@@ -1,0 +1,28 @@
+{
+  "name": "tt",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.js",
+  "scripts": {
+    "build": "webpack build --mode=production",
+    "serve": "webpack serve --open --mode=development",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babylonjs/core": "^6.10.0",
+    "@babylonjs/inspector": "^6.10.0",
+    "babylonjs-loaders": "^6.10.0",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "mini-css-extract-plugin": "^2.7.6",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.1.6",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "babylonjs": "^6.10.0"
+  }
+}
