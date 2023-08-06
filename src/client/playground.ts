@@ -1,30 +1,33 @@
 import * as BABYLON from 'babylonjs';
 import 'babylonjs-loaders';
-import { OBJFileLoader } from 'babylonjs-loaders';
+import HavokPhysics from "@babylonjs/havok";
+
+import { Model } from './models/SandBox';
+
+import { modelLoaderService } from './services';
+import { fileToUrl } from './utils';
+import { Inspector } from '@babylonjs/inspector';
+
+const CAMERA_DEFAULT_POSITION = new BABYLON.Vector3(2, 2, 2);
+
 
 export default class Playground {
     private _scene: BABYLON.Scene;
-    private _engine: BABYLON.Engine;
-    private _canvas: HTMLCanvasElement;
 
-    constructor(canvas: HTMLCanvasElement) {
-        this._canvas = canvas;
+    constructor(scene: BABYLON.Scene) {
+        this._scene = scene;
     }
 
-    async init() {
-        this._engine = await this.createEngine(this._canvas);
-        this._scene = await this.createScene(this._engine, this._canvas);
+    static async init(canvas: HTMLCanvasElement): Promise<Playground> {
+        const engine = await this.initEngine(canvas);
+        const scene = await this.initScene(canvas, engine);
 
-        // Register a render loop to repeatedly render the scene
-        this._engine.runRenderLoop(() => { this._scene.render() });
-
-        // Watch for browser/canvas resize events
-        window.addEventListener("resize", () => { this._engine.resize() });
-
+        engine.runRenderLoop(() => { scene!.render() });
+        window.addEventListener("resize", () => { engine!.resize() });
+        return new Playground(scene);
     }
 
-
-    async createEngine(canvas: HTMLCanvasElement): Promise<BABYLON.Engine> {
+    private static async initEngine(canvas: HTMLCanvasElement): Promise<BABYLON.Engine> {
         let engine: BABYLON.Engine;
         const webgpuSupported = await BABYLON.WebGPUEngine.IsSupportedAsync;
         if (webgpuSupported) {
@@ -48,55 +51,86 @@ export default class Playground {
         return engine;
     }
 
-    async createScene(engine: BABYLON.Engine, canvas: HTMLCanvasElement): Promise<BABYLON.Scene> {
-        // This creates a basic Babylon Scene object (non-mesh)
+    private static async initScene(canvas: HTMLCanvasElement, engine: BABYLON.Engine): Promise<BABYLON.Scene> {
         const scene = new BABYLON.Scene(engine);
-
-        // This creates and positions a free camera (non-mesh)
-        // const camera = new BABYLON.UniversalCamera("camera1", new BABYLON.Vector3(0, 5, -10), scene);
-        const camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, new BABYLON.Vector3(0, 0, 0), scene);
-
-        // This targets the camera to scene origin
+        scene.useRightHandedSystem = true;
+        const camera = new BABYLON.ArcRotateCamera("Camera", 0, 0, 10, CAMERA_DEFAULT_POSITION, scene);
         camera.setTarget(BABYLON.Vector3.Zero());
-
-        // This attaches the camera to the canvas
         camera.attachControl(canvas, true);
-
-        // This creates a light, aiming 0,1,0 - to the sky (non-mesh)
-        const light = new BABYLON.HemisphericLight("light1", new BABYLON.Vector3(0, 1, 0), scene);
-
-        // Default intensity is 1. Let's dim the light a small amount
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
         light.intensity = 0.7;
 
-        // Our built-in 'sphere' shape. Params: name, options, scene
-        const sphere = BABYLON.MeshBuilder.CreateSphere("sphere", { diameter: 2, segments: 32 }, scene);
+        const havokInstance = await HavokPhysics();
+        const hk = new BABYLON.HavokPlugin(true, havokInstance);
 
-        // Move the sphere upward 1/2 its height
-        sphere.position.y = 1;
+        const gravity = new BABYLON.Vector3(0, -2, 0);
+        scene.enablePhysics(gravity, hk);
 
-        // const a = OBJFileLoader.loadAsync(this._scene, "MunchkinFig_v5.compcoll.obj", "http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.compcoll.obj");
-        // const loader = new OBJFileLoader();
-        const target_url = 'https://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.compcoll.obj';
-        const url = 'https://cors-anywhere.herokuapp.com/' + target_url;
-        // const objUrl = "http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.compcoll.obj";
-        // const proxydUrl = 'https://corsproxy.io/?' + encodeURIComponent(objUrl);
-        fetch(url).then((val) => {
-            val.blob().then(blob => {
-                console.log(blob);
+        const ground = BABYLON.MeshBuilder.CreateGround("___ground", { width: 10, height: 10 }, scene);
+        new BABYLON.PhysicsAggregate(ground, BABYLON.PhysicsShapeType.BOX, { mass: 0 }, scene);
 
-                const file = new File([blob], "Stanford.obj");
-                BABYLON.SceneLoader.ImportMesh("", "", file, scene, function (newMeshes) {
-                    // Set the target of the camera to the first imported mesh
-                    newMeshes[0].scaling.scaleInPlace(50);
-                });
-            });
-        })
+        const sphere = BABYLON.MeshBuilder.CreateSphere("___sphere", { diameter: 1 }, scene);
+        sphere.position.y = 20;
+        new BABYLON.PhysicsAggregate(sphere, BABYLON.PhysicsShapeType.SPHERE, { mass: 1 }, scene);
 
-
-
-        // Our built-in 'ground' shape. Params: name, options, scene
-        const ground = BABYLON.MeshBuilder.CreateGround("ground", { width: 6, height: 6 }, scene);
-
+        // @ts-ignore
+        Inspector.Show(scene, {});
         return scene;
+    }
+
+    async loadModel(model: Model, name: string = "") {
+        const modelMesh = await modelLoaderService.load(model.meshURL);
+        const container = await BABYLON.SceneLoader.LoadAssetContainerAsync("", modelMesh, this._scene)
+        const material = new BABYLON.StandardMaterial("", this._scene);
+
+        // @TODO test maps
+        material.diffuseTexture = model.diffuseURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.diffuseURL)), this._scene)
+            : null;
+        material.ambientTexture = model.ambientURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.ambientURL)), this._scene)
+            : null;
+        material.specularTexture = model.specularURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.specularURL)), this._scene)
+            : null;
+        material.emissiveTexture = model.emissiveURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.emissiveURL)), this._scene)
+            : null;
+        material.reflectionTexture = model.reflectionURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.reflectionURL)), this._scene)
+            : null;
+        material.bumpTexture = model.normalURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.normalURL)), this._scene)
+            : null;
+        material.opacityTexture = model.opacityURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.opacityURL)), this._scene)
+            : null;
+        material.lightmapTexture = model.lightmapURL
+            ? new BABYLON.Texture(fileToUrl(await modelLoaderService.load(model.lightmapURL)), this._scene)
+            : null;
+
+        container.meshes[container.meshes.length - 1].material = material;
+
+        const colliderMeshes = model.colliderURL
+            ? (await BABYLON.SceneLoader.LoadAssetContainerAsync("", await modelLoaderService.load(model.colliderURL), this._scene)).meshes
+            : container.meshes
+        const colliderMesh: BABYLON.Mesh = BABYLON.Mesh.MergeMeshes(colliderMeshes as Array<BABYLON.Mesh>, false, true)!;
+        colliderMesh.isVisible = false;
+
+        const node = new BABYLON.Mesh(name, this._scene);
+        const nodeModel = new BABYLON.Mesh(`${name}_model`, this._scene);
+        container.meshes.forEach(mesh => {
+            nodeModel.addChild(mesh);
+        });
+
+        const nodeCollider = new BABYLON.Mesh(`${name}_collider`, this._scene);
+        nodeCollider.addChild(colliderMesh as BABYLON.Mesh);
+
+        node.addChild(nodeModel);
+        node.addChild(nodeCollider);
+
+        const collider = new BABYLON.PhysicsShapeMesh(colliderMesh, this._scene);
+        new BABYLON.PhysicsAggregate(nodeModel, collider, { mass: 0 }, this._scene);
+        container.addAllToScene();
     }
 }
