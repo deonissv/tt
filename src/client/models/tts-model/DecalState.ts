@@ -1,7 +1,7 @@
-import { CustomDecalState } from "./CustomDecalState";
-import { TransformState } from "./TransformState";
+import { CustomDecalState } from './CustomDecalState';
+import { TransformState } from './TransformState';
 
 export interface DecalState {
-    Transform: TransformState;
-    CustomDecal: CustomDecalState;
+  Transform: TransformState;
+  CustomDecal: CustomDecalState;
 }

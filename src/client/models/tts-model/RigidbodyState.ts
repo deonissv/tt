@@ -1,6 +1,6 @@
 export interface RigidbodyState {
-    Mass: number;
-    Drag: number;
-    AngularDrag: number;
-    UseGravity: boolean;
+  Mass: number;
+  Drag: number;
+  AngularDrag: number;
+  UseGravity: boolean;
 }

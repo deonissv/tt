@@ -1,5 +1,5 @@
 export interface FogOfWarRevealerSaveState {
-    Active: boolean;
-    Range: number;
-    Color: string;
+  Active: boolean;
+  Range: number;
+  Color: string;
 }

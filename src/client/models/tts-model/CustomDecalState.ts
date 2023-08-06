@@ -1,5 +1,5 @@
 export interface CustomDecalState {
-    Name: string;
-    ImageURL: string;
-    Size: number; //Size in inches
+  Name: string;
+  ImageURL: string;
+  Size: number; //Size in inches
 }

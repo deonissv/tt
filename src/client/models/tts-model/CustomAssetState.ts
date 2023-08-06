@@ -1,4 +1,4 @@
 export interface CustomAssetState {
-    Name: string;
-    URL: string;
+  Name: string;
+  URL: string;
 }
