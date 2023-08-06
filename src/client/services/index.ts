@@ -1,1 +1,1 @@
-export { default } from "./modelLoader.service";
+export { modelLoaderService } from "./modelLoader.service";
