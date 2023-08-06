@@ -56,14 +56,13 @@ export default class Playground {
 
     private static async initEngine(canvas: HTMLCanvasElement): Promise<Engine> {
         let engine: Engine;
-        // const webgpuSupported = await WebGPUEngine.IsSupportedAsync;
-        // if (webgpuSupported) {
-        //     engine = new WebGPUEngine(canvas);
-        //     await (engine as WebGPUEngine).initAsync();
-        // } else {
-        //     engine = new Engine(canvas, true);
-        // }
-        engine = new Engine(canvas, true);
+        const webgpuSupported = await WebGPUEngine.IsSupportedAsync;
+        if (webgpuSupported) {
+            engine = new WebGPUEngine(canvas);
+            await (engine as WebGPUEngine).initAsync();
+        } else {
+            engine = new Engine(canvas, true, {}, true);
+        }
         return engine;
     }
 
