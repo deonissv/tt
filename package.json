@@ -8,13 +8,17 @@
     "start": "webpack-dev-server --config webpack.dev.js",
     "serve": "webpack serve --open --config webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier --config .prettierrc 'src/**/*.ts' --write"
+    "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "lint": "eslint --ext .ts src"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "@babylonjs/inspector": "^6.15.0",
+    "@typescript-eslint/eslint-plugin": "^6.2.1",
+    "@typescript-eslint/parser": "^6.2.1",
     "css-loader": "^6.8.1",
+    "eslint": "^8.46.0",
     "html-webpack-plugin": "^5.5.3",
     "mini-css-extract-plugin": "^2.7.6",
     "prettier": "^3.0.1",

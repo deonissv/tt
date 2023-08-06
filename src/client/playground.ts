@@ -1,40 +1,37 @@
-import '@babylonjs/loaders/OBJ/objFileLoader';
-
-import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-
-import '@babylonjs/core/Meshes/meshBuilder';
-import { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder';
-import { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
-import { Engine } from '@babylonjs/core/Engines/engine';
-import { Scene } from '@babylonjs/core/scene';
-
-import { modelLoaderService } from './services';
-import { Model } from './models/SandBox';
-import { fileToUrl } from './utils';
-
-import { PhysicsAggregate } from '@babylonjs/core/Physics/v2/physicsAggregate';
-import { PhysicsShapeType } from '@babylonjs/core/Physics/v2/IPhysicsEnginePlugin';
-import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
-import { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
-import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
-import { Texture } from '@babylonjs/core/Materials/Textures/texture';
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
-import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
-import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
-
-// Side efects
-import '@babylonjs/core/Materials/standardMaterial';
-import '@babylonjs/core/Physics/physicsEngineComponent';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicTexture';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicBuffer';
-
 import HavokPlugin from '@babylonjs/havok';
 import { HavokPlugin as HP } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
 
+import { Scene } from '@babylonjs/core/scene';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { Engine } from '@babylonjs/core/Engines/engine';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
+import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
+import { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
+import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
+import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
+import { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder';
+import { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { PhysicsAggregate } from '@babylonjs/core/Physics/v2/physicsAggregate';
+import { PhysicsShapeType } from '@babylonjs/core/Physics/v2/IPhysicsEnginePlugin';
+
+// Side efects
+import '@babylonjs/core/Meshes/meshBuilder';
+import '@babylonjs/loaders/OBJ/objFileLoader';
+import '@babylonjs/core/Materials/standardMaterial';
+import '@babylonjs/core/Physics/physicsEngineComponent';
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicBuffer';
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicTexture';
+
 import { Inspector } from '@babylonjs/inspector';
+
+import { fileToUrl } from './utils';
+import { Model } from './models/SandBox';
+import { modelLoaderService } from './services';
 
 const CAMERA_DEFAULT_POSITION = new Vector3(2, 2, 2);
 
