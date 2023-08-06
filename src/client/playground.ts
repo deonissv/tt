@@ -1,5 +1,4 @@
 import "@babylonjs/loaders/OBJ/objFileLoader";
-// import HavokPhysics from "@babylonjs/havok";
 
 
 import { Vector3 } from "@babylonjs/core/Maths/math.vector";
@@ -29,6 +28,10 @@ import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 // Side efects
 import "@babylonjs/core/Materials/standardMaterial";
 import "@babylonjs/core/Physics/physicsEngineComponent";
+import "@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer";
+import "@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicTexture";
+import "@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha";
+import "@babylonjs/core/Engines/WebGPU/Extensions/engine.dynamicBuffer";
 
 import HavokPlugin from "@babylonjs/havok";
 import { HavokPlugin as HP } from "@babylonjs/core/Physics/v2/Plugins/havokPlugin";
