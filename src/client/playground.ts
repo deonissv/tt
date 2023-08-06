@@ -81,8 +81,6 @@ export default class Playground {
         const gravity = new Vector3(0, -2, 0);
         scene.enablePhysics(gravity, hk);
 
-        new StandardMaterial("___standardMaterial", scene);
-
         const ground = CreateGround("___ground", { width: 10, height: 10 }, scene);
         new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, scene);
 
@@ -136,17 +134,19 @@ export default class Playground {
         const node = new Mesh(name, this._scene);
         const nodeModel = new Mesh(`${name}_model`, this._scene);
         container.meshes.forEach(mesh => {
-            nodeModel.addChild(mesh);
+            mesh.setParent(nodeModel);
         });
 
         const nodeCollider = new Mesh(`${name}_collider`, this._scene);
-        nodeCollider.addChild(colliderMesh as Mesh);
+        colliderMesh.setParent(nodeCollider);
 
-        node.addChild(nodeModel);
-        node.addChild(nodeCollider);
+        nodeModel.setParent(node);
+        nodeCollider.setParent(node);
+        container.meshes.push(node, ...node.getChildren() as Mesh[])
 
         const collider = new PhysicsShapeMesh(colliderMesh, this._scene);
         new PhysicsAggregate(nodeModel, collider, { mass: 0 }, this._scene);
+
         container.addAllToScene();
     }
 }
