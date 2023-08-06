@@ -4,16 +4,15 @@
   "description": "",
   "main": "webpack.js",
   "scripts": {
-    "build": "webpack build --mode=production",
-    "serve": "webpack serve --open --mode=development",
+    "build": "webpack --config webpack.prod.js",
+    "start": "webpack-dev-server --config webpack.dev.js",
+    "serve": "webpack serve --open --config webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babylonjs/core": "^6.10.0",
-    "@babylonjs/inspector": "^6.10.0",
-    "babylonjs-loaders": "^6.10.0",
+    "@babylonjs/inspector": "^6.15.0",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
     "mini-css-extract-plugin": "^2.7.6",
@@ -23,8 +22,9 @@
     "webpack-dev-server": "^4.15.1"
   },
   "dependencies": {
-    "@babylonjs/havok": "^1.1.1",
-    "axios": "^1.4.0",
-    "babylonjs": "^6.10.0"
+    "@babylonjs/core": "^6.15.0",
+    "@babylonjs/havok": "^1.1.2",
+    "@babylonjs/loaders": "^6.15.0",
+    "axios": "^1.4.0"
   }
 }

@@ -2,7 +2,6 @@ import Playground from "./playground";
 
 import "./public/styles.css";
 import { SaveState } from "./models/tts-model/SaveState";
-import { modelLoaderService } from "./services";
 import { Model } from "./models/SandBox";
 
 const MESH_URL = "http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.obj";
@@ -42,10 +41,10 @@ document.getElementById('game-cfg')!.addEventListener('change', (event: Event) =
         const content: SaveState = JSON.parse(result as string);
         console.log(content);
 
-        // const models = await parseTTSModes(content);
-        // models.forEach((model) => {
-        //     pg.loadModel(model);
-        // });
+        const models = await parseTTSModes(content);
+        models.forEach((model) => {
+            pg.loadModel(model);
+        });
     }
 })
 
