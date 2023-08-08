@@ -2,6 +2,8 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 
 export interface PlayGround {
   leftHandedSystem?: boolean; // default: false | If true, the Y axis will be inverted, and the Z axis will be inverted
+  gravity?: number; // default: -9.81
+
   objectStates: ObjectState[]; // Objects on the table
 }
 

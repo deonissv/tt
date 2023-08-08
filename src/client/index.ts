@@ -19,7 +19,8 @@ export const babylonInit = async () => {
   const canvas = document.getElementById('canvas') as HTMLCanvasElement;
   const playground = await Playground.init(canvas);
   pg = playground;
-  playground.loadModel(model);
+  await playground.test();
+  await playground.loadModel(model);
 };
 
 babylonInit().then(() => {});
