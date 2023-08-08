@@ -66,7 +66,7 @@ export default class Playground {
     this._scene = scene;
     this._actionManager = new ActionManager(this._scene);
     this._actionManager.isRecursive = true;
-    this._hll = new HighlightLayer('hll', this._scene); // @TODO check glow to thin solid line
+    this._hll = new HighlightLayer('hll', this._scene); // @TODO change glow to thin solid line
   }
 
   static async init(canvas: HTMLCanvasElement): Promise<Playground> {
@@ -118,9 +118,7 @@ export default class Playground {
     ground.position.y = -0.5;
     ground.isPickable = false;
     new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, scene);
-    if (process.env.NODE_ENV) {
-      // Inspector.Show(scene, {});
-    }
+    // Inspector.Show(scene, {});
     return scene;
   }
 
