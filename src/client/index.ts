@@ -29,7 +29,6 @@ document.getElementById('game-cfg')!.addEventListener('change', (event: Event) =
   const target = event.target! as HTMLInputElement;
   const file = target.files![0];
   const reader = new FileReader();
-  console.log(1);
 
   reader.readAsText(file);
   reader.onload = async event => {
@@ -40,8 +39,6 @@ document.getElementById('game-cfg')!.addEventListener('change', (event: Event) =
       result = enc.decode(result);
     }
     const content: SaveState = JSON.parse(result as string);
-    console.log(content);
-
     const models = await parseTTSModes(content);
     models.forEach(model => {
       pg.loadModel(model);

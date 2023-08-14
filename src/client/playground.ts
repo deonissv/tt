@@ -1,18 +1,12 @@
-import HavokPlugin from '@babylonjs/havok';
-import { HavokPlugin as HP } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
-
 import { Scene } from '@babylonjs/core/scene';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Engine } from '@babylonjs/core/Engines/engine';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
-import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { ActionManager } from '@babylonjs/core/Actions/actionManager';
 import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
-import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
-import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 import { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder';
 import { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
@@ -52,9 +46,8 @@ import { Inspector } from '@babylonjs/inspector';
 import { fileToUrl } from './utils';
 import { Model } from './models/SandBox';
 import { modelLoaderService } from './services';
+import { PlaygroundScene } from './PlaygroundScene';
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
-
-const CAMERA_DEFAULT_POSITION = new Vector3(2, 2, 2);
 
 export default class Playground {
   private _scene: Scene;
@@ -62,7 +55,7 @@ export default class Playground {
   private _hll: HighlightLayer;
   private _hoveredMesh: Mesh | null = null;
 
-  constructor(scene: Scene) {
+  private constructor(scene: Scene) {
     this._scene = scene;
     this._actionManager = new ActionManager(this._scene);
     this._actionManager.isRecursive = true;
@@ -71,7 +64,12 @@ export default class Playground {
 
   static async init(canvas: HTMLCanvasElement): Promise<Playground> {
     const engine = await this.initEngine(canvas);
-    const scene = await this.initScene(canvas, engine);
+    const scene = await PlaygroundScene.init(engine, canvas);
+
+    const ground = CreateGround('___ground', { width: 10, height: 10 }, scene);
+    ground.position.y = -0.5;
+    ground.isPickable = false;
+    new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, scene);
 
     engine.runRenderLoop(() => {
       scene!.render();
@@ -98,28 +96,6 @@ export default class Playground {
       engine = new Engine(canvas, true, engineOptions, true);
     }
     return engine;
-  }
-
-  private static async initScene(canvas: HTMLCanvasElement, engine: Engine): Promise<Scene> {
-    const scene = new Scene(engine);
-    scene.useRightHandedSystem = true;
-    const camera = new ArcRotateCamera('Camera', 0, 0, 5, CAMERA_DEFAULT_POSITION, scene);
-    camera.setTarget(Vector3.Zero());
-    camera.attachControl(canvas, true);
-    const light = new HemisphericLight('light', new Vector3(0, 1, 0), scene);
-    light.intensity = 0.7;
-
-    const hk = new HP(true, await HavokPlugin());
-
-    const gravity = new Vector3(0, -9.81, 0);
-    scene.enablePhysics(gravity, hk);
-
-    const ground = CreateGround('___ground', { width: 10, height: 10 }, scene);
-    ground.position.y = -0.5;
-    ground.isPickable = false;
-    new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, scene);
-    // Inspector.Show(scene, {});
-    return scene;
   }
 
   private _handleHoverHighlight() {
