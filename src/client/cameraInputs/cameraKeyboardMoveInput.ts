@@ -3,8 +3,8 @@ import { Nullable } from '@babylonjs/core/types';
 import { Observer } from '@babylonjs/core/Misc/observable';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { IKeyboardEvent } from '@babylonjs/core/Events/deviceInputEvents';
+import { ICameraInput } from '@babylonjs/core/Cameras/cameraInputsManager';
 import { KeyboardEventTypes, KeyboardInfo } from '@babylonjs/core/Events/keyboardEvents';
-import { CameraInputTypes, ICameraInput } from '@babylonjs/core/Cameras/cameraInputsManager';
 
 export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
   camera: Nullable<ArcRotateCamera>;
@@ -41,13 +41,14 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
       if (evt.metaKey) return;
 
       if (this.__bindedKeyPressed(evt)) {
+        if (evt.preventDefault && !noPreventDefault) evt.preventDefault();
+
         if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
           if (!this._keys.has(evt.code)) this._keys.add(evt.code);
         } else {
           if (this._keys.has(evt.code)) this._keys.delete(evt.code);
         }
       }
-      if (evt.preventDefault && !noPreventDefault) evt.preventDefault();
     });
   }
 
@@ -107,5 +108,3 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
     }
   }
 }
-
-(<any>CameraInputTypes)['CameraKeyboardMoveInput'] = CameraKeyboardMoveInput;

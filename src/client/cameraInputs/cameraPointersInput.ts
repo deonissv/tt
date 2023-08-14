@@ -1,7 +1,6 @@
 import { Nullable } from '@babylonjs/core/types';
 import { PointerTouch } from '@babylonjs/core/Events/pointerEvents';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
-import { CameraInputTypes } from '@babylonjs/core/Cameras/cameraInputsManager';
 import { BaseCameraPointersInput } from '@babylonjs/core/Cameras/Inputs/BaseCameraPointersInput';
 
 const RIGHT_MOUSE_BTN = 2;
@@ -119,4 +118,3 @@ export class CameraPointersInput extends BaseCameraPointersInput {
     this._isPinching = false;
   }
 }
-(<any>CameraInputTypes)['CameraPointersInput'] = CameraPointersInput;

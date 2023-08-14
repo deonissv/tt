@@ -1,9 +1,9 @@
+import { Nullable } from '@babylonjs/core/types';
+import { Observable, Observer } from '@babylonjs/core/Misc/observable';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { ICameraInput } from '@babylonjs/core/Cameras/cameraInputsManager';
-import { EventConstants, IWheelEvent } from '@babylonjs/core/Events/deviceInputEvents';
 import { PointerEventTypes, PointerInfo } from '@babylonjs/core/Events/pointerEvents';
-import { Observable, Observer } from '@babylonjs/core/Misc/observable';
-import { Nullable } from '@babylonjs/core/types';
+import { EventConstants, IWheelEvent } from '@babylonjs/core/Events/deviceInputEvents';
 
 // @TODO refactor
 export class CameraWheelInput implements ICameraInput<ArcRotateCamera> {
