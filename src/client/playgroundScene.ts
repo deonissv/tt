@@ -17,6 +17,7 @@ import {
   CAMERA_DEFAULT_POSITION,
   CAMERA_DEFAULT_RADIUS,
   MOVE_SENSETIVITY,
+  WHEEL_SENSETIVITY,
 } from '../shared/constants';
 
 export class PlaygroundScene extends Scene {
@@ -59,7 +60,7 @@ export class PlaygroundScene extends Scene {
     camera.inputs.add(new CameraPointersInput());
 
     camera.attachControl(canvas);
-    camera.wheelPrecision = 1;
+    camera.wheelPrecision = WHEEL_SENSETIVITY;
   }
 
   private initLight() {

@@ -46,7 +46,7 @@ import { Inspector } from '@babylonjs/inspector';
 import { fileToUrl } from './utils';
 import { Model } from './models/SandBox';
 import { modelLoaderService } from './services';
-import { PlaygroundScene } from './PlaygroundScene';
+import { PlaygroundScene } from './playgroundScene';
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
 export default class Playground {

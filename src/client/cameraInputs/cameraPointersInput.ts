@@ -4,6 +4,8 @@ import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { CameraInputTypes } from '@babylonjs/core/Cameras/cameraInputsManager';
 import { BaseCameraPointersInput } from '@babylonjs/core/Cameras/Inputs/BaseCameraPointersInput';
 
+const RIGHT_MOUSE_BTN = 2;
+
 // @TODO refactor
 export class CameraPointersInput extends BaseCameraPointersInput {
   public camera: ArcRotateCamera;
@@ -56,9 +58,10 @@ export class CameraPointersInput extends BaseCameraPointersInput {
   }
 
   public onTouch(point: Nullable<PointerTouch>, offsetX: number, offsetY: number): void {
-    this.camera.inertialAlphaOffset -= offsetX / this.angularSensibilityX;
-    this.camera.inertialBetaOffset -= offsetY / this.angularSensibilityY;
-    console.log(this.camera.beta);
+    if (this._buttonsPressed === RIGHT_MOUSE_BTN) {
+      this.camera.inertialAlphaOffset -= offsetX / this.angularSensibilityX;
+      this.camera.inertialBetaOffset -= offsetY / this.angularSensibilityY;
+    }
   }
 
   public onDoubleTap() {
