@@ -2,14 +2,14 @@ import { Scene } from '@babylonjs/core/scene';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Engine } from '@babylonjs/core/Engines/engine';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
+import { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
-import { ActionManager } from '@babylonjs/core/Actions/actionManager';
 import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 import { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder';
-import { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { PhysicsAggregate } from '@babylonjs/core/Physics/v2/physicsAggregate';
 import { PhysicsShapeType } from '@babylonjs/core/Physics/v2/IPhysicsEnginePlugin';
@@ -49,22 +49,23 @@ import { modelLoaderService } from './services';
 import { PlaygroundScene } from './playgroundScene';
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
+import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
+import { LIFH_HIGHT } from '../shared/constants';
+
 export default class Playground {
   private _scene: Scene;
-  private _actionManager: ActionManager;
   private _hll: HighlightLayer;
   private _hoveredMesh: Mesh | null = null;
+  private _pickedBody: PhysicsBody | null = null;
 
   private constructor(scene: Scene) {
     this._scene = scene;
-    this._actionManager = new ActionManager(this._scene);
-    this._actionManager.isRecursive = true;
     this._hll = new HighlightLayer('hll', this._scene); // @TODO change glow to thin solid line
   }
 
   static async init(canvas: HTMLCanvasElement): Promise<Playground> {
     const engine = await this.initEngine(canvas);
-    const scene = await PlaygroundScene.init(engine, canvas);
+    const scene = await PlaygroundScene.init(engine);
 
     const ground = CreateGround('___ground', { width: 10, height: 10 }, scene);
     ground.position.y = -0.5;
@@ -117,11 +118,47 @@ export default class Playground {
     });
   }
 
+  private _handlePick() {
+    this._scene.onPointerObservable.add(async evt => {
+      if (evt.event.button !== 0) return;
+      switch (evt.type) {
+        case PointerEventTypes.POINTERDOWN: {
+          const pickedMesh = this._scene.pick(this._scene.pointerX, this._scene.pointerY).pickedMesh as Mesh | null;
+          if (!pickedMesh) return;
+          this._pickedBody = pickedMesh.physicsBody!;
+          this._pickedBody.disablePreStep = false;
+          this._pickedBody.transformNode.position.addInPlace(new Vector3(0, LIFH_HIGHT, 0));
+          this._scene.onAfterRenderObservable.addOnce(() => {
+            this._pickedBody!.disablePreStep = true;
+          });
+          this._pickedBody!.setGravityFactor(0);
+
+          break;
+        }
+        case PointerEventTypes.POINTERUP: {
+          if (!this._pickedBody) return;
+          this._pickedBody.disablePreStep = false;
+          this._pickedBody.transformNode.position.addInPlace(new Vector3(0, -LIFH_HIGHT, 0));
+          this._scene.onAfterRenderObservable.addOnce(() => {
+            this._pickedBody!.disablePreStep = true;
+            this._pickedBody = null;
+          });
+          this._pickedBody!.setGravityFactor(1);
+          break;
+        }
+      }
+    });
+  }
+
   async test() {
-    const sphere = CreateSphere('___sphere', { diameter: 1 }, this._scene);
-    sphere.position.x = -3;
-    sphere.position.y = 1;
-    new PhysicsAggregate(sphere, PhysicsShapeType.SPHERE, { mass: 1 }, this._scene);
+    const box = CreateBox('___sphere', { width: 1, height: 1, depth: 1 }, this._scene);
+    box.position.x = -3;
+    box.position.y = 1;
+    box.enablePointerMoveEvents = true;
+    box.enableDistantPicking = true;
+    new PhysicsAggregate(box, PhysicsShapeType.BOX, { mass: 1 }, this._scene);
+    this._handlePick();
+    // Inspector.Show(this._scene, {});
   }
 
   async loadModel(model: Model, name: string = '') {

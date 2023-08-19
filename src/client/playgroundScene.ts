@@ -16,6 +16,7 @@ import {
   CAMERA_DEFAULT_BETA,
   CAMERA_DEFAULT_POSITION,
   CAMERA_DEFAULT_RADIUS,
+  GRAVITY,
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
 } from '../shared/constants';
@@ -23,12 +24,10 @@ import {
 export class PlaygroundScene extends Scene {
   private constructor(engine: Engine, canvas: HTMLCanvasElement) {
     super(engine);
-
-    this.initCamera(canvas);
-    this.initLight();
   }
 
-  public static async init(engine: Engine, canvas: HTMLCanvasElement): Promise<PlaygroundScene> {
+  public static async init(engine: Engine): Promise<PlaygroundScene> {
+    const canvas = engine.getRenderingCanvas() as HTMLCanvasElement;
     const scene = new PlaygroundScene(engine, canvas);
     scene.useRightHandedSystem = true;
 
@@ -65,12 +64,12 @@ export class PlaygroundScene extends Scene {
 
   private initLight() {
     const light = new HemisphericLight('light', new Vector3(0, 1, 0), this);
-    light.intensity = 0.4;
+    light.intensity = 0.8;
   }
 
   private async initPhysics() {
     const hk = new HP(true, await HavokPlugin());
-    const gravity = new Vector3(0, -9.81, 0);
+    const gravity = new Vector3(0, -GRAVITY, 0);
     this.enablePhysics(gravity, hk);
   }
 }
