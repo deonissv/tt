@@ -111,7 +111,7 @@ export default class Playground {
       if (evt.type !== PointerEventTypes.POINTERMOVE) return;
       const pickedMesh = this._scene.pick(this._scene.pointerX, this._scene.pointerY).pickedMesh as Mesh | null;
       if (!pickedMesh) {
-        if (this._hoveredMesh && !this._pickedBody) {
+        if (this._hoveredMesh) {
           this._hll.removeMesh(this._hoveredMesh);
           this._hoveredMesh = null;
         }
