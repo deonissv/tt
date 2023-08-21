@@ -50,17 +50,23 @@ import { PlaygroundScene } from './playgroundScene';
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
 import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
-import { LIFH_HIGHT } from '../shared/constants';
+import { LIFH_HIGHT, MOUSE_MOVE_SENSETIVITY } from '../shared/constants';
+import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 
 export default class Playground {
   private _scene: Scene;
   private _hll: HighlightLayer;
   private _hoveredMesh: Mesh | null = null;
   private _pickedBody: PhysicsBody | null = null;
+  private _cursorPos: [number, number] = [0, 0];
 
   private constructor(scene: Scene) {
     this._scene = scene;
     this._hll = new HighlightLayer('hll', this._scene); // @TODO change glow to thin solid line
+  }
+
+  private get _camera(): ArcRotateCamera {
+    return this._scene.activeCamera as ArcRotateCamera;
   }
 
   static async init(canvas: HTMLCanvasElement): Promise<Playground> {
@@ -80,6 +86,7 @@ export default class Playground {
     });
     const pg = new Playground(scene);
     pg._handleHoverHighlight();
+    pg._handlePick();
 
     return pg;
   }
@@ -104,7 +111,7 @@ export default class Playground {
       if (evt.type !== PointerEventTypes.POINTERMOVE) return;
       const pickedMesh = this._scene.pick(this._scene.pointerX, this._scene.pointerY).pickedMesh as Mesh | null;
       if (!pickedMesh) {
-        if (this._hoveredMesh) {
+        if (this._hoveredMesh && !this._pickedBody) {
           this._hll.removeMesh(this._hoveredMesh);
           this._hoveredMesh = null;
         }
@@ -120,33 +127,44 @@ export default class Playground {
 
   private _handlePick() {
     this._scene.onPointerObservable.add(async evt => {
-      if (evt.event.button !== 0) return;
       switch (evt.type) {
         case PointerEventTypes.POINTERDOWN: {
+          this._cursorPos = [this._scene.pointerX, this._scene.pointerY];
           const pickedMesh = this._scene.pick(this._scene.pointerX, this._scene.pointerY).pickedMesh as Mesh | null;
           if (!pickedMesh) return;
           this._pickedBody = pickedMesh.physicsBody!;
-          this._pickedBody.disablePreStep = false;
-          this._pickedBody.transformNode.position.addInPlace(new Vector3(0, LIFH_HIGHT, 0));
-          this._scene.onAfterRenderObservable.addOnce(() => {
-            this._pickedBody!.disablePreStep = true;
-          });
+          this._moveBody(this._pickedBody, new Vector3(0, LIFH_HIGHT, 0));
           this._pickedBody!.setGravityFactor(0);
-
           break;
         }
         case PointerEventTypes.POINTERUP: {
           if (!this._pickedBody) return;
-          this._pickedBody.disablePreStep = false;
-          this._pickedBody.transformNode.position.addInPlace(new Vector3(0, -LIFH_HIGHT, 0));
-          this._scene.onAfterRenderObservable.addOnce(() => {
-            this._pickedBody!.disablePreStep = true;
-            this._pickedBody = null;
-          });
+          this._moveBody(this._pickedBody, new Vector3(0, -LIFH_HIGHT, 0));
           this._pickedBody!.setGravityFactor(1);
+          this._pickedBody = null;
           break;
         }
+        case PointerEventTypes.POINTERMOVE: {
+          if (!this._pickedBody) return;
+          const prevCursorPos = this._cursorPos!;
+          this._cursorPos = [this._scene.pointerX, this._scene.pointerY];
+
+          const cursorDX = this._cursorPos[0] - prevCursorPos[0];
+          const cursorDY = this._cursorPos[1] - prevCursorPos[1];
+          const dx = Math.cos(this._camera.alpha) * cursorDY + Math.sin(this._camera.alpha) * cursorDX;
+          const dy = -Math.cos(this._camera.alpha) * cursorDX + Math.sin(this._camera.alpha) * cursorDY;
+          const diff = new Vector3(MOUSE_MOVE_SENSETIVITY * dx, 0, MOUSE_MOVE_SENSETIVITY * dy);
+          this._moveBody(this._pickedBody, diff);
+        }
       }
+    });
+  }
+
+  private _moveBody(body: PhysicsBody, diff: Vector3) {
+    body.disablePreStep = false;
+    body.transformNode.position.addInPlace(diff);
+    this._scene.onAfterRenderObservable.addOnce(() => {
+      body.disablePreStep = true;
     });
   }
 
@@ -157,7 +175,6 @@ export default class Playground {
     box.enablePointerMoveEvents = true;
     box.enableDistantPicking = true;
     new PhysicsAggregate(box, PhysicsShapeType.BOX, { mass: 1 }, this._scene);
-    this._handlePick();
     // Inspector.Show(this._scene, {});
   }
 
