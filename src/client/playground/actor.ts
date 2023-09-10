@@ -7,7 +7,7 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 import { PhysicsAggregate } from '@babylonjs/core/Physics/v2/physicsAggregate';
 
-import { LIFH_HIGHT, MOUSE_MOVE_SENSETIVITY, ROTATE_STEP, SCALE_KOEF } from '../shared/constants';
+import { LIFH_HIGHT, MOUSE_MOVE_SENSETIVITY, ROTATE_STEP, SCALE_KOEF } from '../../shared/constants';
 
 export class Actor extends TransformNode {
   private __width: number;

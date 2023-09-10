@@ -4,7 +4,6 @@ import { Engine } from '@babylonjs/core/Engines/engine';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
-import { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder';
@@ -38,9 +37,9 @@ import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
 // @ts-ignore
-import { Inspector } from '@babylonjs/inspector';
+// import { Inspector } from '@babylonjs/inspector';
 
-import { Model } from './models/SandBox';
+import { Model } from '../models/SandBox';
 import { PlaygroundScene } from './playgroundScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
@@ -48,7 +47,13 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 import { Actor } from './actor';
 import { Loader } from './loader';
-import { FLIP_BIND_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SCALE_DOWN_KEYS, SCALE_UP_KEYS } from '../shared/constants';
+import {
+  FLIP_BIND_KEYS,
+  ROTATE_CCW_KEYS,
+  ROTATE_CW_KEYS,
+  SCALE_DOWN_KEYS,
+  SCALE_UP_KEYS,
+} from '../../shared/constants';
 
 export default class Playground {
   private _scene: Scene;
@@ -182,7 +187,7 @@ export default class Playground {
   async test() {
     const boxModel = CreateBox('___sphere', { width: 1, height: 1, depth: 1 }, this._scene);
     new Actor('box', boxModel, undefined, this._scene, undefined, new Vector3(-3, 0, 0));
-    Inspector.Show(this._scene, {});
+    // Inspector.Show(this._scene, {});
   }
 
   async loadModel(model: Model, name: string = '') {

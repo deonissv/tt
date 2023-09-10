@@ -5,9 +5,9 @@ import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 
 import { Actor } from './actor';
-import { fileToUrl } from './utils';
-import { Model } from './models/SandBox';
-import { modelLoaderService } from './services/modelLoader.service';
+import { fileToUrl } from '../utils';
+import { Model } from '../models/SandBox';
+import { modelLoaderService } from '../services/modelLoader.service';
 
 export class Loader {
   static async loadModel(model: Model, scene: Scene, name: string = '') {

@@ -19,7 +19,7 @@ import {
   GRAVITY,
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
-} from '../shared/constants';
+} from '../../shared/constants';
 
 export class PlaygroundScene extends Scene {
   private constructor(engine: Engine, canvas: HTMLCanvasElement) {
