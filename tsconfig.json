@@ -1,57 +1,18 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
-    "jsx": "react-jsx",
-
+    "target": "es2022",
+    "module": "commonjs",
+    "incremental": true,
+    "declaration": true,
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
-
-    "rootDirs": [
-      "src"
-    ],
-    "sourceMap": true,
-    "removeComments": true,
+    "moduleResolution": "node",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
-    "strictBindCallApply": true,
-    "strictPropertyInitialization": false,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noImplicitReturns": true,
-    "skipDefaultLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
   },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules/**/*"
-  ],
-  "path": {
-    "@models/*": [
-      "src/client/models/*"
-    ],
-    "@components/*": [
-      "src/client/components/*"
-    ],
-    "@shared/*": [
-      "src/shared/*"
-    ]
-  }
+  "references": [
+    { "path": "./packages/shared" },
+    { "path": "./packages/server" },
+    { "path": "./packages/client" }
+  ]
 }

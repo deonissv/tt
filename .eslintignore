@@ -1,2 +1,8 @@
-node_modules
-dist
+.idea
+.vscode
+.vite
+
+**/dist
+**/build
+
+**/node_modules

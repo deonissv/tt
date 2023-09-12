@@ -1,0 +1,45 @@
+{
+  "name": "@tt/client",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.js",
+    "build:v": "vite build",
+    "start": "vite preview",
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "lint": "eslint --ext .ts src"
+  },
+  "devDependencies": {
+    "@babylonjs/inspector": "^6.15.0",
+    "@types/react": "^18.2.21",
+    "@types/react-dom": "^18.2.7",
+    "autoprefixer": "^10.4.15",
+    "css-loader": "^6.8.1",
+    "html-webpack-plugin": "^5.5.3",
+    "mini-css-extract-plugin": "^2.7.6",
+    "postcss": "^8.4.29",
+    "postcss-loader": "^7.3.3",
+    "tailwindcss": "^3.3.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "vite": "^4.4.5",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^6.15.0",
+    "@babylonjs/havok": "^1.1.2",
+    "@babylonjs/loaders": "^6.15.0",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.14.8",
+    "@tt/shared": "^1.0.0",
+    "axios": "^1.4.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}

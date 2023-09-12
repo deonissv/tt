@@ -1,6 +1,8 @@
 .idea
 .vscode
+.vite
 
-dist
+**/dist
+**/build
 
 **/node_modules
