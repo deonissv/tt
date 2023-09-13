@@ -1,11 +1,20 @@
+import React from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+
 import './styles.css';
-import App from './components/App';
+import App from './App';
 
 const container = document.getElementById('root');
 const root = createRoot(container!);
 
-root.render(<App />);
+root.render(
+  <React.StrictMode>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </React.StrictMode>,
+);
 
 // import { SaveState } from './models/tts-model/SaveState';
 // import { Model } from './models/SandBox';

@@ -44,8 +44,8 @@ export class PlaygroundScene extends Scene {
       CAMERA_DEFAULT_ALPHA,
       CAMERA_DEFAULT_BETA,
       CAMERA_DEFAULT_RADIUS,
-      CAMERA_DEFAULT_POSITION,
-      this
+      new Vector3(CAMERA_DEFAULT_POSITION, CAMERA_DEFAULT_POSITION, CAMERA_DEFAULT_POSITION),
+      this,
     );
     camera.setTarget(Vector3.Zero());
 

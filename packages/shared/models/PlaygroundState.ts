@@ -1,4 +1,4 @@
-export interface PlayGround {
+export interface PlaygroundState {
   leftHandedSystem?: boolean; // default: false | If true, the Y axis will be inverted, and the Z axis will be inverted
   gravity?: number; // default: -9.81
 
@@ -7,14 +7,13 @@ export interface PlayGround {
 
 export interface ActorState {
   name: string;
-  description?: string; // default: ""
+  guid: string;
   model: Model;
 
   scale?: number[]; // default: Vector3.One
   rotation?: number[]; // default: Vector3.Zero
   position?: number[]; // default: Vector3.Zero
 
-  guid: string;
   mass?: number; // default: 1
 }
 

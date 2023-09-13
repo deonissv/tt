@@ -1,3 +1,3 @@
 export default () => {
-  return <div>Hello World</div>;
+  return <canvas id="canvas" className="w-full h-full" />;
 };
