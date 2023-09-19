@@ -1,2 +1,3 @@
 export * from './constants';
-export * from './models/PlaygroundState';
+export * from './PlaygroundState';
+export * from './ws';

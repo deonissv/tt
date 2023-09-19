@@ -1,10 +1,12 @@
-import * as MUI from '@mui/material';
 import { useState } from 'react';
+import * as MUI from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { roomService } from '../../services/room.service';
-import { PlaygroundState } from '@tt/shared';
+import { PlaygroundState } from '@shared/index';
 
 export default () => {
   const [nickname, setNickname] = useState('');
+  const navigate = useNavigate();
 
   const pgState: PlaygroundState = {
     actortStates: [
@@ -22,8 +24,7 @@ export default () => {
 
   const onCreateRoom = async () => {
     const roomId = await roomService.createRoom(pgState);
-    console.log(roomId);
-    const ws = await roomService.connect(roomId);
+    navigate(`/room/${roomId}`);
   };
 
   return (
@@ -45,3 +46,40 @@ export default () => {
     </MUI.Unstable_Grid2>
   );
 };
+
+// read PGState from file
+// document.getElementById('game-cfg')!.addEventListener('change', (event: Event) => {
+//   const target = event.target! as HTMLInputElement;
+//   const file = target.files![0];
+//   const reader = new FileReader();
+
+//   reader.readAsText(file);
+//   reader.onload = async event => {
+//     let result = event.target!.result;
+//     if (result instanceof ArrayBuffer) {
+//       // TODO check when event.target.result returns ArrayBuffer
+//       const enc = new TextDecoder();
+//       result = enc.decode(result);
+//     }
+//     const content: SaveState = JSON.parse(result as string);
+//     const models = await parseTTSModes(content);
+//     models.forEach(model => {
+//       pg.loadModel(model);
+//     });
+//   };
+// });
+
+// const parseTTSModes = async (saveState: SaveState): Promise<Model[]> => {
+//   const models: Model[] = [];
+//   saveState.ObjectStates.forEach(objectState => {
+//     const url = objectState.CustomMesh?.MeshURL;
+//     if (url) {
+//       models.push({
+//         meshURL: url,
+//         diffuseURL: objectState.CustomMesh?.DiffuseURL,
+//         colliderURL: objectState.CustomMesh?.ColliderURL,
+//       });
+//     }
+//   });
+//   return models;
+// };

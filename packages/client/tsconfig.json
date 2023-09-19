@@ -10,6 +10,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
 
     "strict": true,
     "noUnusedLocals": true,
@@ -28,19 +30,15 @@
     "alwaysStrict": true,
     "noImplicitReturns": true,
     "skipDefaultLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "composite": true,
-    "rootDirs": [
-      "src"
-    ],
+
+    "outDir": "./dist",
+    "baseUrl": "../",
+    "rootDir": "../",
+    "paths": {
+      "@components/*": [ "client/src/components/*" ],
+      "@shared/*": [ "shared/*" ],
+    }
   },
-  "include": [
-    "src/**/*"
-  ],
-  "path": {
-    "@components/*": [
-      "src/components/*"
-    ],
-  }
+  "include": ["src",  "./src/**/*", "../shared/**/*"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

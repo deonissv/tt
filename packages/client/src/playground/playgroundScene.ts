@@ -19,16 +19,16 @@ import {
   GRAVITY,
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
-} from '../../../shared/constants';
+} from '@shared/index';
 
 export class PlaygroundScene extends Scene {
-  private constructor(engine: Engine, canvas: HTMLCanvasElement) {
+  private constructor(engine: Engine) {
     super(engine);
   }
 
   public static async init(engine: Engine): Promise<PlaygroundScene> {
     const canvas = engine.getRenderingCanvas()!;
-    const scene = new PlaygroundScene(engine, canvas);
+    const scene = new PlaygroundScene(engine);
     scene.useRightHandedSystem = true;
 
     scene.initCamera(canvas);

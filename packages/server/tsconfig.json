@@ -16,8 +16,13 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "outDir": "./dist",
-    "baseUrl": "./",
-    "rootDir": "./",
-    "composite": true
+    "baseUrl": "../",
+    "rootDir": "../",
+    "composite": true,
+    "paths": {
+      "@shared/*": ["shared/*"]
+    }
   },
+  "include": ["src",  "./src/**/*", "../shared/**/*"],
+
 }

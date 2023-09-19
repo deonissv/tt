@@ -7,7 +7,7 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { Actor } from './actor';
 import { fileToUrl } from '../utils';
 import { modelLoaderService } from '../services/modelLoader.service';
-import { Model } from '@tt/shared/models/PlaygroundState';
+import { Model } from '@shared/index';
 
 export class Loader {
   static async loadModel(model: Model, scene: Scene, name = '') {

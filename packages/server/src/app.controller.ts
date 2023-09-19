@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RoomService } from './room/room.service';
-import { PlaygroundState } from '@tt/shared';
+import { PlaygroundState } from '@shared/index';
 
 export class CreateRoomDto {
   playground?: PlaygroundState;

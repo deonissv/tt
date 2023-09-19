@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  entry: path.resolve(__dirname, 'src/client/index.tsx'),
+  entry: path.resolve(__dirname, 'src/index.tsx'),
   mode: 'production',
   output: {
     filename: '[name].js',
@@ -18,6 +18,10 @@ module.exports = {
     fallback: {
       fs: false,
       path: false,
+    },
+    alias: {
+      '@shared': path.resolve(__dirname, '../shared/'),
+      '@components': path.resolve(__dirname, './src/components/'),
     },
   },
   module: {
@@ -42,7 +46,7 @@ module.exports = {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.join(__dirname, './src/public', 'index.html'),
+      template: path.join(__dirname, '.', 'index.html'),
     }),
     new MiniCssExtractPlugin(),
   ],

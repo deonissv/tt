@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
+import Canvas from '../Canvas';
 
 export default () => {
   const { roomId } = useParams();
 
-  return <div>Room {roomId}</div>;
+  return <>{roomId ? <Canvas roomId={roomId!} /> : <div>Room not found</div>}</>;
 };

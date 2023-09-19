@@ -1,4 +1,4 @@
-import { PlaygroundState } from '@tt/shared';
+import { PlaygroundState, WS } from '@shared/index';
 import axios from 'axios';
 
 const LOADER_URL = 'http://localhost:3000/';
@@ -12,20 +12,38 @@ export const roomService = {
     return response.data;
   },
 
-  async connect(roomId: string): Promise<WebSocket> {
+  async connect(roomId: string, nickname: string): Promise<[WebSocket, string, any]> {
     const ws = new WebSocket(WSS_URL + roomId);
+    return new Promise((resolve, reject) => {
+      ws.onopen = () => {
+        const idListener = (event: MessageEvent) => {
+          const message = WS.read(event);
 
-    ws.onmessage = event => {
-      console.log(event.data);
-    };
+          if (message.type == 'clientId') {
+            const id = message.payload.id;
 
-    return new Promise(() => {
-      const timer = setInterval(() => {
-        if (ws.readyState === ws.OPEN) {
-          clearInterval(timer);
-          return ws;
-        }
-      }, 10);
+            WS.send(ws, {
+              type: 'nickname',
+              payload: { nickname },
+            });
+
+            const stateListener = (event: MessageEvent) => {
+              const message = WS.read(event);
+
+              if (message.type == 'state') {
+                ws.removeEventListener('message', stateListener);
+                resolve([ws, id, message.payload]);
+              }
+            };
+            ws.removeEventListener('message', idListener);
+            ws.addEventListener('message', stateListener);
+          }
+        };
+        ws.addEventListener('message', idListener);
+      };
+      ws.onerror = error => {
+        reject(error);
+      };
     });
   },
 };

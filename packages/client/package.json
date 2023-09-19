@@ -18,6 +18,7 @@
     "@babylonjs/inspector": "^6.15.0",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
+    "@vitejs/plugin-react": "^4.0.4",
     "autoprefixer": "^10.4.15",
     "css-loader": "^6.8.1",
     "html-webpack-plugin": "^5.5.3",
@@ -29,6 +30,7 @@
     "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",
     "vite": "^4.4.5",
+    "vite-tsconfig-paths": "^4.2.1",
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
@@ -38,9 +40,13 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/material": "^5.14.8",
-    "@tt/shared": "^1.0.0",
     "axios": "^1.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
-  }
+  },
+  "browserslist": [
+    "last 1 version",
+    "> 1%",
+    "not dead"
+  ]
 }

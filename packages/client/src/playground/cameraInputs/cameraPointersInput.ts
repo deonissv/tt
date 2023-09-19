@@ -31,7 +31,7 @@ export class CameraPointersInput extends BaseCameraPointersInput {
 
   private _computeMultiTouchPanning(
     previousMultiTouchPanPosition: Nullable<PointerTouch>,
-    multiTouchPanPosition: Nullable<PointerTouch>
+    multiTouchPanPosition: Nullable<PointerTouch>,
   ): void {
     if (this.panningSensibility !== 0 && previousMultiTouchPanPosition && multiTouchPanPosition) {
       const moveDeltaX = multiTouchPanPosition.x - previousMultiTouchPanPosition.x;
@@ -56,7 +56,7 @@ export class CameraPointersInput extends BaseCameraPointersInput {
     }
   }
 
-  public onTouch(point: Nullable<PointerTouch>, offsetX: number, offsetY: number): void {
+  public onTouch(_point: Nullable<PointerTouch>, offsetX: number, offsetY: number): void {
     if (this._buttonsPressed === RIGHT_MOUSE_BTN) {
       this.camera.inertialAlphaOffset -= offsetX / this.angularSensibilityX;
       this.camera.inertialBetaOffset -= offsetY / this.angularSensibilityY;
@@ -70,12 +70,12 @@ export class CameraPointersInput extends BaseCameraPointersInput {
   }
 
   public onMultiTouch(
-    pointA: Nullable<PointerTouch>,
-    pointB: Nullable<PointerTouch>,
+    _pointA: Nullable<PointerTouch>,
+    _pointB: Nullable<PointerTouch>,
     previousPinchSquaredDistance: number,
     pinchSquaredDistance: number,
     previousMultiTouchPanPosition: Nullable<PointerTouch>,
-    multiTouchPanPosition: Nullable<PointerTouch>
+    multiTouchPanPosition: Nullable<PointerTouch>,
   ): void {
     if (previousPinchSquaredDistance === 0 && previousMultiTouchPanPosition === null) {
       return;

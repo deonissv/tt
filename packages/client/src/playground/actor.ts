@@ -6,11 +6,11 @@ import { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 import { PhysicsAggregate } from '@babylonjs/core/Physics/v2/physicsAggregate';
-import { LIFH_HIGHT, MOUSE_MOVE_SENSETIVITY, ROTATE_STEP, SCALE_KOEF } from '@tt/shared';
+import { LIFH_HIGHT, MOUSE_MOVE_SENSETIVITY, ROTATE_STEP, SCALE_KOEF } from '@shared/index';
 
 export class Actor extends TransformNode {
-  private __width: number;
-  private __length: number;
+  // private __width: number;
+  // private __length: number;
   private __height: number;
 
   private __scaling = 0;
@@ -18,6 +18,7 @@ export class Actor extends TransformNode {
   private _model: Mesh;
   private _collider: Mesh;
 
+  // @ts-ignore
   private _body: PhysicsBody;
   private _flipTranslate = 0;
 
@@ -42,8 +43,8 @@ export class Actor extends TransformNode {
 
     const vectorsWorld = modelMesh.getBoundingInfo().boundingBox.vectorsWorld;
 
-    this.__width = Math.abs(vectorsWorld[1].x - vectorsWorld[0].x);
-    this.__length = Math.abs(vectorsWorld[1].z - vectorsWorld[0].z);
+    // this.__width = Math.abs(vectorsWorld[1].x - vectorsWorld[0].x);
+    // this.__length = Math.abs(vectorsWorld[1].z - vectorsWorld[0].z);
     this.__height = Math.abs(vectorsWorld[1].y - vectorsWorld[0].y);
 
     if (position) {

@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { Injectable } from '@nestjs/common';
 import { Room } from './Room';
-import { PlaygroundState } from '@tt/shared';
+import { PlaygroundState } from '@shared/index';
 
 @Injectable()
 export class RoomService {

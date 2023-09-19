@@ -39,7 +39,6 @@ import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 // @ts-ignore
 // import { Inspector } from '@babylonjs/inspector';
 
-import { Model } from '../src/models/SandBox';
 import { PlaygroundScene } from './playgroundScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
@@ -47,13 +46,7 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 import { Actor } from './actor';
 import { Loader } from './loader';
-import {
-  FLIP_BIND_KEYS,
-  ROTATE_CCW_KEYS,
-  ROTATE_CW_KEYS,
-  SCALE_DOWN_KEYS,
-  SCALE_UP_KEYS,
-} from '../../../shared/constants';
+import { Model, FLIP_BIND_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SCALE_DOWN_KEYS, SCALE_UP_KEYS } from '@shared/index';
 
 export default class Playground {
   private _scene: Scene;
