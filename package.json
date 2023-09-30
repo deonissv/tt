@@ -9,20 +9,19 @@
   "scripts": {
     "client": "npm -w ./packages/client run",
     "server": "npm -w ./packages/server run",
-    "shared": "npm -w ./packages/shared run",
-    "build": "npx \"npm run shared build\" \"npm run server build\" \"npm run client build\"",
+    "build": "npx concurrently \"npm run server build\" \"npm run client build\"",
     "start": "npx concurrently \"npm run client start\" \"npm run server start\"",
     "dev": "npx concurrently \"npm run client dev\" \"npm run server dev\" \"npm run shared dev\"",
     "lint": "npm run lint:client && npm run lint:server && npm run lint:shared",
-    "lint:client": "eslint --ext .ts --ext .tsx --config .eslintrc.cjs client",
-    "lint:server": "eslint --ext .ts --config .eslintrc.cjs server",
-    "lint:shared": "eslint --ext .ts --config .eslintrc.cjs shared",
+    "lint:client": "eslint --ext .ts --ext .tsx --config .eslintrc.cjs packages/client",
+    "lint:server": "eslint --ext .ts --config .eslintrc.cjs packages/server",
+    "lint:shared": "eslint --ext .ts --config .eslintrc.cjs packages/shared",
     "format": "npm run format:client && npm run format:server && npm run format:shared",
-    "format:client": "prettier --config .prettierrc --write \"client/**/*.ts\"",
-    "format:server": "prettier --config .prettierrc --write \"server/**/*.ts\"",
-    "format:shared": "prettier --config .prettierrc --write \"shared/**/*.ts\"",
+    "format:client": "prettier --config .prettierrc --write \"packages/client/**/*.ts\"",
+    "format:server": "prettier --config .prettierrc --write \"packages/server/**/*.ts\"",
+    "format:shared": "prettier --config .prettierrc --write \"packages/shared/**/*.ts\"",
     "clean": "find . -name 'node_modules' -o -name 'dist' -o -name 'build' -type d -prune -exec rm -rf '{}' +",
-    "i:all": "npm i && npm -w ./packages/shared i && npm -w ./packages/server i  && npm -w ./packages/client i"
+    "i:all": "npm i && npm -w ./packages/server i  && npm -w ./packages/client i"
   },
   "devDependencies": {
     "@types/node": "^20.6.0",

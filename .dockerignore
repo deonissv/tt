@@ -1,0 +1,8 @@
+.idea
+.vscode
+.vite
+
+**/dist
+**/build
+
+**/node_modules
