@@ -72,7 +72,7 @@ export class Room {
     const wss = new WebSocket.Server({ noServer: true });
 
     wss.on('connection', async (ws: WebSocket) => {
-      const client = await Client.init(ws, this.playground); // catch reject
+      const client = await Client.init(ws, this.playground); // @TODO catch reject
       this.clients.set(ws, client);
 
       ws.onmessage = (event: WebSocket.MessageEvent) => {
@@ -109,6 +109,5 @@ export class Room {
 
   static getRandomString(): string {
     return crypto.randomBytes(16).toString('hex');
-    ``;
   }
 }

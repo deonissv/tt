@@ -22,6 +22,7 @@ module.exports = {
     alias: {
       '@shared': path.resolve(__dirname, '../shared/'),
       '@components': path.resolve(__dirname, './src/components/'),
+      '@services': path.resolve(__dirname, './src/services/'),
     },
   },
   module: {

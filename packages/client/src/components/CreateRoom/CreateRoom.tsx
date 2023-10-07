@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import * as MUI from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { roomService } from '../../services/room.service';
+
+import { roomService } from '@services/room.service';
 import { PlaygroundState } from '@shared/index';
+import { useAppDispatch } from 'client/src/store/store';
+import { setNickname as setNickname_ } from 'client/src/store/rootSlice';
 
 export default () => {
   const [nickname, setNickname] = useState('');
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const pgState: PlaygroundState = {
     actortStates: [
@@ -24,6 +28,9 @@ export default () => {
 
   const onCreateRoom = async () => {
     const roomId = await roomService.createRoom(pgState);
+
+    dispatch(setNickname_(nickname));
+    localStorage.setItem('tt-nickname', nickname);
     navigate(`/room/${roomId}`);
   };
 

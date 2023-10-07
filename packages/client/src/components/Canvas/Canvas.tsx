@@ -1,14 +1,14 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import Playground from '../../playground';
-import { roomService } from '../../services/room.service';
+import { roomService } from '@services/room.service';
 
 import { PlaygroundState, WS } from '@shared/index';
-
-const NICKNAME = 'zxc';
+import { useAppSelector } from 'client/src/store/store';
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
   const canvas = useRef<HTMLCanvasElement>(null);
   const [cursors, setCursors] = useState<{ [key: string]: { x: number; y: number } }>({});
+  const nickname = useAppSelector(state => state.root.nickname);
 
   let ws: WebSocket;
 
@@ -20,7 +20,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
   };
 
   const init = useCallback(async () => {
-    const [_ws, _id, pgState] = await roomService.connect(roomId, NICKNAME);
+    const [_ws, _id, pgState] = await roomService.connect(roomId, nickname);
     ws = _ws;
 
     await babylonInit(pgState);
@@ -47,7 +47,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
   useEffect(() => {
     init()
       .then(() => {
-        document.addEventListener('mousemove', event => {
+        (canvas.current as HTMLCanvasElement).addEventListener('pointermove', event => {
           sendCursor(event.clientX, event.clientY);
         });
       })
@@ -59,7 +59,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
       {Object.entries(cursors).map(([id, { x, y }]) => (
         <div
           key={id}
-          className="w-3 h-3 bg-green-500 absolute"
+          className="w-3 h-3 bg-green-500 absolute pointer-events-none"
           style={{ left: `${x}px`, top: `${y}px`, backgroundColor: `#${id.substring(id.length - 6)}` }}
         ></div>
       ))}

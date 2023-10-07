@@ -36,6 +36,7 @@
     "rootDir": "../",
     "paths": {
       "@components/*": [ "client/src/components/*" ],
+      "@services/*": [ "client/src/services/*" ],
       "@shared/*": [ "shared/*" ],
     }
   },
