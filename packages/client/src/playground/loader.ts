@@ -4,13 +4,12 @@ import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 
-import { Actor } from './actor';
 import { fileToUrl } from '../utils';
 import { modelLoaderService } from '../services/modelLoader.service';
 import { Model } from '@shared/index';
 
 export class Loader {
-  static async loadModel(model: Model, scene: Scene, name = '') {
+  static async loadModel(model: Model, scene: Scene): Promise<[Mesh, Mesh]> {
     const loadedModelMeshes = await modelLoaderService.load(model.meshURL);
     const container = await SceneLoader.LoadAssetContainerAsync('', loadedModelMeshes, scene);
 
@@ -25,7 +24,8 @@ export class Loader {
 
     const modelMesh = Mesh.MergeMeshes(container.meshes as Mesh[], false, true, undefined, true, true)!;
     const colliderMesh: Mesh = Mesh.MergeMeshes(colliderMeshes as Mesh[], false, true)!;
-    new Actor(name, modelMesh, colliderMesh, scene);
+
+    return [modelMesh, colliderMesh];
   }
 
   static async _loadModelMaterial(model: Model, scene: Scene, name = ''): Promise<StandardMaterial> {

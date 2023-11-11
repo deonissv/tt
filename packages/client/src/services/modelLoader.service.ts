@@ -4,10 +4,11 @@ const LOADER_URL = 'http://localhost:3000/';
 
 export const modelLoaderService = {
   async load(url: string): Promise<File> {
-    const response = await axios.get(LOADER_URL, {
-      params: {
-        url,
-      },
+    const response = await axios.get('http://localhost:5500/munch.obj', {
+    // const response = await axios.get(LOADER_URL, {
+    //   params: {
+    //     url,
+    //   },
       responseType: 'arraybuffer',
     });
     const blob = new Blob([response.data], { type: 'application/octet-stream' });

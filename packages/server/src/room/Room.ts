@@ -1,9 +1,9 @@
 import * as crypto from 'crypto';
 import * as WebSocket from 'ws';
 
-import { PlaygroundState, WS } from '@shared/index';
+import { PlaygroundState, PlaygroundStateSave, WS } from '@shared/index';
 
-const STATE_TICK_RATE = 66; // [hz]
+const STATE_TICK_RATE = 6; // [hz]
 const STATE_TICK_INTERVAL = 1000 / STATE_TICK_RATE; // [ms]
 
 class Client {
@@ -12,14 +12,14 @@ class Client {
 
   constructor(id: string, nickname: string) {
     this.id = id;
-    this.nickname = null;
+    this.nickname = nickname;
   }
 
-  static async init(ws: WebSocket, pg: PlaygroundState): Promise<Client> {
+  static async init(ws: WebSocket, pgSave: PlaygroundStateSave): Promise<Client> {
     const id = crypto.randomUUID();
     WS.send(ws, {
       type: 'clientId',
-      payload: { id },
+      payload: id,
     });
 
     return new Promise((resolve, reject) => {
@@ -27,10 +27,10 @@ class Client {
         const message = WS.read(event);
 
         if (message.type === WS.NICKNAME) {
-          const client = new Client(id, message.payload.nickname);
+          const client = new Client(id, message.payload as string);
           WS.send(ws, {
             type: 'state',
-            payload: pg,
+            payload: pgSave,
           });
 
           ws.removeEventListener('message', handler);
@@ -38,7 +38,7 @@ class Client {
         }
       };
 
-      ws.onmessage = handler;
+      ws.addEventListener('message', handler);
 
       ws.onerror = () => {
         ws.removeEventListener('message', handler);
@@ -55,14 +55,15 @@ class Client {
 
 export class Room {
   id: string;
-  playground: PlaygroundState;
+  pg: PlaygroundState;
   wss: WebSocket.Server;
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, { x: number; y: number }>;
 
-  constructor(id: string, playground?: PlaygroundState) {
+  constructor(id: string, pgSave?: PlaygroundStateSave) {
     this.id = id;
-    this.playground = playground;
+    // @TODO make pgSave optional
+    this.pg = new PlaygroundState(pgSave!);
     this.clients = new Map();
     this.cursors = new Map();
     this.wss = this.getServer();
@@ -72,14 +73,19 @@ export class Room {
     const wss = new WebSocket.Server({ noServer: true });
 
     wss.on('connection', async (ws: WebSocket) => {
-      const client = await Client.init(ws, this.playground); // @TODO catch reject
+      const client = await Client.init(ws, this.pg.save()); // @TODO catch reject
       this.clients.set(ws, client);
 
       ws.onmessage = (event: WebSocket.MessageEvent) => {
         const message = WS.read(event);
 
-        if (message.type === WS.CURSOR) {
-          this.cursors.set(ws, message.payload);
+        switch (message.type) {
+          case WS.CURSOR:
+            this.cursors.set(ws, message.payload as { x: number; y: number }); // @TODO add typing for position
+            break;
+          case WS.UPDATE:
+            this.pg.applyUpdate(message.payload as PlaygroundStateSave);
+            break;
         }
       };
 
@@ -89,10 +95,11 @@ export class Room {
         }
 
         const cursors = Array.from(this.cursors).reduce((acc, [ws, cursor]) => {
-          acc[this.clients.get(ws).id] = cursor;
+          acc[this.clients.get(ws)!.id] = cursor;
           return acc;
         }, {});
         this.broadcast({ type: WS.CURSOR, payload: cursors });
+        this.broadcast({ type: WS.UPDATE, payload: this.pg.getUpdate() });
       }, STATE_TICK_INTERVAL);
     });
 

@@ -1,18 +1,18 @@
-import { PlaygroundState, WS } from '@shared/index';
+import { PlaygroundStateSave, WS } from '@shared/index';
 import axios from 'axios';
 
 const LOADER_URL = 'http://localhost:3000/';
 const WSS_URL = 'ws://localhost:8081/';
 
 export const roomService = {
-  async createRoom(playground?: PlaygroundState) {
+  async createRoom(playground?: PlaygroundStateSave): Promise<string> {
     const response = await axios.post(LOADER_URL + 'room', {
       playground,
     });
-    return response.data;
+    return response.data as string;
   },
 
-  async connect(roomId: string, nickname: string): Promise<[WebSocket, string, any]> {
+  async connect(roomId: string, nickname: string): Promise<[WebSocket, string, PlaygroundStateSave]> {
     const ws = new WebSocket(WSS_URL + roomId);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
@@ -20,11 +20,11 @@ export const roomService = {
           const message = WS.read(event);
 
           if (message.type == 'clientId') {
-            const id = message.payload.id;
+            const id = message.payload as string;
 
             WS.send(ws, {
               type: 'nickname',
-              payload: { nickname },
+              payload: nickname,
             });
 
             const stateListener = (event: MessageEvent) => {
@@ -32,7 +32,8 @@ export const roomService = {
 
               if (message.type == 'state') {
                 ws.removeEventListener('message', stateListener);
-                resolve([ws, id, message.payload]);
+                const pgState = message.payload as PlaygroundStateSave;
+                resolve([ws, id, pgState]);
               }
             };
             ws.removeEventListener('message', idListener);

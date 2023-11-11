@@ -1,3 +1,5 @@
+export const PRECISION_DELTA = 0.005;
+
 export const CAMERA_DEFAULT_ALPHA = 0;
 export const CAMERA_DEFAULT_BETA = 0;
 export const CAMERA_DEFAULT_RADIUS = 5;
@@ -5,11 +7,12 @@ export const CAMERA_DEFAULT_POSITION = 2;
 
 export const MOVE_SENSETIVITY = 0.1;
 export const WHEEL_SENSETIVITY = 0.5;
-export const MOUSE_MOVE_SENSETIVITY = 0.02;
+export const MOUSE_MOVE_SENSETIVITY = 20;
 
-export const GRAVITY = 10;
+export const GRAVITY = 9.81;
 
 export const LIFH_HIGHT = 1;
+export const MOVEMENT_VELOCITY = 500;
 
 export const FLIP_BIND_KEYS = ['KeyF'];
 

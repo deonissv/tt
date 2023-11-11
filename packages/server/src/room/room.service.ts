@@ -1,23 +1,23 @@
 import { createServer } from 'http';
 import { Injectable } from '@nestjs/common';
 import { Room } from './Room';
-import { PlaygroundState } from '@shared/index';
+import { PlaygroundStateSave } from '@shared/index';
 
 @Injectable()
 export class RoomService {
-  static rooms: Map<string, Room> = new Map();
+  static rooms = new Map<string, Room>();
 
   constructor() {
     const server = createServer();
     server.on('upgrade', (request, socket, head) => {
-      const pathname = request.url;
-      const roomId = pathname!.split('/')[1];
+      const pathname = request.url!;
+      const roomId = pathname.split('/')[1];
 
       if (!RoomService.rooms.has(roomId)) {
         socket.destroy();
         return;
       }
-      const wss = RoomService.rooms.get(roomId).wss;
+      const wss = RoomService.rooms.get(roomId)!.wss;
       wss.handleUpgrade(request, socket, head, ws => {
         wss.emit('connection', ws, request);
       });
@@ -34,9 +34,9 @@ export class RoomService {
     return roomId;
   }
 
-  createRoom(playground?: PlaygroundState): string {
+  createRoom(pgSave?: PlaygroundStateSave): string {
     const roomId = this.getRoomId();
-    const room = new Room(roomId, playground);
+    const room = new Room(roomId, pgSave);
 
     RoomService.rooms.set(roomId, room);
     return roomId;

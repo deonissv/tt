@@ -5,7 +5,7 @@ interface RootState {
 }
 
 const rootState: RootState = {
-  nickname: localStorage.getItem('tt-nickname') || '',
+  nickname: localStorage.getItem('tt-nickname') ?? '',
 };
 
 export const rootSlice = createSlice({

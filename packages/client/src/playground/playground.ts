@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Scene } from '@babylonjs/core/scene';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Engine } from '@babylonjs/core/Engines/engine';
@@ -21,6 +22,7 @@ import '@babylonjs/core/Physics/physicsEngineComponent';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
+
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.computeShader';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.cubeTexture';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.debugging';
@@ -36,17 +38,24 @@ import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.storageBuffer';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
-// @ts-ignore
-// import { Inspector } from '@babylonjs/inspector';
+import { Inspector } from '@babylonjs/inspector';
 
 import { PlaygroundScene } from './playgroundScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
 import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
-import { Actor } from './actor';
-import { Loader } from './loader';
-import { Model, FLIP_BIND_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SCALE_DOWN_KEYS, SCALE_UP_KEYS } from '@shared/index';
+
+import {
+  FLIP_BIND_KEYS,
+  ROTATE_CCW_KEYS,
+  ROTATE_CW_KEYS,
+  SCALE_DOWN_KEYS,
+  SCALE_UP_KEYS,
+  PlaygroundStateSave,
+  PlaygroundStateUpdate,
+} from '@shared/index';
+import Actor from './actor';
 
 export default class Playground {
   private _scene: Scene;
@@ -58,6 +67,37 @@ export default class Playground {
   private constructor(scene: Scene) {
     this._scene = scene;
     this._hll = new HighlightLayer('hll', this._scene); // @TODO change glow to thin solid line
+
+    Inspector.Show(this._scene, {});
+  }
+
+  static async init(canvas: HTMLCanvasElement, stateSave: PlaygroundStateSave): Promise<Playground> {
+    const engine = await this.initEngine(canvas);
+    const scene = await PlaygroundScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem);
+
+    const ground = CreateGround('___ground', { width: 10, height: 10 }, scene);
+    ground.isPickable = false;
+    new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, scene);
+
+    engine.runRenderLoop(() => {
+      scene.render();
+    });
+    window.addEventListener('resize', () => {
+      engine.resize();
+    });
+
+    const pg = new Playground(scene);
+
+    pg._handlePick();
+    pg.loadState(stateSave);
+
+    pg._handleHoverHighlight();
+    pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
+    pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
+    pg._bindAction(ROTATE_CCW_KEYS, Actor.prototype.rotateCCW);
+    pg._bindAction(SCALE_UP_KEYS, Actor.prototype.scaleUp);
+    pg._bindAction(SCALE_DOWN_KEYS, Actor.prototype.scaleDown);
+    return pg;
   }
 
   private get _camera(): ArcRotateCamera {
@@ -72,31 +112,6 @@ export default class Playground {
     const mesh = this._pickMesh();
     if (!mesh) return null;
     return mesh.parent! as Actor;
-  }
-
-  static async init(canvas: HTMLCanvasElement): Promise<Playground> {
-    const engine = await this.initEngine(canvas);
-    const scene = await PlaygroundScene.init(engine);
-
-    const ground = CreateGround('___ground', { width: 10, height: 10 }, scene);
-    ground.isPickable = false;
-    new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, scene);
-
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
-    window.addEventListener('resize', () => {
-      engine.resize();
-    });
-    const pg = new Playground(scene);
-    pg._handleHoverHighlight();
-    pg._handlePick();
-    pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
-    pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
-    pg._bindAction(ROTATE_CCW_KEYS, Actor.prototype.rotateCCW);
-    pg._bindAction(SCALE_UP_KEYS, Actor.prototype.scaleUp);
-    pg._bindAction(SCALE_DOWN_KEYS, Actor.prototype.scaleDown);
-    return pg;
   }
 
   private static async initEngine(canvas: HTMLCanvasElement): Promise<Engine> {
@@ -158,8 +173,7 @@ export default class Playground {
           const cursorDY = this._cursorPos[1] - prevCursorPos[1];
           const dx = Math.cos(this._camera.alpha) * cursorDY + Math.sin(this._camera.alpha) * cursorDX;
           const dy = -Math.cos(this._camera.alpha) * cursorDX + Math.sin(this._camera.alpha) * cursorDY;
-
-          this._pickedActor.move(dx, dy);
+          this._pickedActor.__move(dx * 0.02, 0, dy * 0.02);
         }
       }
     });
@@ -168,22 +182,63 @@ export default class Playground {
   private _bindAction(key: string[], action: () => void) {
     this._scene.onKeyboardObservable.add(kbInfo => {
       const evt = kbInfo.event;
-      if (!key.includes(evt.code)) return;
-      if (kbInfo.type === 1) {
-        const target = this._pickedActor || (this._hoveredMesh!.parent as Actor);
+      if (key.includes(evt.code) && kbInfo.type === 1) {
+        const target = this._pickedActor ?? this._pickActor();
         if (!target) return;
-        action.apply(target);
+        action.call(target);
       }
     });
   }
 
-  async test() {
-    const boxModel = CreateBox('___sphere', { width: 1, height: 1, depth: 1 }, this._scene);
-    new Actor('box', boxModel, undefined, this._scene, undefined, new Vector3(-3, 0, 0));
-    // Inspector.Show(this._scene, {});
+  test1() {
+    // const box = CreateBox('___box', { width: 1, height: 1, depth: 1 }, scene);
+    // box.setPivotPoint(new Vector3(0, -0.5, 0));
+
+    // const tn = new TransformNode('___tn', scene);
+    // tn.position = new Vector3(0, 0, 0);
+    // box.position = new Vector3(0, 0.5, 0);
+    // box.setPivotPoint(new Vector3(0, -0.5, 0));
+    // tn.setPivotPoint(new Vector3(0, -0.5, 0));
+
+    // box.setParent(tn);
+    // const body = new PhysicsBody(tn, PhysicsMotionType.DYNAMIC, false, scene);
+    // body.shape = new PhysicsShapeMesh(box, scene);
+    // body.disablePreStep = false;
+
+    // setTimeout(() => {
+    //   tn.position = new Vector3(0, 5, 0);
+    // }, 3000);
   }
 
-  async loadModel(model: Model, name = '') {
-    await Loader.loadModel(model, this._scene, name);
+  test2() {
+    const boxModel = CreateBox('___sphere', { width: 1, height: 1, depth: 1 }, this._scene);
+    const box = new Actor(
+      {
+        name: 'box',
+        guid: '3',
+        model: {
+          meshURL: '',
+        },
+      },
+      boxModel,
+      undefined,
+      this._scene,
+    );
+    box.position = new Vector3(-3, 0, 0);
+  }
+
+  loadState(state: PlaygroundStateSave) {
+    state.actorStates.forEach(actorState => {
+      Actor.fromState(actorState, this._scene).catch(console.log);
+    });
+  }
+
+  update(pgUpdate: PlaygroundStateUpdate) {
+    pgUpdate?.actortStates?.forEach(actorState => {
+      const actor = this._scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor;
+      if (actor && this._pickedActor?.guid !== actor.guid) {
+        actor.update(actorState);
+      }
+    });
   }
 }

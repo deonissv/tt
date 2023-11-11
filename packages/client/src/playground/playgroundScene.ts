@@ -26,14 +26,14 @@ export class PlaygroundScene extends Scene {
     super(engine);
   }
 
-  public static async init(engine: Engine): Promise<PlaygroundScene> {
+  public static async init(engine: Engine, gravity = GRAVITY, leftHandedSystem = false): Promise<PlaygroundScene> {
     const canvas = engine.getRenderingCanvas()!;
     const scene = new PlaygroundScene(engine);
-    scene.useRightHandedSystem = true;
+    scene.useRightHandedSystem = !leftHandedSystem;
 
     scene.initCamera(canvas);
     scene.initLight();
-    await scene.initPhysics();
+    await scene.initPhysics(gravity);
 
     return scene;
   }
@@ -67,9 +67,9 @@ export class PlaygroundScene extends Scene {
     light.intensity = 0.8;
   }
 
-  private async initPhysics() {
+  private async initPhysics(gravity: number) {
     const hk = new HP(true, await HavokPlugin());
-    const gravity = new Vector3(0, -GRAVITY, 0);
-    this.enablePhysics(gravity, hk);
+    const gravityVec = new Vector3(0, -gravity, 0);
+    this.enablePhysics(gravityVec, hk);
   }
 }
