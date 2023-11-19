@@ -13,5 +13,8 @@
   "references": [
     { "path": "./packages/server" },
     { "path": "./packages/client" }
-  ]
+
+  ],
+  "include": ["packages/server/src/**/*", "packages/client/src/**/*", "packages/shared/**/*"],
+  "exclude": ["node_modules", "packages/server/dist", "packages/client/dist"]
 }

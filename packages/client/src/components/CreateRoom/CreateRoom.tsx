@@ -3,31 +3,44 @@ import * as MUI from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 import { roomService } from '@services/room.service';
-import { PlaygroundState } from '@shared/index';
-import { useAppDispatch } from 'client/src/store/store';
-import { setNickname as setNickname_ } from 'client/src/store/rootSlice';
+import { PlaygroundStateSave } from '@shared/index';
+import { useAppDispatch } from '../../store/store';
+import { setNickname as setNickname_ } from '../../store/nickname';
 
-export default () => {
+const CreateRoom = () => {
   const [nickname, setNickname] = useState('');
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const pgState: PlaygroundState = {
-    actortStates: [
+  const pgStateSave: PlaygroundStateSave = {
+    actorStates: [
       {
         name: 'Munchkin',
         guid: '1',
+        transformation: {
+          position: [0, 50, 0],
+        },
+        mass: 1,
         model: {
-          meshURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.obj',
-          diffuseURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.tex.png',
-          colliderURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.compcoll.obj',
+          meshURL: 'http://localhost:5500/munch.obj',
+        },
+      },
+      {
+        name: 'Munchkin',
+        guid: '2',
+        transformation: {
+          position: [0, 50, 4],
+        },
+        mass: 1,
+        model: {
+          meshURL: 'http://localhost:5500/munch.obj',
         },
       },
     ],
   };
 
   const onCreateRoom = async () => {
-    const roomId = await roomService.createRoom(pgState);
+    const roomId = await roomService.createRoom(pgStateSave);
 
     dispatch(setNickname_(nickname));
     localStorage.setItem('tt-nickname', nickname);
@@ -53,6 +66,8 @@ export default () => {
     </MUI.Unstable_Grid2>
   );
 };
+
+export default CreateRoom;
 
 // read PGState from file
 // document.getElementById('game-cfg')!.addEventListener('change', (event: Event) => {

@@ -2,67 +2,82 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import Playground from '../../playground';
 import { roomService } from '@services/room.service';
 
-import { PlaygroundState, WS } from '@shared/index';
-import { useAppSelector } from 'client/src/store/store';
+import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
+import { useAppSelector } from '../../store/store';
+
+const frameRate = 60;
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
+  const cursor: [number, number] = [0, 0];
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [cursors, setCursors] = useState<{ [key: string]: { x: number; y: number } }>({});
-  const nickname = useAppSelector(state => state.root.nickname);
+  const [cursors, setCursors] = useState<Record<string, number[]>>({});
+  const nickname = useAppSelector(state => state.nickname.nickname);
 
-  let ws: WebSocket;
-
-  const babylonInit = async (playgroundState: PlaygroundState) => {
-    const playground = await Playground.init(canvas.current as HTMLCanvasElement);
-    await playground.test();
-    await playground.loadModel(playgroundState.actortStates[0].model);
+  const babylonInit = async (pgStateSave: PlaygroundStateSave, ws: WebSocket) => {
+    const playground = await Playground.init(canvas.current!, pgStateSave, ws);
     return playground;
   };
 
-  const init = useCallback(async () => {
-    const [_ws, _id, pgState] = await roomService.connect(roomId, nickname);
-    ws = _ws;
+  const init = useCallback(async (): Promise<[WebSocket, string, Playground]> => {
+    const [ws, id, pgState] = await roomService.connect(roomId, nickname);
 
-    await babylonInit(pgState);
+    const pg = await babylonInit(pgState, ws);
 
     ws.addEventListener('message', event => {
       const message = WS.read(event);
 
       switch (message.type) {
-        case WS.UPDATE:
+        case WS.UPDATE: {
+          const pgStateUpdate = message.payload;
+          pg.update(pgStateUpdate);
+          if (pgStateUpdate.cursorPositions) {
+            pg.update(pgStateUpdate);
+            setCursors(prev => ({ ...prev, ...pgStateUpdate.cursorPositions }));
+          }
           break;
-        case WS.CURSOR:
-          setCursors(prev => ({ ...prev, ...message.payload }));
-          break;
+        }
         default:
           break;
       }
     });
-  }, []);
 
-  const sendCursor = (x: number, y: number) => {
-    WS.send(ws, { type: WS.CURSOR, payload: { x, y } });
+    return [ws, id, pg];
+  }, [nickname, roomId]);
+
+  const sendUpdate = (ws: WebSocket, pgStateUpdate: PlaygroundStateUpdate) => {
+    WS.send(ws, {
+      type: WS.UPDATE,
+      payload: pgStateUpdate,
+    });
   };
 
   useEffect(() => {
     init()
-      .then(() => {
-        (canvas.current as HTMLCanvasElement).addEventListener('pointermove', event => {
-          sendCursor(event.clientX, event.clientY);
+      .then(([ws_, id]) => {
+        canvas.current!.addEventListener('pointermove', event => {
+          cursor[0] = event.clientX;
+          cursor[1] = event.clientY;
+
+          setInterval(() => {
+            const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
+            sendUpdate(ws_, pgStateUpdate);
+          }, 1000 / frameRate);
         });
       })
       .catch(console.error);
-  }, [init]);
+  }, []);
 
   return (
     <>
-      {Object.entries(cursors).map(([id, { x, y }]) => (
-        <div
-          key={id}
-          className="w-3 h-3 bg-green-500 absolute pointer-events-none"
-          style={{ left: `${x}px`, top: `${y}px`, backgroundColor: `#${id.substring(id.length - 6)}` }}
-        ></div>
-      ))}
+      <div>
+        {Object.entries(cursors).map(([id, [x, y]]) => (
+          <div
+            key={id}
+            className="w-3 h-3 bg-green-500 absolute pointer-events-none"
+            style={{ left: `${x}px`, top: `${y}px`, backgroundColor: `#${id.substring(id.length - 6)}` }}
+          ></div>
+        ))}
+      </div>
       <canvas ref={canvas} className="w-full h-full !border-0 !hover:border-0 !foucs:border-0" />
     </>
   );

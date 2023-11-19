@@ -30,6 +30,7 @@
     "alwaysStrict": true,
     "noImplicitReturns": true,
     "skipDefaultLibCheck": true,
+    "composite": true,
 
     "outDir": "./dist",
     "baseUrl": "../",
@@ -41,5 +42,6 @@
     }
   },
   "include": ["src",  "./src/**/*", "../shared/**/*"],
+  "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

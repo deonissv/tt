@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RoomService } from './room/room.service';
-import { PlaygroundState } from '@shared/index';
+import { PlaygroundStateSave } from '@shared/index';
 
 export class CreateRoomDto {
-  playground?: PlaygroundState;
+  playground?: PlaygroundStateSave;
 }
 
 @Controller()
@@ -20,7 +20,7 @@ export class AppController {
   }
 
   @Post('room')
-  async createRoom(@Body() createRoomDto: CreateRoomDto) {
+  createRoom(@Body() createRoomDto: CreateRoomDto) {
     return this.roomService.createRoom(createRoomDto.playground);
   }
 }

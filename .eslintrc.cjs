@@ -10,7 +10,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
+    project: ['./packages/client/tsconfig.json', './packages/client/tsconfig.node.json',  './packages/server/tsconfig.json'],
     tsconfigRootDir: __dirname,
    },
   extends: [
@@ -22,9 +22,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-type-checked',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
-  parser: '@typescript-eslint/parser',
   plugins: ['react-refresh'],
-  ignorePatterns: ['.eslintrc.js'],
   rules: {
     'react-refresh/only-export-components': [
       'warn',
@@ -33,6 +31,7 @@ module.exports = {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
-    '@typescript-eslint/no-explicit-any': 'off'
+    '@typescript-eslint/no-explicit-any': 'off',
+    "@typescript-eslint/no-misused-promises": "off"
   },
 }

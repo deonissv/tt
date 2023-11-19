@@ -1,11 +1,11 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 
-import rootSlice from './rootSlice';
+import nicknameReducer from './nickname';
 
 const store = configureStore({
   reducer: {
-    root: rootSlice,
+    nickname: nicknameReducer,
   },
 });
 

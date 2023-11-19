@@ -4,6 +4,9 @@
   "sourceRoot": "./src",
   "entryFile": "server/src/main.js",
   "compilerOptions": {
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "assets": [
+      "../assets/**/*"
+    ]
   }
 }

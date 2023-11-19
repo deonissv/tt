@@ -4,7 +4,7 @@ import JoinRoom from './components/JoinRoom';
 import Room from '@components/Room';
 import NotFoundPage from '@components/NotFoundPage';
 
-export default () => {
+const App = () => {
   return (
     <Routes>
       <Route path="" element={<CreateRoom />} />
@@ -14,3 +14,5 @@ export default () => {
     </Routes>
   );
 };
+
+export default App;

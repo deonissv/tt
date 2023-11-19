@@ -1,6 +1,6 @@
 import * as MUI from '@mui/material';
 
-export default () => {
+const JoinRoom = () => {
   return (
     <MUI.Unstable_Grid2 container justifyContent="center">
       <MUI.Unstable_Grid2 xs={6}>
@@ -21,3 +21,5 @@ export default () => {
     </MUI.Unstable_Grid2>
   );
 };
+
+export default JoinRoom;
