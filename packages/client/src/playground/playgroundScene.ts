@@ -1,5 +1,5 @@
-import HavokPlugin from '@babylonjs/havok';
-import { HavokPlugin as HP } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
+import HavokPhysics from '@babylonjs/havok';
+// import { HavokPlugin } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
 
 import { Scene } from '@babylonjs/core/scene';
 import { Engine } from '@babylonjs/core/Engines/engine';
@@ -68,8 +68,10 @@ export class PlaygroundScene extends Scene {
   }
 
   private async initPhysics(gravity: number) {
-    const hk = new HP(true, await HavokPlugin());
-    const gravityVec = new Vector3(0, -gravity, 0);
-    this.enablePhysics(gravityVec, hk);
+    await HavokPhysics();
+    console.log(gravity);
+    // const hk = new HavokPlugin(true, await HavokPhysics());
+    // const gravityVec = new Vector3(0, -gravity, 0);
+    // this.enablePhysics(gravityVec, hk);
   }
 }

@@ -1,7 +1,7 @@
 import { createServer } from 'http';
 import { Injectable } from '@nestjs/common';
-import { Room } from './Room';
 import { PlaygroundStateSave } from '@shared/index';
+import { Room } from '../network';
 
 @Injectable()
 export class RoomService {
@@ -34,9 +34,10 @@ export class RoomService {
     return roomId;
   }
 
-  createRoom(pgSave?: PlaygroundStateSave): string {
+  async createRoom(pgSave?: PlaygroundStateSave): Promise<string> {
     const roomId = this.getRoomId();
-    const room = new Room(roomId, pgSave);
+    const room = new Room(roomId);
+    await room.init(pgSave);
 
     RoomService.rooms.set(roomId, room);
     return roomId;

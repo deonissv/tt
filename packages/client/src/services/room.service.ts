@@ -20,19 +20,19 @@ export const roomService = {
           const message = WS.read(event);
 
           if (message.type == 'clientId') {
-            const id = message.payload as string;
+            const id = message.payload;
 
             WS.send(ws, {
-              type: 'nickname',
+              type: WS.NICKNAME,
               payload: nickname,
             });
 
             const stateListener = (event: MessageEvent) => {
               const message = WS.read(event);
 
-              if (message.type == 'state') {
+              if (message.type == WS.STATE) {
                 ws.removeEventListener('message', stateListener);
-                const pgState = message.payload as PlaygroundStateSave;
+                const pgState = message.payload;
                 resolve([ws, id, pgState]);
               }
             };

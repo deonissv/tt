@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { roomService } from '@services/room.service';
 import { PlaygroundStateSave } from '@shared/index';
 import { useAppDispatch } from '../../store/store';
-import { setNickname as setNickname_ } from '../../store/rootSlice';
+import { setNickname as setNickname_ } from '../../store/nickname';
 
 const CreateRoom = () => {
   const [nickname, setNickname] = useState('');
@@ -18,26 +18,22 @@ const CreateRoom = () => {
         name: 'Munchkin',
         guid: '1',
         transformation: {
-          position: [0, 0, 0],
+          position: [0, 50, 0],
         },
         mass: 1,
         model: {
-          meshURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.obj',
-          diffuseURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.tex.png',
-          colliderURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.compcoll.obj',
+          meshURL: 'http://localhost:5500/munch.obj',
         },
       },
       {
         name: 'Munchkin',
         guid: '2',
         transformation: {
-          position: [0, 0, 5],
+          position: [0, 50, 4],
         },
         mass: 1,
         model: {
-          meshURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.obj',
-          diffuseURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.tex.png',
-          colliderURL: 'http://wb.yanrishatum.ru/raven81/Munchkin/Accessories/MunchkinFig_v5.compcoll.obj',
+          meshURL: 'http://localhost:5500/munch.obj',
         },
       },
     ],

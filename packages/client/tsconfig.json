@@ -41,7 +41,6 @@
       "@shared/*": [ "shared/*" ],
     }
   },
-  "files": ["./src/playground/playgroundScene.ts"],
   "include": ["src",  "./src/**/*", "../shared/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]

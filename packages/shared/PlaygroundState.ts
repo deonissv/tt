@@ -2,7 +2,7 @@ export interface PlaygroundStateSave {
   leftHandedSystem?: boolean; // default: false | If true, the Y axis will be inverted, and the Z axis will be inverted
   gravity?: number; // default: -9.81
 
-  actorStates: ActorState[]; // Objects on the table
+  actorStates?: ActorState[]; // Objects on the table
 }
 
 export interface ActorState {
@@ -39,7 +39,8 @@ export interface PlaygroundStateUpdate {
   leftHandedSystem?: boolean;
   gravity?: number;
 
-  actortStates?: ActorStateUpdate[];
+  actorStates?: ActorStateUpdate[];
+  cursorPositions?: CursorPositions;
 }
 
 export interface ActorStateUpdate {
@@ -47,6 +48,8 @@ export interface ActorStateUpdate {
   transformation?: Transformation;
   mass?: number;
 }
+
+export type CursorPositions = Record<string, number[]>;
 
 export class PlaygroundState {
   leftHandedSystem: boolean;
@@ -57,12 +60,12 @@ export class PlaygroundState {
   constructor(save: PlaygroundStateSave) {
     this.leftHandedSystem = save.leftHandedSystem ?? false;
     this.gravity = save.gravity ?? -9.81;
-    this.actorStates = new Map(save.actorStates.map(actorState => [actorState.guid, actorState]));
+    this.actorStates = new Map((save?.actorStates ?? []).map(actorState => [actorState.guid, actorState]));
     this.updated = [];
   }
 
   applyUpdate(pgUpdate: PlaygroundStateUpdate) {
-    const actorUpdates = pgUpdate.actortStates ?? [];
+    const actorUpdates = pgUpdate.actorStates ?? [];
     actorUpdates.forEach(actorUpdate => {
       const actorState = this.actorStates.get(actorUpdate.guid);
       if (actorState) {
@@ -85,7 +88,7 @@ export class PlaygroundState {
 
     this.updated = [];
     return {
-      actortStates: actorUpdates,
+      actorStates: actorUpdates,
     };
   }
 

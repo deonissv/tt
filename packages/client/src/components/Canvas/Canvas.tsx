@@ -3,69 +3,74 @@ import Playground from '../../playground';
 import { roomService } from '@services/room.service';
 
 import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
-import { useAppSelector } from 'client/src/store/store';
+import { useAppSelector } from '../../store/store';
 
-let ws: WebSocket;
+const frameRate = 60;
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
+  const cursor: [number, number] = [0, 0];
   const canvas = useRef<HTMLCanvasElement>(null);
-  const [cursors, setCursors] = useState<WS.CursorsUpdate>({});
-  const nickname = useAppSelector(state => state.root.nickname);
+  const [cursors, setCursors] = useState<Record<string, number[]>>({});
+  const nickname = useAppSelector(state => state.nickname.nickname);
 
-  const babylonInit = async (pgStateSave: PlaygroundStateSave) => {
-    const playground = await Playground.init(canvas.current!, pgStateSave);
-    // await playground.test();
+  const babylonInit = async (pgStateSave: PlaygroundStateSave, ws: WebSocket) => {
+    const playground = await Playground.init(canvas.current!, pgStateSave, ws);
     return playground;
   };
 
-  const init = useCallback(async () => {
-    const [_ws, , pgState] = await roomService.connect(roomId, nickname);
-    ws = _ws;
+  const init = useCallback(async (): Promise<[WebSocket, string, Playground]> => {
+    const [ws, id, pgState] = await roomService.connect(roomId, nickname);
 
-    const pg = await babylonInit(pgState);
+    const pg = await babylonInit(pgState, ws);
 
     ws.addEventListener('message', event => {
       const message = WS.read(event);
 
       switch (message.type) {
-        case WS.UPDATE:
-          pg.update(message.payload as PlaygroundStateUpdate);
+        case WS.UPDATE: {
+          const pgStateUpdate = message.payload;
+          pg.update(pgStateUpdate);
+          if (pgStateUpdate.cursorPositions) {
+            pg.update(pgStateUpdate);
+            setCursors(prev => ({ ...prev, ...pgStateUpdate.cursorPositions }));
+          }
           break;
-        case WS.CURSOR:
-          setCursors(prev => ({ ...prev, ...(message.payload as WS.CursorsUpdate) }));
-          break;
+        }
         default:
           break;
       }
     });
+
+    return [ws, id, pg];
   }, [nickname, roomId]);
 
-  const sendCursor = (x: number, y: number) => {
-    WS.send(ws, { type: WS.CURSOR, payload: { x, y } });
+  const sendUpdate = (ws: WebSocket, pgStateUpdate: PlaygroundStateUpdate) => {
+    WS.send(ws, {
+      type: WS.UPDATE,
+      payload: pgStateUpdate,
+    });
   };
 
   useEffect(() => {
     init()
-      .then(() => {
+      .then(([ws_, id]) => {
         canvas.current!.addEventListener('pointermove', event => {
-          sendCursor(event.clientX, event.clientY);
-        });
+          cursor[0] = event.clientX;
+          cursor[1] = event.clientY;
 
-        canvas.current!.addEventListener(WS.ACTOR_UPDATE, e => {
-          const event = e as WS.PGUpdate;
-          WS.send(ws, {
-            type: WS.UPDATE,
-            payload: event.detail,
-          });
+          setInterval(() => {
+            const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
+            sendUpdate(ws_, pgStateUpdate);
+          }, 1000 / frameRate);
         });
       })
       .catch(console.error);
-  }, [init]);
+  }, []);
 
   return (
     <>
       <div>
-        {Object.entries(cursors).map(([id, { x, y }]) => (
+        {Object.entries(cursors).map(([id, [x, y]]) => (
           <div
             key={id}
             className="w-3 h-3 bg-green-500 absolute pointer-events-none"
