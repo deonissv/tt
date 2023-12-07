@@ -9,7 +9,7 @@
   "scripts": {
     "client": "npm -w ./packages/client run",
     "server": "npm -w ./packages/server run",
-    "build": "npx concurrently \"npm run server build\" \"npm run client build\"",
+    "build": "npx concurrently \"npm run server build\" \"npm run client build:v\"",
     "start": "npx concurrently \"npm run client start\" \"npm run server start\"",
     "dev": "npx concurrently \"npm run client dev\" \"npm run server dev\" \"npm run shared dev\"",
     "lint": "npm run lint:client && npm run lint:server && npm run lint:shared",

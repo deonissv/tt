@@ -7,7 +7,7 @@ import { useAppSelector } from '../../store/store';
 
 const frameRate = 60;
 
-const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
+const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const cursor: [number, number] = [0, 0];
   const canvas = useRef<HTMLCanvasElement>(null);
   const [cursors, setCursors] = useState<Record<string, number[]>>({});
@@ -57,12 +57,13 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }) => {
         canvas.current!.addEventListener('pointermove', event => {
           cursor[0] = event.clientX;
           cursor[1] = event.clientY;
-
-          setInterval(() => {
-            const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
-            sendUpdate(ws_, pgStateUpdate);
-          }, 1000 / frameRate);
         });
+
+        console.log('setInterval');
+        setInterval(() => {
+          const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
+          sendUpdate(ws_, pgStateUpdate);
+        }, 1000 / frameRate);
       })
       .catch(console.error);
   }, []);

@@ -7,6 +7,6 @@ COPY . /app
 RUN npm r i:all
 RUN npm run build
 
-EXPOSE 3000 5500
+EXPOSE 3000 5500 8081
 
 ENTRYPOINT ["npm", "run", "start"]
