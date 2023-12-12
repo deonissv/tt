@@ -4,14 +4,15 @@ import * as path from 'path';
 import * as HavokPhysics from '@babylonjs/havok';
 
 import { NestFactory } from '@nestjs/core';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+
 import { AppModule } from './app.module';
 
 async function initHavok() {
   const wasm = path.join(__dirname, '../../HavokPhysics.wasm');
   const wasmBinary = fs.readFileSync(wasm);
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-  global.havok = await (HavokPhysics as any)({ wasmBinary });
+  global.havok = await (HavokPhysics as unknown as (object) => Promise<object>)({ wasmBinary });
 }
 
 async function bootstrap() {
@@ -19,6 +20,17 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+
+  const config = new DocumentBuilder()
+    .setTitle('TT API')
+    .addTag('tt')
+    .setVersion('0.0.1')
+    .addBasicAuth({ type: 'http', scheme: 'basic' }, 'basic')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+
   await app.listen(3000);
 }
 void bootstrap();
