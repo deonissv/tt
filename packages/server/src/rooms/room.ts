@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import * as WebSocket from 'ws';
 
 import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
@@ -94,9 +93,5 @@ export class Room {
         WS.send(client, msg);
       }
     });
-  }
-
-  static getRandomString(): string {
-    return crypto.randomBytes(16).toString('hex');
   }
 }

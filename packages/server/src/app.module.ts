@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { RoomService } from './room/room.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
-import { RoomsModule } from './rooms/rooms.module';
 import { AuthModule } from './auth/auth.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { GamesModule } from './games/games.module';
 
 @Module({
   imports: [
@@ -22,8 +22,9 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     RoomsModule,
     AuthModule,
+    GamesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, RoomService],
+  providers: [AppService],
 })
 export class AppModule {}

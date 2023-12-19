@@ -25,11 +25,24 @@ async function bootstrap() {
     .setTitle('TT API')
     .addTag('tt')
     .setVersion('0.0.1')
-    .addBasicAuth({ type: 'http', scheme: 'basic' }, 'basic')
-    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
+    .addBearerAuth(
+      {
+        type: 'http',
+        // scheme: 'basic',
+        // bearerFormat: 'JWT',
+        // name: 'JWT',
+        // description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   await app.listen(3000);
 }

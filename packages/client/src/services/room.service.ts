@@ -6,7 +6,7 @@ const WSS_URL = 'ws://localhost:8081/';
 
 export const roomService = {
   async createRoom(playground?: PlaygroundStateSave): Promise<string> {
-    const response = await axios.post(LOADER_URL + 'room', {
+    const response = await axios.post(LOADER_URL + 'rooms', {
       playground,
     });
     return response.data as string;

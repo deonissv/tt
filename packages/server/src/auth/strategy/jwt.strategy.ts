@@ -10,11 +10,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey: 'secret', // @TODO move to env
     });
-    console.log(1);
   }
 
   validate(payload: any) {
-    console.log(1);
+    console.log('payload', payload);
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     return { userId: payload.sub, username: payload.username };
