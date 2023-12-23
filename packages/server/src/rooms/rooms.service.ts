@@ -29,7 +29,7 @@ export class RoomsService {
     server.listen(8081);
   }
 
-  getRoomId(): string {
+  getRoomCode(): string {
     let roomId = RoomsService.getRandomString();
     while (RoomsService.rooms.has(roomId)) {
       roomId = RoomsService.getRandomString();
@@ -38,16 +38,16 @@ export class RoomsService {
   }
 
   async createRoom(author: User, pgSave?: PlaygroundStateSave): Promise<string> {
-    const roomId = this.getRoomId();
-    const room = new RRoom(roomId);
+    const roomCode = this.getRoomCode();
+    const room = new RRoom(roomCode);
     await this.roomsRepository.save({
-      roomId: roomId,
+      code: roomCode,
       author: author,
       type: 1,
     });
     await room.init(pgSave);
-    RoomsService.rooms.set(roomId, room);
-    return roomId;
+    RoomsService.rooms.set(roomCode, room);
+    return roomCode;
   }
 
   static getRandomString(): string {

@@ -1,12 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateGameDto {
+export class UpdateGameDto {
   @ApiProperty()
-  name: string;
+  name?: string;
 
   @ApiProperty()
-  description: string;
+  description?: string;
 
   @ApiProperty()
-  banner_url: string;
+  banner_url?: string;
 }

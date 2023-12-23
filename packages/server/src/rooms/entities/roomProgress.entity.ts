@@ -14,9 +14,6 @@ import { GameVersion } from 'server/src/games/entities/gameVersion.entity';
 
 @Entity({ name: 'RoomProgress' })
 export class RoomProgress extends BaseEntity {
-  @PrimaryColumn({ type: 'char', length: 32 })
-  roomId: string;
-
   @PrimaryGeneratedColumn()
   order: number;
 
@@ -29,7 +26,8 @@ export class RoomProgress extends BaseEntity {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => Room, room => room.roomId, { cascade: true })
+  @PrimaryColumn({ type: 'integer' })
+  @ManyToOne(() => Room, { cascade: true })
   @JoinColumn({ name: 'roomId' })
   room: Room;
 

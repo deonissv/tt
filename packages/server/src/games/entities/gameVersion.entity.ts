@@ -25,7 +25,7 @@ export class GameVersion extends BaseEntity {
   @Column({ type: 'jsonb' })
   content: PlaygroundStateSave;
 
-  @ManyToOne(() => Game, game => game.gameId, { cascade: true })
+  @ManyToOne(() => Game, { cascade: true })
   @JoinColumn({ name: 'gameId' })
   game: Game;
 }

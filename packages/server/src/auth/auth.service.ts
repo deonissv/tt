@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../users/entities/user.entity';
 import { SignInDto } from '@shared/dto/auth/sign-in.dto';
 import { CreateUserDto } from '@shared/dto/users/create-user.dto';
+import { JWT } from './strategy/jwt';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
   }
 
   generateToken(user: User): { access_token: string } {
-    const payload = {
+    const payload: JWT = {
       username: user.username,
       email: user.email,
       avatar_url: user.avatarUrl,

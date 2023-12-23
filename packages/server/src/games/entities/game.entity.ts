@@ -4,6 +4,7 @@ import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -30,6 +31,9 @@ export class Game extends BaseEntity {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt?: boolean;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'authorId' })

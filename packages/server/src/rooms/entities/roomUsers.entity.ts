@@ -9,7 +9,7 @@ export class RoomUser extends BaseEntity {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @PrimaryColumn({ name: 'roomId', type: 'char', length: 32 })
+  @PrimaryColumn({ name: 'roomId', type: 'integer' })
   @ManyToOne(() => Room, room => room.roomId)
   @JoinColumn({ name: 'roomId' })
   room: Room;

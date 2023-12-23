@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 
 function getRandomString(): string {
-  return crypto.randomBytes(16).toString('hex');
+  return crypto.randomUUID().replace('-', '');
 }
 
 export { getRandomString };

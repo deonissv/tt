@@ -1,3 +1,4 @@
+import { type CreateRoomDto } from '@shared/dto/rooms/create-room.dto';
 import { PlaygroundStateSave, WS } from '@shared/index';
 import axios from 'axios';
 
@@ -5,10 +6,8 @@ const LOADER_URL = 'http://localhost:3000/';
 const WSS_URL = 'ws://localhost:8081/';
 
 export const roomService = {
-  async createRoom(playground?: PlaygroundStateSave): Promise<string> {
-    const response = await axios.post(LOADER_URL + 'rooms', {
-      playground,
-    });
+  async createRoom(payload?: CreateRoomDto): Promise<string> {
+    const response = await axios.post(LOADER_URL + 'rooms', payload);
     return response.data as string;
   },
 
