@@ -12,8 +12,8 @@ import { PrismaService } from '../prisma.service';
     UsersModule,
     PassportModule,
     JwtModule.register({
-      secret: 'secret', // @TODO move to env
-      signOptions: { expiresIn: '24h' },
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: process.env.JWT_EXPIRES_IN },
     }),
   ],
   controllers: [AuthController],
