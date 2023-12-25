@@ -3,16 +3,14 @@ import { createServer } from 'http';
 
 import { Injectable } from '@nestjs/common';
 import { Room as RRoom } from './room';
-import { Room } from './entities/room.entity';
 import { PlaygroundStateSave } from '@shared/PlaygroundState';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity';
+import { PrismaService } from '../prisma.service';
+import { User } from '@prisma/client';
 
 @Injectable()
 export class RoomsService {
   static rooms = new Map<string, RRoom>();
-  constructor(@InjectRepository(Room) private readonly roomsRepository: Repository<Room>) {
+  constructor(private readonly prisma: PrismaService) {
     const server = createServer();
     server.on('upgrade', (request, socket, head) => {
       const pathname = request.url!;
@@ -40,11 +38,14 @@ export class RoomsService {
   async createRoom(author: User, pgSave?: PlaygroundStateSave): Promise<string> {
     const roomCode = this.getRoomCode();
     const room = new RRoom(roomCode);
-    await this.roomsRepository.save({
-      code: roomCode,
-      author: author,
-      type: 1,
+    await this.prisma.room.create({
+      data: {
+        code: roomCode,
+        creatorId: author.userId,
+        type: 1,
+      },
     });
+
     await room.init(pgSave);
     RoomsService.rooms.set(roomCode, room);
     return roomCode;

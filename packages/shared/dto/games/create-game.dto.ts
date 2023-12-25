@@ -8,5 +8,5 @@ export class CreateGameDto {
   description: string;
 
   @ApiProperty()
-  banner_url: string;
+  bannerUrl: string;
 }

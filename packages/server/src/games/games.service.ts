@@ -1,41 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Game } from './entities/game.entity';
-import { Repository } from 'typeorm';
 import { CreateGameDto } from '@shared/dto/games/create-game.dto';
 import { getRandomString } from '@shared/utils';
 import { UpdateGameDto } from '@shared/dto/games/update-game.dto';
+import { PrismaService } from '../prisma.service';
+import { Game } from '@prisma/client';
 
 @Injectable()
 export class GamesService {
-  constructor(@InjectRepository(Game) private readonly gameRepository: Repository<Game>) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: number, createGameDto: CreateGameDto) {
-    await this.gameRepository.save({
-      code: getRandomString(),
-      authorId: userId,
-      ...createGameDto,
+    return await this.prisma.game.create({
+      data: {
+        ...createGameDto,
+        code: getRandomString(),
+        authorId: userId,
+      },
     });
   }
 
-  async find(gameId: number): Promise<Game> {
-    return await this.gameRepository.findOneByOrFail({ gameId });
+  async findUnique(gameId: number): Promise<Game | null> {
+    return await this.prisma.game.findUnique({ where: { gameId } });
   }
 
-  async findAll(): Promise<Game[]> {
-    return await this.gameRepository.find();
+  async findMany(): Promise<Game[]> {
+    return await this.prisma.game.findMany();
   }
 
-  // async findUser(userId: number): Promise<Game> {
-  //   return await this.gameRepository.findOneByOrFail({ authorId: userId });
-  // }
-
-  async update(userId: number, gameId: number, updateGameDto: UpdateGameDto) {
-    // @TODO add filter by userId
-    return await this.gameRepository.update({ gameId }, updateGameDto);
+  async findManyByAuthorId(authorId: number): Promise<Game[]> {
+    return await this.prisma.game.findMany({ where: { authorId } });
+  }
+  async update(authorId: number, gameId: number, updateGameDto: UpdateGameDto) {
+    return await this.prisma.game.update({
+      where: { gameId, authorId },
+      data: updateGameDto,
+    });
   }
 
-  async delete(userId: number, gameId: number) {
-    return await this.gameRepository.softDelete({ gameId });
+  async delete(authorId: number, gameId: number) {
+    return await this.prisma.game.delete({ where: { gameId, authorId } });
   }
 }

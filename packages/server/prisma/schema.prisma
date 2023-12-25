@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId       Int        @id @default(autoincrement())
+  email        String     @unique @db.VarChar(255)
+  username     String     @db.VarChar(50)
+  passwordHash String     @db.VarChar(72)
+  avatarUrl    String?    @db.VarChar(255)
+  deletedAt    DateTime?  @db.Timestamp(6)
+  Game         Game[]
+  Message      Message[]
+  RoomUser     RoomUser[]
+  Room         Room[]
+}
+
+model Game {
+  gameId      Int           @id @default(autoincrement())
+  code        String        @unique @db.Char(32)
+  name        String        @db.VarChar(255)
+  description String
+  bannerUrl   String        @db.VarChar(255)
+  createdAt   DateTime      @default(now()) @db.Timestamp(6)
+  authorId    Int?
+  deletedAt   DateTime?     @db.Timestamp(6)
+  GameVersion GameVersion[]
+  User        User?         @relation(fields: [authorId], references: [userId])
+}
+
+model GameVersion {
+  gameId       Int
+  version      Int            @default(autoincrement())
+  createdAt    DateTime       @default(now()) @db.Timestamp(6)
+  content      Json
+  Game         Game           @relation(fields: [gameId], references: [gameId])
+  RoomProgress RoomProgress[]
+
+  @@id([gameId, version])
+}
+
+model RoomUser {
+  userId Int
+  roomId Int
+  seatId Int
+  Room   Room @relation(fields: [roomId], references: [roomId])
+  User   User @relation(fields: [userId], references: [userId])
+
+  @@id([userId, roomId, seatId])
+}
+
+model Room {
+  roomId       Int            @id @default(autoincrement())
+  code         String         @unique @db.Char(32)
+  type         Int
+  creatorId    Int?
+  Message      Message[]
+  RoomProgress RoomProgress[]
+  RoomUser     RoomUser[]
+  User         User?          @relation(fields: [creatorId], references: [userId])
+}
+
+model RoomProgress {
+  order       Int          @default(autoincrement())
+  turn        Int
+  stateDelta  Json
+  createdAt   DateTime     @default(now()) @db.Timestamp(6)
+  room        Int
+  roomId      Int?
+  gameId      Int?
+  gameVersion Int?
+  Room        Room?        @relation(fields: [roomId], references: [roomId])
+  GameVersion GameVersion? @relation(fields: [gameId, gameVersion], references: [gameId, version])
+
+  @@id([order, room])
+}
+
+model Message {
+  messageId Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  content   String
+  style     Json
+  authorId  Int?
+  roomId    Int?
+  Room      Room?    @relation(fields: [roomId], references: [roomId])
+  User      User?    @relation(fields: [authorId], references: [userId])
+}

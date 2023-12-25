@@ -17,7 +17,7 @@ export class GamesController {
 
   @Get(':id')
   get(@Param('id') id: number) {
-    return this.gamesService.find(id);
+    return this.gamesService.findUnique(id);
   }
 
   @Put(':id')
