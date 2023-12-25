@@ -41,7 +41,7 @@
       "@shared/*": [ "shared/*" ],
     }
   },
-  "include": ["src",  "./src/**/*", "../shared/**/*"],
+  "include": ["src",  "./src/**/*", "../shared/**/*", "../client/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
