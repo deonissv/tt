@@ -11,6 +11,7 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleDestroy() {
     await this.$disconnect();
 
+    // @TODO replace with prisma extensions
     this.$use(
       createSoftDeleteMiddleware({
         models: {
