@@ -27,7 +27,7 @@ model Game {
   description String
   bannerUrl   String        @db.VarChar(255)
   createdAt   DateTime      @default(now()) @db.Timestamp(6)
-  authorId    Int?
+  authorId    Int
   deletedAt   DateTime?     @db.Timestamp(6)
   GameVersion GameVersion[]
   User        User?         @relation(fields: [authorId], references: [userId])
