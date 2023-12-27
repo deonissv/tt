@@ -1,29 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Param, Put, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UpdateUserDto } from '@shared/dto/users/update-user.dto';
-import { CreateUserDto } from '@shared/dto/users/create-user.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
-
-  @Get(':id')
-  get(@Param('id') id: number) {
-    return this.usersService.findOneById(id);
-  }
-
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   delete(@Param('id') id: number) {
     return this.usersService.delete(id);
   }
 
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
   @Put(':id')
   update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
