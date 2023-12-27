@@ -6,11 +6,15 @@ import { Room as RRoom } from './room';
 import { PlaygroundStateSave } from '@shared/PlaygroundState';
 import { PrismaService } from '../prisma.service';
 import { User } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class RoomsService {
   static rooms = new Map<string, RRoom>();
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly configService: ConfigService,
+  ) {
     const server = createServer();
     server.on('upgrade', (request, socket, head) => {
       const pathname = request.url!;
@@ -24,7 +28,8 @@ export class RoomsService {
         wss.emit('connection', ws, request);
       });
     });
-    server.listen(8081);
+
+    server.listen(configService.getOrThrow<string>('WS_PORT'));
   }
 
   getRoomCode(): string {

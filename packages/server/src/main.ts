@@ -7,6 +7,8 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 async function initHavok() {
   const wasm = path.join(__dirname, '../../HavokPhysics.wasm');
@@ -19,6 +21,7 @@ async function bootstrap() {
   await initHavok();
 
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
 
   const config = new DocumentBuilder()
@@ -44,6 +47,7 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3000);
+  const configService = app.get(ConfigService);
+  await app.listen(configService.getOrThrow<string>('PORT'));
 }
 void bootstrap();
