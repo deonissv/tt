@@ -3,7 +3,7 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from '@shared/dto/auth/sign-in.dto';
 import { CreateUserDto } from '@shared/dto/users/create-user.dto';
-import { JWT } from './strategy/jwt';
+import { JWT } from './jwt';
 import { User } from '@prisma/client';
 
 @Injectable()
@@ -22,11 +22,6 @@ export class AuthService {
   }
 
   async signup(createUser: CreateUserDto): Promise<{ access_token: string }> {
-    const candidate = await this.usersService.findOneByEmail(createUser.email);
-    if (candidate) {
-      throw new BadRequestException('User already exists');
-    }
-
     const user = await this.usersService.create(createUser);
     return this.generateToken(user);
   }
