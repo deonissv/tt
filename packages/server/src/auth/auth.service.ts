@@ -5,6 +5,7 @@ import { SignInDto } from '@shared/dto/auth/sign-in.dto';
 import { CreateUserDto } from '@shared/dto/users/create-user.dto';
 import { JWT } from './jwt';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -14,10 +15,7 @@ export class AuthService {
   ) {}
 
   async signin(signInDto: SignInDto) {
-    const user = await this.usersService.findOneByEmail(signInDto.email);
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
+    const user = await this.validateUser(signInDto.email, signInDto.password);
     return this.generateToken(user);
   }
 
@@ -28,7 +26,7 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.usersService.findOneByEmail(email);
-    if (password !== user?.passwordHash) {
+    if (!user || !(await bcrypt.compare(password, user?.passwordHash))) {
       throw new BadRequestException('Wrong email or password');
     }
     return user;

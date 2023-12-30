@@ -17,6 +17,7 @@ export class UsersService {
       throw new BadRequestException('Email already exists');
     }
     const passwordHash = await bcrypt.hash(createUser.password, +this.configService.getOrThrow<string>('SALT_ROUNDS'));
+
     return await this.prisma.user.create({
       data: {
         email: createUser.email,

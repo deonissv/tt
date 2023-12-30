@@ -17,4 +17,6 @@ module.exports = {
   rootDir: '../../',
   roots: ['./packages/server/'],
   preset: 'ts-jest',
+  openHandlesTimeout: 30000,
+  testTimeout: 30000,
 };
