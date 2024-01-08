@@ -16,7 +16,7 @@ export class UsersService {
     if (await this.emailExists(createUser.email)) {
       throw new BadRequestException('Email already exists');
     }
-    const passwordHash = await bcrypt.hash(createUser.password, +this.configService.getOrThrow<string>('SALT_ROUNDS'));
+    const passwordHash = await this.hashPassword(createUser.password);
 
     return await this.prisma.user.create({
       data: {
@@ -39,7 +39,11 @@ export class UsersService {
   async update(userId: number, updateUserDto: UpdateUserDto) {
     return await this.prisma.user.update({
       where: { userId },
-      data: updateUserDto,
+      data: {
+        username: updateUserDto?.username,
+        avatarUrl: updateUserDto?.avatarUrl,
+        passwordHash: updateUserDto.password ? await this.hashPassword(updateUserDto.password) : undefined,
+      },
     });
   }
 
@@ -50,5 +54,9 @@ export class UsersService {
   async emailExists(email: string): Promise<boolean> {
     const user = await this.prisma.user.findUnique({ where: { email } });
     return !!user;
+  }
+
+  async hashPassword(password: string): Promise<string> {
+    return await bcrypt.hash(password, +this.configService.getOrThrow<string>('SALT_ROUNDS'));
   }
 }

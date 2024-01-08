@@ -7,8 +7,8 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { mainConfig } from './main.config';
 
 async function initHavok() {
   const wasm = path.join(__dirname, '../../HavokPhysics.wasm');
@@ -21,8 +21,8 @@ async function bootstrap() {
   await initHavok();
 
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe());
-  app.enableCors();
+
+  mainConfig(app);
 
   const config = new DocumentBuilder()
     .setTitle('TT API')
