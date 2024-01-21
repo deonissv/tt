@@ -6,6 +6,7 @@
   "license": "ISC",
   "scripts": {
     "build": "nest build",
+    "lint": "eslint --ext .ts src",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "node dist/server/src/main.js",
     "dev": "nest start --watch",
