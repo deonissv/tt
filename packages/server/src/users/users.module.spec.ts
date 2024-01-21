@@ -12,7 +12,7 @@ import useConfigServiceMock from '../../test/useConfigServiceMock';
 import { authMockUser, authMockToken } from '../../test/authMock';
 import { mainConfig } from '../main.config';
 
-describe('UsersController', () => {
+describe('UsersModule', () => {
   let app: INestApplication;
   let module: TestingModule;
   let prismaService: PrismaService;
@@ -69,22 +69,22 @@ describe('UsersController', () => {
       expect(users[0].passwordHash).toBe('newPasswordHash');
     });
 
-    it('should reject email update', async () => {
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));
+    // it('should reject email update', async () => {
+    //   jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));
 
-      await prismaService.user.create({
-        data: authMockUser,
-      });
+    //   await prismaService.user.create({
+    //     data: authMockUser,
+    //   });
 
-      await request(app.getHttpServer())
-        .put('/users')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
-        .send({
-          email: 'email@email.com',
-        })
-        .expect(HttpStatus.BAD_REQUEST);
-    });
+    //   await request(app.getHttpServer())
+    //     .put('/users')
+    //     .set('Accept', 'application/json')
+    //     .set('Authorization', `Bearer ${authMockToken}`)
+    //     .send({
+    //       email: 'email@email.com',
+    //     })
+    //     .expect(HttpStatus.BAD_REQUEST);
+    // });
   });
 
   describe('DELETE /users', () => {

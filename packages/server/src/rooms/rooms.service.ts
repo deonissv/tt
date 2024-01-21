@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import { createServer } from 'http';
 
 import { Injectable } from '@nestjs/common';
@@ -32,31 +31,17 @@ export class RoomsService {
     server.listen(configService.getOrThrow<string>('WS_PORT'));
   }
 
-  getRoomCode(): string {
-    let roomId = RoomsService.getRandomString();
-    while (RoomsService.rooms.has(roomId)) {
-      roomId = RoomsService.getRandomString();
-    }
-    return roomId;
-  }
-
   async createRoom(author: User, pgSave?: PlaygroundStateSave): Promise<string> {
-    const roomCode = this.getRoomCode();
-    const room = new RRoom(roomCode);
-    await this.prisma.room.create({
+    const roomTable = await this.prisma.room.create({
       data: {
-        code: roomCode,
         creatorId: author.userId,
         type: 1,
       },
     });
 
+    const room = new RRoom(roomTable.code);
     await room.init(pgSave);
-    RoomsService.rooms.set(roomCode, room);
-    return roomCode;
-  }
-
-  static getRandomString(): string {
-    return crypto.randomBytes(16).toString('hex');
+    RoomsService.rooms.set(roomTable.code, room);
+    return roomTable.code;
   }
 }

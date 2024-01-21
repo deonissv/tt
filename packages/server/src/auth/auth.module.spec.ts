@@ -8,7 +8,7 @@ import useDatabaseMock from '../../test/useDatabaseMock';
 import { AuthModule } from './auth.module';
 import useConfigServiceMock from '../../test/useConfigServiceMock';
 
-describe('UsersController', () => {
+describe('AuthModule', () => {
   let app: INestApplication;
   let module: TestingModule;
   let prismaService: PrismaService;

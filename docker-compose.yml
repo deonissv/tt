@@ -8,6 +8,6 @@ services:
       - 5432
     ports:
       - "5432:5432"
-    env_file: .env
+    env_file: packages/server/.env
 volumes:
   postgres_data:

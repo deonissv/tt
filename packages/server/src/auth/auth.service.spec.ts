@@ -11,6 +11,7 @@ import configServiceMock from '../../test/configServiceMock';
 const usersArray: User[] = [
   {
     userId: 1,
+    code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
     email: 'email',
     username: 'username',
     passwordHash: 'passwordHash',

@@ -1,0 +1,16 @@
+05.12
+games: versions, metas, is_active
+game_version: add,  rel to progress
+users: is_active
+room_progress: state_delta
+
+19.12
+endpoint games/game_version/rooms
+add .env
+
+23.12
+soft delete
+roles: -permissions, roles
+    -admin
+    -user
+  integration with frontend

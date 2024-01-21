@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsJSON, IsNotEmpty } from 'class-validator';
 
 export class CreateGameDto {
   @ApiProperty()
@@ -13,6 +13,12 @@ export class CreateGameDto {
   description: string;
 
   @ApiProperty()
+  @IsNotEmpty()
   @IsString()
   bannerUrl: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsJSON()
+  content: string;
 }

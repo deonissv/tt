@@ -1,19 +1,14 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
-import { createSoftDeleteMiddleware } from 'prisma-soft-delete-middleware';
+import { createSoftDeleteExtension } from 'prisma-extension-soft-delete';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  async onModuleInit() {
-    await this.$connect();
-  }
+  constructor() {
+    super();
 
-  async onModuleDestroy() {
-    await this.$disconnect();
-
-    // @TODO replace with prisma extensions
-    this.$use(
-      createSoftDeleteMiddleware({
+    const extendedCLient = this.$extends(
+      createSoftDeleteExtension({
         models: {
           Game: true,
           User: true,
@@ -27,5 +22,15 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
         },
       }),
     );
+
+    Object.assign(this, extendedCLient);
+  }
+
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
   }
 }

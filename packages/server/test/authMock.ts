@@ -2,6 +2,7 @@ import { User } from '@prisma/client';
 
 export const authMockUser: User = {
   userId: 0,
+  code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
   username: 'username',
   email: 'email',
   passwordHash: 'passwordHash',
