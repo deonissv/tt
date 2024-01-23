@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId       Int        @id @default(autoincrement())
+  code         String     @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String     @unique @db.VarChar(255)
+  username     String     @db.VarChar(50)
+  passwordHash String     @db.VarChar(72)
+  avatarUrl    String?    @db.VarChar(255)
+  deletedAt    DateTime?  @db.Timestamp(6)
+  Game         Game[]
+  Message      Message[]
+  RoomUser     RoomUser[]
+  Room         Room[]
+  Role         Role       @relation(fields: [roleId], references: [roleId])
+  roleId       Int        @db.Integer()
+}
+
+model Role {
+  roleId    Int       @unique @default(autoincrement())
+  name      String    @db.VarChar()
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? @db.Timestamp()
+
+  Permissions Permission[]
+  User        User[]
+}
+
+model Permission {
+  permissionId Int     @unique @default(autoincrement())
+  Role         Role    @relation(fields: [roleId], references: [roleId])
+  roleId       Int     @db.Integer()
+  action       String  @db.VarChar()
+  subject      String  @db.VarChar()
+  inverted     Boolean @default(false)
+  conditions   Json?   @db.JsonB()
+  reason       String? @db.Text()
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? @db.Timestamp()
+}
+
+model Game {
+  gameId      Int           @id @default(autoincrement())
+  code        String        @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String        @db.VarChar(255)
+  description String
+  bannerUrl   String        @db.VarChar(255)
+  createdAt   DateTime      @default(now()) @db.Timestamp(6)
+  authorId    Int
+  deletedAt   DateTime?     @db.Timestamp(6)
+  GameVersion GameVersion[]
+  User        User?         @relation(fields: [authorId], references: [userId])
+}
+
+model GameVersion {
+  gameId       Int
+  version      Int            @default(autoincrement())
+  createdAt    DateTime       @default(now()) @db.Timestamp(6)
+  content      Json
+  Game         Game           @relation(fields: [gameId], references: [gameId])
+  RoomProgress RoomProgress[]
+
+  @@id([gameId, version])
+}
+
+model RoomUser {
+  userId Int
+  roomId Int
+  seatId Int
+  Room   Room @relation(fields: [roomId], references: [roomId])
+  User   User @relation(fields: [userId], references: [userId])
+
+  @@id([userId, roomId, seatId])
+}
+
+model Room {
+  roomId       Int            @id @default(autoincrement())
+  code         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type         Int
+  creatorId    Int?
+  Message      Message[]
+  RoomProgress RoomProgress[]
+  RoomUser     RoomUser[]
+  User         User?          @relation(fields: [creatorId], references: [userId])
+}
+
+model RoomProgress {
+  order       Int          @default(autoincrement())
+  turn        Int
+  stateDelta  Json
+  createdAt   DateTime     @default(now()) @db.Timestamp(6)
+  room        Int
+  roomId      Int?
+  gameId      Int?
+  gameVersion Int?
+  Room        Room?        @relation(fields: [roomId], references: [roomId])
+  GameVersion GameVersion? @relation(fields: [gameId, gameVersion], references: [gameId, version])
+
+  @@id([order, room])
+}
+
+model Message {
+  messageId Int      @id @default(autoincrement())
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+  content   String
+  style     Json
+  authorId  Int?
+  roomId    Int?
+  Room      Room?    @relation(fields: [roomId], references: [roomId])
+  User      User?    @relation(fields: [authorId], references: [userId])
+}

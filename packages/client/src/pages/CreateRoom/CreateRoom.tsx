@@ -40,7 +40,9 @@ const CreateRoom = () => {
   };
 
   const onCreateRoom = async () => {
-    const roomId = await roomService.createRoom(pgStateSave);
+    const roomId = await roomService.createRoom({
+      playground: pgStateSave,
+    });
 
     dispatch(setNickname_(nickname));
     localStorage.setItem('tt-nickname', nickname);
