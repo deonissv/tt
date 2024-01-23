@@ -28,8 +28,6 @@ export class CaslAbilityFactory {
             ) as MongoQuery)
           : undefined,
       };
-      console.log(user.userId);
-      console.log(rule.conditions);
 
       return rule;
     });

@@ -41,5 +41,7 @@ module.exports = {
         varsIgnorePattern: '^_',
       },
     ],
+    'no-console': 'error',
+    'no-debugger': 'error',
   },
 };
