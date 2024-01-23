@@ -19,6 +19,32 @@ model User {
   Message      Message[]
   RoomUser     RoomUser[]
   Room         Room[]
+  Role         Role       @relation(fields: [roleId], references: [roleId])
+  roleId       Int        @db.Integer()
+}
+
+model Role {
+  roleId    Int       @unique @default(autoincrement())
+  name      String    @db.VarChar()
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? @db.Timestamp()
+
+  Permissions Permission[]
+  User        User[]
+}
+
+model Permission {
+  permissionId Int     @unique @default(autoincrement())
+  Role         Role    @relation(fields: [roleId], references: [roleId])
+  roleId       Int     @db.Integer()
+  action       String  @db.VarChar()
+  subject      String  @db.VarChar()
+  inverted     Boolean @default(false)
+  conditions   Json?   @db.JsonB()
+  reason       String? @db.Text()
+
+  createdAt DateTime  @default(now())
+  deletedAt DateTime? @db.Timestamp()
 }
 
 model Game {

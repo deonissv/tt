@@ -65,6 +65,7 @@ describe('AuthModule', () => {
           username: 'username',
           passwordHash: 'passwordHash',
           avatarUrl: 'avatarUrl',
+          roleId: 1,
         },
       });
 

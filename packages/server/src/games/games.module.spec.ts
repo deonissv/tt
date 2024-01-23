@@ -9,7 +9,7 @@ import useConfigServiceMock from '../../test/useConfigServiceMock';
 import { GamesModule } from './games.module';
 import { mainConfig } from '../main.config';
 import { AuthModule } from '../auth/auth.module';
-import { authMockToken, authMockUser } from '../../test/authMock';
+import { authMockAdminToken, authMockAdmin, authMockUser, authMockUserToken } from '../../test/authMock';
 
 describe('GamesModule', () => {
   let app: INestApplication;
@@ -43,7 +43,7 @@ describe('GamesModule', () => {
   describe('GET /games', () => {
     it('should return game previews', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await prismaService.game.create({
@@ -109,7 +109,7 @@ describe('GamesModule', () => {
       const response = await request(app.getHttpServer())
         .get('/games')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`);
+        .set('Authorization', `Bearer ${authMockAdminToken}`);
 
       expect(response.status).toEqual(HttpStatus.OK);
       expect((response.body as any[]).length).toEqual(2);
@@ -140,7 +140,7 @@ describe('GamesModule', () => {
   describe('GET /games/:id', () => {
     it('should return game with content', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await prismaService.game.create({
@@ -170,7 +170,7 @@ describe('GamesModule', () => {
       await request(app.getHttpServer())
         .get('/games/1')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.OK)
         .expect(res =>
           expect(res.body).toEqual({
@@ -186,7 +186,7 @@ describe('GamesModule', () => {
 
     it('should throw bad request in id is not a number', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await prismaService.game.create({
@@ -216,19 +216,19 @@ describe('GamesModule', () => {
       await request(app.getHttpServer())
         .get('/games/asd')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.BAD_REQUEST);
     });
 
     it('should return not found', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await request(app.getHttpServer())
         .get('/games/1')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.NOT_FOUND);
     });
   });
@@ -244,11 +244,12 @@ describe('GamesModule', () => {
     it('should return user game previews', async () => {
       await prismaService.user.createMany({
         data: [
-          authMockUser,
+          authMockAdmin,
           {
             email: 'email1',
             username: 'username1',
             passwordHash: 'passwordHash1',
+            roleId: 1,
           },
         ],
       });
@@ -298,7 +299,7 @@ describe('GamesModule', () => {
       await request(app.getHttpServer())
         .get('/games/my')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.OK)
         .expect(res =>
           expect(res.body).toEqual([
@@ -324,11 +325,12 @@ describe('GamesModule', () => {
     it('should return user game previews', async () => {
       await prismaService.user.createMany({
         data: [
-          authMockUser,
+          authMockAdmin,
           {
             email: 'email1',
             username: 'username1',
             passwordHash: 'passwordHash1',
+            roleId: 1,
           },
         ],
       });
@@ -376,9 +378,9 @@ describe('GamesModule', () => {
       });
 
       await request(app.getHttpServer())
-        .get(`/games/user/${authMockUser.code}`)
+        .get(`/games/user/${authMockAdmin.code}`)
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.OK)
         .expect(res =>
           expect(res.body).toEqual([
@@ -408,7 +410,7 @@ describe('GamesModule', () => {
 
     it('should update a game preview', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await prismaService.game.create({
@@ -435,7 +437,7 @@ describe('GamesModule', () => {
       await request(app.getHttpServer())
         .put('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .send({
           name: 'name1',
           description: 'desc1',
@@ -477,7 +479,7 @@ describe('GamesModule', () => {
 
     it('should update a game with content', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await prismaService.game.create({
@@ -503,7 +505,7 @@ describe('GamesModule', () => {
       await request(app.getHttpServer())
         .put('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .send({
           name: 'name1',
           description: 'desc1',
@@ -566,13 +568,13 @@ describe('GamesModule', () => {
 
     it('should create game', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await request(app.getHttpServer())
         .post('/games')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .send({
           name: 'name',
           description: 'desc',
@@ -622,7 +624,61 @@ describe('GamesModule', () => {
         .expect(HttpStatus.UNAUTHORIZED);
     });
 
-    it('should soft delete game', async () => {
+    it('should soft delete game - admin', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.game.create({
+        data: {
+          gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          name: 'name',
+          description: 'desc',
+          bannerUrl: 'url',
+          createdAt: new Date(),
+          authorId: 0,
+          deletedAt: null,
+          GameVersion: {
+            create: [
+              {
+                content: '{}',
+              },
+            ],
+          },
+        },
+      });
+
+      await request(app.getHttpServer())
+        .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
+        .expect(HttpStatus.OK);
+
+      const games = await prismaService.game.findMany({ include: { GameVersion: true } });
+      expect(games.length).toBe(0);
+
+      const gamesIncludeDeleted = await prismaService.$queryRaw`SELECT * FROM "Game"`;
+      expect((gamesIncludeDeleted as any[]).length).toBe(1);
+      expect(gamesIncludeDeleted).toEqual([
+        {
+          gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          name: 'name',
+          description: 'desc',
+          bannerUrl: 'url',
+          authorId: 0,
+          createdAt: expect.any(Date) as Date,
+          deletedAt: expect.any(Date) as Date,
+        },
+      ]);
+    });
+
+    it('should forbid game deletion - user', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
       await prismaService.user.create({
         data: authMockUser,
       });
@@ -650,26 +706,43 @@ describe('GamesModule', () => {
       await request(app.getHttpServer())
         .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
-        .expect(HttpStatus.OK);
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .expect(HttpStatus.FORBIDDEN);
+    });
 
-      const games = await prismaService.game.findMany({ include: { GameVersion: true } });
-      expect(games.length).toBe(0);
+    it('should allow game deletion - user', async () => {
+      await prismaService.user.create({
+        data: authMockUser,
+      });
 
-      const gamesIncludeDeleted = await prismaService.$queryRaw`SELECT * FROM "Game"`;
-      expect((gamesIncludeDeleted as any[]).length).toBe(1);
-      expect(gamesIncludeDeleted).toEqual([
-        {
+      await prismaService.game.create({
+        data: {
           gameId: 1,
           code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
           name: 'name',
           description: 'desc',
           bannerUrl: 'url',
-          authorId: 0,
-          createdAt: expect.any(Date) as Date,
-          deletedAt: expect.any(Date) as Date,
+          createdAt: new Date(),
+          authorId: 1,
+          deletedAt: null,
+          GameVersion: {
+            create: [
+              {
+                content: '{}',
+              },
+            ],
+          },
         },
-      ]);
+      });
+
+      await request(app.getHttpServer())
+        .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .expect(HttpStatus.OK);
+
+      const games = await prismaService.game.findMany({ include: { GameVersion: true } });
+      expect(games.length).toBe(0);
     });
   });
 });

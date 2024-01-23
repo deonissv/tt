@@ -16,13 +16,7 @@ export default (): (() => PrismaService) => {
     dbUrl = getDatabaseUrl(host, port);
     process.env.DATABASE_URL = dbUrl;
 
-    prismaService = new PrismaService({
-      datasources: {
-        db: {
-          url: dbUrl,
-        },
-      },
-    });
+    prismaService = new PrismaService();
   });
 
   beforeEach(() => {

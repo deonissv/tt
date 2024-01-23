@@ -4,15 +4,19 @@ module.exports = {
     browser: true,
     node: true,
     jest: true,
-    es2020: true
+    es2020: true,
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
-    project: ['./packages/client/tsconfig.json', './packages/client/tsconfig.node.json',  './packages/server/tsconfig.json'],
+    project: [
+      './packages/client/tsconfig.json',
+      './packages/client/tsconfig.node.json',
+      './packages/server/tsconfig.json',
+    ],
     tsconfigRootDir: __dirname,
-   },
+  },
   extends: [
     'eslint:recommended',
     'plugin:react/jsx-runtime',
@@ -24,14 +28,18 @@ module.exports = {
   ignorePatterns: ['dist', '.eslintrc.cjs'],
   plugins: ['react-refresh'],
   rules: {
-    'react-refresh/only-export-components': [
-      'warn',
-      { allowConstantExport: true },
-    ],
+    'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    "@typescript-eslint/no-misused-promises": "off"
+    '@typescript-eslint/no-misused-promises': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
   },
-}
+};

@@ -17,6 +17,7 @@ const usersArray: User[] = [
     passwordHash: 'passwordHash',
     avatarUrl: 'avatarUrl',
     deletedAt: null,
+    roleId: 2,
   },
 ];
 

@@ -15,6 +15,7 @@ const usersArray: User[] = [
     passwordHash: 'passwordHash',
     avatarUrl: 'avatarUrl',
     deletedAt: null,
+    roleId: 2,
   },
 ];
 
@@ -78,6 +79,7 @@ describe('AuthService', () => {
           username: 'username',
           passwordHash: 'passwordHash',
           avatarUrl: 'avatarUrl',
+          roleId: 2,
         },
       });
     });

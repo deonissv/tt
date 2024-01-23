@@ -24,6 +24,7 @@ export class UsersService {
         username: createUser.username,
         passwordHash,
         avatarUrl: createUser.avatarUrl,
+        roleId: 2,
       },
     });
   }

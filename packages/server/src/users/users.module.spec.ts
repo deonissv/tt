@@ -9,7 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { PrismaService } from '../prisma.service';
 import useDatabaseMock from '../../test/useDatabaseMock';
 import useConfigServiceMock from '../../test/useConfigServiceMock';
-import { authMockUser, authMockToken } from '../../test/authMock';
+import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
 import { mainConfig } from '../main.config';
 
 describe('UsersModule', () => {
@@ -46,13 +46,13 @@ describe('UsersModule', () => {
       jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));
 
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await request(app.getHttpServer())
         .put('/users')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .send({
           username: 'newUsername',
           avatarUrl: 'newAvatarUrl',
@@ -68,35 +68,18 @@ describe('UsersModule', () => {
       expect(users[0].avatarUrl).toBe('newAvatarUrl');
       expect(users[0].passwordHash).toBe('newPasswordHash');
     });
-
-    // it('should reject email update', async () => {
-    //   jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));
-
-    //   await prismaService.user.create({
-    //     data: authMockUser,
-    //   });
-
-    //   await request(app.getHttpServer())
-    //     .put('/users')
-    //     .set('Accept', 'application/json')
-    //     .set('Authorization', `Bearer ${authMockToken}`)
-    //     .send({
-    //       email: 'email@email.com',
-    //     })
-    //     .expect(HttpStatus.BAD_REQUEST);
-    // });
   });
 
   describe('DELETE /users', () => {
     it('should delete user', async () => {
       await prismaService.user.create({
-        data: authMockUser,
+        data: authMockAdmin,
       });
 
       await request(app.getHttpServer())
         .delete('/users')
         .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockToken}`)
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.OK);
 
       const users = await prismaService.user.findMany();

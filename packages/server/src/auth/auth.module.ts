@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { PrismaService } from '../prisma.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PrismaService],
+  providers: [AuthService, JwtStrategy, PrismaService, CaslAbilityFactory],
   exports: [AuthService],
 })
 export class AuthModule {}

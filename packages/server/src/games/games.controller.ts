@@ -19,6 +19,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ValidatedUser } from '../auth/validated-user';
 import { GameDto } from '@shared/dto/games/game.dto';
 import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
+import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
+import { AppAbility } from '../casl/casl-ability.factory';
 
 @ApiTags('games')
 @Controller('games')
@@ -26,6 +28,8 @@ export class GamesController {
   constructor(private readonly gamesService: GamesService) {}
 
   @ApiBearerAuth('JWT')
+  @CheckPolicies((ability: AppAbility) => ability.can('create', 'Game'))
+  @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Request() req: { user: ValidatedUser }, @Body() createGameDto: CreateGameDto): Promise<GamePreviewDto> {
@@ -65,6 +69,8 @@ export class GamesController {
   }
 
   @ApiBearerAuth('JWT')
+  @CheckPolicies((ability: AppAbility) => ability.can('update', 'Game'))
+  @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Put(':code')
   update(@Request() req: { user: ValidatedUser }, @Param('code') code: string, @Body() updateGameDto: UpdateGameDto) {
@@ -72,6 +78,8 @@ export class GamesController {
   }
 
   @ApiBearerAuth('JWT')
+  @CheckPolicies((ability: AppAbility) => ability.can('delete', 'Game'))
+  @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Delete(':code')
   delete(@Request() req: { user: ValidatedUser }, @Param('code') code: string) {

@@ -9,7 +9,7 @@ const POSTGRES_SERVER = 'localhost';
 // TODO: re-write this when Prisma.io gets a programmatic migration API
 // https://github.com/prisma/prisma/issues/4703
 export function prismaMigrate(databaseUrl: string): void {
-  execSync('npx prisma db push --force-reset', {
+  execSync('npx prisma db push --force-reset; npx prisma db seed', {
     env: { ...process.env, DATABASE_URL: databaseUrl },
   });
 }
