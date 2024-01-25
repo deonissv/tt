@@ -18,7 +18,7 @@ model User {
   Game         Game[]
   Message      Message[]
   RoomUser     RoomUser[]
-  Room         Room[]
+  Rooms        Room[]
   Role         Role       @relation(fields: [roleId], references: [roleId])
   roleId       Int        @db.Integer()
 }
@@ -64,7 +64,7 @@ model GameVersion {
   gameId       Int
   version      Int            @default(autoincrement())
   createdAt    DateTime       @default(now()) @db.Timestamp(6)
-  content      Json
+  content      Json           @db.JsonB()
   Game         Game           @relation(fields: [gameId], references: [gameId])
   RoomProgress RoomProgress[]
 
@@ -85,26 +85,25 @@ model Room {
   roomId       Int            @id @default(autoincrement())
   code         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type         Int
-  creatorId    Int?
+  creatorId    Int
   Message      Message[]
   RoomProgress RoomProgress[]
-  RoomUser     RoomUser[]
-  User         User?          @relation(fields: [creatorId], references: [userId])
+  RoomUsers    RoomUser[]
+  Creator      User           @relation(fields: [creatorId], references: [userId])
 }
 
 model RoomProgress {
   order       Int          @default(autoincrement())
-  turn        Int
-  stateDelta  Json
+  roomId      Int
+  turn        Int?
+  stateDelta  Json?        @db.JsonB()
   createdAt   DateTime     @default(now()) @db.Timestamp(6)
-  room        Int
-  roomId      Int?
   gameId      Int?
   gameVersion Int?
-  Room        Room?        @relation(fields: [roomId], references: [roomId])
+  Room        Room         @relation(fields: [roomId], references: [roomId])
   GameVersion GameVersion? @relation(fields: [gameId, gameVersion], references: [gameId, version])
 
-  @@id([order, room])
+  @@id([order, roomId])
 }
 
 model Message {

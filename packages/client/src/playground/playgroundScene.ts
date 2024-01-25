@@ -69,7 +69,7 @@ export class PlaygroundScene extends Scene {
 
   private async initPhysics(gravity: number) {
     await HavokPhysics();
-    console.log(gravity);
+    gravity;
     // const hk = new HavokPlugin(true, await HavokPhysics());
     // const gravityVec = new Vector3(0, -gravity, 0);
     // this.enablePhysics(gravityVec, hk);

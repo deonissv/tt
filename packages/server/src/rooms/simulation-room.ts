@@ -4,11 +4,12 @@ import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
 import { Simulation } from '../simulation/simulation';
 
 import { Client } from './client';
+import { RoomsService } from './rooms.service';
 
 const STATE_TICK_RATE = 60; // [hz]
 const STATE_TICK_INTERVAL = 1000 / STATE_TICK_RATE; // [ms]
 
-export class Room {
+export class SimulationRoom {
   id: string;
   sim: Simulation;
   wss: WebSocket.Server;
@@ -16,7 +17,10 @@ export class Room {
   cursors: Map<WebSocket, number[]>;
   pgSave: PlaygroundStateSave | undefined;
 
-  constructor(id: string) {
+  constructor(
+    private readonly roomsService: RoomsService,
+    id: string,
+  ) {
     this.id = id;
     this.clients = new Map();
     this.cursors = new Map();
@@ -28,6 +32,19 @@ export class Room {
     await this.sim.init(pgSave);
     this.pgSave = pgSave;
     this.sim.start();
+
+    this.initSaving();
+  }
+
+  initSaving() {
+    setInterval(async () => {
+      const pgSave = this.sim._toSaveState();
+      if (pgSave.actorStates?.length && pgSave.actorStates.length > 0) {
+        // eslint-disable-next-line no-console
+        console.log('saving');
+        await this.roomsService.saveRoomProgress(this.id, pgSave);
+      }
+    }, 1000);
   }
 
   private getServer() {

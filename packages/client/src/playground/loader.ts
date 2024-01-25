@@ -5,7 +5,7 @@ import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 
 import { fileToUrl } from '../utils';
-import { modelLoaderService } from '../services/modelLoader.service';
+import { modelLoaderService } from '../services/model-loader.service';
 import { Model } from '@shared/index';
 
 export class Loader {

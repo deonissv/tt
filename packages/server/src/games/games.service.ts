@@ -5,6 +5,7 @@ import { PrismaService } from '../prisma.service';
 import { Game, GameVersion } from '@prisma/client';
 import { GameDto } from '@shared/dto/games/game.dto';
 import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
+import { PlaygroundStateSave } from '@shared/PlaygroundState';
 
 @Injectable()
 export class GamesService {
@@ -36,6 +37,20 @@ export class GamesService {
     if (!game) return null;
     if (!game.GameVersion.length) return null;
     return GamesService.toGameDto(game);
+  }
+
+  async findContentByCode(code: string): Promise<PlaygroundStateSave | null> {
+    const game = await this.prisma.game.findFirst({
+      where: { code },
+      include: {
+        GameVersion: {
+          orderBy: { version: 'desc' },
+        },
+      },
+    });
+
+    if (!game || !game.GameVersion?.[0]?.content) return null;
+    return JSON.parse(game.GameVersion[0].content as string) as PlaygroundStateSave;
   }
 
   async findManyPreview(): Promise<GamePreviewDto[]> {

@@ -14,7 +14,7 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { ActorStateUpdate, GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
+import { ActorState, ActorStateUpdate, GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
 import Actor from './actor';
 
 export class Simulation {
@@ -64,6 +64,22 @@ export class Simulation {
     };
   }
 
+  _toSaveState(): PlaygroundStateSave {
+    const actorStates: ActorState[] = [];
+    this.scene.meshes.forEach(mesh => {
+      if (mesh.parent instanceof Actor) {
+        actorStates.push(mesh.parent._toState());
+      }
+    });
+
+    if (actorStates.length === 0) {
+      return {};
+    }
+    return {
+      actorStates: actorStates,
+    };
+  }
+
   private initPhysics(gravity = GRAVITY) {
     const hp = new HavokPlugin(true, global.havok);
     const gravityVec = new Vector3(0, gravity, 0);
@@ -95,6 +111,7 @@ export class Simulation {
       this.scene,
     );
     // box.__move(0, 10, 0);
+    // eslint-disable-next-line no-console
     console.log('box created');
   }
 }

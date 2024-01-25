@@ -1,4 +1,4 @@
-import { ActorState, ActorStateUpdate, Transformation } from '@shared/PlaygroundState';
+import { ActorState, ActorStateUpdate, Model, Transformation } from '@shared/PlaygroundState';
 import { LIFH_HIGHT, MOVEMENT_VELOCITY, PRECISION_DELTA, ROTATE_STEP, SCALE_KOEF } from '@shared/constants';
 
 import {
@@ -21,6 +21,7 @@ export default class Actor extends TransformNode {
 
   private __mass: number;
   private __model: Mesh;
+  private __stateModel: Model;
 
   public _body: PhysicsBody;
   private __flipTranslate = 0;
@@ -29,6 +30,7 @@ export default class Actor extends TransformNode {
   constructor(state: ActorState, modelMesh: Mesh, scene?: Nullable<Scene>) {
     super(state.name, scene, true);
     this.guid = state.guid;
+    this.__stateModel = state.model;
 
     this._scene = scene!;
 
@@ -198,6 +200,16 @@ export default class Actor extends TransformNode {
   toState(): ActorStateUpdate {
     return {
       guid: this.guid,
+      transformation: this.transformation,
+      mass: this.__mass,
+    };
+  }
+
+  _toState(): ActorState {
+    return {
+      guid: this.guid,
+      name: this.name,
+      model: this.__stateModel,
       transformation: this.transformation,
       mass: this.__mass,
     };

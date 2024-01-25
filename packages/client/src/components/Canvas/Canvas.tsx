@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import Playground from '../../playground';
-import { roomService } from '@services/room.service';
+import { RoomService } from '@services/room.service';
 
 import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
 import { useAppSelector } from '../../store/store';
@@ -19,7 +19,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   };
 
   const init = useCallback(async (): Promise<[WebSocket, string, Playground]> => {
-    const [ws, id, pgState] = await roomService.connect(roomId, nickname);
+    const [ws, id, pgState] = await RoomService.connect(roomId, nickname);
 
     const pg = await babylonInit(pgState, ws);
 

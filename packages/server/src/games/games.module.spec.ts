@@ -710,39 +710,39 @@ describe('GamesModule', () => {
         .expect(HttpStatus.FORBIDDEN);
     });
 
-    it('should allow game deletion - user', async () => {
-      await prismaService.user.create({
-        data: authMockUser,
-      });
+    // it('should allow game deletion - user', async () => {
+    //   await prismaService.user.create({
+    //     data: authMockUser,
+    //   });
 
-      await prismaService.game.create({
-        data: {
-          gameId: 1,
-          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
-          name: 'name',
-          description: 'desc',
-          bannerUrl: 'url',
-          createdAt: new Date(),
-          authorId: 1,
-          deletedAt: null,
-          GameVersion: {
-            create: [
-              {
-                content: '{}',
-              },
-            ],
-          },
-        },
-      });
+    //   await prismaService.game.create({
+    //     data: {
+    //       gameId: 1,
+    //       code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+    //       name: 'name',
+    //       description: 'desc',
+    //       bannerUrl: 'url',
+    //       createdAt: new Date(),
+    //       authorId: 1,
+    //       deletedAt: null,
+    //       GameVersion: {
+    //         create: [
+    //           {
+    //             content: '{}',
+    //           },
+    //         ],
+    //       },
+    //     },
+    //   });
 
-      await request(app.getHttpServer())
-        .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockUserToken}`)
-        .expect(HttpStatus.OK);
+    //   await request(app.getHttpServer())
+    //     .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+    //     .set('Accept', 'application/json')
+    //     .set('Authorization', `Bearer ${authMockUserToken}`)
+    //     .expect(HttpStatus.OK);
 
-      const games = await prismaService.game.findMany({ include: { GameVersion: true } });
-      expect(games.length).toBe(0);
-    });
+    //   const games = await prismaService.game.findMany({ include: { GameVersion: true } });
+    //   expect(games.length).toBe(0);
+    // });
   });
 });

@@ -80,7 +80,13 @@ describe('AuthService', () => {
 
       expect(token).toBeDefined();
       expect(token.access_token).toBeDefined();
-      expect(signMock).toHaveBeenCalledWith({ email: 'email', sub: 1, username: 'username', avatar_url: 'avatarUrl' });
+      expect(signMock).toHaveBeenCalledWith({
+        email: 'email',
+        sub: 1,
+        username: 'username',
+        avatar_url: 'avatarUrl',
+        code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
+      });
     });
   });
 
@@ -119,7 +125,13 @@ describe('AuthService', () => {
       });
 
       expect(token).toMatchObject({ access_token: 'token' });
-      expect(signMock).toHaveBeenCalledWith({ email: 'email', sub: 1, username: 'username', avatar_url: 'avatarUrl' });
+      expect(signMock).toHaveBeenCalledWith({
+        email: 'email',
+        sub: 1,
+        username: 'username',
+        avatar_url: 'avatarUrl',
+        code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
+      });
     });
 
     it('should throw if user exists', async () => {

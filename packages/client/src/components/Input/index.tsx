@@ -42,7 +42,7 @@ export const Input: React.FC<InputProps> = ({
   onChange,
   className,
   error,
-}: InputProps): React.ReactNode => {
+}): React.ReactNode => {
   return (
     <>
       <p className="font-bold mb-2">

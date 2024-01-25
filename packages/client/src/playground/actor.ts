@@ -31,14 +31,14 @@ export default class Actor extends TransformNode {
     this.__camera = this._scene.activeCamera as ArcRotateCamera;
     this.__model = modelMesh;
 
+    modelMesh.name = 'model';
+    modelMesh.setParent(this);
+    this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
+
     if (state.transformation?.scale) {
       this.__model.scaling = new Vector3(...state.transformation.scale);
       this.__collider.scaling = new Vector3(...state.transformation.scale);
     }
-
-    modelMesh.name = 'model';
-    modelMesh.setParent(this);
-    this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
 
     this.update(state);
 

@@ -31,6 +31,18 @@ export const permissions = [
     subject: 'User',
     conditions: { authorId: '{{ userId }}' },
   },
+  {
+    permissionId: 4,
+    roleId: 2,
+    action: 'create',
+    subject: 'User',
+  },
+  {
+    permissionId: 5,
+    roleId: 2,
+    action: 'create',
+    subject: 'Game',
+  },
 ];
 
 const prisma = new PrismaClient();
@@ -62,6 +74,7 @@ main()
     await prisma.$disconnect();
   })
   .catch(async error => {
+    // eslint-disable-next-line no-console
     console.log(error);
     await prisma.$disconnect();
   });

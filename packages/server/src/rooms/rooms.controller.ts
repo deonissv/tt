@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RoomsService } from './rooms.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -16,5 +16,19 @@ export class RoomsController {
   @Post()
   async create(@User() user: ValidatedUser, @Body() createRoomDto: CreateRoomDto) {
     return this.roomService.createRoom(user.userId, createRoomDto?.gameCode);
+  }
+
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Get(':code')
+  async getUserRooms(@Param('code') code: string) {
+    return this.roomService.getUserRooms(code);
+  }
+
+  @ApiBearerAuth('JWT')
+  @UseGuards(JwtAuthGuard)
+  @Post('start/:code')
+  async start(@Param('code') code: string) {
+    return this.roomService.startRoom(code);
   }
 }

@@ -1,23 +1,40 @@
 import { Input } from '@components/Input';
+import { AuthService } from '../../services/auth.service';
+import { saveAccessToken } from 'client/src/utils';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const MIN_PASSWD_LENGTH = 8;
 
-export const Login: React.FC = (): React.ReactNode => {
+interface Props {
+  onLogin?: () => void;
+}
+
+const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
   const navigate = useNavigate();
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-  const onRegisterSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void => {
+  const onRegisterSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
+    if (email === '' || password === '') {
+      showError('Please fill all fields');
+    }
+
     if (password.length < MIN_PASSWD_LENGTH) {
       showError('password is too short');
     }
+
+    const token = await AuthService.signin({
+      email,
+      password,
+    });
+    saveAccessToken(token);
+    onLogin && onLogin();
   };
 
   const showError = (message: string): void => {
-    console.error(message);
+    alert(message);
   };
 
   return (
@@ -43,7 +60,7 @@ export const Login: React.FC = (): React.ReactNode => {
         />
         <div>
           <button className="bg-blue w-max rounded-full px-10 py-3 mb-6 text-white" onClick={e => onRegisterSubmit(e)}>
-            Sign In
+            Login
           </button>
           <span className="text-blue ml-5">Forgot password?</span>
         </div>

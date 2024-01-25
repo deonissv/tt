@@ -1,13 +1,35 @@
 import { type CreateRoomDto } from '@shared/dto/rooms/create-room.dto';
 import { PlaygroundStateSave, WS } from '@shared/index';
 import axios from 'axios';
+import { LOADER_URL, WSS_URL } from '../config';
+import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
 
-const LOADER_URL = 'http://localhost:3000/';
-const WSS_URL = 'ws://localhost:8081/';
-
-export const roomService = {
+export const RoomService = {
   async createRoom(payload?: CreateRoomDto): Promise<string> {
-    const response = await axios.post(LOADER_URL + 'rooms', payload);
+    const response = await axios.post(LOADER_URL + 'rooms', payload, {
+      headers: {
+        Authorization: `Bearer ${document.cookie.split('=')[1]}`,
+      },
+    });
+    return response.data as string;
+  },
+
+  async getUserRooms(code: string): Promise<RoomPreviewDto[]> {
+    const response = await axios.get(LOADER_URL + `rooms/${code}`, {
+      headers: {
+        Authorization: `Bearer ${document.cookie.split('=')[1]}`,
+      },
+    });
+    return response.data as RoomPreviewDto[];
+  },
+
+  async startRoom(code: string): Promise<string> {
+    const response = await axios.post(LOADER_URL + `rooms/start/${code}`, null, {
+      headers: {
+        Authorization: `Bearer ${document.cookie.split('=')[1]}`,
+      },
+    });
+
     return response.data as string;
   },
 

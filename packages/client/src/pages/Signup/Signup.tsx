@@ -1,16 +1,39 @@
 import Input from '@components/Input';
+import { AuthService } from '../../services/auth.service';
+import { saveAccessToken } from 'client/src/utils';
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Signup: React.FC = (): React.ReactNode => {
+  const navigate = useNavigate();
+
   const [email, setEmail] = React.useState('');
-  const [login, setLogin] = React.useState('');
+  const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [rePassword, setRePassword] = React.useState('');
   const [reqRes, setReqRes] = React.useState('');
 
-  const onRegisterSubmit = (e: React.FormEvent<HTMLButtonElement>) => {
+  const onRegisterSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    setReqRes('Failed');
+
+    if (password !== rePassword) {
+      setReqRes('Password not match');
+      return;
+    }
+
+    if (email === '' || username === '' || password === '' || rePassword === '') {
+      setReqRes('Please fill all fields');
+      return;
+    }
+
+    const token = await AuthService.signup({
+      email,
+      username,
+      password,
+    });
+
+    saveAccessToken(token);
+    navigate('/');
   };
 
   return (
@@ -40,17 +63,17 @@ const Signup: React.FC = (): React.ReactNode => {
               className="bg-blue rounded-full px-10 py-3 text-white float-right"
               onClick={e => onRegisterSubmit(e)}
             >
-              Sign In
+              Sign Up
             </button>
           </div>
           <div className="p-3 w-1/2">
             <Input
-              label="Login"
-              placeholder="Login"
+              label="Username"
+              placeholder="Username"
               type="text"
               required
-              value={login}
-              onChange={e => setLogin((e.target as HTMLInputElement).value)}
+              value={username}
+              onChange={e => setUsername((e.target as HTMLInputElement).value)}
             />
             <Input
               label="Repeat password"
