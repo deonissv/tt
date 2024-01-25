@@ -3,6 +3,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RoomsService } from './rooms.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateRoomDto } from '@shared/dto/rooms/create-room.dto';
+import { ValidatedUser } from '../auth/validated-user';
+import { User } from '../decorators/user.decorator';
 
 @ApiTags('rooms')
 @Controller('rooms')
@@ -12,10 +14,7 @@ export class RoomsController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Request() req, @Body() createRoomDto: CreateRoomDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-    console.log(req.user);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-    return this.roomService.createRoom(req.user, createRoomDto.playground);
+  async create(@User() user: ValidatedUser, @Body() createRoomDto: CreateRoomDto) {
+    return this.roomService.createRoom(user.userId, createRoomDto?.gameCode);
   }
 }
