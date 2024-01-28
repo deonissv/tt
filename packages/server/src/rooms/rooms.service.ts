@@ -28,6 +28,10 @@ export class RoomsService {
       wss.handleUpgrade(request, socket, head, ws => {
         wss.emit('connection', ws, request);
       });
+
+      wss.on('close', _ws => {
+        RoomsService.rooms.delete(roomId);
+      });
     });
 
     if (configService.getOrThrow<string>('NODE_ENV') !== 'test') {

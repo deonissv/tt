@@ -16,6 +16,7 @@ export class SimulationRoom {
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, number[]>;
   pgSave: PlaygroundStateSave | undefined;
+  saving_interval: NodeJS.Timeout | undefined;
 
   constructor(
     private readonly roomsService: RoomsService,
@@ -37,7 +38,7 @@ export class SimulationRoom {
   }
 
   initSaving() {
-    setInterval(async () => {
+    this.saving_interval = setInterval(async () => {
       const pgSave = this.sim._toSaveState();
       if (pgSave.actorStates?.length && pgSave.actorStates.length > 0) {
         // eslint-disable-next-line no-console
@@ -49,6 +50,7 @@ export class SimulationRoom {
 
   private getServer() {
     const wss = new WebSocket.Server({ noServer: true });
+    let interval: NodeJS.Timeout;
 
     wss.on('connection', async (ws: WebSocket) => {
       const client = await Client.init(ws, this.pgSave!); // @TODO send actual state @TODO catch reject
@@ -70,7 +72,17 @@ export class SimulationRoom {
         }
       };
 
-      setInterval(() => {
+      ws.onclose = () => {
+        this.clients.delete(ws);
+        this.cursors.delete(ws);
+        if (this.clients.size === 0) {
+          interval && clearInterval(interval);
+          this.saving_interval && clearInterval(this.saving_interval);
+          wss.close();
+        }
+      };
+
+      interval = setInterval(() => {
         if (this.clients.size === 0) {
           return;
         }

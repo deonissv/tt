@@ -13,4 +13,10 @@ soft delete
 roles: -permissions, roles
     -admin
     -user
+    -guest
   integration with frontend
+
+TBD
+-state merge on back
+-check postgess json
+-import tts format
