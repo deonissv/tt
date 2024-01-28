@@ -1,4 +1,22 @@
+import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { JWTPayload } from '@shared/dto/auth/jwt';
+
+const jwtService = new JwtService({
+  secret: 'secret',
+  signOptions: { expiresIn: '1d' },
+});
+
+const signToken = (user: User): string => {
+  const payload: JWTPayload = {
+    username: user.username,
+    email: user.email,
+    avatar_url: user.avatarUrl,
+    code: user.code,
+    sub: user.userId,
+  };
+  return jwtService.sign(payload);
+};
 
 export const authMockAdmin: User = {
   userId: 0,
@@ -11,9 +29,6 @@ export const authMockAdmin: User = {
   roleId: 1,
 };
 
-export const authMockAdminToken =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwiZW1haWwiOiJlbWFpbCIsImF2YXRhcl91cmwiOiJhdmF0YXJVcmwiLCJzdWIiOjAsImlhdCI6MTcwNDc0NTI4MywiZXhwIjozMzI2MjM0NTI4M30.fe0LLHknLsGmy-tc7QXyyMZDDxBDC1HD7B_99zeCnv8';
-
 export const authMockUser: User = {
   userId: 1,
   code: 'aa23c425-1bbb-4f0e-adba-8db0ddd56f27',
@@ -25,5 +40,5 @@ export const authMockUser: User = {
   roleId: 2,
 };
 
-export const authMockUserToken =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXJuYW1lIiwiZW1haWwiOiJlbWFpbCIsImF2YXRhcl91cmwiOiJhdmF0YXJVcmwiLCJzdWIiOjEsImlhdCI6MTcwNTk4NzYwNywiZXhwIjoxNzA2MDc0MDA3fQ.PhMUljbdR7cjr4H2TvJzOhQXmi5vOrUmSaT5FrBLp84';
+export const authMockAdminToken = signToken(authMockAdmin);
+export const authMockUserToken = signToken(authMockUser);

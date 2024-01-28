@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { type PlaygroundStateSave } from '@shared/PlaygroundState';
+import { IsString, IsOptional } from 'class-validator';
 
 export class CreateRoomDto {
   @ApiProperty()
-  playground?: PlaygroundStateSave;
+  @IsOptional()
+  @IsString()
+  gameCode?: string;
 }

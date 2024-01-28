@@ -8,7 +8,6 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -21,6 +20,7 @@ import { GameDto } from '@shared/dto/games/game.dto';
 import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
 import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
 import { AppAbility } from '../casl/casl-ability.factory';
+import { User } from '../decorators/user.decorator';
 
 @ApiTags('games')
 @Controller('games')
@@ -32,15 +32,15 @@ export class GamesController {
   @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Request() req: { user: ValidatedUser }, @Body() createGameDto: CreateGameDto): Promise<GamePreviewDto> {
-    return this.gamesService.create(req.user.userId, createGameDto);
+  create(@User() user: ValidatedUser, @Body() createGameDto: CreateGameDto): Promise<GamePreviewDto> {
+    return this.gamesService.create(user.userId, createGameDto);
   }
 
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Get('/my')
-  getAllOwnPreviews(@Request() req: { user: ValidatedUser }): Promise<GamePreviewDto[]> {
-    return this.gamesService.findManyPreviewByAuthorId(req.user.userId);
+  getAllOwnPreviews(@User() user: ValidatedUser): Promise<GamePreviewDto[]> {
+    return this.gamesService.findManyPreviewByAuthorId(user.userId);
   }
 
   @ApiBearerAuth('JWT')
@@ -64,7 +64,7 @@ export class GamesController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Get()
-  getAllPreviews() {
+  getAllPreviews(): Promise<GamePreviewDto[]> {
     return this.gamesService.findManyPreview();
   }
 
@@ -73,8 +73,8 @@ export class GamesController {
   @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Put(':code')
-  update(@Request() req: { user: ValidatedUser }, @Param('code') code: string, @Body() updateGameDto: UpdateGameDto) {
-    return this.gamesService.update(req.user.userId, code, updateGameDto);
+  update(@User() user: ValidatedUser, @Param('code') code: string, @Body() updateGameDto: UpdateGameDto) {
+    return this.gamesService.update(user.userId, code, updateGameDto);
   }
 
   @ApiBearerAuth('JWT')
@@ -82,7 +82,7 @@ export class GamesController {
   @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Delete(':code')
-  delete(@Request() req: { user: ValidatedUser }, @Param('code') code: string) {
-    return this.gamesService.delete(req.user.userId, code);
+  delete(@User() user: ValidatedUser, @Param('code') code: string) {
+    return this.gamesService.delete(user.userId, code);
   }
 }

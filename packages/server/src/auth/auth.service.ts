@@ -3,9 +3,10 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { SignInDto } from '@shared/dto/auth/sign-in.dto';
 import { CreateUserDto } from '@shared/dto/users/create-user.dto';
-import { JWT } from './jwt';
 import { User } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { AccessTokenDto } from '@shared/dto/auth/access-token';
+import { JWTPayload } from '@shared/dto/auth/jwt';
 
 @Injectable()
 export class AuthService {
@@ -14,12 +15,12 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signin(signInDto: SignInDto) {
+  async signin(signInDto: SignInDto): Promise<AccessTokenDto> {
     const user = await this.validateUser(signInDto.email, signInDto.password);
     return this.generateToken(user);
   }
 
-  async signup(createUser: CreateUserDto): Promise<{ access_token: string }> {
+  async signup(createUser: CreateUserDto): Promise<AccessTokenDto> {
     const user = await this.usersService.create(createUser);
     return this.generateToken(user);
   }
@@ -32,12 +33,13 @@ export class AuthService {
     return user;
   }
 
-  generateToken(user: User): { access_token: string } {
-    const payload: JWT = {
+  generateToken(user: User): AccessTokenDto {
+    const payload: JWTPayload = {
       username: user.username,
       email: user.email,
       avatar_url: user.avatarUrl,
       sub: user.userId,
+      code: user.code,
     };
     return {
       access_token: this.jwtService.sign(payload),

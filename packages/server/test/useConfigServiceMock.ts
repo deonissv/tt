@@ -5,11 +5,12 @@ export default () => {
   return {
     getOrThrow: jest.fn((key: string) => {
       const env: Record<string, string> = {
-        PORT: (5000 + counter).toString(),
-        WS_PORT: (6000 + counter).toString(),
+        PORT: (11000 + counter).toString(),
+        WS_PORT: (12000 + counter).toString(),
         SALT_ROUNDS: '7',
         JWT_SECRET: 'secret',
         JWT_EXPIRES_IN: '24h',
+        NODE_ENV: 'test',
       };
       if (!env[key]) {
         throw new Error(`${key} is not set`);

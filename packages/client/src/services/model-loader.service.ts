@@ -1,6 +1,5 @@
 import axios from 'axios';
-
-const LOADER_URL = 'http://localhost:3000/';
+import { LOADER_URL } from '../config';
 
 export const modelLoaderService = {
   async load(url: string): Promise<File> {

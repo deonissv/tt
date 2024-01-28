@@ -1,6 +1,6 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import Playground from '../../playground';
-import { roomService } from '@services/room.service';
+import { RoomService } from '@services/room.service';
 
 import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
 import { useAppSelector } from '../../store/store';
@@ -8,6 +8,9 @@ import { useAppSelector } from '../../store/store';
 const frameRate = 60;
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
+  const [ws, setWs] = useState<WebSocket>();
+  const [updatePgStateInterval, setUpdatePgStateInterval] = useState<NodeJS.Timeout>();
+
   const cursor: [number, number] = [0, 0];
   const canvas = useRef<HTMLCanvasElement>(null);
   const [cursors, setCursors] = useState<Record<string, number[]>>({});
@@ -19,7 +22,8 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   };
 
   const init = useCallback(async (): Promise<[WebSocket, string, Playground]> => {
-    const [ws, id, pgState] = await roomService.connect(roomId, nickname);
+    const [ws, id, pgState] = await RoomService.connect(roomId, nickname);
+    setWs(ws);
 
     const pg = await babylonInit(pgState, ws);
 
@@ -59,13 +63,19 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
           cursor[1] = event.clientY;
         });
 
-        console.log('setInterval');
-        setInterval(() => {
+        const interval = setInterval(() => {
           const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
           sendUpdate(ws_, pgStateUpdate);
         }, 1000 / frameRate);
+        setUpdatePgStateInterval(interval);
       })
+      // eslint-disable-next-line no-console
       .catch(console.error);
+
+    return () => {
+      updatePgStateInterval && clearInterval(updatePgStateInterval);
+      ws?.close();
+    };
   }, []);
 
   return (

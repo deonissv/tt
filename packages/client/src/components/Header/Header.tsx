@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Typography, Link, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { AuthService } from '../../services/auth.service';
 
 export const Header: React.FC = (): React.ReactNode => {
   const navigate = useNavigate();
@@ -11,7 +13,7 @@ export const Header: React.FC = (): React.ReactNode => {
     setActiveMenu(index);
   };
 
-  const navMenu = ['nav1', 'nav2', 'nav3', 'nav4'];
+  const navMenu: string[] = [];
 
   return (
     <div className="w-full shadow-md mb-5">
@@ -22,7 +24,7 @@ export const Header: React.FC = (): React.ReactNode => {
               navigate('/');
               setActiveMenu(-1);
             }}
-            src="/logo.png"
+            src="https://www.svgrepo.com/show/322168/dice-eight-faces-eight.svg"
             alt="Logo"
             className="h-11 w-auto cursor-pointer"
           />
@@ -41,15 +43,39 @@ export const Header: React.FC = (): React.ReactNode => {
           ))}
         </div>
         <div className="flex items-center justify-end">
-          <button className="bg-blue w-max rounded-full mr-3 px-4 py-1 text-white" onClick={() => navigate('/join')}>
-            Join Room
-          </button>
-          <button className="bg-blue w-max rounded-full px-4 py-1 text-white" onClick={() => navigate('/')}>
-            Create Room
-          </button>
-          <IconButton component={Link} onClick={() => navigate('/login')}>
-            <AccountCircleIcon className="text-black hover:text-sky-500" />
-          </IconButton>
+          {AuthService.authorized() && (
+            <>
+              <button
+                className="bg-blue w-max rounded-full mr-3 px-4 py-1 text-white"
+                onClick={() => navigate('/join')}
+              >
+                Join Room
+              </button>
+              <button className="bg-blue w-max rounded-full mr-3 px-4 py-1 text-white" onClick={() => navigate('/')}>
+                Create Room
+              </button>
+            </>
+          )}
+          {AuthService.authorized() ? (
+            <>
+              <div data-popover-target="popover">
+                {AuthService.authorized()?.avatar_url ? (
+                  <img
+                    src={AuthService.authorized()?.avatar_url}
+                    alt="Avatar"
+                    className="h-11 w-auto cursor-pointer"
+                    onClick={() => navigate('/profile')}
+                  ></img>
+                ) : (
+                  <CheckCircleIcon className="text-black hover:text-sky-500" onClick={() => navigate('/profile')} />
+                )}
+              </div>
+            </>
+          ) : (
+            <IconButton component={Link} onClick={() => navigate('/login')}>
+              <AccountCircleIcon className="text-black hover:text-sky-500" />
+            </IconButton>
+          )}
         </div>
       </div>
     </div>

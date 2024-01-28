@@ -1,1 +1,1 @@
-export { modelLoaderService } from './modelLoader.service';
+export { modelLoaderService } from './model-loader.service';

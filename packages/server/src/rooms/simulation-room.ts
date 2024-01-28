@@ -4,19 +4,24 @@ import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
 import { Simulation } from '../simulation/simulation';
 
 import { Client } from './client';
+import { RoomsService } from './rooms.service';
 
 const STATE_TICK_RATE = 60; // [hz]
 const STATE_TICK_INTERVAL = 1000 / STATE_TICK_RATE; // [ms]
 
-export class Room {
+export class SimulationRoom {
   id: string;
   sim: Simulation;
   wss: WebSocket.Server;
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, number[]>;
   pgSave: PlaygroundStateSave | undefined;
+  saving_interval: NodeJS.Timeout | undefined;
 
-  constructor(id: string) {
+  constructor(
+    private readonly roomsService: RoomsService,
+    id: string,
+  ) {
     this.id = id;
     this.clients = new Map();
     this.cursors = new Map();
@@ -28,10 +33,24 @@ export class Room {
     await this.sim.init(pgSave);
     this.pgSave = pgSave;
     this.sim.start();
+
+    this.initSaving();
+  }
+
+  initSaving() {
+    this.saving_interval = setInterval(async () => {
+      const pgSave = this.sim._toSaveState();
+      if (pgSave.actorStates?.length && pgSave.actorStates.length > 0) {
+        // eslint-disable-next-line no-console
+        console.log('saving');
+        await this.roomsService.saveRoomProgress(this.id, pgSave);
+      }
+    }, 1000);
   }
 
   private getServer() {
     const wss = new WebSocket.Server({ noServer: true });
+    let interval: NodeJS.Timeout;
 
     wss.on('connection', async (ws: WebSocket) => {
       const client = await Client.init(ws, this.pgSave!); // @TODO send actual state @TODO catch reject
@@ -53,7 +72,17 @@ export class Room {
         }
       };
 
-      setInterval(() => {
+      ws.onclose = () => {
+        this.clients.delete(ws);
+        this.cursors.delete(ws);
+        if (this.clients.size === 0) {
+          interval && clearInterval(interval);
+          this.saving_interval && clearInterval(this.saving_interval);
+          wss.close();
+        }
+      };
+
+      interval = setInterval(() => {
         if (this.clients.size === 0) {
           return;
         }
