@@ -10,7 +10,9 @@ import { mainConfig } from '../main.config';
 import { AuthModule } from '../auth/auth.module';
 import { RoomsModule } from './rooms.module';
 import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
+
 import { SimulationRoom } from './simulation-room';
+jest.mock('./simulation-room');
 
 describe('Rooms', () => {
   let app: INestApplication;
@@ -37,6 +39,10 @@ describe('Rooms', () => {
     await app.init();
   });
 
+  beforeEach(() => {
+    (SimulationRoom as jest.Mock).mockClear();
+  });
+
   it('should be defined', () => {
     expect(app).toBeDefined();
   });
@@ -50,7 +56,8 @@ describe('Rooms', () => {
         .post('/rooms')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${authMockAdminToken}`);
-      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.status).toBe(HttpStatus.CREATED);
+      expect(SimulationRoom).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -112,8 +119,6 @@ describe('Rooms', () => {
           },
         ],
       });
-
-      jest.mock('./simulation-room');
 
       const response = await request(app.getHttpServer())
         .get(`/rooms/${authMockAdmin.code}`)
