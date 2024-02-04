@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateGameDto } from '@shared/dto/games/create-game.dto';
 import { UpdateGameDto } from '@shared/dto/games/update-game.dto';
 import { PrismaService } from '../prisma.service';
-import { Game, GameVersion } from '@prisma/client';
+import { Game, GameVersion, Prisma } from '@prisma/client';
 import { GameDto } from '@shared/dto/games/game.dto';
 import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
 import { PlaygroundStateSave } from '@shared/PlaygroundState';
@@ -12,6 +12,7 @@ export class GamesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(userId: number, createGameDto: CreateGameDto): Promise<GamePreviewDto> {
+    const content = JSON.parse(createGameDto.content) as Prisma.JsonObject;
     const createdGame = await this.prisma.game.create({
       data: {
         name: createGameDto.name,
@@ -20,7 +21,7 @@ export class GamesService {
         authorId: userId,
         GameVersion: {
           create: {
-            content: createGameDto.content,
+            content,
           },
         },
       },
@@ -93,6 +94,7 @@ export class GamesService {
   }
 
   async _updateFull(authorId: number, code: string, updateGameDto: UpdateGameDto) {
+    const content = JSON.parse(updateGameDto.content!) as Prisma.JsonObject;
     return await this.prisma.game.update({
       where: { code, authorId },
       include: { GameVersion: true },
@@ -102,7 +104,7 @@ export class GamesService {
         bannerUrl: updateGameDto.bannerUrl,
         GameVersion: {
           create: {
-            content: updateGameDto.content!,
+            content,
           },
         },
       },

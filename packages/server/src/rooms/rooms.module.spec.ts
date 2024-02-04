@@ -10,6 +10,7 @@ import { mainConfig } from '../main.config';
 import { AuthModule } from '../auth/auth.module';
 import { RoomsModule } from './rooms.module';
 import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
+import { SimulationRoom } from './simulation-room';
 
 describe('Rooms', () => {
   let app: INestApplication;
@@ -40,18 +41,18 @@ describe('Rooms', () => {
     expect(app).toBeDefined();
   });
 
-  // describe('GET /rooms', () => {
-  //   it('should create a room', async () => {
-  //     await prismaService.user.create({
-  //       data: authMockAdmin,
-  //     });
-  //     const response = await request(app.getHttpServer())
-  //       .post('/rooms')
-  //       .set('Accept', 'application/json')
-  //       .set('Authorization', `Bearer ${authMockAdminToken}`);
-  //     expect(response.status).toBe(HttpStatus.OK);
-  //   });
-  // });
+  describe('GET /rooms', () => {
+    it('should create a room', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+      const response = await request(app.getHttpServer())
+        .post('/rooms')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockAdminToken}`);
+      expect(response.status).toBe(HttpStatus.OK);
+    });
+  });
 
   describe('GET /rooms/:code', () => {
     it('should return user rooms', async () => {
@@ -112,6 +113,8 @@ describe('Rooms', () => {
         ],
       });
 
+      jest.mock('./simulation-room');
+
       const response = await request(app.getHttpServer())
         .get(`/rooms/${authMockAdmin.code}`)
         .set('Accept', 'application/json')
@@ -121,9 +124,3 @@ describe('Rooms', () => {
     });
   });
 });
-
-// describe('placeholder', () => {
-//   it('should contain a test', () => {
-//     expect(true).toBe(true);
-//   });
-// });
