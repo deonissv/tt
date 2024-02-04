@@ -59,11 +59,11 @@ describe('GamesModule', () => {
             create: [
               {
                 version: 1,
-                content: '{}',
+                content: {},
               },
               {
                 version: 2,
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -82,7 +82,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: {
               version: 1,
-              content: '{}',
+              content: {},
             },
           },
         },
@@ -100,7 +100,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: {
               version: 1,
-              content: '{}',
+              content: {},
             },
           },
         },
@@ -156,11 +156,11 @@ describe('GamesModule', () => {
             create: [
               {
                 version: 1,
-                content: '{}',
+                content: {},
               },
               {
                 version: 2,
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -202,11 +202,11 @@ describe('GamesModule', () => {
             create: [
               {
                 version: 1,
-                content: '{}',
+                content: {},
               },
               {
                 version: 2,
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -267,11 +267,11 @@ describe('GamesModule', () => {
             create: [
               {
                 version: 1,
-                content: '{}',
+                content: {},
               },
               {
                 version: 2,
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -290,7 +290,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: {
               version: 1,
-              content: '{}',
+              content: {},
             },
           },
         },
@@ -348,11 +348,11 @@ describe('GamesModule', () => {
             create: [
               {
                 version: 1,
-                content: '{}',
+                content: {},
               },
               {
                 version: 2,
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -371,7 +371,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: {
               version: 1,
-              content: '{}',
+              content: {},
             },
           },
         },
@@ -427,7 +427,7 @@ describe('GamesModule', () => {
             create: [
               {
                 version: 1,
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -469,7 +469,7 @@ describe('GamesModule', () => {
             {
               gameId: 1,
               version: 1,
-              content: '{}',
+              content: {},
               createdAt: expect.any(Date) as Date,
             },
           ],
@@ -495,7 +495,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: [
               {
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -538,13 +538,13 @@ describe('GamesModule', () => {
             {
               gameId: 1,
               version: 1,
-              content: '{}',
+              content: {},
               createdAt: expect.any(Date) as Date,
             },
             {
               gameId: 1,
               version: 2,
-              content: '{}',
+              content: {},
               createdAt: expect.any(Date) as Date,
             },
           ],
@@ -607,7 +607,7 @@ describe('GamesModule', () => {
             {
               gameId: 1,
               version: 1,
-              content: '{}',
+              content: {},
               createdAt: expect.any(Date) as Date,
             },
           ],
@@ -642,7 +642,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: [
               {
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -696,7 +696,7 @@ describe('GamesModule', () => {
           GameVersion: {
             create: [
               {
-                content: '{}',
+                content: {},
               },
             ],
           },
@@ -728,7 +728,7 @@ describe('GamesModule', () => {
     //       GameVersion: {
     //         create: [
     //           {
-    //             content: '{}',
+    //             content: {},
     //           },
     //         ],
     //       },
