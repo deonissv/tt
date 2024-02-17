@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/
 import { Reflector } from '@nestjs/core';
 import { User } from '@prisma/client';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
-import { PrismaService } from '../prisma.service';
+import { PermissionsService } from '../permissions.service';
 
 interface IPolicyHandler {
   handle(ability: AppAbility): boolean;
@@ -26,7 +26,7 @@ export class PoliciesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory,
-    private prisma: PrismaService,
+    private permissionsService: PermissionsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -38,20 +38,8 @@ export class PoliciesGuard implements CanActivate {
       return false;
     }
 
-    const user = await this.prisma.user.findUniqueOrThrow({
-      where: {
-        userId: currentUser.userId,
-      },
-      include: {
-        Role: {
-          include: {
-            Permissions: true,
-          },
-        },
-      },
-    });
-
-    const ability = this.caslAbilityFactory.createForUser(user);
+    const currentUserWithPermissions = await this.permissionsService.getUserWithPermissions(currentUser);
+    const ability = this.caslAbilityFactory.createForUser(currentUserWithPermissions);
     return policyHandlers.every(handler => this.execPolicyHandler(handler, ability));
   }
 

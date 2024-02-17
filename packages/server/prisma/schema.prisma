@@ -85,11 +85,11 @@ model Room {
   roomId       Int            @id @default(autoincrement())
   code         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type         Int
-  creatorId    Int
+  authorId     Int
   Message      Message[]
   RoomProgress RoomProgress[]
   RoomUsers    RoomUser[]
-  Creator      User           @relation(fields: [creatorId], references: [userId])
+  User         User           @relation(fields: [authorId], references: [userId])
 }
 
 model RoomProgress {

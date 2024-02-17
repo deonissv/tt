@@ -1,5 +1,93 @@
 import { PrismaClient } from '@prisma/client';
 
+// const _permissions: Pick<Permission, 'roleId' | 'action' | 'subject' | 'conditions'> = [
+const _permissions = [
+  // Admin.
+  {
+    roleId: 1,
+    action: 'manage',
+    subject: 'all',
+  },
+  // Games
+  // Games - User
+  {
+    roleId: 2,
+    action: 'create',
+    subject: 'Game',
+  },
+  {
+    roleId: 2,
+    action: 'read',
+    subject: 'Game',
+  },
+  {
+    roleId: 2,
+    action: 'update',
+    subject: 'Game',
+    conditions: { authorId: '${ userId }' },
+  },
+  {
+    roleId: 2,
+    action: 'delete',
+    subject: 'Game',
+    conditions: { authorId: '${ userId }' },
+  },
+  // Games - Guest
+  {
+    roleId: 3,
+    action: 'read',
+    subject: 'Game',
+  },
+  // Users
+  // Users - User
+  {
+    roleId: 2,
+    action: 'create',
+    subject: 'User',
+  },
+  {
+    roleId: 2,
+    action: 'read',
+    subject: 'User',
+  },
+  {
+    roleId: 2,
+    action: 'update',
+    subject: 'User',
+    conditions: { userId: '${ userId }' },
+  },
+  {
+    roleId: 2,
+    action: 'delete',
+    subject: 'User',
+    conditions: { userId: '${ userId }' },
+  },
+  // Users - Guest
+  {
+    roleId: 3,
+    action: 'read',
+    subject: 'User',
+  },
+  // Rooms
+  // Rooms - User
+  {
+    roleId: 2,
+    action: 'create',
+    subject: 'Room',
+  },
+  {
+    roleId: 2,
+    action: 'read',
+    subject: 'Room',
+  },
+  // Rooms - Guest
+  {
+    roleId: 3,
+    action: 'read',
+    subject: 'Room',
+  },
+];
+
 export const roles = [
   {
     roleId: 1,
@@ -9,45 +97,24 @@ export const roles = [
     roleId: 2,
     name: 'User',
   },
-];
-
-export const permissions = [
   {
-    permissionId: 1,
-    roleId: 1,
-    action: 'manage',
-    subject: 'all',
-  },
-  {
-    permissionId: 2,
-    roleId: 2,
-    action: 'read',
-    subject: 'Game',
-  },
-  {
-    permissionId: 3,
-    roleId: 2,
-    action: 'read',
-    subject: 'User',
-    conditions: { authorId: '{{ userId }}' },
-  },
-  {
-    permissionId: 4,
-    roleId: 2,
-    action: 'create',
-    subject: 'User',
-  },
-  {
-    permissionId: 5,
-    roleId: 2,
-    action: 'create',
-    subject: 'Game',
+    roleId: 3,
+    name: 'Guest',
   },
 ];
 
-const prisma = new PrismaClient();
+export const permissions = _permissions.map((permission, idx) => ({
+  permissionId: idx,
+  roleId: permission.roleId,
+  action: permission.action,
+  subject: permission.subject,
+  conditions: permission.conditions,
+}));
+
+let prisma: PrismaClient;
 
 async function main() {
+  prisma = new PrismaClient();
   for await (const role of roles) {
     await prisma.role.upsert({
       where: {
@@ -69,12 +136,14 @@ async function main() {
   }
 }
 
-main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async error => {
-    // eslint-disable-next-line no-console
-    console.log(error);
-    await prisma.$disconnect();
-  });
+if (require.main === module) {
+  main()
+    .then(async () => {
+      await prisma.$disconnect();
+    })
+    .catch(async error => {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      await prisma.$disconnect();
+    });
+}

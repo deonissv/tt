@@ -4,10 +4,11 @@ import { RoomsController } from './rooms.controller';
 import { PrismaService } from '../prisma.service';
 import { ConfigModule } from '@nestjs/config';
 import { GamesModule } from '../games/games.module';
+import { PermissionsService } from '../permissions.service';
 
 @Module({
   imports: [ConfigModule, GamesModule],
-  providers: [RoomsService, PrismaService],
+  providers: [RoomsService, PrismaService, PermissionsService],
   controllers: [RoomsController],
 })
 export class RoomsModule {}

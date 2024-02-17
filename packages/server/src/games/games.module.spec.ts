@@ -9,7 +9,15 @@ import useConfigServiceMock from '../../test/useConfigServiceMock';
 import { GamesModule } from './games.module';
 import { mainConfig } from '../main.config';
 import { AuthModule } from '../auth/auth.module';
-import { authMockAdminToken, authMockAdmin, authMockUser, authMockUserToken } from '../../test/authMock';
+import {
+  authMockAdminToken,
+  authMockAdmin,
+  authMockUser,
+  authMockUserToken,
+  authMockGuest,
+  authMockGuestToken,
+} from '../../test/authMock';
+import { PermissionsService } from '../permissions.service';
 
 describe('GamesModule', () => {
   let app: INestApplication;
@@ -23,7 +31,10 @@ describe('GamesModule', () => {
     const configService = useConfigServiceMock();
     module = await Test.createTestingModule({
       imports: [GamesModule, AuthModule],
+      providers: [PermissionsService],
     })
+      .overrideProvider(PermissionsService)
+      .useValue(new PermissionsService())
       .overrideProvider(PrismaService)
       .useValue(prismaService)
       .overrideProvider(ConfigService)
@@ -180,6 +191,7 @@ describe('GamesModule', () => {
             bannerUrl: 'url',
             content: expect.stringContaining('{}') as string,
             version: 2,
+            authorId: 0,
           }),
         );
     });
@@ -551,6 +563,82 @@ describe('GamesModule', () => {
         },
       ]);
     });
+
+    it('should forbid updating a game preview - user', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.game.create({
+        data: {
+          gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          name: 'name',
+          description: 'desc',
+          bannerUrl: 'url',
+          createdAt: new Date(),
+          authorId: 0,
+          deletedAt: null,
+          GameVersion: {
+            create: [
+              {
+                version: 1,
+                content: {},
+              },
+            ],
+          },
+        },
+      });
+
+      await request(app.getHttpServer())
+        .put('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .send({
+          name: 'name1',
+          description: 'desc1',
+          bannerUrl: 'url1',
+        })
+        .expect(HttpStatus.FORBIDDEN);
+    });
+
+    it('should forbid updating a game preview - guest', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.game.create({
+        data: {
+          gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          name: 'name',
+          description: 'desc',
+          bannerUrl: 'url',
+          createdAt: new Date(),
+          authorId: 0,
+          deletedAt: null,
+          GameVersion: {
+            create: [
+              {
+                version: 1,
+                content: {},
+              },
+            ],
+          },
+        },
+      });
+
+      await request(app.getHttpServer())
+        .put('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockGuestToken}`)
+        .send({
+          name: 'name1',
+          description: 'desc1',
+          bannerUrl: 'url1',
+        })
+        .expect(HttpStatus.FORBIDDEN);
+    });
   });
 
   describe('POST /games', () => {
@@ -710,39 +798,75 @@ describe('GamesModule', () => {
         .expect(HttpStatus.FORBIDDEN);
     });
 
-    // it('should allow game deletion - user', async () => {
-    //   await prismaService.user.create({
-    //     data: authMockUser,
-    //   });
+    it('should allow game deletion - user (owner)', async () => {
+      await prismaService.user.create({
+        data: authMockUser,
+      });
 
-    //   await prismaService.game.create({
-    //     data: {
-    //       gameId: 1,
-    //       code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
-    //       name: 'name',
-    //       description: 'desc',
-    //       bannerUrl: 'url',
-    //       createdAt: new Date(),
-    //       authorId: 1,
-    //       deletedAt: null,
-    //       GameVersion: {
-    //         create: [
-    //           {
-    //             content: {},
-    //           },
-    //         ],
-    //       },
-    //     },
-    //   });
+      await prismaService.game.create({
+        data: {
+          gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          name: 'name',
+          description: 'desc',
+          bannerUrl: 'url',
+          createdAt: new Date(),
+          authorId: 1,
+          deletedAt: null,
+          GameVersion: {
+            create: [
+              {
+                content: {},
+              },
+            ],
+          },
+        },
+      });
 
-    //   await request(app.getHttpServer())
-    //     .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
-    //     .set('Accept', 'application/json')
-    //     .set('Authorization', `Bearer ${authMockUserToken}`)
-    //     .expect(HttpStatus.OK);
+      await request(app.getHttpServer())
+        .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .expect(HttpStatus.OK);
 
-    //   const games = await prismaService.game.findMany({ include: { GameVersion: true } });
-    //   expect(games.length).toBe(0);
-    // });
+      const games = await prismaService.game.findMany({ include: { GameVersion: true } });
+      expect(games.length).toBe(0);
+    });
+
+    it('should forbid game deletion - guest', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.user.create({
+        data: authMockGuest,
+      });
+
+      await prismaService.game.create({
+        data: {
+          gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          name: 'name',
+          description: 'desc',
+          bannerUrl: 'url',
+          createdAt: new Date(),
+          authorId: 0,
+          deletedAt: null,
+          GameVersion: {
+            create: [
+              {
+                content: {},
+              },
+            ],
+          },
+        },
+      });
+
+      await request(app.getHttpServer())
+        .delete('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockGuestToken}`)
+        .expect(HttpStatus.FORBIDDEN);
+    });
   });
 });

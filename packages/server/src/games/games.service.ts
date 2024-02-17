@@ -40,6 +40,20 @@ export class GamesService {
     return GamesService.toGameDto(game);
   }
 
+  async findUniqueByCode(code: string): Promise<GameDto | null> {
+    const game = await this.prisma.game.findUnique({
+      where: { code },
+      include: {
+        GameVersion: {
+          orderBy: { version: 'desc' },
+        },
+      },
+    });
+
+    if (!game || !game.GameVersion?.[0]?.content) return null;
+    return GamesService.toGameDto(game);
+  }
+
   async findContentByCode(code: string): Promise<PlaygroundStateSave | null> {
     const game = await this.prisma.game.findFirst({
       where: { code },
@@ -111,8 +125,8 @@ export class GamesService {
     });
   }
 
-  async delete(authorId: number, code: string) {
-    return await this.prisma.game.delete({ where: { code, authorId } });
+  async delete(code: string) {
+    return await this.prisma.game.delete({ where: { code } });
   }
 
   static toGamePreviewDto(game: Game): GamePreviewDto {
@@ -133,6 +147,7 @@ export class GamesService {
       description: game.description,
       bannerUrl: game.bannerUrl,
       content: JSON.stringify(gameVersion.content),
+      authorId: game.authorId,
     };
   }
 }

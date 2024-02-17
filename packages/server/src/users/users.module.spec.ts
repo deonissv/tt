@@ -9,7 +9,14 @@ import { AuthModule } from '../auth/auth.module';
 import { PrismaService } from '../prisma.service';
 import useDatabaseMock from '../../test/useDatabaseMock';
 import useConfigServiceMock from '../../test/useConfigServiceMock';
-import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
+import {
+  authMockAdmin,
+  authMockAdminToken,
+  authMockGuest,
+  authMockGuestToken,
+  authMockUser,
+  authMockUserToken,
+} from '../../test/authMock';
 import { mainConfig } from '../main.config';
 
 describe('UsersModule', () => {
@@ -50,7 +57,7 @@ describe('UsersModule', () => {
       });
 
       await request(app.getHttpServer())
-        .put('/users')
+        .put(`/users/${authMockAdmin.code}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${authMockAdminToken}`)
         .send({
@@ -68,6 +75,65 @@ describe('UsersModule', () => {
       expect(users[0].avatarUrl).toBe('newAvatarUrl');
       expect(users[0].passwordHash).toBe('newPasswordHash');
     });
+
+    it('should forbid updating user - user', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.user.create({
+        data: authMockUser,
+      });
+
+      await request(app.getHttpServer())
+        .put(`/users/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .send({
+          username: 'newUsername',
+          avatarUrl: 'newAvatarUrl',
+          password: 'password',
+        })
+        .expect(HttpStatus.FORBIDDEN);
+    });
+
+    it('should allow updating user - user (self)', async () => {
+      await prismaService.user.create({
+        data: authMockUser,
+      });
+
+      await request(app.getHttpServer())
+        .put(`/users/${authMockUser.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .send({
+          username: 'newUsername',
+          avatarUrl: 'newAvatarUrl',
+          password: 'password',
+        })
+        .expect(HttpStatus.OK);
+    });
+
+    it('should forbid updating user - guest', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.user.create({
+        data: authMockGuest,
+      });
+
+      await request(app.getHttpServer())
+        .put(`/users/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockGuestToken}`)
+        .send({
+          username: 'newUsername',
+          avatarUrl: 'newAvatarUrl',
+          password: 'password',
+        })
+        .expect(HttpStatus.FORBIDDEN);
+    });
   });
 
   describe('DELETE /users', () => {
@@ -77,13 +143,72 @@ describe('UsersModule', () => {
       });
 
       await request(app.getHttpServer())
-        .delete('/users')
+        .delete(`/users/${authMockAdmin.code}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.OK);
 
       const users = await prismaService.user.findMany();
       expect(users.length).toBe(0);
+    });
+
+    it('should forbid deleting user - user', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.user.create({
+        data: authMockUser,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/users/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .send({
+          username: 'newUsername',
+          avatarUrl: 'newAvatarUrl',
+          password: 'password',
+        })
+        .expect(HttpStatus.FORBIDDEN);
+    });
+
+    it('should allow deleting user - user (self)', async () => {
+      await prismaService.user.create({
+        data: authMockUser,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/users/${authMockUser.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockUserToken}`)
+        .send({
+          username: 'newUsername',
+          avatarUrl: 'newAvatarUrl',
+          password: 'password',
+        })
+        .expect(HttpStatus.OK);
+    });
+
+    it('should forbid deleting user - guest', async () => {
+      await prismaService.user.create({
+        data: authMockAdmin,
+      });
+
+      await prismaService.user.create({
+        data: authMockGuest,
+      });
+
+      await request(app.getHttpServer())
+        .delete(`/users/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockGuestToken}`)
+        .send({
+          username: 'newUsername',
+          avatarUrl: 'newAvatarUrl',
+          password: 'password',
+        })
+        .expect(HttpStatus.FORBIDDEN);
     });
   });
 });
