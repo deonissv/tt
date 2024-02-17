@@ -14,6 +14,7 @@ const signToken = (user: User): string => {
     avatar_url: user.avatarUrl,
     code: user.code,
     sub: user.userId,
+    role: user.roleId,
   };
   return jwtService.sign(payload);
 };
@@ -40,5 +41,17 @@ export const authMockUser: User = {
   roleId: 2,
 };
 
+export const authMockGuest: User = {
+  userId: 2,
+  code: 'acd3c425-1bbb-4f0e-adba-8db0ddd56f27',
+  username: 'userrname',
+  email: 'emmail',
+  passwordHash: 'passwordHash',
+  avatarUrl: 'avatarUrl',
+  deletedAt: null,
+  roleId: 2,
+};
+
 export const authMockAdminToken = signToken(authMockAdmin);
 export const authMockUserToken = signToken(authMockUser);
+export const authMockGuestToken = signToken(authMockGuest);

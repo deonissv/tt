@@ -4,6 +4,7 @@ export class JWTPayload {
   readonly avatar_url: string | null;
   readonly code: string;
   readonly sub: number;
+  readonly role: number;
 }
 
 export class JWT extends JWTPayload {

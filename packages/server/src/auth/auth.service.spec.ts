@@ -86,6 +86,7 @@ describe('AuthService', () => {
         username: 'username',
         avatar_url: 'avatarUrl',
         code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
+        role: 2,
       });
     });
   });
@@ -131,6 +132,7 @@ describe('AuthService', () => {
         username: 'username',
         avatar_url: 'avatarUrl',
         code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
+        role: 2,
       });
     });
 

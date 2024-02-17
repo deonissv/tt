@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Delete,
+  ForbiddenException,
   Get,
   NotFoundException,
   Param,
@@ -19,13 +20,18 @@ import { ValidatedUser } from '../auth/validated-user';
 import { GameDto } from '@shared/dto/games/game.dto';
 import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
 import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
-import { AppAbility } from '../casl/casl-ability.factory';
+import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { User } from '../decorators/user.decorator';
+import { PermissionsService } from '../permissions.service';
+import { subject } from '@casl/ability';
 
 @ApiTags('games')
 @Controller('games')
 export class GamesController {
-  constructor(private readonly gamesService: GamesService) {}
+  constructor(
+    private readonly gamesService: GamesService,
+    private readonly permissionsService: PermissionsService,
+  ) {}
 
   @ApiBearerAuth('JWT')
   @CheckPolicies((ability: AppAbility) => ability.can('create', 'Game'))
@@ -73,7 +79,19 @@ export class GamesController {
   @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Put(':code')
-  update(@User() user: ValidatedUser, @Param('code') code: string, @Body() updateGameDto: UpdateGameDto) {
+  async update(@User() user: ValidatedUser, @Param('code') code: string, @Body() updateGameDto: UpdateGameDto) {
+    const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
+    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+
+    const game = await this.gamesService.findUniqueByCode(code);
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+
+    if (!ability.can('update', subject('Game', game))) {
+      throw new ForbiddenException('Cannot update the game');
+    }
+
     return this.gamesService.update(user.userId, code, updateGameDto);
   }
 
@@ -82,7 +100,19 @@ export class GamesController {
   @UseGuards(PoliciesGuard)
   @UseGuards(JwtAuthGuard)
   @Delete(':code')
-  delete(@User() user: ValidatedUser, @Param('code') code: string) {
-    return this.gamesService.delete(user.userId, code);
+  async delete(@User() user: ValidatedUser, @Param('code') code: string) {
+    const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
+    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+
+    const game = await this.gamesService.findUniqueByCode(code);
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+
+    if (!ability.can('delete', subject('Game', game))) {
+      throw new ForbiddenException('Cannot delete the game');
+    }
+
+    return this.gamesService.delete(code);
   }
 }

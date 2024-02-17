@@ -93,13 +93,13 @@ describe('Rooms', () => {
           {
             roomId: 1,
             code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
-            creatorId: 0,
+            authorId: 0,
             type: 1,
           },
           {
             roomId: 2,
             code: '5dbab385-0a62-442c-a4b2-c22e8ae35cb7',
-            creatorId: 0,
+            authorId: 0,
             type: 1,
           },
         ],

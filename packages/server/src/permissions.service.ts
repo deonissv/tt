@@ -1,0 +1,38 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+import { Permission } from '@prisma/client';
+import { ValidatedUser } from './auth/validated-user';
+import { UserWithPermissions } from './casl/casl-ability.factory';
+
+@Injectable()
+export class PermissionsService {
+  permissions = new Map<number, Permission[]>(); // @TODO add ttl
+  prismaService: PrismaService;
+
+  constructor() {
+    this.prismaService = new PrismaService();
+  }
+
+  async getPermissionsByRoleId(roleId: number): Promise<Permission[]> {
+    let permissions = this.permissions.get(roleId);
+    if (!permissions) {
+      permissions = await this.prismaService.permission.findMany({
+        where: {
+          roleId: roleId,
+        },
+      });
+      this.permissions.set(roleId, permissions);
+    }
+    return permissions;
+  }
+
+  async getUserWithPermissions(user: ValidatedUser): Promise<UserWithPermissions> {
+    const permissions = await this.getPermissionsByRoleId(user.roleId);
+    return {
+      ...user,
+      Role: {
+        Permissions: permissions,
+      },
+    };
+  }
+}

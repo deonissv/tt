@@ -46,11 +46,11 @@ export class RoomsService {
     return roomCode;
   }
 
-  async createRoom(creatorId: number, gameCode?: string): Promise<string> {
+  async createRoom(authorId: number, gameCode?: string): Promise<string> {
     const pgSave = gameCode ? (await this.gameService.findContentByCode(gameCode)) ?? {} : {};
     const roomTable = await this.prisma.room.create({
       data: {
-        creatorId,
+        authorId,
         type: 1,
       },
     });

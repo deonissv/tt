@@ -5,4 +5,5 @@ export class GameDto {
   description: string;
   bannerUrl: string;
   content: string;
+  authorId: number;
 }
