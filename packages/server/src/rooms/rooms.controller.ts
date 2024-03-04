@@ -14,8 +14,8 @@ export class RoomsController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@User() user: ValidatedUser, @Body() createRoomDto: CreateRoomDto) {
-    return this.roomService.createRoom(user.userId, createRoomDto?.gameCode);
+  async createRoom(@User() user: ValidatedUser, @Body() createRoomDto: CreateRoomDto) {
+    return this.roomService.createRoom(user.userId, createRoomDto.gameCode);
   }
 
   @ApiBearerAuth('JWT')

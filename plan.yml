@@ -20,3 +20,15 @@ TBD
 -state merge on back
 -check postgess json
 -import tts format
+
+@TODO:
+- gameState defaults
+- websocket auth
+- importable / compatible with tts
+- game save table
+
+
+RoomProgress type:
+- 1 -  load
+- 2 -  save
+- 3 -  delta

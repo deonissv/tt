@@ -6,7 +6,7 @@ import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 
 import { fileToUrl } from '../utils';
 import { modelLoaderService } from '../services/model-loader.service';
-import { Model } from '@shared/index';
+import { Model } from '@shared/dto/pg/actorModel';
 
 export class Loader {
   static async loadModel(model: Model, scene: Scene): Promise<[Mesh, Mesh]> {
@@ -52,8 +52,8 @@ export class Loader {
     material.opacityTexture = model.opacityURL
       ? new Texture(fileToUrl(await modelLoaderService.load(model.opacityURL)), scene)
       : null;
-    material.lightmapTexture = model.lightmapURL
-      ? new Texture(fileToUrl(await modelLoaderService.load(model.lightmapURL)), scene)
+    material.lightmapTexture = model.lightMapURL
+      ? new Texture(fileToUrl(await modelLoaderService.load(model.lightMapURL)), scene)
       : null;
 
     return material;

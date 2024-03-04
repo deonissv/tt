@@ -1,4 +1,4 @@
-export const PRECISION_DELTA = 0.005;
+export const PRECISION_EPSILON = 0.005;
 
 export const CAMERA_DEFAULT_ALPHA = 0;
 export const CAMERA_DEFAULT_BETA = 0;
@@ -23,3 +23,5 @@ export const ROTATE_STEP = Math.PI / 12;
 export const SCALE_UP_KEYS = ['NumpadAdd', 'Equal'];
 export const SCALE_DOWN_KEYS = ['NumpadSubtract', 'Minus'];
 export const SCALE_KOEF = 0.1;
+
+export const MASS_DEFAULT = 1;

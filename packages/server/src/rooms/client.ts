@@ -1,7 +1,6 @@
 import * as WebSocket from 'ws';
 
-import { WS } from '@shared/index';
-import { PlaygroundStateSave } from '@shared/PlaygroundState';
+import { PlaygroundStateSave, WS } from '@shared/index';
 
 export class Client {
   id: string;

@@ -14,8 +14,9 @@ import {
   Vector3,
 } from 'babylonjs';
 
-import { ActorState, ActorStateUpdate, GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
+import { GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
 import Actor from './actor';
+import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
 
 export class Simulation {
   private engine: NullEngine;
@@ -52,11 +53,12 @@ export class Simulation {
     });
   }
 
-  toSaveState(): PlaygroundStateUpdate {
+  toStateUpdate(pgState?: PlaygroundStateSave): PlaygroundStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
     this.scene.meshes.forEach(mesh => {
       if (mesh.parent instanceof Actor) {
-        actorStates.push(mesh.parent.toState());
+        const actorState = pgState?.actorStates?.find(actorState => actorState.guid === (mesh.parent as Actor).guid);
+        actorStates.push(mesh.parent.toStateUpdate(actorState));
       }
     });
     return {
@@ -64,11 +66,11 @@ export class Simulation {
     };
   }
 
-  _toSaveState(): PlaygroundStateSave {
+  toStateSave(): PlaygroundStateSave {
     const actorStates: ActorState[] = [];
     this.scene.meshes.forEach(mesh => {
       if (mesh.parent instanceof Actor) {
-        actorStates.push(mesh.parent._toState());
+        actorStates.push(mesh.parent.toStateSave());
       }
     });
 
@@ -113,5 +115,25 @@ export class Simulation {
     // box.__move(0, 10, 0);
     // eslint-disable-next-line no-console
     console.log('box created');
+  }
+
+  static mergeStateDelta(state: PlaygroundStateSave, delta: PlaygroundStateUpdate): PlaygroundStateSave {
+    const rv: PlaygroundStateSave = {
+      leftHandedSystem: delta.leftHandedSystem ?? state.leftHandedSystem,
+      gravity: delta.gravity ?? state.gravity,
+      actorStates: state.actorStates,
+    };
+
+    if (state.actorStates) {
+      rv.actorStates = state.actorStates.map(actorState => {
+        const update = delta.actorStates?.find(actorUpdate => actorUpdate.guid === actorState.guid);
+        if (!update) {
+          return actorState;
+        }
+        return Actor.applyStateUpdate(actorState, update);
+      });
+    }
+
+    return rv;
   }
 }
