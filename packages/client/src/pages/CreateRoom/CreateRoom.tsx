@@ -15,7 +15,7 @@ const CreateRoom = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const onCreateRoom = async (gameCode?: string) => {
+  const onCreateRoom = async (gameCode: string) => {
     const roomId = await RoomService.createRoom({
       gameCode,
     });

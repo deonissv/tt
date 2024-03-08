@@ -5,14 +5,17 @@ import { SimulationRoom } from './simulation-room';
 import { PrismaService } from '../prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { GamesService } from '../games/games.service';
-import { PlaygroundStateSave } from '@shared/PlaygroundState';
 import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
+import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
+import { Prisma, Room } from '@prisma/client';
+import { Simulation } from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {
   static rooms = new Map<string, SimulationRoom>();
+
   constructor(
-    private readonly prisma: PrismaService,
+    private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
     private readonly gameService: GamesService,
   ) {
@@ -39,27 +42,45 @@ export class RoomsService {
     }
   }
 
-  private async startRoomSimulation(roomCode: string, pgSave?: PlaygroundStateSave) {
+  async startRoomSimulation(roomCode: string, pgSave?: PlaygroundStateSave) {
     const room = new SimulationRoom(this, roomCode);
     await room.init(pgSave);
     RoomsService.rooms.set(roomCode, room);
     return roomCode;
   }
 
-  async createRoom(authorId: number, gameCode?: string): Promise<string> {
-    const pgSave = gameCode ? (await this.gameService.findContentByCode(gameCode)) ?? {} : {};
-    const roomTable = await this.prisma.room.create({
+  async createRoom(authorId: number, gameCode: string): Promise<string> {
+    const gameVersion = await this.gameService.findLastVersionByCode(gameCode);
+    if (!gameVersion) {
+      throw new BadRequestException('Game not found');
+    }
+
+    const roomTable = await this.prismaService.room.create({
       data: {
         authorId,
         type: 1,
+        RoomProgress: {
+          create: {
+            RoomProgressGameLoad: {
+              create: {
+                gameId: gameVersion.gameId,
+                gameVersion: gameVersion.version,
+              },
+            },
+          },
+        },
+      },
+      include: {
+        RoomProgress: true,
       },
     });
 
+    const pgSave = gameVersion.content as PlaygroundStateSave;
     return await this.startRoomSimulation(roomTable.code, pgSave);
   }
 
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
-    const usersRooms = await this.prisma.user.findFirst({
+    const usersRooms = await this.prismaService.user.findFirst({
       where: {
         code: userCode,
       },
@@ -90,46 +111,138 @@ export class RoomsService {
       throw new BadRequestException('Room already started');
     }
 
-    const roomProgress = await this.prisma.room.findFirst({
-      where: {
-        code: roomCode,
-      },
-      include: {
-        RoomProgress: {
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
-      },
-    });
-
-    if (!roomProgress) {
-      throw new BadRequestException('Room not found');
-    }
-
-    if (!roomProgress.RoomProgress?.[0]) {
-      throw new BadRequestException('No saved progress');
-    }
-
-    const pgSave = JSON.parse(roomProgress.RoomProgress[0].stateDelta as string) as PlaygroundStateSave;
-    return await this.startRoomSimulation(roomCode, pgSave);
-  }
-
-  async saveRoomProgress(roomCode: string, stateDelta: PlaygroundStateSave) {
-    const room = await this.prisma.room.findFirst({
-      where: {
-        code: roomCode,
-      },
-    });
+    const room = await this.findRoomByCode(roomCode);
 
     if (!room) {
       throw new BadRequestException('Room not found');
     }
 
-    await this.prisma.roomProgress.create({
+    const lastState = await this.getRoomLastState(room.roomId);
+    const updates = await this.prismaService.roomProgressUpdate.findMany({
+      where: {
+        roomId: room.roomId,
+        order: {
+          gt: lastState.order,
+        },
+      },
+      orderBy: {
+        order: 'desc',
+      },
+    });
+
+    const pgSave = lastState.content;
+
+    updates.forEach(update => {
+      Simulation.mergeStateDelta(pgSave, update.content as PlaygroundStateUpdate);
+    });
+
+    return await this.startRoomSimulation(roomCode, pgSave);
+  }
+
+  private async getRoomLastState(roomId: number): Promise<{ order: number; content: PlaygroundStateSave }> {
+    const lastSave = await this.prismaService.roomProgressSave.findFirst({
+      where: {
+        roomId,
+      },
+      orderBy: {
+        order: 'desc',
+      },
+    });
+
+    if (lastSave) {
+      return {
+        order: 0,
+        content: lastSave.content as PlaygroundStateSave,
+      };
+    }
+    const gameLoad = await this.prismaService.roomProgressGameLoad.findFirst({
+      where: {
+        roomId,
+      },
+      include: {
+        GameVersion: true,
+      },
+      orderBy: {
+        order: 'desc',
+      },
+    });
+    if (!gameLoad) {
+      throw new BadRequestException('Room progress not found');
+    }
+    return {
+      order: gameLoad.order,
+      content: gameLoad.GameVersion.content as PlaygroundStateSave,
+    };
+  }
+
+  async saveRoomProgressUpdate(roomCode: string, stateUpdate: PlaygroundStateUpdate) {
+    const room = await this.findRoomByCode(roomCode);
+
+    if (!room) {
+      throw new BadRequestException('Room not found');
+    }
+
+    await this.prismaService.roomProgress.create({
       data: {
         roomId: room.roomId,
-        stateDelta: JSON.stringify(stateDelta),
+        RoomProgressUpdate: {
+          create: {
+            content: stateUpdate as Prisma.InputJsonObject,
+          },
+        },
+      },
+      include: {
+        RoomProgressUpdate: true,
+      },
+    });
+  }
+
+  async saveRoomState(roomCode: string) {
+    const room = await this.findRoomByCode(roomCode);
+    const simulationRoom = RoomsService.rooms.get(roomCode);
+
+    if (!room || !simulationRoom) {
+      throw new BadRequestException('Room not found');
+    }
+
+    const pgSave = simulationRoom.simulation.toStateSave();
+
+    await this.prismaService.roomProgress.create({
+      data: {
+        roomId: room.roomId,
+        RoomProgressSave: {
+          create: {
+            content: pgSave as Prisma.InputJsonObject,
+          },
+        },
+      },
+    });
+  }
+
+  async saveRoomGameLoad(roomCode: string, gameId: number, gameVersion: number) {
+    const room = await this.findRoomByCode(roomCode);
+
+    if (!room) {
+      throw new BadRequestException('Room not found');
+    }
+
+    await this.prismaService.roomProgress.create({
+      data: {
+        roomId: room.roomId,
+        RoomProgressGameLoad: {
+          create: {
+            gameId,
+            gameVersion,
+          },
+        },
+      },
+    });
+  }
+
+  async findRoomByCode(roomCode: string): Promise<Room | null> {
+    return await this.prismaService.room.findFirst({
+      where: {
+        code: roomCode,
       },
     });
   }

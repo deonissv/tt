@@ -4,10 +4,12 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Vector3 } from '@babylonjs/core/Maths/math';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 
-import { ActorState, ActorStateUpdate, PlaygroundStateUpdate, Transformation, WS } from '@shared/index';
+import { PlaygroundStateUpdate, WS } from '@shared/index';
 import { Loader } from './loader';
 import { PointerDragBehavior } from '@babylonjs/core/Behaviors/Meshes/pointerDragBehavior';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
+import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
+import { Transformation } from '@shared/dto/pg/transformation';
 
 export default class Actor extends TransformNode {
   public guid: string;
@@ -55,7 +57,7 @@ export default class Actor extends TransformNode {
   //     // console.log(this.__targetPosition.asArray(), diff.asArray(), this.position.asArray());
 
   //     const len = diff.length();
-  //     if (len < PRECISION_DELTA) {
+  //     if (len < PRECISION_EPSILON) {
   //       this.__targetPosition = null;
   //       this._body.setLinearVelocity(Vector3.Zero());
   //       this._body.setAngularVelocity(Vector3.Zero());
@@ -88,7 +90,7 @@ export default class Actor extends TransformNode {
 
       const cursorDX = this.__cursorPos[0] - prevCursorPos[0];
       const cursorDY = this.__cursorPos[1] - prevCursorPos[1];
-      const sensetivity = 0.02;
+      const sensitivity = 0.02;
 
       const dx = Math.cos(this.__camera.alpha) * cursorDY + Math.sin(this.__camera.alpha) * cursorDX;
       const dy = -Math.cos(this.__camera.alpha) * cursorDX + Math.sin(this.__camera.alpha) * cursorDY;
@@ -98,7 +100,7 @@ export default class Actor extends TransformNode {
           {
             guid: this.guid,
             transformation: {
-              position: [dx * sensetivity, 0, dy * sensetivity],
+              position: [dx * sensitivity, 0, dy * sensitivity],
             },
           },
         ],

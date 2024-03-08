@@ -8,8 +8,8 @@ import { useAppSelector } from '../../store/store';
 const frameRate = 60;
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
-  const [ws, setWs] = useState<WebSocket>();
-  const [updatePgStateInterval, setUpdatePgStateInterval] = useState<NodeJS.Timeout>();
+  const ws = useRef<WebSocket>();
+  const updatePgStateInterval = useRef<NodeJS.Timeout>();
 
   const cursor: [number, number] = [0, 0];
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -21,13 +21,13 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
     return playground;
   };
 
-  const init = useCallback(async (): Promise<[WebSocket, string, Playground]> => {
-    const [ws, id, pgState] = await RoomService.connect(roomId, nickname);
-    setWs(ws);
+  const init = useCallback(async (): Promise<[string, Playground]> => {
+    const [_ws, id, pgState] = await RoomService.connect(roomId, nickname);
+    ws.current = _ws;
 
-    const pg = await babylonInit(pgState, ws);
+    const pg = await babylonInit(pgState, ws.current);
 
-    ws.addEventListener('message', event => {
+    ws.current.addEventListener('message', event => {
       const message = WS.read(event);
 
       switch (message.type) {
@@ -45,38 +45,40 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
       }
     });
 
-    return [ws, id, pg];
+    return [id, pg];
   }, [nickname, roomId]);
 
-  const sendUpdate = (ws: WebSocket, pgStateUpdate: PlaygroundStateUpdate) => {
-    WS.send(ws, {
-      type: WS.UPDATE,
-      payload: pgStateUpdate,
-    });
+  const sendUpdate = (pgStateUpdate: PlaygroundStateUpdate) => {
+    ws.current &&
+      WS.send(ws.current, {
+        type: WS.UPDATE,
+        payload: pgStateUpdate,
+      });
   };
 
   useEffect(() => {
     init()
-      .then(([ws_, id]) => {
+      .then(([id]) => {
         canvas.current!.addEventListener('pointermove', event => {
           cursor[0] = event.clientX;
           cursor[1] = event.clientY;
         });
 
-        const interval = setInterval(() => {
+        updatePgStateInterval.current = setInterval(() => {
           const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
-          sendUpdate(ws_, pgStateUpdate);
+          sendUpdate(pgStateUpdate);
         }, 1000 / frameRate);
-        setUpdatePgStateInterval(interval);
       })
       // eslint-disable-next-line no-console
       .catch(console.error);
-
-    return () => {
-      updatePgStateInterval && clearInterval(updatePgStateInterval);
-      ws?.close();
-    };
   }, []);
+
+  useEffect(() => {
+    return () => {
+      updatePgStateInterval && clearInterval(updatePgStateInterval.current);
+      ws.current?.close();
+    };
+  }, [ws, updatePgStateInterval]);
 
   return (
     <>

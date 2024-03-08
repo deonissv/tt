@@ -1,4 +1,4 @@
-import { Transformation } from '@shared/PlaygroundState';
+import { Transformation } from '@shared/dto/pg/transformation';
 
 export const ACTOR_UPDATE = 'ACTOR_UPDATE';
 

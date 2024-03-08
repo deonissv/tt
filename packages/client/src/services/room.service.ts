@@ -5,7 +5,7 @@ import { LOADER_URL, WSS_URL } from '../config';
 import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
 
 export const RoomService = {
-  async createRoom(payload?: CreateRoomDto): Promise<string> {
+  async createRoom(payload: CreateRoomDto): Promise<string> {
     const response = await axios.post(LOADER_URL + 'rooms', payload, {
       headers: {
         Authorization: `Bearer ${document.cookie.split('=')[1]}`,

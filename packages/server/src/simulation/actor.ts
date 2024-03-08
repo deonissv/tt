@@ -1,5 +1,11 @@
-import { ActorState, ActorStateUpdate, Model, Transformation } from '@shared/PlaygroundState';
-import { LIFH_HIGHT, MOVEMENT_VELOCITY, PRECISION_DELTA, ROTATE_STEP, SCALE_KOEF } from '@shared/constants';
+import {
+  LIFH_HIGHT,
+  MASS_DEFAULT,
+  MOVEMENT_VELOCITY,
+  PRECISION_EPSILON,
+  ROTATE_STEP,
+  SCALE_KOEF,
+} from '@shared/constants';
 
 import {
   Axis,
@@ -15,8 +21,17 @@ import {
   Vector3,
 } from 'babylonjs';
 import { Loader } from '../loader';
+import { floatCompare } from '@shared/utils';
+import { Model } from '@shared/dto/pg/actorModel';
+import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
+import { Transformation } from '@shared/dto/pg/transformation';
 
 export default class Actor extends TransformNode {
+  static DEFAULT_MASS = 1;
+  static DEFAULT_SCALE = [1, 1, 1];
+  static DEFAULT_ROTATION = [0, 0, 0];
+  static DEFAULT_POSITION = [0, 0, 0];
+
   public guid: string;
 
   private __mass: number;
@@ -71,7 +86,7 @@ export default class Actor extends TransformNode {
       const diff = this.__targetPosition.subtract(this.position);
 
       const len = diff.length();
-      if (len < PRECISION_DELTA) {
+      if (len < PRECISION_EPSILON) {
         this.__targetPosition = null;
         this._body.setLinearVelocity(Vector3.Zero());
         this._body.setAngularVelocity(Vector3.Zero());
@@ -104,6 +119,10 @@ export default class Actor extends TransformNode {
     const vectorsWorld = this.vectorsWorld;
     const h = Math.abs(vectorsWorld[1].y - vectorsWorld[0].y);
     return h;
+  }
+
+  get mass(): number {
+    return this.__mass;
   }
 
   private _setMass(mass: number) {
@@ -197,15 +216,65 @@ export default class Actor extends TransformNode {
     return actor;
   }
 
-  toState(): ActorStateUpdate {
+  toState() {
     return {
       guid: this.guid,
+      name: this.name,
+      model: this.__stateModel,
       transformation: this.transformation,
       mass: this.__mass,
     };
   }
 
-  _toState(): ActorState {
+  toStateUpdate(actorState?: ActorState): ActorStateUpdate {
+    const currentState = this.toStateSave();
+
+    if (!actorState) {
+      return currentState;
+    }
+
+    const rv: ActorStateUpdate = {
+      guid: this.guid,
+    };
+
+    if (actorState.name !== this.name) {
+      rv.name = this.name;
+    }
+
+    if (!floatCompare(actorState.mass ?? MASS_DEFAULT, this.mass)) {
+      rv.mass = this.__mass;
+    }
+
+    const stateTransformation = {
+      scale: actorState.transformation?.scale ?? Actor.DEFAULT_SCALE,
+      rotation: actorState.transformation?.rotation ?? Actor.DEFAULT_ROTATION,
+      position: actorState.transformation?.position ?? Actor.DEFAULT_POSITION,
+    };
+
+    const updatePosition = stateTransformation.position.some(
+      (v, i) => !floatCompare(v, currentState.transformation?.position?.[i] ?? 0),
+    );
+
+    const updateRotation = stateTransformation.rotation.some(
+      (v, i) => !floatCompare(v, currentState.transformation?.rotation?.[i] ?? 0),
+    );
+
+    const updateScale = stateTransformation.scale.some(
+      (v, i) => !floatCompare(v, currentState.transformation?.rotation?.[i] ?? 1),
+    );
+
+    if (updatePosition || updateRotation || updateScale) {
+      rv.transformation = {
+        scale: updateScale ? stateTransformation.scale : undefined,
+        rotation: updateRotation ? stateTransformation.rotation : undefined,
+        position: updatePosition ? stateTransformation.position : undefined,
+      };
+    }
+
+    return rv;
+  }
+
+  toStateSave(): ActorState {
     return {
       guid: this.guid,
       name: this.name,
@@ -220,5 +289,27 @@ export default class Actor extends TransformNode {
       const pos = actorStateUpdate.transformation.position as [number, number, number];
       this.move(...pos);
     }
+  }
+
+  static applyStateUpdate(actorState: ActorState, actorStateUpdate: ActorStateUpdate): ActorState {
+    const mergedScale = actorStateUpdate.transformation?.scale ?? actorState.transformation?.scale;
+    const mergedPosition = actorStateUpdate.transformation?.position ?? actorState.transformation?.position;
+    const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
+
+    const rv: ActorState = {
+      guid: actorStateUpdate.guid,
+      model: actorStateUpdate.model ?? actorState.model,
+      name: actorStateUpdate.name ?? actorState.name,
+    };
+
+    if (mergedScale !== undefined || mergedPosition !== undefined || mergedRotation !== undefined) {
+      rv.transformation = {
+        scale: mergedScale,
+        rotation: mergedRotation,
+        position: mergedPosition,
+      };
+    }
+
+    return rv;
   }
 }

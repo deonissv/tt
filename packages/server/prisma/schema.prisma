@@ -61,12 +61,12 @@ model Game {
 }
 
 model GameVersion {
-  gameId       Int
-  version      Int            @default(autoincrement())
-  createdAt    DateTime       @default(now()) @db.Timestamp(6)
-  content      Json           @db.JsonB()
-  Game         Game           @relation(fields: [gameId], references: [gameId])
-  RoomProgress RoomProgress[]
+  gameId               Int
+  version              Int                    @default(autoincrement())
+  createdAt            DateTime               @default(now()) @db.Timestamp(6)
+  content              Json                   @db.JsonB()
+  Game                 Game                   @relation(fields: [gameId], references: [gameId])
+  RoomProgressGameLoad RoomProgressGameLoad[]
 
   @@id([gameId, version])
 }
@@ -82,26 +82,60 @@ model RoomUser {
 }
 
 model Room {
-  roomId       Int            @id @default(autoincrement())
-  code         String         @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  type         Int
-  authorId     Int
-  Message      Message[]
-  RoomProgress RoomProgress[]
-  RoomUsers    RoomUser[]
-  User         User           @relation(fields: [authorId], references: [userId])
+  roomId               Int                    @id @default(autoincrement())
+  code                 String                 @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type                 Int
+  authorId             Int
+  Messages             Message[]
+  RoomProgress         RoomProgress[]
+  RoomUsers            RoomUser[]
+  User                 User                   @relation(fields: [authorId], references: [userId])
+  RoomProgressSave     RoomProgressSave[]
+  RoomProgressUpdate   RoomProgressUpdate[]
+  RoomProgressGameLoad RoomProgressGameLoad[]
 }
 
 model RoomProgress {
-  order       Int          @default(autoincrement())
-  roomId      Int
-  turn        Int?
-  stateDelta  Json?        @db.JsonB()
-  createdAt   DateTime     @default(now()) @db.Timestamp(6)
-  gameId      Int?
-  gameVersion Int?
-  Room        Room         @relation(fields: [roomId], references: [roomId])
-  GameVersion GameVersion? @relation(fields: [gameId, gameVersion], references: [gameId, version])
+  roomId               Int
+  order                Int                   @default(autoincrement())
+  turn                 Int?
+  createdAt            DateTime              @default(now()) @db.Timestamp(6)
+  Room                 Room                  @relation(fields: [roomId], references: [roomId])
+  RoomProgressSave     RoomProgressSave?
+  RoomProgressUpdate   RoomProgressUpdate?
+  RoomProgressGameLoad RoomProgressGameLoad?
+
+  @@id([order, roomId])
+}
+
+model RoomProgressSave {
+  roomId       Int
+  order        Int
+  content      Json
+  Room         Room         @relation(fields: [roomId], references: [roomId])
+  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId])
+
+  @@id([order, roomId])
+}
+
+model RoomProgressUpdate {
+  roomId       Int
+  order        Int
+  content      Json         @db.JsonB()
+  Room         Room         @relation(fields: [roomId], references: [roomId])
+  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId])
+
+  @@id([order, roomId])
+}
+
+model RoomProgressGameLoad {
+  roomId       Int
+  order        Int
+  gameId       Int
+  gameVersion  Int
+  Room         Room         @relation(fields: [roomId], references: [roomId])
+  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId])
+  GameVersion  GameVersion  @relation(fields: [gameId, gameVersion], references: [gameId, version])
 
   @@id([order, roomId])
 }

@@ -1,6 +1,6 @@
 import 'babylonjs-loaders';
-import { Model } from '@shared/index';
 import { Mesh, Scene, SceneLoader } from 'babylonjs';
+import { Model } from '@shared/dto/pg/actorModel';
 
 export class Loader {
   static async loadModel(model: Model, scene: Scene): Promise<Mesh> {

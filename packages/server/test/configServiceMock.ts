@@ -6,6 +6,7 @@ export default {
       SALT_ROUNDS: '5',
       JWT_SECRET: 'secret',
       JWT_EXPIRES_IN: '24h',
+      NODE_ENV: 'test',
     };
     if (!env[key]) {
       throw new Error(`${key} is not set`);

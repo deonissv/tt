@@ -1,8 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 
-export class CreateRoomDto {
+export class RoomPreviewDto {
   @ApiProperty()
   @IsString()
-  gameCode: string;
+  saveName: string;
+
+  @ApiProperty()
+  @IsString()
+  saveCode: string;
 }

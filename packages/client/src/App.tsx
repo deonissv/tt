@@ -13,7 +13,7 @@ import Profile from './pages/Profile/Profile';
 const App = () => {
   const protectedRoutes = [
     {
-      path: 'room/:roomId',
+      path: 'room/:roomCode',
       element: <Room />,
     },
     {
@@ -36,7 +36,7 @@ const App = () => {
 
   return (
     <Routes>
-      <Route path="room/:roomId" element={<Room />} />
+      <Route path="room/:roomCode" element={<Room />} />
       <Route element={<Layout />}>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />

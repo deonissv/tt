@@ -1,5 +1,5 @@
 export * from './constants';
-export * from './PlaygroundState';
+export * from './dto/pg/playgroundState';
 export * from './ws';
 export * as WS from './ws';
 export * from './utils';
