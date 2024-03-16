@@ -1,2 +1,4 @@
-export const LOADER_URL = 'http://localhost:3000/';
-export const WSS_URL = 'ws://localhost:8081/';
+export const API_DOMAIN = 'localhost';
+export const API_PORT = 3000;
+export const LOADER_URL = `http://${API_DOMAIN}:${API_PORT}/`;
+export const WSS_URL = `ws://${API_DOMAIN}:${API_PORT}/`;

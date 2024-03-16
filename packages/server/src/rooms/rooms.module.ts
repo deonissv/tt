@@ -10,5 +10,6 @@ import { PermissionsService } from '../permissions.service';
   imports: [ConfigModule, GamesModule],
   providers: [RoomsService, PrismaService, PermissionsService],
   controllers: [RoomsController],
+  exports: [RoomsService],
 })
 export class RoomsModule {}

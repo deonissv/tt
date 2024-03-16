@@ -1,9 +1,6 @@
-import { createServer } from 'http';
-
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { SimulationRoom } from './simulation-room';
 import { PrismaService } from '../prisma.service';
-import { ConfigService } from '@nestjs/config';
 import { GamesService } from '../games/games.service';
 import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
 import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
@@ -16,36 +13,13 @@ export class RoomsService {
 
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly configService: ConfigService,
     private readonly gameService: GamesService,
-  ) {
-    const server = createServer();
-    server.on('upgrade', (request, socket, head) => {
-      const pathname = request.url!;
-      const roomId = pathname.split('/')[1];
-      if (!RoomsService.rooms.has(roomId)) {
-        socket.destroy();
-        return;
-      }
-      const wss = RoomsService.rooms.get(roomId)!.wss;
-      wss.handleUpgrade(request, socket, head, ws => {
-        wss.emit('connection', ws, request);
-      });
-
-      wss.on('close', _ws => {
-        RoomsService.rooms.delete(roomId);
-      });
-    });
-
-    if (configService.getOrThrow<string>('NODE_ENV') !== 'test') {
-      server.listen(configService.getOrThrow<string>('WS_PORT'));
-    }
-  }
+  ) {}
 
   async startRoomSimulation(roomCode: string, pgSave?: PlaygroundStateSave) {
     const room = new SimulationRoom(this, roomCode);
     await room.init(pgSave);
-    RoomsService.rooms.set(roomCode, room);
+    RoomsService.setRoom(room);
     return roomCode;
   }
 
@@ -107,7 +81,7 @@ export class RoomsService {
   }
 
   async startRoom(roomCode: string): Promise<string> {
-    if (RoomsService.rooms.has(roomCode)) {
+    if (RoomsService.hasRoom(roomCode)) {
       throw new BadRequestException('Room already started');
     }
 
@@ -199,7 +173,7 @@ export class RoomsService {
 
   async saveRoomState(roomCode: string) {
     const room = await this.findRoomByCode(roomCode);
-    const simulationRoom = RoomsService.rooms.get(roomCode);
+    const simulationRoom = RoomsService.getRoom(roomCode);
 
     if (!room || !simulationRoom) {
       throw new BadRequestException('Room not found');
@@ -245,5 +219,21 @@ export class RoomsService {
         code: roomCode,
       },
     });
+  }
+
+  static setRoom(room: SimulationRoom) {
+    RoomsService.rooms.set(room.id, room);
+  }
+
+  static getRoom(roomCode: string): SimulationRoom | undefined {
+    return RoomsService.rooms.get(roomCode);
+  }
+
+  static deleteRoom(roomCode: string) {
+    RoomsService.rooms.delete(roomCode);
+  }
+
+  static hasRoom(roomCode: string): boolean {
+    return RoomsService.rooms.has(roomCode);
   }
 }

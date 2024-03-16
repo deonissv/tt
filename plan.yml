@@ -23,12 +23,19 @@ TBD
 
 @TODO:
 - gameState defaults
-- websocket auth
-- importable / compatible with tts
+- websocket auth - custom handshake
+- importable / compatible with tts : compatible with tts
 - game save table
 
+
+-saving variables
 
 RoomProgress type:
 - 1 -  load
 - 2 -  save
 - 3 -  delta
+
+18.03 17:30
+- websocket auth - custom handshake
+- compatible with tts
+- save delta to game config

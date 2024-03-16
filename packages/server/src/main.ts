@@ -9,6 +9,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { mainConfig } from './main.config';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 async function initHavok() {
   const wasm = path.join(__dirname, '../../HavokPhysics.wasm');
@@ -21,6 +22,7 @@ async function bootstrap() {
   await initHavok();
 
   const app = await NestFactory.create(AppModule);
+  app.useWebSocketAdapter(new WsAdapter(app));
 
   mainConfig(app);
 

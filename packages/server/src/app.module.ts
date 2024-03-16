@@ -7,6 +7,7 @@ import { RoomsModule } from './rooms/rooms.module';
 import { GamesModule } from './games/games.module';
 import { MessagesModule } from './messages/messages.module';
 import { ConfigModule } from '@nestjs/config';
+import { EventsModule } from './events/events.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     GamesModule,
     MessagesModule,
+    EventsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
