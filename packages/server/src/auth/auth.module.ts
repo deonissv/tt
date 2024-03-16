@@ -28,6 +28,6 @@ import { PermissionsService } from '../permissions.service';
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PrismaService, PermissionsService, CaslAbilityFactory],
-  exports: [AuthService],
+  exports: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

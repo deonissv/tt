@@ -3,6 +3,7 @@ import { PlaygroundStateSave, WS } from '@shared/index';
 import axios from 'axios';
 import { LOADER_URL, WSS_URL } from '../config';
 import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
+import { getAccessToken } from '../utils';
 
 export const RoomService = {
   async createRoom(payload: CreateRoomDto): Promise<string> {
@@ -34,7 +35,7 @@ export const RoomService = {
   },
 
   async connect(roomId: string, nickname: string): Promise<[WebSocket, string, PlaygroundStateSave]> {
-    const ws = new WebSocket(WSS_URL + roomId);
+    const ws = new WebSocket(WSS_URL + roomId, `Bearer.${getAccessToken()}`);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
         const idListener = (event: MessageEvent) => {
