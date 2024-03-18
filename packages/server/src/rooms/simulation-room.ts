@@ -6,10 +6,6 @@ import { Simulation } from '../simulation/simulation';
 import { Client } from './client';
 import { RoomsService } from './rooms.service';
 
-const STATE_TICK_RATE = 60; // [hz]
-const STATE_TICK_INTERVAL = 1000 / STATE_TICK_RATE; // [ms]
-const SAVING_INTERVAL = 1000; // [ms]
-
 export class SimulationRoom {
   id: string;
   simulation: Simulation;
@@ -19,16 +15,22 @@ export class SimulationRoom {
   pgSave: PlaygroundStateSave | undefined;
   savingInterval: NodeJS.Timeout | undefined;
   tickInterval: NodeJS.Timeout | undefined;
+  savingDelay: number;
+  stateTickDelay: number;
 
   constructor(
     private readonly roomsService: RoomsService,
     id: string,
+    savingDelay: number,
+    stateTickDelay: number,
   ) {
     this.id = id;
     this.clients = new Map();
     this.cursors = new Map();
     this.wss = this.getServer();
     this.simulation = new Simulation();
+    this.savingDelay = savingDelay;
+    this.stateTickDelay = stateTickDelay;
   }
 
   async init(pgSave?: PlaygroundStateSave) {
@@ -115,13 +117,13 @@ export class SimulationRoom {
         await this.roomsService.saveRoomProgressUpdate(this.id, pgUpdate);
       }
       this.pgSave = pgSave;
-    }, SAVING_INTERVAL);
+    }, this.savingDelay);
   }
 
   initUpdate(): NodeJS.Timeout {
     return setInterval(() => {
       this.tick();
-    }, STATE_TICK_INTERVAL);
+    }, this.stateTickDelay);
   }
 
   private getDelta(): PlaygroundStateUpdate {

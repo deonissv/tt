@@ -86,6 +86,8 @@ model Room {
   code                 String                 @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type                 Int
   authorId             Int
+  savingDelay          Int                    @default(1000)
+  stateTickDelay       Int                    @default(1000)
   Messages             Message[]
   RoomProgress         RoomProgress[]
   RoomUsers            RoomUser[]

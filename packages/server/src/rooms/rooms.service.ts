@@ -16,8 +16,13 @@ export class RoomsService {
     private readonly gameService: GamesService,
   ) {}
 
-  async startRoomSimulation(roomCode: string, pgSave?: PlaygroundStateSave) {
-    const room = new SimulationRoom(this, roomCode);
+  async startRoomSimulation(
+    roomCode: string,
+    savingDelay: number,
+    stateTickDelay: number,
+    pgSave?: PlaygroundStateSave,
+  ) {
+    const room = new SimulationRoom(this, roomCode, savingDelay, stateTickDelay);
     await room.init(pgSave);
     RoomsService.setRoom(room);
     return roomCode;
@@ -50,7 +55,7 @@ export class RoomsService {
     });
 
     const pgSave = gameVersion.content as PlaygroundStateSave;
-    return await this.startRoomSimulation(roomTable.code, pgSave);
+    return await this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, pgSave);
   }
 
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
@@ -110,7 +115,7 @@ export class RoomsService {
       Simulation.mergeStateDelta(pgSave, update.content as PlaygroundStateUpdate);
     });
 
-    return await this.startRoomSimulation(roomCode, pgSave);
+    return await this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, pgSave);
   }
 
   private async getRoomLastState(roomId: number): Promise<{ order: number; content: PlaygroundStateSave }> {
