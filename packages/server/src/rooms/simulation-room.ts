@@ -5,6 +5,9 @@ import { Simulation } from '../simulation/simulation';
 
 import { Client } from './client';
 import { RoomsService } from './rooms.service';
+import { Logger } from '@nestjs/common';
+
+const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
 export class SimulationRoom {
   id: string;
@@ -13,10 +16,16 @@ export class SimulationRoom {
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, number[]>;
   pgSave: PlaygroundStateSave | undefined;
-  savingInterval: NodeJS.Timeout | undefined;
-  tickInterval: NodeJS.Timeout | undefined;
+  downloadProgress: WS.DownloadProgress;
+
   savingDelay: number;
   stateTickDelay: number;
+
+  savingInterval: NodeJS.Timeout | undefined;
+  tickInterval: NodeJS.Timeout | undefined;
+  closeTimeout: NodeJS.Timeout | undefined;
+
+  private static readonly logger = new Logger(SimulationRoom.name);
 
   constructor(
     private readonly roomsService: RoomsService,
@@ -28,35 +37,83 @@ export class SimulationRoom {
     this.clients = new Map();
     this.cursors = new Map();
     this.wss = this.getServer();
-    this.simulation = new Simulation();
     this.savingDelay = savingDelay;
     this.stateTickDelay = stateTickDelay;
+    this.pgSave = undefined;
+    this.downloadProgress = {
+      total: 0,
+      loaded: 0,
+      succeded: 0,
+      failed: 0,
+    };
   }
 
   async init(pgSave?: PlaygroundStateSave) {
-    await this.simulation.init(pgSave);
-    this.pgSave = pgSave;
+    this.downloadProgress.total = pgSave?.actorStates?.length ?? 0;
+    this.simulation = await Simulation.init(
+      pgSave ?? {},
+      () => {
+        this.downloadProgress.loaded++;
+
+        this.broadcast({
+          type: WS.DOWNLOAD_PROGRESS,
+          payload: this.downloadProgress,
+        } as WS.MSG);
+      },
+      _actorState => {
+        this.downloadProgress.succeded++;
+      },
+      _actorState => {
+        this.downloadProgress.failed++;
+      },
+    );
+
     this.simulation.start();
+    SimulationRoom.logger.log(`Room ${this.id} started.`);
+    try {
+      this.pgSave = this.simulation.toStateSave();
+    } catch (e) {
+      SimulationRoom.logger.error(e);
+    }
+    this.onSimulationInit();
+    SimulationRoom.logger.log(`Room ${this.id} initialized.`);
+  }
+
+  private onSimulationInit() {
+    for (const clientWs of this.clients.keys()) {
+      clientWs.onmessage = (event: WebSocket.MessageEvent) => {
+        this.onMessage(event);
+      };
+    }
+
+    this.broadcast({
+      type: WS.STATE,
+      payload: this.pgSave,
+    } as WS.MSG);
 
     this.savingInterval = this.initSaving();
+    this.tickInterval = this.initUpdate();
   }
 
   private getServer() {
     const wss = new WebSocket.Server({ noServer: true });
 
     wss.on('connection', async (ws: WebSocket) => {
-      const client = await Client.init(ws, this.pgSave!); // @TODO send actual state @TODO catch reject
+      const client = await Client.init(ws); // @TODO send actual state @TODO catch reject
+      this.closeTimeout && clearTimeout(this.closeTimeout);
+
       this.clients.set(ws, client);
 
-      ws.onmessage = (event: WebSocket.MessageEvent) => {
-        this.onMessage(event);
-      };
+      if (this.pgSave) {
+        WS.send(ws, {
+          type: WS.STATE,
+          payload: this.pgSave,
+        });
+      }
 
-      ws.onclose = async (event: WebSocket.CloseEvent) => {
-        await this.onClose(event);
+      ws.onclose = (event: WebSocket.CloseEvent) => {
+        this.onClose(event);
       };
-
-      this.tickInterval = this.initUpdate();
     });
     return wss;
   }
@@ -77,15 +134,23 @@ export class SimulationRoom {
     }
   }
 
-  private async onClose(event: WebSocket.CloseEvent) {
+  private onClose(event: WebSocket.CloseEvent) {
     this.clients.delete(event.target);
     this.cursors.delete(event.target);
     if (this.clients.size === 0) {
-      this.tickInterval && clearInterval(this.tickInterval);
-      this.savingInterval && clearInterval(this.savingInterval);
-      await this.roomsService.saveRoomState(this.id);
-      this.wss.close();
+      this.closeTimeout = setTimeout(() => {
+        if (this.clients.size === 0) {
+          this.closeRoom().catch(e => SimulationRoom.logger.error(e));
+        }
+      }, EMPTY_ROOM_PERSIST_DELAY);
     }
+  }
+
+  private async closeRoom() {
+    this.tickInterval && clearInterval(this.tickInterval);
+    this.savingInterval && clearInterval(this.savingInterval);
+    await this.roomsService.saveRoomState(this.id);
+    this.wss.close();
   }
 
   private tick() {
@@ -98,10 +163,12 @@ export class SimulationRoom {
       return acc;
     }, {});
 
-    const update: PlaygroundStateUpdate = {
-      ...this.getDelta(),
+    let update: PlaygroundStateUpdate = {
       cursorPositions: cursors,
     };
+
+    const delta = this.getDelta();
+    update = { ...update, ...delta };
 
     this.broadcast({
       type: WS.UPDATE,
@@ -109,7 +176,7 @@ export class SimulationRoom {
     });
   }
 
-  initSaving(): NodeJS.Timeout {
+  private initSaving(): NodeJS.Timeout {
     return setInterval(async () => {
       const pgSave = this.simulation.toStateSave();
       const pgUpdate = this.simulation.toStateUpdate(this.pgSave);
@@ -120,15 +187,20 @@ export class SimulationRoom {
     }, this.savingDelay);
   }
 
-  initUpdate(): NodeJS.Timeout {
+  private initUpdate(): NodeJS.Timeout {
     return setInterval(() => {
       this.tick();
     }, this.stateTickDelay);
   }
 
-  private getDelta(): PlaygroundStateUpdate {
+  private getDelta(): PlaygroundStateUpdate | null {
     const delta = this.simulation.toStateUpdate(this.pgSave);
+
+    if (Object.keys(delta).length === 0) {
+      return null;
+    }
     this.pgSave = this.simulation.toStateSave();
+
     return delta;
   }
 

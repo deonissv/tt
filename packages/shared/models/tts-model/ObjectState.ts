@@ -55,7 +55,7 @@ export interface ObjectState {
   FogReverseHiding?: boolean;
   FogSeethrough?: boolean;
   DeckIDs: number[];
-  CustomDeck: { [key: number]: CustomDeckState };
+  CustomDeck: Record<number, CustomDeckState>;
   CustomMesh: CustomMeshState;
   CustomImage: CustomImageState;
   CustomAssetbundle: CustomAssetbundleState;
@@ -81,6 +81,7 @@ export interface ObjectState {
   AttachedSnapPoints: SnapPointState[]; //Snap points that are stuck to this object, happens when placing a snap point on a locked object
   AttachedVectorLines: VectorLineState[]; // Vector lines that are stuck to this object, happens when drawing a vector line on a locked object
   AttachedDecals: DecalState[]; //Decals that are attached to this objects
-  States: { [key: number]: ObjectState }; //Objects can have multiple states which can be swapped between
+  States: Record<string, ObjectState>; //Objects can have multiple states which can be swapped between
   RotationValues: RotationValueState[]; //Rotation values are tooltip values tied to rotations
+  ChildObjects: ObjectState[];
 }

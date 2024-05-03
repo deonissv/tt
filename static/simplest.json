@@ -1,34 +1,47 @@
 {
-    "actorStates": [
-        {
-            "name": "Munchkin",
-            "guid": "1",
-            "transformation": {
-                "position": [
-                    0,
-                    50,
-                    0
-                ]
-            },
-            "mass": 1,
-            "model": {
-                "meshURL": "http://localhost:5500/munch.obj"
-            }
-        },
-        {
-            "name": "Munchkin",
-            "guid": "2",
-            "transformation": {
-                "position": [
-                    0,
-                    50,
-                    4
-                ]
-            },
-            "mass": 1,
-            "model": {
-                "meshURL": "http://localhost:5500/munch.obj"
-            }
-        }
-    ]
+  "table": {
+    "type": "custom",
+    "url": "http://cloud-3.steamusercontent.com/ugc/1010436537647666695/83BC360ECD5C2128DE5286B8367272DB1D96D14F/"
+  },
+  "actorStates": [
+    {
+      "name": "Munchkin",
+      "guid": "1",
+      "transformation": {
+        "position": [0, 50, 0]
+      },
+      "mass": 1,
+      "model": {
+        "meshURL": "http://localhost:5500/munch.obj"
+      }
+    },
+    {
+      "guid": "0f9227",
+      "name": "[00A164]Ротигус, Великий Нечистый",
+      "model": {
+        "meshURL": "http://localhost:5500/rothygus.obj",
+        "colliderURL": "http://localhost:5500/rothygus.obj"
+      },
+      "transformation": {
+        "scale": [1, 1, 1],
+        "position": [-10.9353037, 20.6019473, 87.02083],
+        "rotation": [0, 0, 0]
+      }
+    },
+    {
+      "guid": "6c95a9",
+      "name": "Custom_Model_Infinite_Bag",
+      "model": {
+        "meshURL": "http://pastebin.com/raw.php?i=1W5SPMe3",
+        "colliderURL": "http://pastebin.com/raw.php?i=ACv5AGPN",
+        "normalURL": "http://i.imgur.com/bkpi7zc.jpg",
+        "diffuseURL": "http://i.imgur.com/FMisrth.png"
+      },
+      "transformation": {
+        "scale": [0.905000031, 0.905000031, 0.905000031],
+        "position": [58.4391, 12.2183409, -8.5435915],
+        "rotation": [0.000009092958, 295.8001, -0.00000192609241]
+      }
+    }
+  ]
 }

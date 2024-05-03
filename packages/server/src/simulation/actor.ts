@@ -59,25 +59,25 @@ export default class Actor extends TransformNode {
     modelMesh.name = 'model';
     modelMesh.setParent(this);
 
-    const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, false, this._scene);
-    body.shape = new PhysicsShapeMesh(this.__model, this._scene);
+    // const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, false, this._scene);
+    // body.shape = new PhysicsShapeMesh(this.__model, this._scene);
 
-    this._body = body;
-    this._body.setMassProperties({
-      mass: this.__mass,
-      // centerOfMass: Vector3.Zero(),
-      // inertia: Vector3.Zero(),
-      inertia: Vector3.One(),
-      inertiaOrientation: Quaternion.Identity(),
-    });
+    // this._body = body;
+    // this._body.setMassProperties({
+    //   mass: this.__mass,
+    //   // centerOfMass: Vector3.Zero(),
+    //   // inertia: Vector3.Zero(),
+    //   inertia: Vector3.One(),
+    //   inertiaOrientation: Quaternion.Identity(),
+    // });
 
     this.__flipTranslate = 1;
     this._setTransformations(state?.transformation);
     // this._addDragBehavior();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this._scene.onBeforeRenderObservable.add(this._beforeRender.bind(this));
-    this._forceUpdate();
+    // this._scene.onBeforeRenderObservable.add(this._beforeRender.bind(this));
+    // this._forceUpdate();
   }
 
   private _beforeRender() {
@@ -210,8 +210,13 @@ export default class Actor extends TransformNode {
     });
   }
 
-  static async fromState(actorState: ActorState, scene: Scene): Promise<Actor> {
+  static async fromState(actorState: ActorState, scene: Scene): Promise<Actor | null> {
     const model = await Loader.loadModel(actorState.model, scene);
+
+    if (!model) {
+      return null;
+    }
+
     const actor = new Actor(actorState, model, scene);
     return actor;
   }
@@ -226,7 +231,7 @@ export default class Actor extends TransformNode {
     };
   }
 
-  toStateUpdate(actorState?: ActorState): ActorStateUpdate {
+  toStateUpdate(actorState?: ActorState): ActorStateUpdate | null {
     const currentState = this.toStateSave();
 
     if (!actorState) {
@@ -260,7 +265,7 @@ export default class Actor extends TransformNode {
     );
 
     const updateScale = stateTransformation.scale.some(
-      (v, i) => !floatCompare(v, currentState.transformation?.rotation?.[i] ?? 1),
+      (v, i) => !floatCompare(v, currentState.transformation?.scale?.[i] ?? 1),
     );
 
     if (updatePosition || updateRotation || updateScale) {
@@ -269,6 +274,10 @@ export default class Actor extends TransformNode {
         rotation: updateRotation ? stateTransformation.rotation : undefined,
         position: updatePosition ? stateTransformation.position : undefined,
       };
+    }
+
+    if (Object.keys(rv).length === 1) {
+      return null;
     }
 
     return rv;

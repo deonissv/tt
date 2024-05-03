@@ -9,7 +9,7 @@ export const RoomService = {
   async createRoom(payload: CreateRoomDto): Promise<string> {
     const response = await axios.post(LOADER_URL + 'rooms', payload, {
       headers: {
-        Authorization: `Bearer ${document.cookie.split('=')[1]}`,
+        Authorization: `Bearer ${getAccessToken()}`,
       },
     });
     return response.data as string;
@@ -18,7 +18,7 @@ export const RoomService = {
   async getUserRooms(code: string): Promise<RoomPreviewDto[]> {
     const response = await axios.get(LOADER_URL + `rooms/${code}`, {
       headers: {
-        Authorization: `Bearer ${document.cookie.split('=')[1]}`,
+        Authorization: `Bearer ${getAccessToken()}`,
       },
     });
     return response.data as RoomPreviewDto[];
@@ -27,7 +27,7 @@ export const RoomService = {
   async startRoom(code: string): Promise<string> {
     const response = await axios.post(LOADER_URL + `rooms/start/${code}`, null, {
       headers: {
-        Authorization: `Bearer ${document.cookie.split('=')[1]}`,
+        Authorization: `Bearer ${getAccessToken()}`,
       },
     });
 

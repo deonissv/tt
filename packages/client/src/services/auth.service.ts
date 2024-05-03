@@ -1,10 +1,9 @@
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
 import { LOADER_URL } from '../config';
 import { SignInDto } from '@shared/dto/auth/sign-in.dto';
 import { CreateUserDto } from '@shared/dto/users/create-user.dto';
 import { AccessTokenDto } from '@shared/dto/auth/access-token';
-import { resetAccessToken } from '../utils';
+import { getAccessToken, resetAccessToken } from '../utils';
 import { JWT } from '@shared/dto/auth/jwt';
 
 export const AuthService = {
@@ -23,14 +22,22 @@ export const AuthService = {
   },
 
   authorized(): JWT | null {
-    const token = document.cookie.split('=')[1];
+    const token = getAccessToken();
     if (!token) {
       return null;
     }
-    const decoded = jwtDecode<JWT>(token);
+    const decoded = this.decode(token);
     if (!decoded || decoded.exp * 1000 < Date.now()) {
       return null;
     }
     return decoded;
+  },
+
+  decode(token: string): JWT | null {
+    try {
+      return JSON.parse(window.atob(token.split('.')[1])) as JWT;
+    } catch (e) {
+      return null;
+    }
   },
 };

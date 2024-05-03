@@ -6,9 +6,11 @@ import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
 import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
 import { Prisma, Room } from '@prisma/client';
 import { Simulation } from '../simulation/simulation';
+import { Logger } from 'testcontainers/build/common';
 
 @Injectable()
 export class RoomsService {
+  private readonly logger = new Logger(RoomsService.name);
   static rooms = new Map<string, SimulationRoom>();
 
   constructor(
@@ -16,14 +18,9 @@ export class RoomsService {
     private readonly gameService: GamesService,
   ) {}
 
-  async startRoomSimulation(
-    roomCode: string,
-    savingDelay: number,
-    stateTickDelay: number,
-    pgSave?: PlaygroundStateSave,
-  ) {
+  startRoomSimulation(roomCode: string, savingDelay: number, stateTickDelay: number, pgSave?: PlaygroundStateSave) {
     const room = new SimulationRoom(this, roomCode, savingDelay, stateTickDelay);
-    await room.init(pgSave);
+    room.init(pgSave).catch((e: Error) => this.logger.error(e.message));
     RoomsService.setRoom(room);
     return roomCode;
   }
@@ -55,7 +52,7 @@ export class RoomsService {
     });
 
     const pgSave = gameVersion.content as PlaygroundStateSave;
-    return await this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, pgSave);
+    return this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, pgSave);
   }
 
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
@@ -115,7 +112,7 @@ export class RoomsService {
       Simulation.mergeStateDelta(pgSave, update.content as PlaygroundStateUpdate);
     });
 
-    return await this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, pgSave);
+    return this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, pgSave);
   }
 
   private async getRoomLastState(roomId: number): Promise<{ order: number; content: PlaygroundStateSave }> {

@@ -1,17 +1,30 @@
 import { Scene } from '@babylonjs/core/scene';
 import { Nullable } from '@babylonjs/core/types';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { Vector3 } from '@babylonjs/core/Maths/math';
+import { Color3, Vector3 } from '@babylonjs/core/Maths/math';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 
-import { PlaygroundStateUpdate, WS } from '@shared/index';
+import { PlaygroundStateUpdate } from '@shared/index';
 import { Loader } from './loader';
 import { PointerDragBehavior } from '@babylonjs/core/Behaviors/Meshes/pointerDragBehavior';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
 import { Transformation } from '@shared/dto/pg/transformation';
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { MultiMaterial } from '@babylonjs/core/Materials/multiMaterial';
+
+// import TtMesh from './ttMesh';
+// import { Model } from '@shared/dto/pg/actorModel';
+
+// interface ActorMeshModel {
+//   name: string;
+//   model: Model;
+//   children?: ActorMeshModel[];
+// }
 
 export default class Actor extends TransformNode {
+  private static ColorMaterials = new Map<string, Promise<StandardMaterial | null>>();
+
   public guid: string;
   public buffer: Record<number, number[]> = {};
 
@@ -22,25 +35,23 @@ export default class Actor extends TransformNode {
   private __cursorPos: [number, number] = [0, 0];
   private __camera: ArcRotateCamera;
 
-  private ws: WebSocket;
-
-  constructor(state: ActorState, modelMesh: Mesh, colliderMesh?: Mesh, scene?: Nullable<Scene>, ws?: WebSocket) {
-    super(state.name, scene, true);
+  constructor(state: ActorState, modelMesh: Mesh, colliderMesh?: Mesh, scene?: Nullable<Scene>) {
+    const name = `${state.guid}: ${state.name}`;
+    super(name, scene, true);
     this.guid = state.guid;
-    this.ws = ws!;
 
     this._scene = scene!;
     this.__camera = this._scene.activeCamera as ArcRotateCamera;
     this.__model = modelMesh;
 
-    modelMesh.name = 'model';
+    modelMesh.name = `${state.guid}: model`;
     modelMesh.setParent(this);
     this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
 
-    if (state.transformation?.scale) {
-      this.__model.scaling = new Vector3(...state.transformation.scale);
-      this.__collider.scaling = new Vector3(...state.transformation.scale);
-    }
+    // if (state.transformation?.scale) {
+    //   this.__model.scaling = new Vector3(...state.transformation.scale);
+    //   this.__collider.scaling = new Vector3(...state.transformation.scale);
+    // }
 
     this.update(state);
 
@@ -105,10 +116,15 @@ export default class Actor extends TransformNode {
           },
         ],
       };
-      WS.send(this.ws, {
-        type: WS.UPDATE,
-        payload: pgStateUpdate,
-      });
+
+      const event = new CustomEvent('onDrag', { detail: pgStateUpdate });
+
+      this._scene.getEngine().getRenderingCanvas()?.dispatchEvent(event);
+
+      // WS.send(this.ws, {
+      //   type: WS.UPDATE,
+      //   payload: pgStateUpdate,
+      // });
     });
 
     this.addBehavior(pointerDragBehavior);
@@ -122,6 +138,10 @@ export default class Actor extends TransformNode {
     const vectorsWorld = this.vectorsWorld;
     const h = Math.abs(vectorsWorld[1].y - vectorsWorld[0].y);
     return h;
+  }
+
+  get model(): Mesh {
+    return this.__model;
   }
 
   private _getColliderMesh(modelMesh: Mesh, colliderMesh?: Mesh): Mesh {
@@ -152,12 +172,6 @@ export default class Actor extends TransformNode {
     this.__targetPosition = pos.add(new Vector3(dx, dy, dz));
   }
 
-  static async fromState(actorState: ActorState, scene: Scene, ws: WebSocket): Promise<Actor> {
-    const [modelMesh, colliderMesh] = await Loader.loadModel(actorState.model, scene);
-    const actor = new Actor(actorState, modelMesh, colliderMesh, scene, ws);
-    return actor;
-  }
-
   update(actorStateUpdate: ActorStateUpdate) {
     if (actorStateUpdate.transformation?.scale) {
       this.scaling = new Vector3(...actorStateUpdate.transformation.scale);
@@ -169,4 +183,99 @@ export default class Actor extends TransformNode {
       this.position = new Vector3(...actorStateUpdate.transformation.position);
     }
   }
+
+  static async fromState(actorState: ActorState, scene: Scene): Promise<Actor | null> {
+    const modelMesh = await Actor.modelFromState(actorState, scene);
+    if (!modelMesh) {
+      return null;
+    }
+
+    const colliderMesh = await Actor.colliderFromState(actorState, scene);
+    if (!colliderMesh) {
+      return null;
+    }
+
+    const actor = new Actor(actorState, modelMesh, colliderMesh, scene);
+    return actor;
+  }
+
+  static async modelFromState(actorState: ActorState, scene: Scene): Promise<Mesh | null> {
+    const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model, scene);
+
+    if (!modelMesh) {
+      return null;
+    }
+
+    if (modelMesh.material && actorState.colorDiffuse) {
+      const stMaterial = modelMesh.material as StandardMaterial;
+      stMaterial.diffuseColor = new Color3(...actorState.colorDiffuse.slice(0, 3));
+      if (actorState.colorDiffuse.length > 3) {
+        stMaterial.alpha = actorState.colorDiffuse[3];
+      }
+    }
+
+    let childMeshes: Mesh[] = [];
+    if (actorState?.children) {
+      const loadedMeshes = await Promise.all(actorState.children.map(child => Actor.modelFromState(child, scene)));
+      childMeshes = loadedMeshes.filter(mesh => mesh !== null);
+    }
+
+    const mesh = Mesh.MergeMeshes([modelMesh, ...childMeshes], true, true, undefined, true, true)!;
+    mesh.setEnabled(true);
+    mesh.name = actorState.name;
+    return mesh;
+  }
+
+  static async colliderFromState(actorState: ActorState, scene: Scene): Promise<Mesh | null> {
+    const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model, scene);
+
+    if (!colliderMesh) {
+      return null;
+    }
+
+    let childMeshes: Mesh[] = [];
+    if (actorState?.children) {
+      const loadedMeshes = await Promise.all(actorState.children.map(child => Actor.colliderFromState(child, scene)));
+      childMeshes = loadedMeshes.filter(mesh => mesh !== null);
+    }
+
+    const mesh = Mesh.MergeMeshes([colliderMesh, ...childMeshes], true, true, undefined, true, true)!;
+    mesh.setEnabled(true);
+    mesh.name = actorState.name;
+    return mesh;
+  }
+  // static async modelFromState(actorState: ActorState, scene: Scene, parent?: Mesh): Promise<Mesh> {
+  //   const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model, scene);
+
+  //   if (parent) {
+  //     modelMesh.name = actorState.name;
+  //     modelMesh.setParent(parent);
+  //   } else {
+  //     modelMesh.name = `model-${actorState.name}`;
+  //   }
+
+  //   if (actorState.children) {
+  //     await Promise.all(actorState.children.map(child => Actor.modelFromState(child, scene, modelMesh)));
+  //   }
+
+  //   modelMesh.setEnabled(true);
+  //   return modelMesh;
+  // }
+
+  //   static async colliderFromState(actorState: ActorState, scene: Scene, parent?: Mesh): Promise<Mesh> {
+  //     const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model, scene);
+
+  //     if (parent) {
+  //       colliderMesh.name = actorState.name;
+  //       colliderMesh.setParent(parent);
+  //     } else {
+  //       colliderMesh.name = `collider-${actorState.name}`;
+  //     }
+
+  //     if (actorState.children) {
+  //       await Promise.all(actorState.children.map(child => Actor.colliderFromState(child, scene, colliderMesh)));
+  //     }
+
+  //     return colliderMesh;
+  //   }
 }

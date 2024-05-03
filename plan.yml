@@ -39,3 +39,34 @@ RoomProgress type:
 - websocket auth - custom handshake
 - compatible with tts
 - save delta to game config
+
+03.04 18:30
+- tts save parsing
+- assets
+- lua to js research
+
+17.04 18:30
+x- buggy texturesw (drukhari)
+x- rothigus
+x- dragar
+
+08.05 18:30
+o- ColorDiffuse
+
+- special tts objects
+  - boards
+  - bags (containers)
+  - desks
+  - dice  
+  - pdfs
+  - zones
+  - pointers
+  - buttons
+
+- loading screen
+
+- physics
+- lua to js research
+
+@TODO
+-TEXT

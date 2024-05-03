@@ -5,7 +5,6 @@ import { Engine } from '@babylonjs/core/Engines/engine';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
 import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
-import { CreateGround } from '@babylonjs/core/Meshes/Builders/groundBuilder';
 
 // Side efects
 import '@babylonjs/core/Culling/ray';
@@ -17,7 +16,7 @@ import '@babylonjs/core/Physics/physicsEngineComponent'; // enablePhysics
 // WebGPU Extensions
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
+// import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.computeShader';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.cubeTexture';
@@ -34,7 +33,7 @@ import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.storageBuffer';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
-// import { Inspector } from '@babylonjs/inspector';
+import { Inspector } from '@babylonjs/inspector';
 
 import { PlaygroundScene } from './playgroundScene';
 
@@ -42,6 +41,9 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
 import { PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
 import Actor from './actor';
+import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
+import { Loader } from './loader';
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 
 export default class Playground {
   private _scene: Scene;
@@ -54,14 +56,25 @@ export default class Playground {
     this._scene = scene;
     this._hll = new HighlightLayer('hll', this._scene); // @TODO change glow to thin solid line
 
-    // Inspector.Show(this._scene, {});
+    Inspector.Show(this._scene, {});
   }
 
-  static async init(canvas: HTMLCanvasElement, stateSave: PlaygroundStateSave, ws: WebSocket): Promise<Playground> {
+  static async init(canvas: HTMLCanvasElement, stateSave: PlaygroundStateSave): Promise<Playground> {
     const engine = await this.initEngine(canvas);
     const scene = await PlaygroundScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem);
 
-    const ground = CreateGround('___ground', { width: 100, height: 100 }, scene);
+    const ground = CreatePlane('___ground', { width: 100, height: 70 }, scene);
+    ground.rotation.x = Math.PI / 2;
+    if (stateSave.table?.url) {
+      const texture = await Loader._loadTexture(stateSave.table.url, scene);
+      if (texture) {
+        const material = new StandardMaterial('___ground-material', scene);
+        material.diffuseTexture = texture;
+        ground.material = material;
+      }
+    }
+
+    // const ground = CreateGround('___ground', { width: 100, height: 100 }, scene);
     ground.isPickable = false;
 
     engine.runRenderLoop(() => {
@@ -72,7 +85,7 @@ export default class Playground {
     });
 
     const pg = new Playground(scene);
-    await pg.loadState(stateSave, ws);
+    await pg.loadState(stateSave);
 
     // pg._handlePick();
 
@@ -165,8 +178,8 @@ export default class Playground {
   //   });
   // }
 
-  async loadState(state: PlaygroundStateSave, ws: WebSocket) {
-    await Promise.all((state?.actorStates ?? []).map(actorState => Actor.fromState(actorState, this._scene, ws)));
+  async loadState(state: PlaygroundStateSave) {
+    await Promise.all((state?.actorStates ?? []).map(actorState => Actor.fromState(actorState, this._scene)));
   }
 
   update(pgUpdate: PlaygroundStateUpdate) {

@@ -1,5 +1,7 @@
 import Input from '@components/Input';
 import { GameService } from '@services/game.service';
+import { PlaygroundStateSave } from '@shared/index';
+import { parseTtsSave } from 'client/src/utils';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,11 +26,21 @@ export const CreateGame = () => {
     navigate('/');
   };
 
+  const parseGameText = (text: string): PlaygroundStateSave => {
+    const ttsGame = parseTtsSave(text);
+    if (ttsGame) {
+      return ttsGame;
+    }
+    return JSON.parse(text) as PlaygroundStateSave; // @TODO add validation
+  };
+
   const readFile = (file: File) => {
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = result => {
-      setContent(JSON.stringify(JSON.parse(result?.target?.result as string)));
+      const text = result?.target?.result as string;
+      setContent(JSON.stringify(parseGameText(text)));
+      
     };
   };
 

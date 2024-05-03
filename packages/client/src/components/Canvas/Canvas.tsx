@@ -35,7 +35,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
           const pgStateUpdate = message.payload;
           pg.update(pgStateUpdate);
           if (pgStateUpdate.cursorPositions) {
-            pg.update(pgStateUpdate);
+            // pg.update(pgStateUpdate);
             setCursors(prev => ({ ...prev, ...pgStateUpdate.cursorPositions }));
           }
           break;
@@ -49,11 +49,11 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   }, [nickname, roomId]);
 
   const sendUpdate = (pgStateUpdate: PlaygroundStateUpdate) => {
-    ws.current &&
-      WS.send(ws.current, {
-        type: WS.UPDATE,
-        payload: pgStateUpdate,
-      });
+    // ws.current &&
+    //   WS.send(ws.current, {
+    //     type: WS.UPDATE,
+    //     payload: pgStateUpdate,
+    //   });
   };
 
   useEffect(() => {
@@ -62,6 +62,14 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
         canvas.current!.addEventListener('pointermove', event => {
           cursor[0] = event.clientX;
           cursor[1] = event.clientY;
+        });
+
+        canvas.current!.addEventListener('onDrag', event => {
+          const pgStateUpdate = (event as CustomEvent).detail as PlaygroundStateUpdate;
+          WS.send(ws.current!, {
+            type: WS.UPDATE,
+            payload: pgStateUpdate,
+          });
         });
 
         updatePgStateInterval.current = setInterval(() => {

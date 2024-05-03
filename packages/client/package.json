@@ -9,7 +9,7 @@
     "build": "webpack --config webpack.js",
     "build:v": "vite build",
     "start": "vite preview",
-    "dev": "cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite",
+    "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite",
     "test": "echo \"Error: no test specified\" && exit 1",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
@@ -44,7 +44,6 @@
     "@mui/material": "^5.14.8",
     "@reduxjs/toolkit": "^1.9.7",
     "axios": "^1.4.0",
-    "jwt-decode": "^4.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.3"

@@ -17,25 +17,47 @@ import {
 import { GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
 import Actor from './actor';
 import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
+import * as _ from 'lodash';
 
 export class Simulation {
   private engine: NullEngine;
   private scene: Scene;
+  private initialState: PlaygroundStateSave;
 
-  constructor() {
+  constructor(initialState: PlaygroundStateSave) {
     this.engine = new NullEngine();
     this.scene = new Scene(this.engine);
-    new ArcRotateCamera('Camera', 0, 0.8, 100, Vector3.Zero(), this.scene);
+    this.initialState = initialState;
+
+    this.scene.createDefaultCameraOrLight(true, true, false);
   }
 
-  async init(stateSave?: PlaygroundStateSave) {
-    this.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? false : stateSave.leftHandedSystem;
-    this.initPhysics(stateSave?.gravity);
-    const ground = CreateGround('___ground', { width: 100, height: 100 }, this.scene);
+  static async init(
+    stateSave: PlaygroundStateSave,
+    onModelLoaded: () => void,
+    onSucceed?: (ActorState) => void,
+    onFailed?: (ActorState) => void,
+  ): Promise<Simulation> {
+    const sim = new Simulation(stateSave);
+    sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : stateSave.leftHandedSystem;
+    // sim.initPhysics(stateSave?.gravity);
+    const ground = CreateGround('___ground', { width: 100, height: 100 }, sim.scene);
     ground.isPickable = false;
-    new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, this.scene);
+    // new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, sim.scene);
 
-    await Promise.all((stateSave?.actorStates ?? []).map(actorState => Actor.fromState(actorState, this.scene)));
+    await Promise.all(
+      (stateSave?.actorStates ?? []).map(async actorState => {
+        const actor = await Actor.fromState(actorState, sim.scene);
+        if (actor) {
+          onSucceed && onSucceed(actorState);
+        } else {
+          onFailed && onFailed(actorState);
+        }
+        onModelLoaded();
+      }),
+    );
+
+    return sim;
   }
 
   start() {
@@ -48,8 +70,8 @@ export class Simulation {
 
   update(pgUpdate: PlaygroundStateUpdate) {
     pgUpdate?.actorStates?.forEach(actorState => {
-      const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor;
-      actor.update(actorState);
+      const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor | undefined;
+      actor?.update(actorState);
     });
   }
 
@@ -58,9 +80,17 @@ export class Simulation {
     this.scene.meshes.forEach(mesh => {
       if (mesh.parent instanceof Actor) {
         const actorState = pgState?.actorStates?.find(actorState => actorState.guid === (mesh.parent as Actor).guid);
-        actorStates.push(mesh.parent.toStateUpdate(actorState));
+        const stateUpdate = mesh.parent.toStateUpdate(actorState);
+        if (stateUpdate) {
+          actorStates.push(stateUpdate);
+        }
       }
     });
+
+    if (actorStates.length === 0) {
+      return {};
+    }
+
     return {
       actorStates: actorStates,
     };
@@ -77,14 +107,22 @@ export class Simulation {
     if (actorStates.length === 0) {
       return {};
     }
+
     return {
-      actorStates: actorStates,
+      ...this.initialState,
+      actorStates: actorStates.map(state => {
+        const initActorState = this.initialState.actorStates!.find(actorState => actorState.guid === state.guid);
+        return {
+          ...initActorState,
+          ...state,
+        };
+      }),
     };
   }
 
   private initPhysics(gravity = GRAVITY) {
     const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, gravity, 0);
+    const gravityVec = new Vector3(0, 0, 0);
 
     this.scene.enablePhysics(gravityVec, hp);
   }

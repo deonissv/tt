@@ -6,6 +6,14 @@ export const NICKNAME = 'nickname';
 export const STATE = 'state';
 export const CURSOR = 'cursor';
 export const UPDATE = 'update';
+export const DOWNLOAD_PROGRESS = 'downloadProgress';
+
+export interface DownloadProgress {
+  loaded: number;
+  total: number;
+  succeded: number;
+  failed: number;
+}
 
 export type MSG =
   | {
@@ -19,6 +27,10 @@ export type MSG =
   | {
       type: typeof UPDATE;
       payload: PlaygroundStateUpdate;
+    }
+  | {
+      type: typeof DOWNLOAD_PROGRESS;
+      payload: DownloadProgress;
     };
 
 export const send = (ws: WebSocket | ws.WebSocket, msg: MSG) => {
