@@ -46,22 +46,22 @@ RoomProgress type:
 - lua to js research
 
 17.04 18:30
-x- buggy texturesw (drukhari)
-x- rothigus
-x- dragar
+[x] - buggy texturesw (drukhari)
+[x] - rothigus
+[x] - dragar
 
 08.05 18:30
-o- ColorDiffuse
+[x] - ColorDiffuse
 
 - special tts objects
-  - boards
-  - bags (containers)
-  - desks
-  - dice  
-  - pdfs
-  - zones
-  - pointers
-  - buttons
+  [o] - boards
+  [] - bags (containers)
+  [] - desks
+  [] - dice  
+  [] - pdfs
+  [] - zones
+  [] - pointers
+  [] - buttons
 
 - loading screen
 

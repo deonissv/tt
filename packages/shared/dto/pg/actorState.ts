@@ -1,6 +1,8 @@
 import { Model } from './actorModel';
 import { Transformation } from './transformation';
 
+type OpnitalAllBut<T, K extends keyof T> = Required<Pick<T, K>> & Omit<Partial<ActorState>, K>;
+
 export interface ActorStateBase {
   guid: string;
 }
@@ -16,12 +18,4 @@ export interface ActorState {
   children?: ActorState[];
 }
 
-export interface ActorStateUpdate {
-  guid: string;
-  name?: string;
-  model?: Model;
-  colorDiffuse?: number[];
-  transformation?: Transformation;
-  mass?: number;
-  children?: ActorState[];
-}
+export interface ActorStateUpdate extends OpnitalAllBut<ActorState, 'guid'> {}

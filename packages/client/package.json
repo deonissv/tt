@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@babylonjs/inspector": "^6.15.0",
+    "@babylonjs/inspector": "^7.0.0",
     "@types/react": "^18.2.21",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.0.4",
@@ -35,9 +35,9 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@babylonjs/core": "^6.15.0",
-    "@babylonjs/havok": "^1.1.2",
-    "@babylonjs/loaders": "^6.15.0",
+    "@babylonjs/core": "^7.0.0",
+    "@babylonjs/havok": "^1.2.1",
+    "@babylonjs/loaders": "^7.0.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mui/icons-material": "^5.14.19",

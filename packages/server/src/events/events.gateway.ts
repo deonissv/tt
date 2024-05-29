@@ -54,6 +54,7 @@ export class EventsGateway implements OnGatewayInit {
   ) {}
 
   afterInit(_wss: Server) {
+    _wss.setMaxListeners(255);
     const httpServer = this.adapterHost.httpAdapter.getHttpServer() as http.Server;
     httpServer.removeAllListeners('upgrade');
     httpServer.on('upgrade', async (request, socket, head) => {

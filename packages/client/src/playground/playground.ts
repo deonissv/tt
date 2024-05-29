@@ -39,11 +39,10 @@ import { PlaygroundScene } from './playgroundScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
-import { PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
+import { PlaygroundStateSave, PlaygroundStateUpdate, SpecialObjectsMapper } from '@shared/index';
 import Actor from './actor';
-import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
-import { Loader } from './loader';
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
+import { SpecialObjcetsBuilder } from './SpecialObjects/specialObjcetsBuilder';
 
 export default class Playground {
   private _scene: Scene;
@@ -63,29 +62,32 @@ export default class Playground {
     const engine = await this.initEngine(canvas);
     const scene = await PlaygroundScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem);
 
-    const ground = CreatePlane('___ground', { width: 100, height: 70 }, scene);
-    ground.rotation.x = Math.PI / 2;
-    if (stateSave.table?.url) {
-      const texture = await Loader._loadTexture(stateSave.table.url, scene);
-      if (texture) {
-        const material = new StandardMaterial('___ground-material', scene);
-        material.diffuseTexture = texture;
-        ground.material = material;
-      }
-    }
+    // const ground = CreatePlane('___ground', { width: 100, height: 70 }, scene);
+    // ground.rotation.x = Math.PI / 2;
+    // if (stateSave.table?.url) {
+    //   const texture = await Loader._loadTexture(stateSave.table.url, scene);
+    //   if (texture) {
+    //     const material = new StandardMaterial('___ground-material', scene);
+    //     material.diffuseTexture = texture;
+    //     ground.material = material;
+    //   }
+    // }
 
-    // const ground = CreateGround('___ground', { width: 100, height: 100 }, scene);
-    ground.isPickable = false;
-
-    engine.runRenderLoop(() => {
-      scene.render();
-    });
     window.addEventListener('resize', () => {
       engine.resize();
     });
 
     const pg = new Playground(scene);
+
+    // setInterval(async () => {
+    await this.initTable('rectangleCustom', stateSave.table?.url);
+    // }, 1000);
+
     await pg.loadState(stateSave);
+
+    engine.runRenderLoop(() => {
+      scene.render();
+    });
 
     // pg._handlePick();
 
@@ -98,12 +100,17 @@ export default class Playground {
     return pg;
   }
 
+  static async initTable(table: SpecialObjectsMapper['tables'], url?: string): Promise<Actor> {
+    const tableMesh = await SpecialObjcetsBuilder.tables[table](url);
+    return tableMesh as Actor;
+  }
+
   private _pickMesh(): Mesh | null {
     return this._scene.pick(this._scene.pointerX, this._scene.pointerY).pickedMesh as Mesh | null;
   }
 
-  private static async initEngine(canvas: HTMLCanvasElement): Promise<Engine> {
-    let engine: Engine;
+  private static async initEngine(canvas: HTMLCanvasElement): Promise<AbstractEngine> {
+    let engine: AbstractEngine;
     const engineOptions = {
       stencil: true,
     };
@@ -179,7 +186,7 @@ export default class Playground {
   // }
 
   async loadState(state: PlaygroundStateSave) {
-    await Promise.all((state?.actorStates ?? []).map(actorState => Actor.fromState(actorState, this._scene)));
+    await Promise.all((state?.actorStates ?? []).map(actorState => Actor.fromState(actorState)));
   }
 
   update(pgUpdate: PlaygroundStateUpdate) {

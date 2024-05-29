@@ -2,7 +2,6 @@ import HavokPhysics from '@babylonjs/havok';
 // import { HavokPlugin } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
 
 import { Scene } from '@babylonjs/core/scene';
-import { Engine } from '@babylonjs/core/Engines/engine';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
@@ -20,13 +19,18 @@ import {
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
 } from '@shared/index';
+import { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 
 export class PlaygroundScene extends Scene {
-  private constructor(engine: Engine) {
+  private constructor(engine: AbstractEngine) {
     super(engine);
   }
 
-  public static async init(engine: Engine, gravity = GRAVITY, leftHandedSystem = false): Promise<PlaygroundScene> {
+  public static async init(
+    engine: AbstractEngine,
+    gravity = GRAVITY,
+    leftHandedSystem = false,
+  ): Promise<PlaygroundScene> {
     const canvas = engine.getRenderingCanvas()!;
     const scene = new PlaygroundScene(engine);
     scene.useRightHandedSystem = !leftHandedSystem;

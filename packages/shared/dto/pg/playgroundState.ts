@@ -15,12 +15,8 @@ export interface PlaygroundStateSave extends PlaygroundStateBase {
   actorStates?: ActorState[]; // Objects on the table
 }
 
-export interface PlaygroundStateUpdate {
-  leftHandedSystem?: boolean;
-  gravity?: number;
-
+export interface PlaygroundStateUpdate extends Omit<Partial<PlaygroundState>, 'actorStates'> {
   actorStates?: ActorStateUpdate[];
-  cursorPositions?: CursorPositions;
 }
 
 export interface Table {

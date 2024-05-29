@@ -1,7 +1,9 @@
-import { OBJFileLoader } from 'babylonjs-loaders';
-import { Mesh, Scene, SceneLoader } from 'babylonjs';
 import { Model } from '@shared/dto/pg/actorModel';
 import { Logger } from '@nestjs/common';
+import { OBJFileLoader } from '@babylonjs/loaders';
+import { Scene } from '@babylonjs/core/scene';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
 
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 500; // ms
@@ -18,9 +20,11 @@ OBJFileLoader.SKIP_MATERIALS = true;
 export class Loader {
   private static readonly logger = new Logger(Loader.name);
 
-  static async loadModel(model: Model, scene: Scene): Promise<Mesh | null> {
-    const modelURL = model.colliderURL ?? model.meshURL;
+  static async loadModel(model: Model, scene?: Scene): Promise<Mesh | null> {
+    return await Loader.loadMesh(model.meshURL, scene);
+  }
 
+  static async loadMesh(modelURL: string, scene?: Scene): Promise<Mesh | null> {
     const beforeLoad = Date.now();
     const fetchedModel = await this.fetchFile(modelURL);
 
@@ -58,9 +62,7 @@ export class Loader {
       const errorName = fetchedModel?.b64 ? err.name.replace(fetchedModel?.b64, '{{ B64 }}') : err.name;
       const errorStack = fetchedModel?.b64 ? err.stack?.replace(fetchedModel?.b64, '{{ B64 }}') : err.stack;
       const errorMessage = fetchedModel?.b64 ? err.message.replace(fetchedModel?.b64, '{{ B64 }}') : err.message;
-      Loader.logger.error(
-        `LoadAssetContainerAsync ${model.meshURL} failed: ${errorName} | ${errorMessage} | ${errorStack}`,
-      );
+      Loader.logger.error(`LoadAssetContainerAsync ${modelURL} failed: ${errorName} | ${errorMessage} | ${errorStack}`);
       return null;
     }
   }

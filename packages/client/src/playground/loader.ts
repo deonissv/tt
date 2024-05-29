@@ -26,7 +26,7 @@ export class Loader {
   //     : modelContainer;
 
   //   const material = new StandardMaterial('_material', scene);
-  //   const loadedMaterial = await Loader._loadModelMaterial(model, scene);
+  //   const loadedMaterial = await Loader.loadModelMaterial(model, scene);
   //   modelContainer.meshes[0].material = material;
   //   modelContainer.meshes[modelContainer.meshes.length - 1].material = loadedMaterial;
 
@@ -40,11 +40,11 @@ export class Loader {
   //   return [modelMesh, colliderMesh];
   // }
 
-  static async loadModel(model: Model, scene: Scene): Promise<[Mesh | null, Mesh | null]> {
-    const modelMesh = await Loader._loadMesh(model.meshURL, scene);
+  static async loadModel(model: Model): Promise<[Mesh | null, Mesh | null]> {
+    const modelMesh = await Loader.loadMesh(model.meshURL);
 
-    const colliderMesh = model.colliderURL ? await Loader._loadMesh(model.colliderURL, scene) : modelMesh;
-    const loadedMaterial = await Loader._loadModelMaterial(model, scene);
+    const colliderMesh = model.colliderURL ? await Loader.loadMesh(model.colliderURL) : modelMesh;
+    const loadedMaterial = await Loader.loadModelMaterial(model);
 
     if (modelMesh?.material) {
       modelMesh.material = loadedMaterial;
@@ -52,11 +52,11 @@ export class Loader {
     return [modelMesh, colliderMesh];
   }
 
-  private static async _loadMesh(meshUrl: string, scene: Scene): Promise<Mesh | null> {
+  static async loadMesh(meshUrl: string): Promise<Mesh | null> {
     if (!Loader.MeshAssets.has(meshUrl)) {
       const meshPromise = async () => {
         const loadedMeshes = await modelLoaderService.load(meshUrl);
-        const container = await SceneLoader.LoadAssetContainerAsync('', loadedMeshes, scene);
+        const container = await SceneLoader.LoadAssetContainerAsync('', loadedMeshes);
         const nonEmptyMeshes = Loader.filterEmptyMeshes(container.meshes);
         const mesh = Mesh.MergeMeshes(nonEmptyMeshes as Mesh[], false, true, undefined, true, true);
         if (!mesh) {
@@ -65,8 +65,8 @@ export class Loader {
 
         mesh.setEnabled(false);
         mesh.name = meshUrl;
-        container.removeAllFromScene();
-        return mesh;
+        // container.removeAllFromScene();
+        return mesh.clone();
       };
       Loader.MeshAssets.set(meshUrl, meshPromise());
     }
@@ -78,23 +78,23 @@ export class Loader {
     return mesh.clone(mesh.name, null, true, true);
   }
 
-  static async _loadModelMaterial(model: Model, scene: Scene, name = ''): Promise<StandardMaterial> {
-    const material = new StandardMaterial(name, scene);
+  static async loadModelMaterial(model: Omit<Model, 'meshURL'>, name = ''): Promise<StandardMaterial> {
+    const material = new StandardMaterial(name);
     material.diffuseColor = new Color3(1, 1, 1);
     // @TODO test maps
-    material.diffuseTexture = model.diffuseURL ? await Loader._loadTexture(model.diffuseURL, scene) : null;
-    material.ambientTexture = model.ambientURL ? await Loader._loadTexture(model.ambientURL, scene) : null;
-    material.specularTexture = model.specularURL ? await Loader._loadTexture(model.specularURL, scene) : null;
-    material.emissiveTexture = model.emissiveURL ? await Loader._loadTexture(model.emissiveURL, scene) : null;
-    material.reflectionTexture = model.reflectionURL ? await Loader._loadTexture(model.reflectionURL, scene) : null;
-    material.bumpTexture = model.normalURL ? await Loader._loadTexture(model.normalURL, scene) : null;
-    material.opacityTexture = model.opacityURL ? await Loader._loadTexture(model.opacityURL, scene) : null;
-    material.lightmapTexture = model.lightMapURL ? await Loader._loadTexture(model.lightMapURL, scene) : null;
+    material.diffuseTexture = model.diffuseURL ? await Loader.loadTexture(model.diffuseURL) : null;
+    material.ambientTexture = model.ambientURL ? await Loader.loadTexture(model.ambientURL) : null;
+    material.specularTexture = model.specularURL ? await Loader.loadTexture(model.specularURL) : null;
+    material.emissiveTexture = model.emissiveURL ? await Loader.loadTexture(model.emissiveURL) : null;
+    material.reflectionTexture = model.reflectionURL ? await Loader.loadTexture(model.reflectionURL) : null;
+    material.bumpTexture = model.normalURL ? await Loader.loadTexture(model.normalURL) : null;
+    material.opacityTexture = model.opacityURL ? await Loader.loadTexture(model.opacityURL) : null;
+    material.lightmapTexture = model.lightMapURL ? await Loader.loadTexture(model.lightMapURL) : null;
 
     return material;
   }
 
-  static async _loadTexture(textureUrl: string, scene: Scene): Promise<Texture | null> {
+  static async loadTexture(textureUrl: string, scene?: Scene): Promise<Texture | null> {
     if (!Loader.TextureAssets.has(textureUrl)) {
       const texturePromise = async () => {
         const loadedTexture = await modelLoaderService.load(textureUrl);

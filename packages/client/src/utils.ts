@@ -35,13 +35,15 @@ export const parseTtsSave = (tts: string): PlaygroundStateSave | null => {
       url: obj.TableURL,
     };
 
-    save.actorStates = obj.ObjectStates.reduce<ActorState[]>((acc, o) => {
-      const actorState = parseTtsObjectState(o);
-      if (actorState) {
-        acc.push(actorState);
-      }
-      return acc;
-    }, []);
+    if (obj.ObjectStates && Array.isArray(obj.ObjectStates)) {
+      save.actorStates = obj.ObjectStates.reduce<ActorState[]>((acc, o) => {
+        const actorState = parseTtsObjectState(o);
+        if (actorState) {
+          acc.push(actorState);
+        }
+        return acc;
+      }, []);
+    }
     return save;
   } catch (e) {
     console.error('Tts parse failed', e);

@@ -1,23 +1,30 @@
-import {
-  ArcRotateCamera,
-  CreateBox,
-  CreateGround,
-  CreateSphere,
-  HavokPlugin,
-  NullEngine,
-  PhysicsAggregate,
-  PhysicsBody,
-  PhysicsMotionType,
-  PhysicsShapeMesh,
-  PhysicsShapeType,
-  Scene,
-  Vector3,
-} from 'babylonjs';
-
-import { GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
-import Actor from './actor';
+import { GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate, SpecialObjectsMapper } from '@shared/index';
 import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
-import * as _ from 'lodash';
+import { SpecialObjcetsBuilder } from './specialObjects.ts/specialObjcetsBuilder';
+import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Scene } from '@babylonjs/core/scene';
+import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
+import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
+import { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
+import { PhysicsMotionType } from '@babylonjs/core/Physics/v2/IPhysicsEnginePlugin';
+import { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { HavokPlugin } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
+
+// Side efects
+import '@babylonjs/core/Culling/ray';
+import '@babylonjs/core/Meshes/meshBuilder';
+import '@babylonjs/loaders/OBJ/objFileLoader';
+import '@babylonjs/core/Materials/standardMaterial';
+import '@babylonjs/core/Physics/physicsEngineComponent'; // enablePhysics
+import '@babylonjs/core/Helpers/sceneHelpers'; // createDefaultCameraOrLight
+
+// WebGPU Extensions
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
+import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
+import Actor from './actor';
+import { EngineStore } from '@babylonjs/core/Engines/engineStore';
+// import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 
 export class Simulation {
   private engine: NullEngine;
@@ -30,6 +37,7 @@ export class Simulation {
     this.initialState = initialState;
 
     this.scene.createDefaultCameraOrLight(true, true, false);
+    console.log('Simulation created');
   }
 
   static async init(
@@ -41,13 +49,12 @@ export class Simulation {
     const sim = new Simulation(stateSave);
     sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : stateSave.leftHandedSystem;
     // sim.initPhysics(stateSave?.gravity);
-    const ground = CreateGround('___ground', { width: 100, height: 100 }, sim.scene);
-    ground.isPickable = false;
-    // new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, sim.scene);
+
+    await this.initTable('rectangleCustom');
 
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
-        const actor = await Actor.fromState(actorState, sim.scene);
+        const actor = await Actor.fromState(actorState);
         if (actor) {
           onSucceed && onSucceed(actorState);
         } else {
@@ -58,6 +65,11 @@ export class Simulation {
     );
 
     return sim;
+  }
+
+  static async initTable(table: SpecialObjectsMapper['tables']): Promise<Actor> {
+    const tableMesh = await SpecialObjcetsBuilder.tables[table]();
+    return tableMesh as Actor;
   }
 
   start() {
@@ -110,13 +122,15 @@ export class Simulation {
 
     return {
       ...this.initialState,
-      actorStates: actorStates.map(state => {
-        const initActorState = this.initialState.actorStates!.find(actorState => actorState.guid === state.guid);
-        return {
-          ...initActorState,
-          ...state,
-        };
-      }),
+      actorStates: actorStates
+        .filter(actorState => actorState.guid != '')
+        .map(state => {
+          const initActorState = this.initialState.actorStates!.find(actorState => actorState.guid === state.guid);
+          return {
+            ...initActorState,
+            ...state,
+          };
+        }),
     };
   }
 
@@ -147,6 +161,7 @@ export class Simulation {
           position: [0, 10, 0],
         },
       },
+      boxModel,
       boxModel,
       this.scene,
     );
