@@ -10,7 +10,7 @@
     "build:v": "vite build",
     "start": "vite preview",
     "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"

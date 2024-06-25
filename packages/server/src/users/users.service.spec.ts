@@ -1,34 +1,34 @@
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
+import { jest } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from '../users/users.service';
 import { ConfigService } from '@nestjs/config';
-import type { User } from '@prisma/client';
+import type { PrismaClient, User } from '@prisma/client';
+
 import { PrismaService } from '../prisma.service';
 import configServiceMock from '../../test/configServiceMock';
 
-const usersArray: User[] = [
-  {
-    userId: 1,
-    code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
-    email: 'email',
-    username: 'username',
-    passwordHash: 'passwordHash',
-    avatarUrl: 'avatarUrl',
-    deletedAt: null,
-    roleId: 2,
-  },
-];
+const user: User = {
+  userId: 1,
+  code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
+  email: 'email',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  avatarUrl: 'avatarUrl',
+  deletedAt: null,
+  roleId: 2,
+};
 
-const oneUser: User = usersArray[0];
+const usersArray: User[] = [user];
 
 const db = {
   user: {
-    findMany: jest.fn().mockResolvedValue(usersArray),
-    findUnique: jest.fn().mockResolvedValue(oneUser),
-    findFirst: jest.fn().mockResolvedValue(oneUser),
-    create: jest.fn().mockReturnValue(oneUser),
-    update: jest.fn().mockResolvedValue(oneUser),
-    delete: jest.fn().mockResolvedValue(oneUser),
+    findMany: jest.fn<typeof PrismaClient.prototype.user.findMany>().mockResolvedValue(usersArray),
+    findUnique: jest.fn<typeof PrismaClient.prototype.user.findUnique>().mockResolvedValue(user),
+    findFirst: jest.fn<typeof PrismaClient.prototype.user.findFirst>().mockResolvedValue(user),
+    create: jest.fn<typeof PrismaClient.prototype.user.create>().mockResolvedValue(user),
+    update: jest.fn<typeof PrismaClient.prototype.user.update>().mockResolvedValue(user),
+    delete: jest.fn<typeof PrismaClient.prototype.user.delete>().mockResolvedValue(user),
   },
 };
 

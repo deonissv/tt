@@ -1,8 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
-import * as HavokPhysics from '@babylonjs/havok';
-
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
@@ -10,13 +5,7 @@ import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { mainConfig } from './main.config';
 import { WsAdapter } from '@nestjs/platform-ws';
-
-async function initHavok() {
-  const wasm = path.join(__dirname, '../../HavokPhysics.wasm');
-  const wasmBinary = fs.readFileSync(wasm);
-
-  global.havok = await (HavokPhysics as unknown as (object) => Promise<object>)({ wasmBinary });
-}
+import { initHavok } from './utils';
 
 async function bootstrap() {
   await initHavok();

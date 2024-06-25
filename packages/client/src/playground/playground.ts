@@ -13,9 +13,10 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 import '@babylonjs/core/Materials/standardMaterial';
 import '@babylonjs/core/Physics/physicsEngineComponent'; // enablePhysics
 
+import '@babylonjs/core/Engines/WebGPU/Extensions';
 // WebGPU Extensions
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
+// import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
+// import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.computeShader';
@@ -39,10 +40,13 @@ import { PlaygroundScene } from './playgroundScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
-import { PlaygroundStateSave, PlaygroundStateUpdate, SpecialObjectsMapper } from '@shared/index';
-import Actor from './actor';
+import { ActorBase, FLIP_BIND_KEYS, PlaygroundStateSave, PlaygroundStateUpdate, TableState } from '@shared/index';
 import { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
-import { SpecialObjcetsBuilder } from './SpecialObjects/specialObjcetsBuilder';
+import { Card } from '@shared/playground/Card';
+import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Actor } from '@shared/playground/Actor';
+import { RectangleCustomTable } from '@shared/playground/RectagleCustomTable';
+import { Deck } from '@shared/playground/Deck';
 
 export default class Playground {
   private _scene: Scene;
@@ -58,9 +62,11 @@ export default class Playground {
     Inspector.Show(this._scene, {});
   }
 
-  static async init(canvas: HTMLCanvasElement, stateSave: PlaygroundStateSave): Promise<Playground> {
+  static async init(canvas: HTMLCanvasElement | null, stateSave: PlaygroundStateSave): Promise<Playground> {
     const engine = await this.initEngine(canvas);
-    const scene = await PlaygroundScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem);
+    const scene = canvas
+      ? await PlaygroundScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem)
+      : new Scene(engine);
 
     // const ground = CreatePlane('___ground', { width: 100, height: 70 }, scene);
     // ground.rotation.x = Math.PI / 2;
@@ -73,15 +79,12 @@ export default class Playground {
     //   }
     // }
 
-    window.addEventListener('resize', () => {
-      engine.resize();
-    });
+    canvas &&
+      window.addEventListener('resize', () => {
+        engine.resize();
+      });
 
     const pg = new Playground(scene);
-
-    // setInterval(async () => {
-    await this.initTable('rectangleCustom', stateSave.table?.url);
-    // }, 1000);
 
     await pg.loadState(stateSave);
 
@@ -92,6 +95,10 @@ export default class Playground {
     // pg._handlePick();
 
     pg._handleHoverHighlight();
+    pg._bindAction(FLIP_BIND_KEYS, (actor: Actor) => {
+      console.log(actor.guid);
+    });
+
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
     // pg._bindAction(ROTATE_CCW_KEYS, Actor.prototype.rotateCCW);
@@ -100,20 +107,33 @@ export default class Playground {
     return pg;
   }
 
-  static async initTable(table: SpecialObjectsMapper['tables'], url?: string): Promise<Actor> {
-    const tableMesh = await SpecialObjcetsBuilder.tables[table](url);
-    return tableMesh as Actor;
+  // static async initTable(table: SpecialObjectsMapper['tables'], url?: string): Promise<Actor> {
+  //   const tableMesh = await SpecialObjcetsBuilder.tables[table](url);
+  //   return tableMesh as Actor;
+  // }
+
+  static async initTable(tableState: TableState): Promise<ActorBase | null> {
+    return await RectangleCustomTable.fromState(tableState);
   }
 
   private _pickMesh(): Mesh | null {
     return this._scene.pick(this._scene.pointerX, this._scene.pointerY).pickedMesh as Mesh | null;
   }
 
-  private static async initEngine(canvas: HTMLCanvasElement): Promise<AbstractEngine> {
+  private _pickActor(): Actor | null {
+    const pickedMesh = this._pickMesh();
+    return pickedMesh?.parent instanceof Actor ? pickedMesh.parent : null;
+  }
+
+  private static async initEngine(canvas: HTMLCanvasElement | null): Promise<AbstractEngine> {
     let engine: AbstractEngine;
     const engineOptions = {
       stencil: true,
     };
+    if (!canvas) {
+      return new NullEngine();
+    }
+
     const webgpuSupported = await WebGPUEngine.IsSupportedAsync;
     if (webgpuSupported) {
       engine = new WebGPUEngine(canvas, engineOptions);
@@ -174,16 +194,16 @@ export default class Playground {
   //   });
   // }
 
-  // private _bindAction(key: string[], action: () => void) {
-  //   this._scene.onKeyboardObservable.add(kbInfo => {
-  //     const evt = kbInfo.event;
-  //     if (key.includes(evt.code) && kbInfo.type === 1) {
-  //       const target = this._pickedActor ?? this._pickActor();
-  //       if (!target) return;
-  //       action.call(target);
-  //     }
-  //   });
-  // }
+  private _bindAction(key: string[], action: (actor: Actor) => void) {
+    this._scene.onKeyboardObservable.add(kbInfo => {
+      const evt = kbInfo.event;
+      if (key.includes(evt.code) && kbInfo.type === 1) {
+        const target = this._pickedActor ?? this._pickActor();
+        if (!target) return;
+        action.call(target, target);
+      }
+    });
+  }
 
   async loadState(state: PlaygroundStateSave) {
     await Promise.all((state?.actorStates ?? []).map(actorState => Actor.fromState(actorState)));

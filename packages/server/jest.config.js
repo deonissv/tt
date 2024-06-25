@@ -5,6 +5,7 @@ module.exports = {
       {
         tsconfig: '<rootDir>/packages/server/tsconfig.json',
         diagnostics: false,
+        useESM: true,
       },
     ],
   },
@@ -16,7 +17,7 @@ module.exports = {
   displayName: 'server',
   rootDir: '../../',
   roots: ['./packages/server/'],
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   openHandlesTimeout: 30000,
   testTimeout: 30000,
 };

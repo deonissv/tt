@@ -1,3 +1,4 @@
+import { beforeAll, describe, it, expect } from 'vitest';
 import * as request from 'supertest';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';

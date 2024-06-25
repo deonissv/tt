@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpStatus, INestApplication } from '@nestjs/common';

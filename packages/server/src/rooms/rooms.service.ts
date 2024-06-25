@@ -5,8 +5,8 @@ import { GamesService } from '../games/games.service';
 import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
 import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
 import { Prisma, Room } from '@prisma/client';
-import { Simulation } from '../simulation/simulation';
 import { Logger } from 'testcontainers/build/common';
+import Simulation from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {

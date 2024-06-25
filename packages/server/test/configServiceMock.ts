@@ -1,5 +1,7 @@
+import { vi } from 'vitest';
+
 export default {
-  getOrThrow: jest.fn((key: string) => {
+  getOrThrow: vi.fn((key: string) => {
     const env: Record<string, string> = {
       PORT: '11000',
       SALT_ROUNDS: '5',

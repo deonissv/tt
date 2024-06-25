@@ -1,7 +1,7 @@
 import * as WebSocket from 'ws';
 
 import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
-import { Simulation } from '../simulation/simulation';
+import Simulation from '../simulation/simulation';
 
 import { Client } from './client';
 import { RoomsService } from './rooms.service';

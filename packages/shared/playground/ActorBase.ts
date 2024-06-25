@@ -8,6 +8,8 @@ import { Axis, Space } from '@babylonjs/core/Maths/math.axis';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
 import { Model } from '@shared/dto/pg/actorModel';
+import { StandardMaterial, Color3 } from '@babylonjs/core';
+
 import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
 import {
   floatCompare,
@@ -18,8 +20,9 @@ import {
   ROTATE_STEP,
   SCALE_KOEF,
 } from '..';
+import Loader from './loader';
 
-export default class BaseActor extends TransformNode {
+export class ActorBase extends TransformNode {
   static DEFAULT_MASS = 1;
   static DEFAULT_SCALE = [1, 1, 1];
   static DEFAULT_ROTATION = [0, 0, 0];
@@ -36,24 +39,36 @@ export default class BaseActor extends TransformNode {
   protected __flipTranslate = 0;
   protected __targetPosition: Vector3 | null = null;
 
-  constructor(state: ActorState, modelMesh: Mesh, colliderMesh?: Mesh, scene: Scene | null = null) {
-    const name = `${state.guid}: ${state.name}`;
+  colorDiffuse: number[] = [];
+
+  constructor(
+    guid: string,
+    name: string,
+    modelMesh: Mesh,
+    colliderMesh?: Mesh,
+    transformation?: Transformation,
+    mass?: number,
+    colorDiffuse?: number[],
+    scene: Scene | null = null,
+  ) {
     super(name, scene, true);
-    this.guid = state.guid;
-    this.__stateModel = state.model;
+
+    this.guid = guid;
 
     this._scene = scene ?? this.getEngine().scenes[0];
 
-    this.__mass = state.mass ?? 1;
+    this.__mass = mass ?? 1;
     this.__model = modelMesh;
     this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
 
-    if (state.transformation?.scale) {
-      this.__model.scaling = new Vector3(...state.transformation.scale);
+    if (transformation?.scale) {
+      this.__model.scaling = new Vector3(...transformation.scale);
     }
 
     modelMesh.name = 'model';
     modelMesh.setParent(this);
+
+    this.colorDiffuse = colorDiffuse ?? [];
 
     // const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, false, this._scene);
     // body.shape = new PhysicsShapeMesh(this.__model, this._scene);
@@ -68,7 +83,7 @@ export default class BaseActor extends TransformNode {
     // });
 
     this.__flipTranslate = 1;
-    this._setTransformations(state?.transformation);
+    this._setTransformations(transformation);
     // this._addDragBehavior();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -125,7 +140,7 @@ export default class BaseActor extends TransformNode {
     return this.__model;
   }
 
-  private _getColliderMesh(modelMesh: Mesh, colliderMesh?: Mesh): Mesh {
+  protected _getColliderMesh(modelMesh: Mesh, colliderMesh?: Mesh): Mesh {
     if (!colliderMesh) {
       return modelMesh;
     } else {
@@ -221,14 +236,74 @@ export default class BaseActor extends TransformNode {
     });
   }
 
+  static async fromState(_actorState: object): Promise<ActorBase | null> {
+    throw new Error('Not implemented');
+  }
+
+  static async modelFromState(actorState: ActorState, child = false): Promise<Mesh | null> {
+    const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model);
+
+    if (!modelMesh) {
+      return null;
+    }
+
+    if (child) {
+      actorState.transformation?.position && (modelMesh.position = new Vector3(...actorState.transformation.position));
+      actorState.transformation?.rotation && (modelMesh.rotation = new Vector3(...actorState.transformation.rotation));
+      actorState.transformation?.scale && (modelMesh.scaling = new Vector3(...actorState.transformation.scale));
+    }
+
+    if (modelMesh.material && actorState.colorDiffuse) {
+      const stMaterial = modelMesh.material as StandardMaterial;
+      stMaterial.diffuseColor = new Color3(...actorState.colorDiffuse.slice(0, 3));
+      if (actorState.colorDiffuse.length > 3) {
+        stMaterial.alpha = actorState.colorDiffuse[3];
+      }
+    }
+
+    let childMeshes: Mesh[] = [];
+    if (actorState?.children) {
+      const loadedMeshes = await Promise.all(actorState.children.map(child => ActorBase.modelFromState(child, true)));
+      childMeshes = loadedMeshes.filter(mesh => mesh !== null) as Mesh[];
+    }
+
+    const mesh = Mesh.MergeMeshes([modelMesh, ...childMeshes], true, true, undefined, true, true)!;
+    mesh.setEnabled(true);
+    mesh.name = actorState.name;
+    return mesh;
+  }
+
+  static async colliderFromState(actorState: ActorState): Promise<Mesh | null> {
+    const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model);
+
+    if (!colliderMesh) {
+      return null;
+    }
+
+    let childMeshes: Mesh[] = [];
+    if (actorState?.children) {
+      const loadedMeshes = await Promise.all(actorState.children.map(child => ActorBase.colliderFromState(child)));
+      childMeshes = loadedMeshes.filter(mesh => mesh !== null) as Mesh[];
+    }
+
+    const mesh = Mesh.MergeMeshes([colliderMesh, ...childMeshes], true, true, undefined, true, true)!;
+    mesh.setEnabled(true);
+    mesh.name = actorState.name;
+    return mesh;
+  }
+
   toState() {
-    return {
+    const rv: ActorState = {
       guid: this.guid,
       name: this.name,
       model: this.__stateModel,
       transformation: this.transformation,
       mass: this.__mass,
     };
+
+    this.colorDiffuse.length > 1 && (rv.colorDiffuse = this.colorDiffuse);
+
+    return rv;
   }
 
   toStateUpdate(actorState?: ActorState): ActorStateUpdate | null {
@@ -251,9 +326,9 @@ export default class BaseActor extends TransformNode {
     }
 
     const stateTransformation = {
-      scale: actorState.transformation?.scale ?? BaseActor.DEFAULT_SCALE,
-      rotation: actorState.transformation?.rotation ?? BaseActor.DEFAULT_ROTATION,
-      position: actorState.transformation?.position ?? BaseActor.DEFAULT_POSITION,
+      scale: actorState.transformation?.scale ?? ActorBase.DEFAULT_SCALE,
+      rotation: actorState.transformation?.rotation ?? ActorBase.DEFAULT_ROTATION,
+      position: actorState.transformation?.position ?? ActorBase.DEFAULT_POSITION,
     };
 
     const updatePosition = stateTransformation.position.some(

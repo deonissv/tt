@@ -3,7 +3,7 @@ import { ActorState, ActorStateUpdate } from './actorState';
 export interface PlaygroundStateBase {
   leftHandedSystem?: boolean; // default: false | If true, the Y axis will be inverted, and the Z axis will be inverted
   gravity?: number; // default: -9.81
-  table?: Table;
+  table?: TableState;
 }
 
 export interface PlaygroundState extends PlaygroundStateBase {
@@ -19,7 +19,7 @@ export interface PlaygroundStateUpdate extends Omit<Partial<PlaygroundState>, 'a
   actorStates?: ActorStateUpdate[];
 }
 
-export interface Table {
+export interface TableState {
   type: TableType;
   url?: string;
 }

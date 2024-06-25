@@ -1,9 +1,11 @@
+import { vi } from 'vitest';
+
 let counter = 0;
 
 export default () => {
   counter++;
   return {
-    getOrThrow: jest.fn((key: string) => {
+    getOrThrow: vi.fn((key: string) => {
       const env: Record<string, string> = {
         PORT: (11000 + counter).toString(),
         SALT_ROUNDS: '7',

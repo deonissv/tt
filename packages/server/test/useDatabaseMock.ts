@@ -1,3 +1,5 @@
+import { beforeAll, beforeEach, afterAll } from 'vitest';
+
 import { StartedTestContainer } from 'testcontainers';
 
 import { PrismaService } from '../src/prisma.service';

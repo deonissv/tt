@@ -1,8 +1,8 @@
 import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
-import Actor from '../../actor';
 import { Loader } from '../../loader';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { Actor } from '@shared/playground/Actor';
 
 const STATIC_SERVER = 'http:/localhost:5500';
 const SCALING = 87;
@@ -92,15 +92,7 @@ export const RectangleCustomTableBuilder = async (url?: string) => {
   //     },
   //   ],
   // };
-  const actor = new Actor(
-    {
-      guid: 'RectangleCustomTable',
-      name: 'RectangleCustomTable',
-      model,
-    },
-    wrapper!,
-  );
-
+  const actor = new Actor('RectangleCustomTable', 'RectangleCustomTable', wrapper!);
   if (actor) {
     actor.model.isPickable = false;
   }

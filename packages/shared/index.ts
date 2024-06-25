@@ -4,4 +4,4 @@ export * from './ws';
 export * as WS from './ws';
 export * from './utils';
 export * from './specialObjects';
-export * from './playground/baseActor';
+export * from './playground/ActorBase';

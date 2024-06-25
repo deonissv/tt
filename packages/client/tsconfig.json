@@ -39,6 +39,7 @@
       "@components/*": [ "client/src/components/*" ],
       "@services/*": [ "client/src/services/*" ],
       "@shared/*": [ "shared/*" ],
+      "@client/*": [ "client/*" ],
     }
   },
   "include": ["src",  "./src/**/*", "../shared/**/*", "../client/**/*"],

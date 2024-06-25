@@ -12,7 +12,7 @@
     "start": "node dist/server/src/main.js -e 'node --experimental-require-module'",
     "dev": "nest start --watch -e 'node --experimental-require-module'",
     "debug": "nest start --debug --watch -e 'node --experimental-require-module'",
-    "test": "jest",
+    "test": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-require-module --experimental-vm-modules \" NODE_NO_WARNINGS=1 jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
@@ -24,8 +24,8 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
-    "@babylonjs/havok": "^1.2.1",
     "@babylonjs/core": "^7.0.0",
+    "@babylonjs/havok": "^1.2.1",
     "@babylonjs/loaders": "^7.0.0",
     "@casl/ability": "^6.5.0",
     "@nestjs/common": "^10.0.0",
@@ -69,6 +69,7 @@
     "testcontainers": "^10.4.0",
     "ts-jest": "^29.1.0",
     "ts-loader": "^9.4.3",
-    "ts-node": "^10.9.1"
+    "ts-node": "^10.9.1",
+    "vitest": "^1.6.0"
   }
 }

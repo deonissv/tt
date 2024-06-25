@@ -35,7 +35,7 @@ export class Loader {
 
       const onModelLoaded = Date.now();
 
-      const modelExtention = Loader.determineModelExtention(fetchedModel.text);
+      const modelExtention = Loader.getModelExtension(fetchedModel.text);
       if (!modelExtention) {
         Loader.logger.log(`loadModel ${modelURL} ${onModelLoaded - beforeLoad}ms | Can't determine model extention`);
         return null;
@@ -67,7 +67,7 @@ export class Loader {
     }
   }
 
-  static determineModelExtention(model: string | null): ModelExtentions | null {
+  static getModelExtension(model: string | null): ModelExtentions | null {
     if (!model) {
       return null;
     }

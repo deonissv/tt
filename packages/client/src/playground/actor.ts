@@ -1,118 +1,82 @@
-import { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { Color3, Vector3 } from '@babylonjs/core/Maths/math';
+// import { Mesh } from '@babylonjs/core/Meshes/mesh';
+// import { Color3, Vector3 } from '@babylonjs/core/Maths/math';
 
-import { Loader } from './loader';
-import { ActorState } from '@shared/dto/pg/actorState';
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
-import BaseActor from '../../../shared/playground/baseActor';
+// import { Loader } from './loader';
+// import { ActorState } from '@shared/dto/pg/actorState';
+// import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+// import BaseActor from '../../../shared/playground/ActorBase';
 
-export default class Actor extends BaseActor {
-  static async fromState(actorState: ActorState): Promise<Actor | null> {
-    const modelMesh = await Actor.modelFromState(actorState);
-    if (!modelMesh) {
-      console.log('Failed to load model mesh');
+// export default class Actor extends BaseActor {
+//   constructor(state: ActorState, modelMesh: Mesh, colliderMesh?: Mesh) {
+//     super(state.guid, state.name, modelMesh, colliderMesh, state.transformation, state.mass, state.colorDiffuse);
+//   }
 
-      return null;
-    }
+//   static async fromState(actorState: ActorState): Promise<Actor | null> {
+//     const modelMesh = await Actor.modelFromState(actorState);
+//     if (!modelMesh) {
+//       console.log('Failed to load model mesh');
+//       return null;
+//     }
 
-    const colliderMesh = await Actor.colliderFromState(actorState);
-    if (!colliderMesh) {
-      return null;
-    }
+//     const colliderMesh = await Actor.colliderFromState(actorState);
+//     if (!colliderMesh) {
+//       return null;
+//     }
 
-    const actor = new Actor(actorState, modelMesh, colliderMesh);
-    return actor;
-  }
+//     const actor = new Actor(actorState, modelMesh, colliderMesh);
+//     return actor;
+//   }
 
-  static async modelFromState(actorState: ActorState): Promise<Mesh | null> {
-    const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model);
+//   static async modelFromState(actorState: ActorState, child = false): Promise<Mesh | null> {
+//     const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model);
 
-    if (!modelMesh) {
-      return null;
-    }
+//     if (!modelMesh) {
+//       return null;
+//     }
 
-    if (actorState.transformation?.position) {
-      modelMesh.position = new Vector3(...actorState.transformation.position);
-    }
+//     if (child) {
+//       actorState.transformation?.position && (modelMesh.position = new Vector3(...actorState.transformation.position));
+//       actorState.transformation?.rotation && (modelMesh.rotation = new Vector3(...actorState.transformation.rotation));
+//       actorState.transformation?.scale && (modelMesh.scaling = new Vector3(...actorState.transformation.scale));
+//     }
 
-    if (actorState.transformation?.rotation) {
-      modelMesh.rotation = new Vector3(...actorState.transformation.rotation);
-    }
+//     if (modelMesh.material && actorState.colorDiffuse) {
+//       const stMaterial = modelMesh.material as StandardMaterial;
+//       stMaterial.diffuseColor = new Color3(...actorState.colorDiffuse.slice(0, 3));
+//       if (actorState.colorDiffuse.length > 3) {
+//         stMaterial.alpha = actorState.colorDiffuse[3];
+//       }
+//     }
 
-    if (actorState.transformation?.scale) {
-      modelMesh.scaling = new Vector3(...actorState.transformation.scale);
-    }
+//     let childMeshes: Mesh[] = [];
+//     if (actorState?.children) {
+//       const loadedMeshes = await Promise.all(actorState.children.map(child => Actor.modelFromState(child, true)));
+//       childMeshes = loadedMeshes.filter(mesh => mesh !== null);
+//     }
 
-    if (modelMesh.material && actorState.colorDiffuse) {
-      const stMaterial = modelMesh.material as StandardMaterial;
-      stMaterial.diffuseColor = new Color3(...actorState.colorDiffuse.slice(0, 3));
-      if (actorState.colorDiffuse.length > 3) {
-        stMaterial.alpha = actorState.colorDiffuse[3];
-      }
-    }
+//     const mesh = Mesh.MergeMeshes([modelMesh, ...childMeshes], true, true, undefined, true, true)!;
+//     mesh.setEnabled(true);
+//     mesh.name = actorState.name;
+//     return mesh;
+//   }
 
-    let childMeshes: Mesh[] = [];
-    if (actorState?.children) {
-      const loadedMeshes = await Promise.all(actorState.children.map(child => Actor.modelFromState(child)));
-      childMeshes = loadedMeshes.filter(mesh => mesh !== null);
-    }
+//   static async colliderFromState(actorState: ActorState): Promise<Mesh | null> {
+//     const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model);
 
-    const mesh = Mesh.MergeMeshes([modelMesh, ...childMeshes], true, true, undefined, true, true)!;
-    mesh.setEnabled(true);
-    mesh.name = actorState.name;
-    return mesh;
-  }
+//     if (!colliderMesh) {
+//       return null;
+//     }
 
-  static async colliderFromState(actorState: ActorState): Promise<Mesh | null> {
-    const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model);
+//     let childMeshes: Mesh[] = [];
+//     if (actorState?.children) {
+//       const loadedMeshes = await Promise.all(actorState.children.map(child => Actor.colliderFromState(child)));
+//       childMeshes = loadedMeshes.filter(mesh => mesh !== null);
+//     }
 
-    if (!colliderMesh) {
-      return null;
-    }
-
-    let childMeshes: Mesh[] = [];
-    if (actorState?.children) {
-      const loadedMeshes = await Promise.all(actorState.children.map(child => Actor.colliderFromState(child)));
-      childMeshes = loadedMeshes.filter(mesh => mesh !== null);
-    }
-
-    const mesh = Mesh.MergeMeshes([colliderMesh, ...childMeshes], true, true, undefined, true, true)!;
-    mesh.setEnabled(true);
-    mesh.name = actorState.name;
-    return mesh;
-  }
-  // static async modelFromState(actorState: ActorState, scene: Scene, parent?: Mesh): Promise<Mesh> {
-  //   const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model, scene);
-
-  //   if (parent) {
-  //     modelMesh.name = actorState.name;
-  //     modelMesh.setParent(parent);
-  //   } else {
-  //     modelMesh.name = `model-${actorState.name}`;
-  //   }
-
-  //   if (actorState.children) {
-  //     await Promise.all(actorState.children.map(child => Actor.modelFromState(child, scene, modelMesh)));
-  //   }
-
-  //   modelMesh.setEnabled(true);
-  //   return modelMesh;
-  // }
-
-  //   static async colliderFromState(actorState: ActorState, scene: Scene, parent?: Mesh): Promise<Mesh> {
-  //     const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model, scene);
-
-  //     if (parent) {
-  //       colliderMesh.name = actorState.name;
-  //       colliderMesh.setParent(parent);
-  //     } else {
-  //       colliderMesh.name = `collider-${actorState.name}`;
-  //     }
-
-  //     if (actorState.children) {
-  //       await Promise.all(actorState.children.map(child => Actor.colliderFromState(child, scene, colliderMesh)));
-  //     }
-
-  //     return colliderMesh;
-  //   }
-}
+//     const mesh = Mesh.MergeMeshes([colliderMesh, ...childMeshes], true, true, undefined, true, true)!;
+//     mesh.setEnabled(true);
+//     mesh.name = actorState.name;
+//     return mesh;
+//   }
+// }
+export {};

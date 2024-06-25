@@ -1,2 +1,2 @@
-export * from './baseActor';
+export * from './ActorBase';
 export * from './simulation';

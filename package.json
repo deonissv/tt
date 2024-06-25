@@ -20,7 +20,7 @@
     "format:client": "prettier --config .prettierrc --write \"packages/client/**/*.ts\"",
     "format:server": "prettier --config .prettierrc --write \"packages/server/**/*.ts\"",
     "format:shared": "prettier --config .prettierrc --write \"packages/shared/**/*.ts\"",
-    "clean": "find . -name 'node_modules' -o -name 'dist' -o -name 'build' -type d -prune -exec rm -rf '{}' +",
+    "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' + && find . -name 'build' -type d -prune -exec rm -rf '{}' +",
     "i:all": "npm i && npm -w ./packages/server i  && npm -w ./packages/client i"
   },
   "devDependencies": {

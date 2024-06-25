@@ -94,16 +94,16 @@ export class Loader {
     return material;
   }
 
-  static async loadTexture(textureUrl: string, scene?: Scene): Promise<Texture | null> {
+  static async loadTexture(textureUrl: string): Promise<Texture | null> {
     if (!Loader.TextureAssets.has(textureUrl)) {
       const texturePromise = async () => {
         const loadedTexture = await modelLoaderService.load(textureUrl);
 
-        if (!loadedTexture.type.includes('image')) {
-          return null;
-        }
-        const url = fileToUrl(loadedTexture);
-        return new Texture(url, scene);
+        // if (!loadedTexture.type.includes('image')) {
+        //   return null;
+        // }
+        const url = fileToUrl(loadedTexture); // ADD FLAG
+        return new Texture(url);
       };
       Loader.TextureAssets.set(textureUrl, texturePromise());
     }

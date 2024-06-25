@@ -23,10 +23,9 @@ import '@babylonjs/core/Helpers/sceneHelpers'; // createDefaultCameraOrLight
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
 import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
 import Actor from './actor';
-import { EngineStore } from '@babylonjs/core/Engines/engineStore';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
 
-export class Simulation {
+export default class Simulation {
   private engine: NullEngine;
   private scene: Scene;
   private initialState: PlaygroundStateSave;
@@ -37,30 +36,29 @@ export class Simulation {
     this.initialState = initialState;
 
     this.scene.createDefaultCameraOrLight(true, true, false);
-    console.log('Simulation created');
   }
 
   static async init(
     stateSave: PlaygroundStateSave,
-    onModelLoaded: () => void,
+    onModelLoaded?: () => void,
     onSucceed?: (ActorState) => void,
     onFailed?: (ActorState) => void,
   ): Promise<Simulation> {
     const sim = new Simulation(stateSave);
-    sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : stateSave.leftHandedSystem;
+    sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
     // sim.initPhysics(stateSave?.gravity);
 
-    await this.initTable('rectangleCustom');
+    // await this.initTable('rectangleCustom');
 
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
         const actor = await Actor.fromState(actorState);
         if (actor) {
-          onSucceed && onSucceed(actorState);
+          onSucceed?.(actorState);
         } else {
-          onFailed && onFailed(actorState);
+          onFailed?.(actorState);
         }
-        onModelLoaded();
+        onModelLoaded?.();
       }),
     );
 
@@ -116,10 +114,6 @@ export class Simulation {
       }
     });
 
-    if (actorStates.length === 0) {
-      return {};
-    }
-
     return {
       ...this.initialState,
       actorStates: actorStates
@@ -136,7 +130,7 @@ export class Simulation {
 
   private initPhysics(gravity = GRAVITY) {
     const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, 0, 0);
+    const gravityVec = new Vector3(0, gravity, 0);
 
     this.scene.enablePhysics(gravityVec, hp);
   }
@@ -150,32 +144,26 @@ export class Simulation {
 
   testBox() {
     const boxModel = CreateBox('___box', { width: 1, height: 1, depth: 1 }, this.scene);
-    new Actor(
-      {
-        name: 'box',
-        guid: '3',
-        model: {
-          meshURL: '',
-        },
-        transformation: {
-          position: [0, 10, 0],
-        },
-      },
-      boxModel,
-      boxModel,
-      this.scene,
-    );
+    new Actor('3', 'box', boxModel, undefined, {
+      position: [0, 10, 0],
+    });
     // box.__move(0, 10, 0);
     // eslint-disable-next-line no-console
     console.log('box created');
   }
 
   static mergeStateDelta(state: PlaygroundStateSave, delta: PlaygroundStateUpdate): PlaygroundStateSave {
-    const rv: PlaygroundStateSave = {
-      leftHandedSystem: delta.leftHandedSystem ?? state.leftHandedSystem,
-      gravity: delta.gravity ?? state.gravity,
-      actorStates: state.actorStates,
-    };
+    const rv: PlaygroundStateSave = { actorStates: [] };
+
+    const leftHandedSystemCandidate = delta.leftHandedSystem ?? state.leftHandedSystem;
+    if (leftHandedSystemCandidate) {
+      rv.leftHandedSystem = leftHandedSystemCandidate;
+    }
+
+    const gravityCandidate = delta.gravity ?? state.gravity;
+    if (gravityCandidate) {
+      rv.gravity = gravityCandidate;
+    }
 
     if (state.actorStates) {
       rv.actorStates = state.actorStates.map(actorState => {
