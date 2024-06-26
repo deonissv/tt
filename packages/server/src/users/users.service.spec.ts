@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { jest } from '@jest/globals';
-import { Test, TestingModule } from '@nestjs/testing';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { UsersService } from '../users/users.service';
 import { ConfigService } from '@nestjs/config';
 import type { PrismaClient, User } from '@prisma/client';

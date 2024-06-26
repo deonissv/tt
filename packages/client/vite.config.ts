@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), tsconfigPaths()],
   resolve: {
     alias: {
-      '@shared': path.resolve(__dirname, '../shared/'),
+      '@shared': path.resolve(__dirname, '../shared/src/'),
       '@client': path.resolve(__dirname, '../client/'),
     },
   },

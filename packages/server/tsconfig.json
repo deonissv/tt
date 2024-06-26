@@ -20,9 +20,9 @@
     "rootDir": "../",
     "composite": true,
     "paths": {
-      "@shared/*": ["shared/*"]
+      "@shared/*": ["shared/src/*"]
     }
   },
-  "include": ["src",  "/src/**/*",  "./src/**/*", "../shared/**/*", "./../server/**/*"],
+  "include": ["src",  "/src/**/*",  "./src/**/*", "../shared/src/**/*", "./../server/**/*"],
   "exclude": ["node_modules", "dist"],
 }

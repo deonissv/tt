@@ -38,11 +38,11 @@
     "paths": {
       "@components/*": [ "client/src/components/*" ],
       "@services/*": [ "client/src/services/*" ],
-      "@shared/*": [ "shared/*" ],
+      "@shared/*": [ "shared/src/*" ],
       "@client/*": [ "client/*" ],
     }
   },
-  "include": ["src",  "./src/**/*", "../shared/**/*", "../client/**/*"],
+  "include": ["src",  "./src/**/*", "../shared/src/**/*", "../client/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

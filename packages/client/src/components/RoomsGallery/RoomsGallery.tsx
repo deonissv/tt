@@ -1,5 +1,6 @@
-import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
-import { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+
+import type { RoomPreviewDto } from '@shared/dto/rooms';
 
 interface Props {
   rooms: RoomPreviewDto[];

@@ -7,7 +7,7 @@ import { setNickname as setNickname_ } from '../../store/nickname';
 import { Input } from '@components/Input';
 import GamesGallery from '../../components/GamesGallery';
 import { GameService } from '@services/game.service';
-import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
+import { GamePreviewDto } from '@shared/dto/games';
 
 const CreateRoom = () => {
   const [nickname, setNickname] = useState('');

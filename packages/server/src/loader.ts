@@ -1,9 +1,9 @@
-import { Model } from '@shared/dto/pg/actorModel';
-import { Logger } from '@nestjs/common';
-import { OBJFileLoader } from '@babylonjs/loaders';
-import { Scene } from '@babylonjs/core/scene';
-import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
+import type { Scene } from '@babylonjs/core/scene';
+import { OBJFileLoader } from '@babylonjs/loaders';
+import { Logger } from '@nestjs/common';
+import type { ActorModel } from '@shared/dto/simulation';
 
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY = 500; // ms
@@ -20,7 +20,7 @@ OBJFileLoader.SKIP_MATERIALS = true;
 export class Loader {
   private static readonly logger = new Logger(Loader.name);
 
-  static async loadModel(model: Model, scene?: Scene): Promise<Mesh | null> {
+  static async loadModel(model: ActorModel, scene?: Scene): Promise<Mesh | null> {
     return await Loader.loadMesh(model.meshURL, scene);
   }
 

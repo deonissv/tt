@@ -1,11 +1,13 @@
 import * as WebSocket from 'ws';
 
-import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
-import Simulation from '../simulation/simulation';
+import { Simulation } from '../simulation/simulation';
 
-import { Client } from './client';
-import { RoomsService } from './rooms.service';
 import { Logger } from '@nestjs/common';
+import { Client } from './client';
+import type { RoomsService } from './rooms.service';
+
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { WS } from '@shared/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -15,7 +17,7 @@ export class SimulationRoom {
   wss: WebSocket.Server;
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, number[]>;
-  pgSave: PlaygroundStateSave | undefined;
+  simSave: SimulationStateSave | undefined;
   downloadProgress: WS.DownloadProgress;
 
   savingDelay: number;
@@ -39,7 +41,7 @@ export class SimulationRoom {
     this.wss = this.getServer();
     this.savingDelay = savingDelay;
     this.stateTickDelay = stateTickDelay;
-    this.pgSave = undefined;
+    this.simSave = undefined;
     this.downloadProgress = {
       total: 0,
       loaded: 0,
@@ -48,10 +50,11 @@ export class SimulationRoom {
     };
   }
 
-  async init(pgSave?: PlaygroundStateSave) {
-    this.downloadProgress.total = pgSave?.actorStates?.length ?? 0;
+  async init(simSave?: SimulationStateSave) {
+    SimulationRoom.logger.log(`Room initializig`);
+    this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
     this.simulation = await Simulation.init(
-      pgSave ?? {},
+      simSave ?? {},
       () => {
         this.downloadProgress.loaded++;
 
@@ -71,7 +74,7 @@ export class SimulationRoom {
     this.simulation.start();
     SimulationRoom.logger.log(`Room ${this.id} started.`);
     try {
-      this.pgSave = this.simulation.toStateSave();
+      this.simSave = this.simulation.toStateSave();
     } catch (e) {
       SimulationRoom.logger.error(e);
     }
@@ -88,7 +91,7 @@ export class SimulationRoom {
 
     this.broadcast({
       type: WS.STATE,
-      payload: this.pgSave,
+      payload: this.simSave,
     } as WS.MSG);
 
     this.savingInterval = this.initSaving();
@@ -104,10 +107,10 @@ export class SimulationRoom {
 
       this.clients.set(ws, client);
 
-      if (this.pgSave) {
+      if (this.simSave) {
         WS.send(ws, {
           type: WS.STATE,
-          payload: this.pgSave,
+          payload: this.simSave,
         });
       }
 
@@ -163,7 +166,7 @@ export class SimulationRoom {
       return acc;
     }, {});
 
-    let update: PlaygroundStateUpdate = {
+    let update: SimulationStateUpdate = {
       cursorPositions: cursors,
     };
 
@@ -178,12 +181,12 @@ export class SimulationRoom {
 
   private initSaving(): NodeJS.Timeout {
     return setInterval(async () => {
-      const pgSave = this.simulation.toStateSave();
-      const pgUpdate = this.simulation.toStateUpdate(this.pgSave);
-      if (pgSave.actorStates?.length && pgSave.actorStates.length > 0) {
+      const simSave = this.simulation.toStateSave();
+      const pgUpdate = this.simulation.toStateUpdate(this.simSave);
+      if (simSave.actorStates?.length && simSave.actorStates.length > 0) {
         await this.roomsService.saveRoomProgressUpdate(this.id, pgUpdate);
       }
-      this.pgSave = pgSave;
+      this.simSave = simSave;
     }, this.savingDelay);
   }
 
@@ -193,13 +196,13 @@ export class SimulationRoom {
     }, this.stateTickDelay);
   }
 
-  private getDelta(): PlaygroundStateUpdate | null {
-    const delta = this.simulation.toStateUpdate(this.pgSave);
+  private getDelta(): SimulationStateUpdate | null {
+    const delta = this.simulation.toStateUpdate(this.simSave);
 
     if (Object.keys(delta).length === 0) {
       return null;
     }
-    this.pgSave = this.simulation.toStateSave();
+    this.simSave = this.simulation.toStateSave();
 
     return delta;
   }

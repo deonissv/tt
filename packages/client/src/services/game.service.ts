@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { LOADER_URL } from '../config';
 import { getAccessToken } from '../utils';
-import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
-import { CreateGameDto } from '@shared/dto/games/create-game.dto';
+
+import type { CreateGameDto, GamePreviewDto } from '@shared/dto/games';
 
 export const GameService = {
   async getGamePreviews(): Promise<GamePreviewDto[]> {

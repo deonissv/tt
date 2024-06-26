@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { CreateGameDto } from '@shared/dto/games/create-game.dto';
-import { UpdateGameDto } from '@shared/dto/games/update-game.dto';
+import type { Game, GameVersion, Prisma } from '@prisma/client';
+
 import { PrismaService } from '../prisma.service';
-import { Game, GameVersion, Prisma } from '@prisma/client';
-import { GameDto } from '@shared/dto/games/game.dto';
-import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
-import { PlaygroundStateSave } from '@shared/index';
+
+import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
+import type { SimulationStateSave } from '@shared/dto/simulation';
 
 @Injectable()
 export class GamesService {
@@ -66,7 +65,7 @@ export class GamesService {
     return game?.GameVersion?.[0] ?? null;
   }
 
-  async findContentByCode(code: string): Promise<PlaygroundStateSave | null> {
+  async findContentByCode(code: string): Promise<SimulationStateSave | null> {
     const game = await this.prisma.game.findFirst({
       where: { code },
       include: {
@@ -79,7 +78,7 @@ export class GamesService {
     if (!game || !game.GameVersion?.[0]?.content) return null;
     const content = game.GameVersion?.[0]?.content;
     if (typeof content !== 'object') return null;
-    return content as PlaygroundStateSave;
+    return content as SimulationStateSave;
   }
 
   async findManyPreview(): Promise<GamePreviewDto[]> {

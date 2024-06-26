@@ -1,7 +1,9 @@
 import request from 'supertest';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 
 import { PrismaService } from '../prisma.service';
 import useDatabaseMock from '../../test/useDatabaseMock';

@@ -1,10 +1,10 @@
 import { NestFactory } from '@nestjs/core';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
-import { mainConfig } from './main.config';
 import { WsAdapter } from '@nestjs/platform-ws';
+import { AppModule } from './app.module';
+import { mainConfig } from './main.config';
 import { initHavok } from './utils';
 
 async function bootstrap() {
@@ -28,7 +28,7 @@ async function bootstrap() {
         // description: 'Enter JWT token',
         in: 'header',
       },
-      'JWT', // This name here is important for matching up with @ApiBearerAuth() in your controller!
+      'JWT', // This name here is important for matching up with @ApiBearerAuth() in controller
     )
     .build();
   const document = SwaggerModule.createDocument(app, config);

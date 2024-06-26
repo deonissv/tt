@@ -1,7 +1,8 @@
 import * as http from 'http';
-import internal from 'node:stream';
+import type internal from 'node:stream';
 
-import { OnGatewayInit, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import type { OnGatewayInit } from '@nestjs/websockets';
+import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'ws';
 import { HttpAdapterHost } from '@nestjs/core';
 import { AuthService } from '../auth/auth.service';
@@ -45,7 +46,6 @@ function abortHandshake(
 export class EventsGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
-
   constructor(
     private readonly adapterHost: HttpAdapterHost,
     private readonly authService: AuthService,

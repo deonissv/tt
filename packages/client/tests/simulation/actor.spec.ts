@@ -2,7 +2,7 @@
 // import { jest } from '@jest/globals';
 import { beforeEach, describe, it, vi, expect } from 'vitest';
 import { Logger, Mesh, NullEngine, Scene, Vector3 } from '@babylonjs/core';
-import { ActorState } from '@shared/dto/pg/actorState';
+import { ActorState } from '@shared/src/dto/pg/actorState';
 import Actor from '@client/src/playground/actor';
 import { Loader } from '@client/src/playground/loader';
 

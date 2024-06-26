@@ -1,18 +1,21 @@
-import request from 'supertest';
 import { jest } from '@jest/globals';
+import type { INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
 
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
-import { mainConfig } from '../main.config';
-import { AuthModule } from '../auth/auth.module';
-import { RoomsModule } from './rooms.module';
 import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
+import useConfigServiceMock from '../../test/useConfigServiceMock';
+import useDatabaseMock from '../../test/useDatabaseMock';
+import { AuthModule } from '../auth/auth.module';
+import { mainConfig } from '../main.config';
+import { PrismaService } from '../prisma.service';
+import { RoomsModule } from './rooms.module';
 import { RoomsService } from './rooms.service';
-import { CreateRoomDto } from '@shared/dto/rooms/create-room.dto';
+
+import type { CreateRoomDto } from '@shared/dto/rooms';
 
 describe('Rooms', () => {
   let app: INestApplication;

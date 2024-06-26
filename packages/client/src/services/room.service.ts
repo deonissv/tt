@@ -1,9 +1,10 @@
-import { type CreateRoomDto } from '@shared/dto/rooms/create-room.dto';
-import { PlaygroundStateSave, WS } from '@shared/index';
 import axios from 'axios';
 import { LOADER_URL, WSS_URL } from '../config';
-import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
 import { getAccessToken } from '../utils';
+
+import type { CreateRoomDto, RoomPreviewDto } from '@shared/dto/rooms';
+import type { SimulationStateSave } from '@shared/dto/simulation';
+import { WS } from '@shared/ws';
 
 export const RoomService = {
   async createRoom(payload: CreateRoomDto): Promise<string> {
@@ -34,7 +35,7 @@ export const RoomService = {
     return response.data as string;
   },
 
-  async connect(roomId: string, nickname: string): Promise<[WebSocket, string, PlaygroundStateSave]> {
+  async connect(roomId: string, nickname: string): Promise<[WebSocket, string, SimulationStateSave]> {
     const ws = new WebSocket(WSS_URL + roomId, `Bearer.${getAccessToken()}`);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {

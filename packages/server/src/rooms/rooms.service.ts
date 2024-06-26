@@ -1,12 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { SimulationRoom } from './simulation-room';
-import { PrismaService } from '../prisma.service';
-import { GamesService } from '../games/games.service';
-import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
-import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
-import { Prisma, Room } from '@prisma/client';
+import type { Prisma, Room } from '@prisma/client';
 import { Logger } from 'testcontainers/build/common';
-import Simulation from '../simulation/simulation';
+import { GamesService } from '../games/games.service';
+import { PrismaService } from '../prisma.service';
+import { SimulationRoom } from './simulation-room';
+
+import type { RoomPreviewDto } from '@shared/dto/rooms';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { Simulation } from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {
@@ -18,9 +19,9 @@ export class RoomsService {
     private readonly gameService: GamesService,
   ) {}
 
-  startRoomSimulation(roomCode: string, savingDelay: number, stateTickDelay: number, pgSave?: PlaygroundStateSave) {
+  startRoomSimulation(roomCode: string, savingDelay: number, stateTickDelay: number, simSave?: SimulationStateSave) {
     const room = new SimulationRoom(this, roomCode, savingDelay, stateTickDelay);
-    room.init(pgSave).catch((e: Error) => this.logger.error(e.message));
+    room.init(simSave).catch((e: Error) => this.logger.error(e.message));
     RoomsService.setRoom(room);
     return roomCode;
   }
@@ -51,8 +52,8 @@ export class RoomsService {
       },
     });
 
-    const pgSave = gameVersion.content as PlaygroundStateSave;
-    return this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, pgSave);
+    const simSave = gameVersion.content as SimulationStateSave;
+    return this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, simSave);
   }
 
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
@@ -109,13 +110,13 @@ export class RoomsService {
     const pgSave = lastState.content;
 
     updates.forEach(update => {
-      Simulation.mergeStateDelta(pgSave, update.content as PlaygroundStateUpdate);
+      Simulation.mergeStateDelta(pgSave, update.content as SimulationStateUpdate);
     });
 
     return this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, pgSave);
   }
 
-  private async getRoomLastState(roomId: number): Promise<{ order: number; content: PlaygroundStateSave }> {
+  private async getRoomLastState(roomId: number): Promise<{ order: number; content: SimulationStateSave }> {
     const lastSave = await this.prismaService.roomProgressSave.findFirst({
       where: {
         roomId,
@@ -128,7 +129,7 @@ export class RoomsService {
     if (lastSave) {
       return {
         order: 0,
-        content: lastSave.content as PlaygroundStateSave,
+        content: lastSave.content as SimulationStateSave,
       };
     }
     const gameLoad = await this.prismaService.roomProgressGameLoad.findFirst({
@@ -147,11 +148,11 @@ export class RoomsService {
     }
     return {
       order: gameLoad.order,
-      content: gameLoad.GameVersion.content as PlaygroundStateSave,
+      content: gameLoad.GameVersion.content as SimulationStateSave,
     };
   }
 
-  async saveRoomProgressUpdate(roomCode: string, stateUpdate: PlaygroundStateUpdate) {
+  async saveRoomProgressUpdate(roomCode: string, stateUpdate: SimulationStateUpdate) {
     const room = await this.findRoomByCode(roomCode);
 
     if (!room) {

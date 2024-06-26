@@ -1,11 +1,5 @@
-import { MASS_DEFAULT } from '@shared/constants';
+import { Actor } from '@shared/playground';
 
-import { Loader } from '../loader';
-import { floatCompare } from '@shared/utils';
-import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
-import { Scene } from '@babylonjs/core/scene';
-import { Mesh } from '@babylonjs/core';
-import { Actor } from '@shared/playground/Actor';
 export default Actor;
 // export default class Actor extends BaseActor {
 //   constructor(state: ActorState, modelMesh: Mesh, colliderMesh?: Mesh, scene?: Scene) {

@@ -1,7 +1,7 @@
-import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
-import { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import type { GamePreviewDto } from '@shared/dto/games';
 interface Props {
   games: GamePreviewDto[];
   onGameClick: (code: string) => void;

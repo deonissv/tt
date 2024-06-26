@@ -1,45 +1,23 @@
-import { GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate, SpecialObjectsMapper } from '@shared/index';
-import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
-import { SpecialObjcetsBuilder } from './specialObjects.ts/specialObjcetsBuilder';
-import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
-import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
-import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
-import { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
-import { PhysicsMotionType } from '@babylonjs/core/Physics/v2/IPhysicsEnginePlugin';
-import { CreateSphere } from '@babylonjs/core/Meshes/Builders/sphereBuilder';
-import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import { HavokPlugin } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
+import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
-// Side efects
-import '@babylonjs/core/Culling/ray';
-import '@babylonjs/core/Meshes/meshBuilder';
-import '@babylonjs/loaders/OBJ/objFileLoader';
-import '@babylonjs/core/Materials/standardMaterial';
-import '@babylonjs/core/Physics/physicsEngineComponent'; // enablePhysics
-import '@babylonjs/core/Helpers/sceneHelpers'; // createDefaultCameraOrLight
-
-// WebGPU Extensions
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
-import '@babylonjs/core/Engines/WebGPU/Extensions/engine.renderTarget';
 import Actor from './actor';
-// import '@babylonjs/core/Engines/WebGPU/Extensions/engine.uniformBuffer';
+import { SimulationBase } from '@shared/playground';
+import type { ActorState, ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 
-export default class Simulation {
-  private engine: NullEngine;
-  private scene: Scene;
-  private initialState: PlaygroundStateSave;
+import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 
-  constructor(initialState: PlaygroundStateSave) {
+export class Simulation extends SimulationBase {
+  constructor(initialState: SimulationStateSave) {
+    super();
     this.engine = new NullEngine();
     this.scene = new Scene(this.engine);
     this.initialState = initialState;
-
-    this.scene.createDefaultCameraOrLight(true, true, false);
+    this.scene.createDefaultCameraOrLight(false, false, false);
   }
 
   static async init(
-    stateSave: PlaygroundStateSave,
+    stateSave: SimulationStateSave,
     onModelLoaded?: () => void,
     onSucceed?: (ActorState) => void,
     onFailed?: (ActorState) => void,
@@ -47,8 +25,6 @@ export default class Simulation {
     const sim = new Simulation(stateSave);
     sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
     // sim.initPhysics(stateSave?.gravity);
-
-    // await this.initTable('rectangleCustom');
 
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
@@ -65,11 +41,6 @@ export default class Simulation {
     return sim;
   }
 
-  static async initTable(table: SpecialObjectsMapper['tables']): Promise<Actor> {
-    const tableMesh = await SpecialObjcetsBuilder.tables[table]();
-    return tableMesh as Actor;
-  }
-
   start() {
     this.scene.executeWhenReady(() => {
       this.engine.runRenderLoop(() => {
@@ -78,14 +49,7 @@ export default class Simulation {
     });
   }
 
-  update(pgUpdate: PlaygroundStateUpdate) {
-    pgUpdate?.actorStates?.forEach(actorState => {
-      const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor | undefined;
-      actor?.update(actorState);
-    });
-  }
-
-  toStateUpdate(pgState?: PlaygroundStateSave): PlaygroundStateUpdate {
+  toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
     this.scene.meshes.forEach(mesh => {
       if (mesh.parent instanceof Actor) {
@@ -106,11 +70,11 @@ export default class Simulation {
     };
   }
 
-  toStateSave(): PlaygroundStateSave {
+  toStateSave(): SimulationStateSave {
     const actorStates: ActorState[] = [];
     this.scene.meshes.forEach(mesh => {
       if (mesh.parent instanceof Actor) {
-        actorStates.push(mesh.parent.toStateSave());
+        actorStates.push(mesh.parent.toState());
       }
     });
 
@@ -126,55 +90,5 @@ export default class Simulation {
           };
         }),
     };
-  }
-
-  private initPhysics(gravity = GRAVITY) {
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, gravity, 0);
-
-    this.scene.enablePhysics(gravityVec, hp);
-  }
-
-  testSphere() {
-    const sphere = CreateSphere('___sphere', { diameter: 1 }, this.scene);
-    sphere.position = new Vector3(0, 10, 0);
-    const body = new PhysicsBody(sphere, PhysicsMotionType.DYNAMIC, false, this.scene);
-    body.shape = new PhysicsShapeMesh(sphere, this.scene);
-  }
-
-  testBox() {
-    const boxModel = CreateBox('___box', { width: 1, height: 1, depth: 1 }, this.scene);
-    new Actor('3', 'box', boxModel, undefined, {
-      position: [0, 10, 0],
-    });
-    // box.__move(0, 10, 0);
-    // eslint-disable-next-line no-console
-    console.log('box created');
-  }
-
-  static mergeStateDelta(state: PlaygroundStateSave, delta: PlaygroundStateUpdate): PlaygroundStateSave {
-    const rv: PlaygroundStateSave = { actorStates: [] };
-
-    const leftHandedSystemCandidate = delta.leftHandedSystem ?? state.leftHandedSystem;
-    if (leftHandedSystemCandidate) {
-      rv.leftHandedSystem = leftHandedSystemCandidate;
-    }
-
-    const gravityCandidate = delta.gravity ?? state.gravity;
-    if (gravityCandidate) {
-      rv.gravity = gravityCandidate;
-    }
-
-    if (state.actorStates) {
-      rv.actorStates = state.actorStates.map(actorState => {
-        const update = delta.actorStates?.find(actorUpdate => actorUpdate.guid === actorState.guid);
-        if (!update) {
-          return actorState;
-        }
-        return Actor.applyStateUpdate(actorState, update);
-      });
-    }
-
-    return rv;
   }
 }

@@ -10,7 +10,7 @@ module.exports = {
   },
   testRegex: '(/tests/.*|(\\.|/)(test|spec))\\.tsx?$',
   moduleNameMapper: {
-    '^@shared/(.*)$': '<rootDir>/packages/shared/$1',
+    '^@shared/(.*)$': '<rootDir>/packages/shared/src/$1',
   },
   moduleFileExtensions: ['js', 'json', 'jsx', 'node', 'ts', 'tsx'],
   displayName: 'client',

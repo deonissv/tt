@@ -1,13 +1,14 @@
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { User } from '@prisma/client';
 import bcrypt from 'bcrypt';
-import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
-import { Test, TestingModule } from '@nestjs/testing';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import configServiceMock from '../../test/configServiceMock';
+import { PrismaService } from '../prisma.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import type { User } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
-import configServiceMock from '../../test/configServiceMock';
 
 const user: User = {
   userId: 1,

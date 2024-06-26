@@ -1,8 +1,9 @@
-import { RawRuleOf, MongoAbility, ForcedSubject, createMongoAbility, MongoQuery } from '@casl/ability';
+import type { RawRuleOf, MongoAbility, ForcedSubject, MongoQuery } from '@casl/ability';
+import { createMongoAbility } from '@casl/ability';
 
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { ValidatedUser } from '../auth/validated-user';
+import type { Prisma } from '@prisma/client';
+import type { ValidatedUser } from '../auth/validated-user';
 
 export const Actions = ['read', 'manage', 'create', 'update', 'delete'] as const;
 export const Subjects = ['Game', 'User', 'Room', 'all'] as const;

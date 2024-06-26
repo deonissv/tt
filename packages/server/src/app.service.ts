@@ -7,7 +7,7 @@ export class AppService {
   async load(url: string): Promise<StreamableFile | null> {
     try {
       this.logger.log(`Proxing: ${url}`);
-      const response = await fetch(url).catch(e => {
+      const response = await fetch(url).catch((e: Error) => {
         this.logger.error(`Proxing ${url} failed - fetching: ${e.message}`);
       });
 
@@ -18,7 +18,7 @@ export class AppService {
         return null;
       }
 
-      const arrayBuffer = await response.arrayBuffer().catch(e => {
+      const arrayBuffer = await response.arrayBuffer().catch((e: Error) => {
         this.logger.error(`Proxing ${url} failed - reading arrayBuffer: ${e.message}`);
       });
       if (!arrayBuffer) return null;
@@ -28,7 +28,7 @@ export class AppService {
       const buffer = new Uint8Array(arrayBuffer);
       return new StreamableFile(buffer);
     } catch (e) {
-      this.logger.error(`Proxing ${url} failed - Unknow error: ${e.message}`);
+      this.logger.error(`Proxing ${url} failed - Unknow error: ${e instanceof Error ? e.message : e}`);
       return null;
     }
   }

@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { beforeEach, describe, it, vi, expect } from 'vitest';
-import { PlaygroundStateSave } from '@shared/index';
-import { ActorState } from '@shared/dto/pg/actorState';
+import { SimulationStateSave } from '@shared/src/index';
+import { ActorState } from '@shared/src/dto/pg/actorState';
 import { Logger, Mesh } from '@babylonjs/core';
 
 import Actor from '@client/src/playground/actor';
 import { Loader } from '@client/src/playground/loader';
-import Playground from '@client/src/playground';
+import Playground from '@client/src/simulation';
 
 Logger.LogLevels = 0;
 vi.mock('../../src/playground/loader');
@@ -21,7 +21,7 @@ describe('Simulation', () => {
 
   // describe('update', () => {
   //   it('updates actors based on state', async () => {
-  //     const initialState: PlaygroundStateSave = {
+  //     const initialState: SimulationStateSave = {
   //       actorStates: [
   //         { guid: 'actor1', name: 'actor1', model: { meshURL: '' }, transformation: { position: [0, 0, 0] } },
   //       ],
@@ -44,7 +44,7 @@ describe('Simulation', () => {
   //   });
 
   //   it('does not update non-existent actors', async () => {
-  //     const initialState: PlaygroundStateSave = {
+  //     const initialState: SimulationStateSave = {
   //       actorStates: [
   //         { guid: 'actor1', name: 'actor1', model: { meshURL: '' }, transformation: { position: [0, 0, 0] } },
   //       ],
@@ -67,7 +67,7 @@ describe('Simulation', () => {
 
   // describe('toStateUpdate', () => {
   //   it('returns actor state updates', async () => {
-  //     const initialState: PlaygroundStateSave = {
+  //     const initialState: SimulationStateSave = {
   //       actorStates: [
   //         { guid: 'actor1', name: 'actor1', model: { meshURL: '' }, transformation: { position: [0, 0, 0] } },
   //       ],
@@ -93,7 +93,7 @@ describe('Simulation', () => {
 
   describe('toStateSave', () => {
     it('returns complete state save', async () => {
-      const initialState: PlaygroundStateSave = {
+      const initialState: SimulationStateSave = {
         table: {
           url: '',
           type: 'Custom',
@@ -741,7 +741,7 @@ describe('Simulation', () => {
   //     const initialState = {
   //       actorStates: [{ guid: actorGuid, name: 'zxc', model: { meshURL: '' }, position: [0, 0, 0] }],
   //     };
-  //     const delta: PlaygroundStateUpdate = {
+  //     const delta: SimulationStateUpdate = {
   //       actorStates: [{ guid: actorGuid, transformation: { position: [1, 2, 3] } }],
   //     };
   //     const mergedState = Playground.mergeStateDelta(initialState, delta);
@@ -770,7 +770,7 @@ describe('Simulation', () => {
   //     const initialState = {
   //       actorStates: [{ guid: 'unknown', name: 'zxc', model: { meshURL: '' }, position: [0, 0, 0] }],
   //     };
-  //     const delta: PlaygroundStateUpdate = {
+  //     const delta: SimulationStateUpdate = {
   //       actorStates: [{ guid: actorGuid, transformation: { position: [1, 2, 3] } }],
   //     };
   //     const mergedState = Playground.mergeStateDelta(initialState, delta);

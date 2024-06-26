@@ -1,6 +1,6 @@
+import { MimeDetector } from '@shared/playground/Loader';
 import axios from 'axios';
 import { LOADER_URL } from '../config';
-import { getFileMime } from '@shared/index';
 
 export const modelLoaderService = {
   async load(url: string): Promise<File> {
@@ -11,7 +11,7 @@ export const modelLoaderService = {
       responseType: 'arraybuffer',
     });
     const blob = new Blob([response.data]);
-    const file = new File([blob], 'Stanford.obj', { type: getFileMime(response.data) });
+    const file = new File([blob], 'Stanford.obj', { type: MimeDetector.getMime(response.data) });
     return file;
   },
 };

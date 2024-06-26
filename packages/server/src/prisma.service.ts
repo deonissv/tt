@@ -1,9 +1,12 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import type { OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import type { PrismaClientInitializationError } from '@prisma/client/runtime/library';
 import { createSoftDeleteExtension } from 'prisma-extension-soft-delete';
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
+  private logger = new Logger(PrismaService.name);
   constructor() {
     super();
 
@@ -27,7 +30,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onModuleInit() {
-    await this.$connect();
+    await this.$connect().catch((e: PrismaClientInitializationError) => {
+      this.logger.error(e);
+      process.kill(process.pid, 'SIGTERM');
+    });
   }
 
   async onModuleDestroy() {

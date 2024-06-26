@@ -20,7 +20,7 @@ module.exports = {
       path: false,
     },
     alias: {
-      '@shared': path.resolve(__dirname, '../shared/'),
+      '@shared': path.resolve(__dirname, '../shared/src/'),
       '@components': path.resolve(__dirname, './src/components/'),
       '@services': path.resolve(__dirname, './src/services/'),
     },

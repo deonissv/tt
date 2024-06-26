@@ -1,9 +1,10 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
-import Playground from '../../playground';
 import { RoomService } from '@services/room.service';
 
-import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
 import { useAppSelector } from '../../store/store';
+import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { WS } from '@shared/ws';
+import { Simulation } from '@client/src/simulation';
 
 const frameRate = 60;
 
@@ -16,12 +17,12 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const [cursors, setCursors] = useState<Record<string, number[]>>({});
   const nickname = useAppSelector(state => state.nickname.nickname);
 
-  const babylonInit = async (pgStateSave: PlaygroundStateSave, ws: WebSocket) => {
-    const playground = await Playground.init(canvas.current!, pgStateSave, ws);
+  const babylonInit = async (pgStateSave: SimulationStateSave, ws: WebSocket) => {
+    const playground = await Simulation.init(canvas.current!, pgStateSave, ws);
     return playground;
   };
 
-  const init = useCallback(async (): Promise<[string, Playground]> => {
+  const init = useCallback(async (): Promise<[string, Simulation]> => {
     const [_ws, id, pgState] = await RoomService.connect(roomId, nickname);
     ws.current = _ws;
 
@@ -48,7 +49,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
     return [id, pg];
   }, [nickname, roomId]);
 
-  const sendUpdate = (pgStateUpdate: PlaygroundStateUpdate) => {
+  const sendUpdate = (simStateUpdate: SimulationStateUpdate) => {
     // ws.current &&
     //   WS.send(ws.current, {
     //     type: WS.UPDATE,
@@ -65,7 +66,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
         });
 
         canvas.current!.addEventListener('onDrag', event => {
-          const pgStateUpdate = (event as CustomEvent).detail as PlaygroundStateUpdate;
+          const pgStateUpdate = (event as CustomEvent).detail as SimulationStateUpdate;
           WS.send(ws.current!, {
             type: WS.UPDATE,
             payload: pgStateUpdate,
@@ -73,7 +74,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
         });
 
         updatePgStateInterval.current = setInterval(() => {
-          const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
+          const pgStateUpdate: SimulationStateUpdate = { cursorPositions: { [id]: cursor } };
           sendUpdate(pgStateUpdate);
         }, 1000 / frameRate);
       })

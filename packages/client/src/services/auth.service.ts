@@ -1,10 +1,9 @@
 import axios from 'axios';
 import { LOADER_URL } from '../config';
-import { SignInDto } from '@shared/dto/auth/sign-in.dto';
-import { CreateUserDto } from '@shared/dto/users/create-user.dto';
-import { AccessTokenDto } from '@shared/dto/auth/access-token';
 import { getAccessToken, resetAccessToken } from '../utils';
-import { JWT } from '@shared/dto/auth/jwt';
+
+import type { AccessTokenDto, JWT, SignInDto } from '@shared/dto/auth';
+import type { CreateUserDto } from '@shared/dto/users';
 
 export const AuthService = {
   async signin(payload: SignInDto): Promise<AccessTokenDto> {
