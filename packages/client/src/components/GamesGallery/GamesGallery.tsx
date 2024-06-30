@@ -1,14 +1,28 @@
 import type { FC, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+import { GameService } from '@services/game.service';
+import { RoomService } from '@services/room.service';
 import type { GamePreviewDto } from '@shared/dto/games';
 interface Props {
   games: GamePreviewDto[];
-  onGameClick: (code: string) => void;
 }
 
-const GamesGallery: FC<Props> = ({ games, onGameClick }): ReactNode => {
+const GamesGallery: FC<Props> = ({ games }): ReactNode => {
   const navigate = useNavigate();
+
+  const onCreateRoom = async (gameCode: string) => {
+    const roomId = await RoomService.createRoom({
+      gameCode,
+    });
+
+    localStorage.setItem('tt-nickname', '');
+    navigate(`/room/${roomId}`);
+  };
+
+  const onRemoveGame = async (gameCode: string) => {
+    await GameService.removeGame(gameCode);
+  };
 
   return (
     <div className="inline-block">
@@ -20,12 +34,16 @@ const GamesGallery: FC<Props> = ({ games, onGameClick }): ReactNode => {
           <img src={game.bannerUrl ?? 'https://www.svgrepo.com/show/126178/question-mark.svg'} alt={game.name} />
           <div>{game.name}</div>
           <button
-            className="bg-blue w-full rounded-full mb-5 py-1 text-white text-center"
-            onClick={() => {
-              onGameClick(game.code);
-            }}
+            className="bg-blue w-full rounded-full mb-1 py-1 text-white text-center"
+            onClick={() => onCreateRoom(game.code).catch(console.error)}
           >
             Create
+          </button>
+          <button
+            className="bg-red  w-full rounded-full mb-5 py-1 text-white text-center"
+            onClick={() => onRemoveGame(game.code).catch(console.error)}
+          >
+            Remove
           </button>
         </div>
       ))}

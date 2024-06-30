@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 
 import Input from '@components/Input';
 import { GameService } from '@services/game.service';
-import { parseTtsSave } from 'client/src/utils';
 
+import { TTSParser } from '@client/src/TTSParser';
 import type { SimulationStateSave } from '@shared/dto/simulation';
 
 export const CreateGame = () => {
@@ -29,7 +29,7 @@ export const CreateGame = () => {
   };
 
   const parseGameText = (text: string): SimulationStateSave => {
-    const ttsGame = parseTtsSave(text);
+    const ttsGame = TTSParser.parse(text);
     if (ttsGame) {
       return ttsGame;
     }

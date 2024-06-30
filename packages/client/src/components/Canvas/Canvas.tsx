@@ -1,32 +1,32 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
 import { RoomService } from '@services/room.service';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { useAppSelector } from '../../store/store';
-import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
-import { WS } from '@shared/ws';
 import { Simulation } from '@client/src/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { WS } from '@shared/ws';
+import { useAppSelector } from '../../store/store';
 
 const frameRate = 60;
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const ws = useRef<WebSocket>();
-  const updatePgStateInterval = useRef<NodeJS.Timeout>();
+  const updateSimStateInterval = useRef<NodeJS.Timeout>();
 
   const cursor: [number, number] = [0, 0];
   const canvas = useRef<HTMLCanvasElement>(null);
   const [cursors, setCursors] = useState<Record<string, number[]>>({});
   const nickname = useAppSelector(state => state.nickname.nickname);
 
-  const babylonInit = async (pgStateSave: SimulationStateSave, ws: WebSocket) => {
-    const playground = await Simulation.init(canvas.current!, pgStateSave, ws);
+  const babylonInit = async (simStateSave: SimulationStateSave) => {
+    const playground = await Simulation.init(canvas.current, simStateSave);
     return playground;
   };
 
   const init = useCallback(async (): Promise<[string, Simulation]> => {
-    const [_ws, id, pgState] = await RoomService.connect(roomId, nickname);
+    const [_ws, id, simState] = await RoomService.connect(roomId, nickname);
     ws.current = _ws;
 
-    const pg = await babylonInit(pgState, ws.current);
+    const pg = await babylonInit(simState);
 
     ws.current.addEventListener('message', event => {
       const message = WS.read(event);
@@ -73,7 +73,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
           });
         });
 
-        updatePgStateInterval.current = setInterval(() => {
+        updateSimStateInterval.current = setInterval(() => {
           const pgStateUpdate: SimulationStateUpdate = { cursorPositions: { [id]: cursor } };
           sendUpdate(pgStateUpdate);
         }, 1000 / frameRate);
@@ -84,10 +84,10 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
 
   useEffect(() => {
     return () => {
-      updatePgStateInterval && clearInterval(updatePgStateInterval.current);
+      updateSimStateInterval && clearInterval(updateSimStateInterval.current);
       ws.current?.close();
     };
-  }, [ws, updatePgStateInterval]);
+  }, [ws, updateSimStateInterval]);
 
   return (
     <>
