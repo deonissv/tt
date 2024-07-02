@@ -243,6 +243,7 @@ export class ActorBase extends TransformNode {
     const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model);
 
     if (!modelMesh) {
+      console.error(`Model ${actorState.guid} not found`);
       return null;
     }
 

@@ -3,6 +3,8 @@ import type { ActorState } from '@shared/dto/simulation';
 import { ActorBase } from './ActorBase';
 
 export class Actor extends ActorBase {
+  public __state: ActorState;
+
   constructor(actorState: ActorState, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(
       actorState.guid,
