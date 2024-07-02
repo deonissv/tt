@@ -6,7 +6,6 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
-import type { Scene } from '@babylonjs/core/scene';
 
 import {
   LIFH_HIGHT,
@@ -16,7 +15,7 @@ import {
   ROTATE_STEP,
   SCALE_COEF,
 } from '@shared/constants';
-import type { ActorState, ActorStateUpdate, Transformation } from '@shared/dto/simulation';
+import type { ActorState, ActorStateBase, ActorStateUpdate, Transformation } from '@shared/dto/simulation';
 import { floatCompare } from '@shared/utils';
 import { Loader } from '../Loader';
 
@@ -26,16 +25,16 @@ export class ActorBase extends TransformNode {
   static DEFAULT_ROTATION = [0, 0, 0];
   static DEFAULT_POSITION = [0, 0, 0];
 
-  public guid: string;
+  guid: string;
 
-  protected __mass: number;
-  protected __model: Mesh;
-  protected __collider: Mesh;
-  protected __state: ActorState;
+  __mass: number;
+  __model: Mesh;
+  __collider: Mesh;
+  __state: ActorStateBase;
 
-  public _body: PhysicsBody;
-  protected __flipTranslate = 0;
-  protected __targetPosition: Vector3 | null = null;
+  _body: PhysicsBody;
+  __flipTranslate = 0;
+  __targetPosition: Vector3 | null = null;
 
   colorDiffuse: number[] = [];
 
@@ -47,17 +46,19 @@ export class ActorBase extends TransformNode {
     transformation?: Transformation,
     mass?: number,
     colorDiffuse?: number[],
-    scene: Scene | null = null,
+    state?: ActorStateBase,
   ) {
-    super(name, scene, true);
+    super(name, undefined, true);
 
     this.guid = guid;
 
-    this._scene = scene ?? this.getEngine().scenes[0];
+    this._scene = this.getEngine().scenes[0];
 
     this.__mass = mass ?? 1;
     this.__model = modelMesh;
     this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
+
+    this.__state = state ?? { guid, name, transformation, mass };
 
     if (transformation?.scale) {
       this.__model.scaling = new Vector3(...transformation.scale);
@@ -294,7 +295,7 @@ export class ActorBase extends TransformNode {
     return mesh;
   }
 
-  toState(): ActorState {
+  toState<T extends typeof this>(): T['__state'] {
     return {
       ...this.__state,
       guid: this.guid,

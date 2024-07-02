@@ -1,4 +1,4 @@
-import { CustomShaderState } from './CustomShaderState';
+import type { CustomShaderState } from './CustomShaderState';
 
 export interface CustomMeshState {
   MeshURL: string;

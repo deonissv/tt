@@ -1,10 +1,10 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+
 import { MultiMaterial } from '@babylonjs/core/Materials/multiMaterial';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
-import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh';
-
-import type { DeckState } from '../../dto/simulation/ActorState';
+import type { DeckState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
@@ -22,38 +22,71 @@ const CARD_FACE_INDEX_COUNT = 51;
 const CARD_BACK_INDEX_START = 240;
 const CARD_BACK_INDEX_COUNT = 60;
 
+interface Card {
+  deckId: number;
+  deckNumber: number;
+  cardGUID: string;
+}
+
 export class Deck extends ActorBase {
-  constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
-    if (state.grid) {
-      const cardWidth = 1 / state.grid.cols;
-      const cardHeight = 1 / state.grid.rows;
+  // protected __state: DeckState;
+  protected cards: Card[];
+  gridTextures: Record<number, [Texture, Texture]>;
 
-      faceTexture.uOffset = 0;
-      faceTexture.vOffset = -cardHeight;
+  constructor(state: DeckState, model: Mesh, gridTextures: Record<number, [Texture, Texture]>) {
+    const cards: Card[] = Object.entries(state.cards).map(([deck, cardGUID]) => {
+      const [deckId, deckNumber] = deck.split(':').map(Number);
+      return { deckId, deckNumber, cardGUID };
+    });
 
-      faceTexture.uScale = cardWidth;
-      faceTexture.vScale = cardHeight;
+    console.log(cards.length);
 
-      model.scaling.x = state.grid.number;
-    }
+    model.scaling.x = cards.length;
 
-    const mat = new StandardMaterial('material');
-    const matFace = new StandardMaterial('face');
-    matFace.diffuseTexture = faceTexture;
+    const deckMaterial = new MultiMaterial(`deck-${state.guid}-multimat`);
+    const mat = new StandardMaterial(`deck-${state.guid}-base-mat`);
+    const matFace = new StandardMaterial(`deck-${state.guid}-face-mat`);
+    const matBack = new StandardMaterial(`deck-${state.guid}-back-mat`);
 
-    const matBack = new StandardMaterial('back');
-    matBack.diffuseTexture = backTexture;
-
-    const cardMat = new MultiMaterial('card');
-    cardMat.subMaterials.push(mat);
-    cardMat.subMaterials.push(matFace);
-    cardMat.subMaterials.push(matBack);
+    deckMaterial.subMaterials.push(mat);
+    deckMaterial.subMaterials.push(matFace);
+    deckMaterial.subMaterials.push(matBack);
 
     new SubMesh(1, CARD_VERT_START, CARD_VERT_COUNT, CARD_FACE_INDEX_START, CARD_FACE_INDEX_COUNT, model);
     new SubMesh(2, CARD_VERT_START, CARD_VERT_COUNT, CARD_BACK_INDEX_START, CARD_BACK_INDEX_COUNT, model);
-    model.material = cardMat;
 
-    super(state.guid, state.name, model, undefined, state.transformation, CARD_MASS);
+    model.material = deckMaterial;
+    super(state.guid, state.name, model, undefined, state.transformation, CARD_MASS, undefined, state);
+    this.gridTextures = gridTextures;
+
+    // console.assert(ids === Object.keys(state.grids));
+    const first = cards.at(0)!;
+    const last = cards.at(-1)!;
+
+    matFace.diffuseTexture = this.getFaceTexture(first.deckId, first.deckNumber);
+    matBack.diffuseTexture = this.getBackTexture(last.deckId);
+  }
+
+  getFaceTexture(deckId: number, number: number): Texture {
+    const grid = (this.__state as unknown as DeckState).grids[deckId];
+
+    const faceTexture = this.gridTextures[deckId][0].clone();
+
+    const cardWidth = 1 / grid.cols;
+    const cardHeight = 1 / grid.rows;
+
+    faceTexture.uOffset = cardWidth * number;
+    faceTexture.vOffset = -cardHeight + cardWidth * number;
+
+    faceTexture.uScale = cardWidth;
+    faceTexture.vScale = cardHeight;
+
+    return faceTexture;
+  }
+
+  getBackTexture(deckId: number): Texture {
+    const backTexture = this.gridTextures[deckId][1].clone();
+    return backTexture;
   }
 
   static async fromState(state: DeckState): Promise<Deck | null> {
@@ -63,15 +96,21 @@ export class Deck extends ActorBase {
       return null;
     }
 
-    const faceTexture = await Loader.loadTexture(state.faceURL);
-    const backTexture = await Loader.loadTexture(state.backURL);
+    const loadedTextures = await Promise.all(
+      Object.entries(state.grids).map(async ([id, grid]) => ({
+        [id]: [(await Loader.loadTexture(grid.faceURL))!, (await Loader.loadTexture(grid.backURL))!],
+      })),
+    );
+    const gridTextures = loadedTextures.reduce((acc, val) => {
+      const [key, value] = Object.entries(val)[0];
+      acc[Number(key)] = value;
+      return acc;
+    }, {}) as Record<number, [Texture, Texture]>;
 
-    if (!faceTexture || !backTexture) {
-      return null;
-    }
+    // @todo error handling
 
     model.setEnabled(true);
 
-    return new Deck(state, model, faceTexture, backTexture);
+    return new Deck(state, model, gridTextures);
   }
 }

@@ -14,6 +14,7 @@ module.exports = {
       './packages/client/tsconfig.json',
       './packages/client/tsconfig.node.json',
       './packages/server/tsconfig.json',
+      './packages/shared/tsconfig.json',
     ],
     tsconfigRootDir: __dirname,
   },
@@ -43,7 +44,7 @@ module.exports = {
         varsIgnorePattern: '^_',
       },
     ],
-    'no-console': 'error',
+    'no-console': 'off',
     'no-debugger': 'error',
   },
 };

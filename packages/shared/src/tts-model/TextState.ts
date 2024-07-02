@@ -1,4 +1,4 @@
-import { ColourState } from './ColourState';
+import type { ColourState } from './ColourState';
 
 export interface TextState {
   Text: string;

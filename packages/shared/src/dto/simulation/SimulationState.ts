@@ -1,4 +1,5 @@
 import type { ActorState, ActorStateUpdate } from './ActorState';
+import type { TableState } from './TableState';
 
 export interface SimulationStateBase {
   leftHandedSystem?: boolean; // default: false | If true, the Y axis will be inverted, and the Z axis will be inverted
@@ -19,12 +20,6 @@ export interface SimulationStateUpdate extends Omit<Partial<SimulationState>, 'a
   actorStates?: ActorStateUpdate[];
 }
 
-export interface TableState {
-  type: TableType;
-  url?: string;
-}
-
-export type TableType = 'Circle' | 'Rectangle' | 'Hexagon' | 'Octagon' | 'Custom';
 export type CursorPositions = Record<string, number[]>;
 
 // export class PlaygroundState {

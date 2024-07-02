@@ -4,7 +4,7 @@ import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh';
 
-import type { CardState } from '../../dto/simulation/ActorState';
+import type { CardState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
@@ -25,6 +25,7 @@ const CARD_BACK_INDEX_COUNT = 60;
 export class Card extends ActorBase {
   constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
     if (state.grid) {
+      faceTexture = faceTexture.clone();
       const cardWidth = 1 / state.grid.cols;
       const cardHeight = 1 / state.grid.rows;
 

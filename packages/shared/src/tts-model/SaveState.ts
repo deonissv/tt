@@ -1,15 +1,15 @@
-import { CameraState } from './CameraState';
-import { CustomAssetState } from './CustomAssetState';
-import { CustomDecalState } from './CustomDecalState';
-import { DecalState } from './DecalState';
-import { GridState } from './GridState';
-import { HandsState } from './HandsState';
-import { LightingState } from './LightingState';
-import { ObjectState } from './ObjectState';
-import { SnapPointState } from './SnapPointState';
-import { TabState } from './TabState';
-import { TurnsState } from './TurnsState';
-import { VectorLineState } from './VectorLineState';
+import type { CameraState } from './CameraState';
+import type { CustomAssetState } from './CustomAssetState';
+import type { CustomDecalState } from './CustomDecalState';
+import type { DecalState } from './DecalState';
+import type { GridState } from './GridState';
+import type { HandsState } from './HandsState';
+import type { LightingState } from './LightingState';
+import type { ObjectState } from './ObjectState';
+import type { SnapPointState } from './SnapPointState';
+import type { TabState } from './TabState';
+import type { TurnsState } from './TurnsState';
+import type { VectorLineState } from './VectorLineState';
 
 export interface SaveState {
   SaveName: string;

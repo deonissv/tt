@@ -1,4 +1,4 @@
-import { JointState } from './JointState';
+import type { JointState } from './JointState';
 
 export interface JointHingeState extends JointState {
   //http://docs.unity3d.com/ScriptReference/HingeJoint.html

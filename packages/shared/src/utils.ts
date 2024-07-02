@@ -1,6 +1,8 @@
 import { WebSocket } from 'ws';
 import { PRECISION_EPSILON } from './constants';
 
+export type OpnitalAllBut<T, K extends keyof T> = Required<Pick<T, K>> & Omit<Partial<T>, K>;
+
 export function floatCompare(a: number, b: number, epsilon = PRECISION_EPSILON): boolean {
   return Math.abs(a - b) < epsilon;
 }
@@ -16,3 +18,7 @@ export async function wsConnect(url: string, protocol?: string | string[]): Prom
     };
   });
 }
+
+export const range = (start = 0, end: number, step = 1): number[] => {
+  return Array.from({ length: Math.floor((end - start) / step) }, (_, i) => start + i * step);
+};

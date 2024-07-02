@@ -1,9 +1,9 @@
-import { Scene } from '@babylonjs/core/scene';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Scene } from '@babylonjs/core/scene';
 
-import Actor from './actor';
-import { SimulationBase } from '@shared/playground';
 import type { ActorState, ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { SimulationBase } from '@shared/playground';
+import Actor from './actor';
 
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 

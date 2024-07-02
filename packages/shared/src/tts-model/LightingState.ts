@@ -1,4 +1,4 @@
-import { ColourState } from './ColourState';
+import type { ColourState } from './ColourState';
 
 export interface LightingState {
   LightIntensity: number; // = 0.54f; //0-8

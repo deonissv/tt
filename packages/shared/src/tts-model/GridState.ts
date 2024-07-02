@@ -1,5 +1,5 @@
-import { ColourState } from './ColourState';
-import { Vector3 } from './Vector3';
+import type { ColourState } from './ColourState';
+import type { Vector3 } from './Vector3';
 
 export interface GridState {
   Type: GridType;

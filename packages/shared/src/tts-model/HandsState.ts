@@ -1,4 +1,4 @@
-import { TransformState } from './TransformState';
+import type { TransformState } from './TransformState';
 
 export interface HandsState {
   Enable: boolean;

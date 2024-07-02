@@ -1,26 +1,26 @@
-import { CalculatorState } from './CalculatorState';
-import { ClockSaveState } from './ClockSaveState';
-import { ColourState } from './ColourState';
-import { CounterState } from './CounterState';
-import { CustomAssetState } from './CustomAssetState';
-import { CustomAssetbundleState } from './CustomAssetbundleState';
-import { CustomDeckState } from './CustomDeckState';
-import { CustomImageState } from './CustomImageState';
-import { CustomMeshState } from './CustomMeshState';
-import { DecalState } from './DecalState';
-import { FogOfWarRevealerSaveState } from './FogOfWarRevealerSaveState';
-import { FogOfWarSaveState } from './FogOfWarSaveState';
-import { JointFixedState } from './JointFixedState';
-import { JointHingeState } from './JointHingeState';
-import { Mp3PlayerState } from './Mp3PlayerState';
-import { PhysicsMaterialState } from './PhysicsMaterialState';
-import { RigidbodyState } from './RigidbodyState';
-import { RotationValueState } from './RotationValueState';
-import { SnapPointState } from './SnapPointState';
-import { TabletState } from './TabletState';
-import { TextState } from './TextState';
-import { TransformState } from './TransformState';
-import { VectorLineState } from './VectorLineState';
+import type { CalculatorState } from './CalculatorState';
+import type { ClockSaveState } from './ClockSaveState';
+import type { ColourState } from './ColourState';
+import type { CounterState } from './CounterState';
+import type { CustomAssetState } from './CustomAssetState';
+import type { CustomAssetbundleState } from './CustomAssetbundleState';
+import type { CustomDeckState } from './CustomDeckState';
+import type { CustomImageState } from './CustomImageState';
+import type { CustomMeshState } from './CustomMeshState';
+import type { DecalState } from './DecalState';
+import type { FogOfWarRevealerSaveState } from './FogOfWarRevealerSaveState';
+import type { FogOfWarSaveState } from './FogOfWarSaveState';
+import type { JointFixedState } from './JointFixedState';
+import type { JointHingeState } from './JointHingeState';
+import type { Mp3PlayerState } from './Mp3PlayerState';
+import type { PhysicsMaterialState } from './PhysicsMaterialState';
+import type { RigidbodyState } from './RigidbodyState';
+import type { RotationValueState } from './RotationValueState';
+import type { SnapPointState } from './SnapPointState';
+import type { TabletState } from './TabletState';
+import type { TextState } from './TextState';
+import type { TransformState } from './TransformState';
+import type { VectorLineState } from './VectorLineState';
 
 export interface ObjectState {
   Name: string;
@@ -71,7 +71,7 @@ export interface ObjectState {
   CustomUIAssets: CustomAssetState[];
   LuaScript: string;
   LuaScriptState: string; // Serialized running Lua code
-  ContainedObjects: ObjectState; //Objects inside this one
+  ContainedObjects: ObjectState[]; //Objects inside this one
   PhysicsMaterial: PhysicsMaterialState; //Use to modify the physics material (friction, bounce, etc.) http://docs.unity3d.com/Manual/class-PhysicMaterial.html
   Rigidbody: RigidbodyState; //Use to modify the physical properties (mass, drag, etc) http://docs.unity3d.com/Manual/class-Rigidbody.html
   JointFixed: JointFixedState; //Joints can be used to attached/link objects together check the classes below
