@@ -1,4 +1,3 @@
-import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { Axis, Space } from '@babylonjs/core/Maths/math.axis';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
@@ -48,7 +47,7 @@ export class ActorBase extends TransformNode {
     colorDiffuse?: number[],
     state?: ActorStateBase,
   ) {
-    super(name, undefined, true);
+    super(name || guid, undefined, true);
 
     this.guid = guid;
 
@@ -60,11 +59,7 @@ export class ActorBase extends TransformNode {
 
     this.__state = state ?? { guid, name, transformation, mass };
 
-    if (transformation?.scale) {
-      this.__model.scaling = new Vector3(...transformation.scale);
-    }
-
-    modelMesh.name = 'model';
+    modelMesh.name = `${this.name}: model`;
     modelMesh.setParent(this);
 
     this.colorDiffuse = colorDiffuse ?? [];
@@ -144,7 +139,7 @@ export class ActorBase extends TransformNode {
       return modelMesh;
     } else {
       colliderMesh.isVisible = false;
-      colliderMesh.name = 'collider';
+      colliderMesh.name = `${this.name}: collider`;
       colliderMesh.setParent(this);
     }
     return colliderMesh;
@@ -240,7 +235,7 @@ export class ActorBase extends TransformNode {
   }
 
   static async modelFromState(actorState: ActorState, child = false): Promise<Mesh | null> {
-    const [modelMesh, _colliderMesh] = await Loader.loadModel(actorState.model);
+    const modelMesh = await Loader.loadMesh(actorState.model.meshURL);
 
     if (!modelMesh) {
       console.error(`Model ${actorState.guid} not found`);
@@ -253,13 +248,14 @@ export class ActorBase extends TransformNode {
       actorState.transformation?.scale && (modelMesh.scaling = new Vector3(...actorState.transformation.scale));
     }
 
-    if (modelMesh.material && actorState.colorDiffuse) {
-      const stMaterial = modelMesh.material as StandardMaterial;
-      stMaterial.diffuseColor = new Color3(...actorState.colorDiffuse.slice(0, 3));
+    const material = await Loader.loadModelMaterial(actorState.model, `${actorState.guid}: material`);
+    if (material && actorState.colorDiffuse) {
+      material.diffuseColor = new Color3(...actorState.colorDiffuse.slice(0, 3));
       if (actorState.colorDiffuse.length > 3) {
-        stMaterial.alpha = actorState.colorDiffuse[3];
+        material.alpha = actorState.colorDiffuse[3];
       }
     }
+    modelMesh.material = material;
 
     let childMeshes: Mesh[] = [];
     if (actorState?.children) {
@@ -271,12 +267,15 @@ export class ActorBase extends TransformNode {
     const mesh = meshes.length > 1 ? Mesh.MergeMeshes(meshes, true, true, undefined, true, true)! : meshes[0];
 
     mesh.setEnabled(true);
-    mesh.name = actorState.name;
     return mesh;
   }
 
   static async colliderFromState(actorState: ActorState): Promise<Mesh | null> {
-    const [_modelMesh, colliderMesh] = await Loader.loadModel(actorState.model);
+    if (!actorState.model.colliderURL) {
+      return null;
+    }
+
+    const colliderMesh = await Loader.loadMesh(actorState.model.colliderURL);
 
     if (!colliderMesh) {
       return null;
@@ -292,7 +291,6 @@ export class ActorBase extends TransformNode {
     const mesh = meshes.length > 1 ? Mesh.MergeMeshes(meshes, true, true, undefined, false, false)! : meshes[0];
 
     mesh.setEnabled(true);
-    mesh.name = actorState.name;
     return mesh;
   }
 

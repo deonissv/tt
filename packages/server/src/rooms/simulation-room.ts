@@ -6,10 +6,22 @@ import { Logger } from '@nestjs/common';
 import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
+import { URL_PREFIX } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { WS } from '@shared/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
+
+type Primitive = string | number | boolean | null | undefined;
+
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+interface RecursiveObject {
+  [key: string]: RecursiveType;
+}
+
+type RecursiveArray = RecursiveType[];
+
+type RecursiveType = Primitive | RecursiveObject | RecursiveArray;
 
 export class SimulationRoom {
   id: string;
@@ -51,7 +63,7 @@ export class SimulationRoom {
   }
 
   async init(simSave?: SimulationStateSave) {
-    SimulationRoom.logger.log(`Room initializig`);
+    SimulationRoom.logger.log(`Room ${this.id} initializig...`);
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
     this.simulation = await Simulation.init(
       simSave ?? {},
@@ -70,6 +82,7 @@ export class SimulationRoom {
         this.downloadProgress.failed++;
       },
     );
+    SimulationRoom.logger.log(`Room ${this.id} starting`);
 
     this.simulation.start();
     SimulationRoom.logger.log(`Room ${this.id} started.`);
@@ -91,7 +104,7 @@ export class SimulationRoom {
 
     this.broadcast({
       type: WS.STATE,
-      payload: this.simSave,
+      payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType),
     } as WS.MSG);
 
     this.savingInterval = this.initSaving();
@@ -110,7 +123,7 @@ export class SimulationRoom {
       if (this.simSave) {
         WS.send(ws, {
           type: WS.STATE,
-          payload: this.simSave,
+          payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave,
         });
       }
 
@@ -126,10 +139,10 @@ export class SimulationRoom {
 
     switch (message.type) {
       case WS.UPDATE: {
-        const pgStateUpdate = message.payload;
+        const simStateUpdate = message.payload;
         this.simulation.update(message.payload);
-        if (pgStateUpdate.cursorPositions) {
-          const cursor = Object.values(pgStateUpdate.cursorPositions)[0];
+        if (simStateUpdate.cursorPositions) {
+          const cursor = Object.values(simStateUpdate.cursorPositions)[0];
           this.cursors.set(event.target, cursor); // @TODO add typing for position
         }
         break;
@@ -182,9 +195,9 @@ export class SimulationRoom {
   private initSaving(): NodeJS.Timeout {
     return setInterval(async () => {
       const simSave = this.simulation.toStateSave();
-      const pgUpdate = this.simulation.toStateUpdate(this.simSave);
+      const simUpdate = this.simulation.toStateUpdate(this.simSave);
       if (simSave.actorStates?.length && simSave.actorStates.length > 0) {
-        await this.roomsService.saveRoomProgressUpdate(this.id, pgUpdate);
+        await this.roomsService.saveRoomProgressUpdate(this.id, simUpdate);
       }
       this.simSave = simSave;
     }, this.savingDelay);
@@ -213,5 +226,27 @@ export class SimulationRoom {
         WS.send(client, msg);
       }
     });
+  }
+
+  static patchStateURLs<T extends RecursiveType>(item: T): T {
+    if (typeof item == 'string' && item.startsWith('http') && !item.startsWith(URL_PREFIX)) {
+      return this.getAssetURL(item) as T;
+    } else if (Array.isArray(item)) {
+      return item.map(i => this.patchStateURLs(i)) as T;
+    } else if (typeof item === 'object' && item !== null) {
+      const newObj: RecursiveObject = {};
+      for (const key in item) {
+        if (Object.prototype.hasOwnProperty.call(item, key)) {
+          newObj[key] = this.patchStateURLs(item[key]);
+        }
+      }
+      return newObj as T;
+    }
+    return item;
+  }
+
+  static getAssetURL(url: string) {
+    // return `http://localhost:3000/assets/${url}`
+    return URL_PREFIX + url;
   }
 }

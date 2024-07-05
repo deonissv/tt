@@ -7,6 +7,7 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { OBJFileLoader } from '@babylonjs/loaders';
 import type { ActorModel } from '@shared/dto/simulation';
+import type { ActorMaterial } from '@shared/dto/simulation/ActorMaterial';
 import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
 
@@ -91,18 +92,20 @@ class Loader {
     return mesh.clone(mesh.name, null, true, true);
   }
 
-  async loadModelMaterial(model: Omit<ActorModel, 'meshURL'>, name = ''): Promise<StandardMaterial> {
+  async loadModelMaterial(modelMaterial: ActorMaterial, name = ''): Promise<StandardMaterial> {
     const material = new StandardMaterial(name);
     material.diffuseColor = new Color3(1, 1, 1);
     // @TODO test maps
-    material.diffuseTexture = model.diffuseURL ? await this.loadTexture(model.diffuseURL) : null;
-    material.ambientTexture = model.ambientURL ? await this.loadTexture(model.ambientURL) : null;
-    material.specularTexture = model.specularURL ? await this.loadTexture(model.specularURL) : null;
-    material.emissiveTexture = model.emissiveURL ? await this.loadTexture(model.emissiveURL) : null;
-    material.reflectionTexture = model.reflectionURL ? await this.loadTexture(model.reflectionURL) : null;
-    material.bumpTexture = model.normalURL ? await this.loadTexture(model.normalURL) : null;
-    material.opacityTexture = model.opacityURL ? await this.loadTexture(model.opacityURL) : null;
-    material.lightmapTexture = model.lightMapURL ? await this.loadTexture(model.lightMapURL) : null;
+    material.diffuseTexture = modelMaterial.diffuseURL ? await this.loadTexture(modelMaterial.diffuseURL) : null;
+    material.ambientTexture = modelMaterial.ambientURL ? await this.loadTexture(modelMaterial.ambientURL) : null;
+    material.specularTexture = modelMaterial.specularURL ? await this.loadTexture(modelMaterial.specularURL) : null;
+    material.emissiveTexture = modelMaterial.emissiveURL ? await this.loadTexture(modelMaterial.emissiveURL) : null;
+    material.reflectionTexture = modelMaterial.reflectionURL
+      ? await this.loadTexture(modelMaterial.reflectionURL)
+      : null;
+    material.bumpTexture = modelMaterial.normalURL ? await this.loadTexture(modelMaterial.normalURL) : null;
+    material.opacityTexture = modelMaterial.opacityURL ? await this.loadTexture(modelMaterial.opacityURL) : null;
+    material.lightmapTexture = modelMaterial.lightMapURL ? await this.loadTexture(modelMaterial.lightMapURL) : null;
 
     return material;
   }
@@ -145,11 +148,24 @@ class Loader {
     return null;
   }
 
-  bufferToURL(buffer: ArrayBuffer, url: string, type?: string): string {
-    type = type ?? MimeDetector.getMime(buffer);
+  _getB64URL(buffer: ArrayBuffer) {
+    const b64 = btoa(
+      Array.from(new Uint8Array(buffer))
+        .map(b => String.fromCharCode(b))
+        .join(''),
+    );
+    return `data:;base64,${b64}`;
+  }
 
+  _getObjectURL(buffer: ArrayBuffer, type?: string) {
+    type = type ?? MimeDetector.getMime(buffer);
     const blob = new Blob([buffer], { type });
-    const resourceURL = URL.createObjectURL(blob);
+    return URL.createObjectURL(blob);
+  }
+
+  bufferToURL(buffer: ArrayBuffer, url: string, _type?: string): string {
+    // const resourceURL = this._getObjectURL(buffer, type); // @TODO switch to getObjectURL, possible solution - wrapper for xhr2 using fetch
+    const resourceURL = this._getB64URL(buffer);
     this.Resources.set(url, resourceURL);
     return resourceURL;
   }

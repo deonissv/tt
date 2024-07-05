@@ -44,6 +44,10 @@ describe('Actor Class', () => {
       },
     };
     actor = new Actor(state, modelMesh);
+
+    jest.spyOn(Loader, 'loadMesh').mockImplementation(() => {
+      return Promise.resolve(new Mesh('testMesh'));
+    });
   });
 
   it('should create an actor with the correct initial state', () => {

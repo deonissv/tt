@@ -1,4 +1,5 @@
 export const PRECISION_EPSILON = 0.005;
+export const URL_PREFIX = 'http://localhost:3000/?url=';
 
 export const CAMERA_DEFAULT_ALPHA = 0;
 export const CAMERA_DEFAULT_BETA = 0;

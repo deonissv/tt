@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
-import { GenericContainer, StartedTestContainer } from 'testcontainers';
+import type { StartedTestContainer } from 'testcontainers';
+import { GenericContainer } from 'testcontainers';
 
 const POSTGRES_USER = 'test';
 const POSTGRES_PASSWORD = 'test';

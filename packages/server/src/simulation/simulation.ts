@@ -1,14 +1,14 @@
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 
-import type { ActorState, ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type { ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { SimulationBase } from '@shared/playground';
 import Actor from './actor';
 
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 
 export class Simulation extends SimulationBase {
-  constructor(initialState: SimulationStateSave) {
+  private constructor(initialState: SimulationStateSave) {
     super();
     this.engine = new NullEngine();
     this.scene = new Scene(this.engine);
@@ -51,13 +51,11 @@ export class Simulation extends SimulationBase {
 
   toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
-    this.scene.meshes.forEach(mesh => {
-      if (mesh.parent instanceof Actor) {
-        const actorState = pgState?.actorStates?.find(actorState => actorState.guid === (mesh.parent as Actor).guid);
-        const stateUpdate = mesh.parent.toStateUpdate(actorState);
-        if (stateUpdate) {
-          actorStates.push(stateUpdate);
-        }
+    this.actors.forEach(actor => {
+      const actorState = pgState?.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const stateUpdate = actor.toStateUpdate(actorState);
+      if (stateUpdate) {
+        actorStates.push(stateUpdate);
       }
     });
 
@@ -71,12 +69,7 @@ export class Simulation extends SimulationBase {
   }
 
   toStateSave(): SimulationStateSave {
-    const actorStates: ActorState[] = [];
-    this.scene.meshes.forEach(mesh => {
-      if (mesh.parent instanceof Actor) {
-        actorStates.push(mesh.parent.toState());
-      }
-    });
+    const actorStates = this.actors.map(actor => actor.toState());
 
     return {
       ...this.initialState,

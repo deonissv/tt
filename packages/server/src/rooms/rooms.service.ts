@@ -21,7 +21,11 @@ export class RoomsService {
 
   startRoomSimulation(roomCode: string, savingDelay: number, stateTickDelay: number, simSave?: SimulationStateSave) {
     const room = new SimulationRoom(this, roomCode, savingDelay, stateTickDelay);
-    room.init(simSave).catch((e: Error) => this.logger.error(e.message));
+    try {
+      room.init(simSave).catch((e: Error) => this.logger.error(e.message));
+    } catch (e) {
+      this.logger.error((e as unknown as Error).message);
+    }
     RoomsService.setRoom(room);
     return roomCode;
   }

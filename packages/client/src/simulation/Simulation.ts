@@ -6,7 +6,7 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Scene } from '@babylonjs/core/scene';
 
-// import { Inspector } from '@babylonjs/inspector';
+import { Inspector } from '@babylonjs/inspector';
 
 import { SimulationScene } from './SimulationScene';
 
@@ -31,7 +31,7 @@ export class Simulation extends SimulationBase {
     this.scene = scene;
     this._hll = new HighlightLayer('hll', this.scene); // @TODO change glow to thin solid line
 
-    // Inspector.Show(this.scene, {});
+    Inspector.Show(this.scene, {});
   }
 
   static async init(canvas: HTMLCanvasElement | null, stateSave: SimulationStateSave): Promise<Simulation> {
@@ -40,25 +40,14 @@ export class Simulation extends SimulationBase {
       ? await SimulationScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem)
       : new Scene(engine);
 
-    // const ground = CreatePlane('___ground', { width: 100, height: 70 }, scene);
-    // ground.rotation.x = Math.PI / 2;
-    // if (stateSave.table?.url) {
-    //   const texture = await Loader._loadTexture(stateSave.table.url, scene);
-    //   if (texture) {
-    //     const material = new StandardMaterial('___ground-material', scene);
-    //     material.diffuseTexture = texture;
-    //     ground.material = material;
-    //   }
-    // }
-
     canvas &&
       window.addEventListener('resize', () => {
         engine.resize();
       });
 
-    const pg = new Simulation(scene);
+    const sim = new Simulation(scene);
 
-    await pg.loadState(stateSave);
+    await sim.loadState(stateSave);
 
     engine.runRenderLoop(() => {
       scene.render();
@@ -66,8 +55,8 @@ export class Simulation extends SimulationBase {
 
     // pg._handlePick();
 
-    pg._handleHoverHighlight();
-    pg._bindAction(FLIP_BIND_KEYS, (actor: Actor) => {
+    sim._handleHoverHighlight();
+    sim._bindAction(FLIP_BIND_KEYS, (actor: Actor) => {
       console.log(actor.guid);
     });
 
@@ -76,7 +65,7 @@ export class Simulation extends SimulationBase {
     // pg._bindAction(ROTATE_CCW_KEYS, Actor.prototype.rotateCCW);
     // pg._bindAction(SCALE_UP_KEYS, Actor.prototype.scaleUp);
     // pg._bindAction(SCALE_DOWN_KEYS, Actor.prototype.scaleDown);
-    return pg;
+    return sim;
   }
 
   // static async initTable(table: SpecialObjectsMapper['tables'], url?: string): Promise<Actor> {

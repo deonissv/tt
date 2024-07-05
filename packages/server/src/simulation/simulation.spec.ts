@@ -20,6 +20,9 @@ describe('Simulation', () => {
     jest.spyOn(Loader, 'loadModel').mockImplementation(() => {
       return Promise.resolve([new Mesh('testMesh'), null]);
     });
+    jest.spyOn(Loader, 'loadMesh').mockImplementation(() => {
+      return Promise.resolve(new Mesh('testMesh'));
+    });
   });
 
   describe('init', () => {
@@ -810,6 +813,7 @@ describe('Simulation', () => {
           return acc as object;
         }, {});
       };
+      expect(sim.actors.length).toBe(initialState.actorStates?.length);
       expect(omitKeys(result, ['actorStates'])).toBe(omitKeys(expected, ['actorStates']));
       result.actorStates?.forEach(actorState => {
         const expectedActorState = expected.actorStates?.find(
