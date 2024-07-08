@@ -14,9 +14,11 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
 import { GRAVITY } from '@shared/constants';
+import type { ActorStateBase } from '@shared/dto/simulation';
+import { ActorState, CardState, DeckState } from '@shared/dto/simulation';
 import type { ActorStateUpdate } from '@shared/dto/simulation/ActorState';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation/SimulationState';
-import { Actor } from '../actors';
+import { Actor, ActorBase, Card, Deck } from '../actors';
 
 // WebGPU Extensions
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
@@ -53,11 +55,23 @@ export abstract class SimulationBase {
   get actors() {
     return this.scene.rootNodes.reduce((acc, node) => {
       const actorCandidate = node as Actor;
-      if (actorCandidate && actorCandidate instanceof Actor) {
+      if (actorCandidate && actorCandidate instanceof ActorBase) {
         acc.push(actorCandidate);
       }
       return acc;
     }, [] as Actor[]);
+  }
+
+  static async actorFromState(actorState: ActorStateBase): Promise<ActorBase | null> {
+    if (CardState.validate(actorState)) {
+      return Card.fromState(actorState);
+    } else if (DeckState.validate(actorState)) {
+      return Deck.fromState(actorState);
+    } else if (ActorState.validate(actorState)) {
+      return Actor.fromState(actorState);
+    } else {
+      throw new Error('Unknown actor type');
+    }
   }
 
   update(pgUpdate: SimulationStateUpdate) {
@@ -68,7 +82,7 @@ export abstract class SimulationBase {
   }
 
   async loadState(state: SimulationStateSave) {
-    await Promise.all((state?.actorStates ?? []).map(actorState => Actor.fromState(actorState)));
+    await Promise.all((state?.actorStates ?? []).map(actorState => SimulationBase.actorFromState(actorState)));
   }
 
   toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {

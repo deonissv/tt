@@ -4,7 +4,7 @@ import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh';
 
-import type { CardState } from '@shared/dto/simulation';
+import type { CardGrid, CardState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
@@ -24,13 +24,19 @@ const CARD_BACK_INDEX_COUNT = 60;
 
 export class Card extends ActorBase {
   constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
-    if (state.grid) {
-      faceTexture = faceTexture.clone();
-      const cardWidth = 1 / state.grid.cols;
-      const cardHeight = 1 / state.grid.rows;
+    const cardModel = Card.getCardModel(model, faceTexture, backTexture, state.grid);
+    super(state.guid, state.name, cardModel, undefined, state.transformation, CARD_MASS);
+  }
 
-      faceTexture.uOffset = state.grid.col * cardWidth;
-      faceTexture.vOffset = -cardHeight - state.grid.row * cardHeight;
+  static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid?: CardGrid) {
+    if (grid) {
+      const [col, row] = Card.getColRow(grid.sequence, grid.cols, grid.rows);
+
+      const cardWidth = 1 / grid.cols;
+      const cardHeight = 1 / grid.rows;
+
+      faceTexture.uOffset = col * cardWidth;
+      faceTexture.vOffset = -cardHeight - row * cardHeight;
 
       faceTexture.uScale = cardWidth;
       faceTexture.vScale = cardHeight;
@@ -53,11 +59,27 @@ export class Card extends ActorBase {
     new SubMesh(1, CARD_VERT_START, CARD_VERT_COUNT, CARD_FACE_INDEX_START, CARD_FACE_INDEX_COUNT, model);
     new SubMesh(2, CARD_VERT_START, CARD_VERT_COUNT, CARD_BACK_INDEX_START, CARD_BACK_INDEX_COUNT, model);
     model.material = cardMat;
-
-    super(state.guid, state.name, model, undefined, state.transformation, CARD_MASS);
+    return model;
   }
+
+  static getColRow(sequence: number, cols: number, rows: number): [number, number] {
+    const col = Math.floor(sequence / cols);
+    const row = sequence % rows;
+    return [col, row];
+  }
+
+  static async loadCardModel(): Promise<Mesh | null> {
+    const mesh = await Loader.loadMesh(CARD_MODEL_URL);
+    if (!mesh) {
+      return null;
+    }
+    mesh.rotation.y = Math.PI / 2;
+    mesh.rotation.z = Math.PI / 2;
+    return mesh;
+  }
+
   static async fromState(state: CardState): Promise<Card | null> {
-    const model = await Loader.loadMesh(CARD_MODEL_URL);
+    const model = await Card.loadCardModel();
 
     if (!model) {
       return null;

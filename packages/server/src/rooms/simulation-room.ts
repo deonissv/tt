@@ -87,7 +87,7 @@ export class SimulationRoom {
     this.simulation.start();
     SimulationRoom.logger.log(`Room ${this.id} started.`);
     try {
-      this.simSave = this.simulation.toStateSave();
+      this.simSave = this.simulation.toState();
     } catch (e) {
       SimulationRoom.logger.error(e);
     }
@@ -194,7 +194,7 @@ export class SimulationRoom {
 
   private initSaving(): NodeJS.Timeout {
     return setInterval(async () => {
-      const simSave = this.simulation.toStateSave();
+      const simSave = this.simulation.toState();
       const simUpdate = this.simulation.toStateUpdate(this.simSave);
       if (simSave.actorStates?.length && simSave.actorStates.length > 0) {
         await this.roomsService.saveRoomProgressUpdate(this.id, simUpdate);
@@ -215,7 +215,7 @@ export class SimulationRoom {
     if (Object.keys(delta).length === 0) {
       return null;
     }
-    this.simSave = this.simulation.toStateSave();
+    this.simSave = this.simulation.toState();
 
     return delta;
   }

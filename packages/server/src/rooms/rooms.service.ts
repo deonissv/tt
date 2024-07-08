@@ -111,13 +111,13 @@ export class RoomsService {
       },
     });
 
-    const pgSave = lastState.content;
+    const simSave = lastState.content;
 
     updates.forEach(update => {
-      Simulation.mergeStateDelta(pgSave, update.content as SimulationStateUpdate);
+      Simulation.mergeStateDelta(simSave, update.content as SimulationStateUpdate);
     });
 
-    return this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, pgSave);
+    return this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, simSave);
   }
 
   private async getRoomLastState(roomId: number): Promise<{ order: number; content: SimulationStateSave }> {
@@ -186,14 +186,14 @@ export class RoomsService {
       throw new BadRequestException('Room not found');
     }
 
-    const pgSave = simulationRoom.simulation.toStateSave();
+    const simSave = simulationRoom.simulation.toState();
 
     await this.prismaService.roomProgress.create({
       data: {
         roomId: room.roomId,
         RoomProgressSave: {
           create: {
-            content: pgSave as Prisma.InputJsonObject,
+            content: simSave as Prisma.InputJsonObject,
           },
         },
       },

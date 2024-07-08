@@ -1,4 +1,4 @@
-import type { ActorStateBase } from './ActorStateBase';
+import { ActorStateBase } from './ActorStateBase';
 
 export interface DeckGrid {
   faceURL: string;
@@ -7,7 +7,17 @@ export interface DeckGrid {
   cols: number;
 }
 
-export interface DeckState extends ActorStateBase {
-  cards: Record<string, string>;
+export interface DeckCard {
+  cardGUID: string;
+  deckId: number;
+  sequence: number;
+}
+
+export class DeckState extends ActorStateBase {
+  cards: DeckCard[];
   grids: Record<number, DeckGrid>;
+
+  static override validate(state: ActorStateBase): state is DeckState {
+    return (state as DeckState).cards !== undefined;
+  }
 }

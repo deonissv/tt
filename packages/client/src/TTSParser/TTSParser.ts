@@ -75,6 +75,11 @@ class TTSParser {
   parseObject = (objectState: ObjectState): ActorState | null => {
     let actorState: ActorState | null = null;
 
+    actorState = this.parseDeck(objectState) as unknown as ActorState;
+    if (actorState) {
+      return actorState;
+    }
+
     actorState = this.parseCustomObject(objectState);
     if (actorState) {
       return actorState;
@@ -87,16 +92,15 @@ class TTSParser {
   parseDeck(objectState: ObjectState): DeckState | null {
     try {
       const cardsGUID = objectState.ContainedObjects.map(o => o.GUID);
-      const cards = objectState.DeckIDs.slice(0, cardsGUID.length)
-        .map(id => {
-          const deckId = id.toString().slice(0, -2);
-          const cardId = +id.toString().slice(-2);
-          return `${deckId}:${cardId}`;
-        })
-        .reduce<Record<string, string>>((acc, id, i) => {
-          acc[id.toString()] = cardsGUID[i];
-          return acc;
-        }, {});
+      const cards = objectState.DeckIDs.slice(0, cardsGUID.length).map((id, i) => {
+        const deckId = +id.toString().slice(0, -2);
+        const sequence = +id.toString().slice(-2);
+        return {
+          cardGUID: cardsGUID[i],
+          deckId,
+          sequence,
+        };
+      });
 
       const deckState: DeckState = {
         ...this.parseActorBase(objectState),

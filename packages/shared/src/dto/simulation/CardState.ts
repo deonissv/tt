@@ -1,12 +1,18 @@
-import type { ActorStateBase } from './ActorStateBase';
+import { ActorStateBase } from './ActorStateBase';
 
-export interface CardState extends ActorStateBase {
+export interface CardGrid {
+  rows: number;
+  cols: number;
+  sequence: number;
+}
+
+export class CardState extends ActorStateBase {
   faceURL: string;
   backURL: string;
-  grid?: {
-    rows: number;
-    cols: number;
-    row: number;
-    col: number;
-  };
+  grid?: CardGrid;
+
+  static override validate(state: ActorStateBase): state is CardState {
+    const cardState = state as CardState;
+    return cardState.faceURL !== undefined && cardState.backURL !== undefined;
+  }
 }

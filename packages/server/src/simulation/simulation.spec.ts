@@ -803,7 +803,7 @@ describe('Simulation', () => {
         leftHandedSystem: true,
       };
 
-      const result = sim.toStateSave();
+      const result = sim.toState();
 
       const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]) => {
         Object.values(obj).reduce((acc, key: keyof T) => {
@@ -834,7 +834,7 @@ describe('Simulation', () => {
         },
       };
       const sim = await Simulation.init(initialState);
-      expect(sim.toStateSave()).toEqual({
+      expect(sim.toState()).toEqual({
         actorStates: [],
         leftHandedSystem: false,
         gravity: -9.8,

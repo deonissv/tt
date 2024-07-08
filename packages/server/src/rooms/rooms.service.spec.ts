@@ -323,7 +323,7 @@ describe('RoomsService', () => {
 
       jest.spyOn(RoomsService.rooms, 'get').mockReturnValue({
         simulation: {
-          toStateSave: () => pgState2,
+          toState: () => pgState2,
         },
       } as SimulationRoom);
 

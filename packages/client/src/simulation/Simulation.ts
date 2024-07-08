@@ -17,8 +17,8 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate, TableState } from '@shared/dto/simulation';
-import type { ActorBase } from '@shared/playground';
-import { Actor, RectangleCustomTable, SimulationBase } from '@shared/playground';
+import type { Actor, Deck } from '@shared/playground';
+import { ActorBase, RectangleCustomTable, SimulationBase } from '@shared/playground';
 
 export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
@@ -56,10 +56,14 @@ export class Simulation extends SimulationBase {
     // pg._handlePick();
 
     sim._handleHoverHighlight();
-    sim._bindAction(FLIP_BIND_KEYS, (actor: Actor) => {
+    sim._bindAction(FLIP_BIND_KEYS, (actor: ActorBase) => {
       console.log(actor.guid);
     });
 
+    sim._bindAction(FLIP_BIND_KEYS, a => {
+      console.log('flip');
+      (a as unknown as Deck).pickCard().catch(console.error);
+    });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
     // pg._bindAction(ROTATE_CCW_KEYS, Actor.prototype.rotateCCW);
@@ -81,9 +85,9 @@ export class Simulation extends SimulationBase {
     return this.scene.pick(this.scene.pointerX, this.scene.pointerY).pickedMesh as Mesh | null;
   }
 
-  private _pickActor(): Actor | null {
+  private _pickActor(): ActorBase | null {
     const pickedMesh = this._pickMesh();
-    return pickedMesh?.parent instanceof Actor ? pickedMesh.parent : null;
+    return pickedMesh?.parent instanceof ActorBase ? pickedMesh.parent : null;
   }
 
   private static async initEngine(canvas: HTMLCanvasElement | null): Promise<AbstractEngine> {
@@ -155,7 +159,7 @@ export class Simulation extends SimulationBase {
   //   });
   // }
 
-  private _bindAction(key: string[], action: (actor: Actor) => void) {
+  private _bindAction(key: string[], action: (actor: ActorBase) => void) {
     this.scene.onKeyboardObservable.add(kbInfo => {
       const evt = kbInfo.event;
       if (key.includes(evt.code) && kbInfo.type === 1) {

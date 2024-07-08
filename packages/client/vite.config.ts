@@ -14,7 +14,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    exclude: ['HavokPhysics.wasm'],
+    exclude: ['./**/HavokPhysics.wasm'],
   },
   server: {
     host: true,
