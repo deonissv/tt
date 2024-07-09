@@ -6,8 +6,8 @@ import type { TableState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
-const STATIC_SERVER = 'http:/localhost:5500';
-const SCALING = 87;
+const STATIC_SERVER = 'http://localhost:5500';
+const SCALING = 79;
 
 const meshSizes = (mesh: Mesh) => {
   const vectorsWorld = mesh.getBoundingInfo().boundingBox.vectorsWorld;
@@ -45,24 +45,26 @@ export class RectangleCustomTable extends ActorBase {
 
     const felt = await Loader.loadMesh(`${STATIC_SERVER}/GreenFelt_Table_Felt.obj`);
 
-    if (felt) {
-      const { width, depth } = meshSizes(felt);
-
-      const plane = CreatePlane('plane', { width: width, height: depth });
-      plane.rotation.x = Math.PI / 2;
-      plane.position.y = 0.3;
-
-      const planeMatetial = await Loader.loadModelMaterial({ diffuseURL: tableState.url! });
-      plane.material = planeMatetial;
-      wrapper.addChild(plane);
+    if (!felt) {
+      return null;
     }
+
+    const { width, depth } = meshSizes(felt);
+
+    const plane = CreatePlane('plane', { width: width, height: depth });
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = 0.3;
+
+    const planeMatetial = await Loader.loadModelMaterial({ diffuseURL: tableState.url! });
+    plane.material = planeMatetial;
+    wrapper.addChild(plane);
 
     wrapper.scaling = new Vector3(SCALING, SCALING, SCALING);
     const wrapperHeight = meshSizes(wrapper).height;
     wrapper.position.y = -(wrapperHeight * SCALING) / 2;
     wrapper.setEnabled(true);
 
-    const table = new RectangleCustomTable('RectangleCustomTable', 'RectangleCustomTable', wrapper);
+    const table = new RectangleCustomTable('#RectangleCustomTable', '#RectangleCustomTable', wrapper);
     if (table) {
       table.model.isPickable = false;
     }

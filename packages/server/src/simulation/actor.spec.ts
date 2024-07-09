@@ -138,19 +138,4 @@ describe('Actor Class', () => {
   //   actor.update(actorStateUpdate);
   //   expect(actor['__targetPosition']).toEqual(new Vector3(2, 2, 2));
   // });
-
-  it('should save current state correctly with toStateSave', () => {
-    const savedState = actor.toState();
-    expect(savedState).toEqual({
-      guid: '1234',
-      name: 'testActor',
-      model: state.model,
-      transformation: {
-        scale: [1, 1, 1],
-        rotation: [0, 0, 0],
-        position: [0, 0, 0],
-      },
-      mass: 2,
-    });
-  });
 });

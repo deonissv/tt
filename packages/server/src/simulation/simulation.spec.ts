@@ -5,6 +5,7 @@ import { initHavok } from '../utils';
 
 import type { ActorState, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { Loader } from '@shared/playground';
+import { omitKeys } from '@shared/utils';
 import Actor from './actor';
 import { Simulation } from './simulation';
 
@@ -177,7 +178,7 @@ describe('Simulation', () => {
     });
   });
 
-  describe('toStateSave', () => {
+  describe('toState', () => {
     it('returns complete state save', async () => {
       const initialState: SimulationStateSave = {
         table: {
@@ -805,14 +806,6 @@ describe('Simulation', () => {
 
       const result = sim.toState();
 
-      const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]) => {
-        Object.values(obj).reduce((acc, key: keyof T) => {
-          if (!keys.includes(key)) {
-            Object.assign(acc, obj[key]);
-          }
-          return acc as object;
-        }, {});
-      };
       expect(sim.actors.length).toBe(initialState.actorStates?.length);
       expect(omitKeys(result, ['actorStates'])).toBe(omitKeys(expected, ['actorStates']));
       result.actorStates?.forEach(actorState => {
@@ -821,6 +814,20 @@ describe('Simulation', () => {
         );
         expect(actorState).toEqual(expectedActorState);
       });
+    });
+
+    it('returns state save with rectangle table', async () => {
+      const initialState: SimulationStateSave = {
+        table: {
+          url: 'https://example.com',
+          type: 'Rectangle',
+        },
+        gravity: -9.8,
+        actorStates: [],
+        leftHandedSystem: false,
+      };
+      const sim = await Simulation.init(initialState);
+      expect(sim.toState()).toEqual(initialState);
     });
 
     it('excludes empty actor states', async () => {

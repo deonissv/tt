@@ -14,11 +14,11 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
 import { GRAVITY } from '@shared/constants';
-import type { ActorStateBase } from '@shared/dto/simulation';
+import type { ActorStateBase, TableState } from '@shared/dto/simulation';
 import { ActorState, CardState, DeckState } from '@shared/dto/simulation';
 import type { ActorStateUpdate } from '@shared/dto/simulation/ActorState';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation/SimulationState';
-import { Actor, ActorBase, Card, Deck } from '../actors';
+import { Actor, ActorBase, Card, Deck, RectangleCustomTable } from '../actors';
 
 // WebGPU Extensions
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
@@ -41,9 +41,9 @@ import { Actor, ActorBase, Card, Deck } from '../actors';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
 export abstract class SimulationBase {
-  protected engine: AbstractEngine;
-  protected scene: Scene;
-  protected initialState: SimulationStateSave;
+  engine: AbstractEngine;
+  scene: Scene;
+  initialState: SimulationStateSave;
 
   private initPhysics(gravity = GRAVITY) {
     const hp = new HavokPlugin(true, global.havok);
@@ -55,7 +55,7 @@ export abstract class SimulationBase {
   get actors() {
     return this.scene.rootNodes.reduce((acc, node) => {
       const actorCandidate = node as Actor;
-      if (actorCandidate && actorCandidate instanceof ActorBase) {
+      if (actorCandidate && actorCandidate instanceof ActorBase && !actorCandidate.guid.startsWith('#')) {
         acc.push(actorCandidate);
       }
       return acc;
@@ -64,13 +64,23 @@ export abstract class SimulationBase {
 
   static async actorFromState(actorState: ActorStateBase): Promise<ActorBase | null> {
     if (CardState.validate(actorState)) {
-      return Card.fromState(actorState);
+      return await Card.fromState(actorState);
     } else if (DeckState.validate(actorState)) {
-      return Deck.fromState(actorState);
+      return await Deck.fromState(actorState);
     } else if (ActorState.validate(actorState)) {
-      return Actor.fromState(actorState);
+      return await Actor.fromState(actorState);
     } else {
       throw new Error('Unknown actor type');
+    }
+  }
+
+  static async tableFromState(tableState: TableState): Promise<ActorBase | null> {
+    switch (tableState.type) {
+      case 'Rectangle':
+      case 'Custom':
+        return await RectangleCustomTable.fromState(tableState);
+      default:
+        return null;
     }
   }
 
@@ -79,10 +89,6 @@ export abstract class SimulationBase {
       const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor | undefined;
       actor?.update(actorState);
     });
-  }
-
-  async loadState(state: SimulationStateSave) {
-    await Promise.all((state?.actorStates ?? []).map(actorState => SimulationBase.actorFromState(actorState)));
   }
 
   toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {

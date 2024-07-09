@@ -22,3 +22,11 @@ export async function wsConnect(url: string, protocol?: string | string[]): Prom
 export const range = (start = 0, end: number, step = 1): number[] => {
   return Array.from({ length: Math.floor((end - start) / step) }, (_, i) => start + i * step);
 };
+export const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]) => {
+  Object.values(obj).reduce((acc, key: keyof T) => {
+    if (!keys.includes(key)) {
+      Object.assign(acc, obj[key]);
+    }
+    return acc as object;
+  }, {});
+};

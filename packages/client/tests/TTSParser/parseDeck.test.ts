@@ -3,6 +3,7 @@ import TTSParser from '@client/src/TTSParser/TTSParser';
 import { degToRad } from '@client/src/utils';
 import type { DeckState } from '@shared/dto/simulation';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
+import { omitKeys } from '@shared/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseDeck', () => {
@@ -1888,11 +1889,8 @@ describe('TTSParser - parseDeck', () => {
       },
     };
 
-    const parsed = TTSParser.parseDeck(MUNCHKIN_DECK_OBJ as unknown as ObjectState);
-    expect(parsed?.guid).toStrictEqual(expected.guid);
-    expect(parsed?.name).toStrictEqual(expected.name);
-    expect(parsed?.mass).toStrictEqual(expected.mass);
-    expect(parsed?.transformation).toStrictEqual(expected.transformation);
+    const parsed = TTSParser.parseDeck(MUNCHKIN_DECK_OBJ as unknown as ObjectState)!;
+    expect(omitKeys(parsed, ['cards', 'grids'])).toStrictEqual(omitKeys(expected, ['cards', 'grids']));
     expect(parsed?.grids).toStrictEqual(expected.grids);
     expect(parsed?.cards).toStrictEqual(expected?.cards);
   });

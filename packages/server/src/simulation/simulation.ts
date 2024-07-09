@@ -31,6 +31,14 @@ export class Simulation extends SimulationBase {
     sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
     // sim.initPhysics(stateSave?.gravity);
 
+    if (stateSave.table) {
+      try {
+        await SimulationBase.tableFromState(stateSave.table);
+      } catch (e) {
+        sim.logger.error(`Failed to load table: ${e}`);
+      }
+    }
+
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
         try {

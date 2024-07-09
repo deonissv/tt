@@ -4,6 +4,7 @@ import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh';
 
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { CardGrid, CardState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
@@ -75,6 +76,8 @@ export class Card extends ActorBase {
     }
     mesh.rotation.y = Math.PI / 2;
     mesh.rotation.z = Math.PI / 2;
+
+    mesh.scaling = new Vector3(2, 2.093, 1.77);
     return mesh;
   }
 

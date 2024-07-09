@@ -16,9 +16,9 @@ import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
 import { FLIP_BIND_KEYS } from '@shared/constants';
-import type { SimulationStateSave, SimulationStateUpdate, TableState } from '@shared/dto/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import type { Actor, Deck } from '@shared/playground';
-import { ActorBase, RectangleCustomTable, SimulationBase } from '@shared/playground';
+import { ActorBase, SimulationBase } from '@shared/playground';
 
 export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
@@ -47,8 +47,25 @@ export class Simulation extends SimulationBase {
 
     const sim = new Simulation(scene);
 
-    await sim.loadState(stateSave);
-
+    if (stateSave.table) {
+      await SimulationBase.tableFromState(stateSave.table);
+    }
+    await Promise.all(
+      (stateSave?.actorStates ?? []).map(async actorState => {
+        try {
+          const actor = await SimulationBase.actorFromState(actorState);
+          if (actor) {
+            return actor;
+          } else {
+            console.error(`Null actor ${actorState.guid}`);
+            return null;
+          }
+        } catch (e) {
+          console.error(`Failed to load actor ${actorState.guid}: ${(e as Error).toString()}`);
+          return null;
+        }
+      }),
+    );
     engine.runRenderLoop(() => {
       scene.render();
     });
@@ -70,15 +87,6 @@ export class Simulation extends SimulationBase {
     // pg._bindAction(SCALE_UP_KEYS, Actor.prototype.scaleUp);
     // pg._bindAction(SCALE_DOWN_KEYS, Actor.prototype.scaleDown);
     return sim;
-  }
-
-  // static async initTable(table: SpecialObjectsMapper['tables'], url?: string): Promise<Actor> {
-  //   const tableMesh = await SpecialObjcetsBuilder.tables[table](url);
-  //   return tableMesh as Actor;
-  // }
-
-  static async initTable(tableState: TableState): Promise<ActorBase | null> {
-    return await RectangleCustomTable.fromState(tableState);
   }
 
   private _pickMesh(): Mesh | null {
