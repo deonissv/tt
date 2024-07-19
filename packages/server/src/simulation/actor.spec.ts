@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { HavokPlugin, Logger, Mesh, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { jest } from '@jest/globals';
-import { initHavok } from '../utils';
 import Actor from './actor';
 
 import { GRAVITY } from '@shared/constants';
 import type { ActorState } from '@shared/dto/simulation';
 import { Loader } from '@shared/playground';
+import { initHavok } from '@shared/utils';
 
 Logger.LogLevels = 0;
 jest.mock('@shared/playground');

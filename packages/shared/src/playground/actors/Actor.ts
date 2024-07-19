@@ -71,6 +71,7 @@ export class Actor extends ActorBase {
   static async fromState(actorState: ActorState): Promise<Actor | null> {
     const modelMesh = await Actor.modelFromState(actorState);
     if (!modelMesh) {
+      // eslint-disable-next-line no-console
       console.log('Failed to load model mesh');
       return null;
     }

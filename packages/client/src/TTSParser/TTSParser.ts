@@ -35,10 +35,13 @@ class TTSParser {
           }
           return acc;
         }, []);
+      } else {
+        return null;
       }
       return save;
     } catch (e) {
       this.error = true;
+      // eslint-disable-next-line no-console
       console.error('Tts parse failed', e);
       return null;
     }
@@ -52,6 +55,7 @@ class TTSParser {
   };
 
   mapTableType(type: string): TableType {
+    // https://kb.tabletopsimulator.com/host-guides/tables/
     switch (type) {
       case 'Table_Circular':
         return 'Circle';
@@ -66,9 +70,10 @@ class TTSParser {
       case 'Table_RPG':
         return 'RPG';
       case 'Table_Custom':
+        return 'Custom';
       case '':
       default:
-        return 'Custom';
+        return 'None';
     }
   }
 

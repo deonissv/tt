@@ -5,7 +5,7 @@ import RoomsGallery from '@components/RoomsGallery/RoomsGallery';
 import { AuthService } from '@services/auth.service';
 import { RoomService } from '@services/room.service';
 
-import { RoomPreviewDto } from '@shared/dto/rooms';
+import type { RoomPreviewDto } from '@shared/dto/rooms';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -32,7 +32,7 @@ const Profile = () => {
 
     // eslint-disable-next-line no-console
     loadPreviews().catch(console.error);
-  }, []);
+  }, [user]);
 
   return (
     <>

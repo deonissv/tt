@@ -1,5 +1,5 @@
-import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
-import ws from 'ws';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type ws from 'ws';
 
 export const CLIENT_ID = 'clientId';
 export const NICKNAME = 'nickname';
@@ -7,6 +7,15 @@ export const STATE = 'state';
 export const CURSOR = 'cursor';
 export const UPDATE = 'update';
 export const DOWNLOAD_PROGRESS = 'downloadProgress';
+
+export enum ACTIONS {
+  PICK_DECK,
+}
+
+export interface Action {
+  type: ACTIONS;
+  payload: string;
+}
 
 export interface DownloadProgress {
   loaded: number;
@@ -16,6 +25,7 @@ export interface DownloadProgress {
 }
 
 export type MSG =
+  | Action
   | {
       type: typeof CLIENT_ID | typeof NICKNAME;
       payload: string;

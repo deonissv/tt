@@ -238,6 +238,7 @@ export class ActorBase extends TransformNode {
     const modelMesh = await Loader.loadMesh(actorState.model.meshURL);
 
     if (!modelMesh) {
+      // eslint-disable-next-line no-console
       console.error(`Model ${actorState.guid} not found`);
       return null;
     }

@@ -87,7 +87,7 @@ model Room {
   type                 Int
   authorId             Int
   savingDelay          Int                    @default(1000)
-  stateTickDelay       Int                    @default(1000)
+  stateTickDelay       Int                    @default(17)
   Messages             Message[]
   RoomProgress         RoomProgress[]
   RoomUsers            RoomUser[]

@@ -17,24 +17,34 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
-import type { Actor, Deck } from '@shared/playground';
-import { ActorBase, SimulationBase } from '@shared/playground';
+import type { Actor } from '@shared/playground';
+import { ActorBase, Deck, SimulationBase } from '@shared/playground';
+
+export interface SimulationCallbacks {
+  onDeckPick: (deck: Deck) => void;
+}
 
 export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
   private _hoveredMesh: Mesh | null = null;
   private _pickedActor: Actor | null = null;
   // private _cursorPos: [number, number] = [0, 0];
+  cbs: SimulationCallbacks;
 
-  private constructor(scene: Scene) {
+  private constructor(scene: Scene, cbs: SimulationCallbacks) {
     super();
     this.scene = scene;
     this._hll = new HighlightLayer('hll', this.scene); // @TODO change glow to thin solid line
+    this.cbs = cbs;
 
     Inspector.Show(this.scene, {});
   }
 
-  static async init(canvas: HTMLCanvasElement | null, stateSave: SimulationStateSave): Promise<Simulation> {
+  static async init(
+    canvas: HTMLCanvasElement | null,
+    stateSave: SimulationStateSave,
+    cbs: SimulationCallbacks,
+  ): Promise<Simulation> {
     const engine = await this.initEngine(canvas);
     const scene = canvas
       ? await SimulationScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem)
@@ -45,7 +55,7 @@ export class Simulation extends SimulationBase {
         engine.resize();
       });
 
-    const sim = new Simulation(scene);
+    const sim = new Simulation(scene, cbs);
 
     if (stateSave.table) {
       await SimulationBase.tableFromState(stateSave.table);
@@ -57,10 +67,12 @@ export class Simulation extends SimulationBase {
           if (actor) {
             return actor;
           } else {
+            // eslint-disable-next-line no-console
             console.error(`Null actor ${actorState.guid}`);
             return null;
           }
         } catch (e) {
+          // eslint-disable-next-line no-console
           console.error(`Failed to load actor ${actorState.guid}: ${(e as Error).toString()}`);
           return null;
         }
@@ -73,13 +85,10 @@ export class Simulation extends SimulationBase {
     // pg._handlePick();
 
     sim._handleHoverHighlight();
-    sim._bindAction(FLIP_BIND_KEYS, (actor: ActorBase) => {
-      console.log(actor.guid);
-    });
-
-    sim._bindAction(FLIP_BIND_KEYS, a => {
-      console.log('flip');
-      (a as unknown as Deck).pickCard().catch(console.error);
+    sim._bindAction(FLIP_BIND_KEYS, actor => {
+      if (actor instanceof Deck) {
+        cbs.onDeckPick && cbs.onDeckPick(actor);
+      }
     });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
@@ -178,12 +187,14 @@ export class Simulation extends SimulationBase {
     });
   }
 
-  update(pgUpdate: SimulationStateUpdate) {
-    pgUpdate?.actorStates?.forEach(actorState => {
+  update(simUpdate: SimulationStateUpdate) {
+    simUpdate?.actorStates?.forEach(actorState => {
       const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor;
       if (actor && this._pickedActor?.guid !== actor.guid) {
         actor.update(actorState);
       }
     });
+
+    simUpdate?.actions?.forEach(action => this.processAction(action));
   }
 }

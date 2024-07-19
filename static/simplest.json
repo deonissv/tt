@@ -1,7 +1,6 @@
 {
   "table": {
-    "type": "custom",
-    "url": "http://cloud-3.steamusercontent.com/ugc/1010436537647666695/83BC360ECD5C2128DE5286B8367272DB1D96D14F/"
+    "type": "None"
   },
   "actorStates": [
     {
@@ -26,6 +25,120 @@
         "scale": [1, 1, 1],
         "position": [-10.9353037, 20.6019473, 87.02083],
         "rotation": [0, 0, 0]
+      }
+    },
+    {
+      "guid": "162411",
+      "name": "Deck",
+      "cards": [
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "8a9824",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "c947cd",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "45cad9",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "09b55e",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "6bab49",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "74b0a4",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "d5821f",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "8c958c",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "db2b79",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "c8502d",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "837a0b",
+          "sequence": 0
+        },
+        {
+          "deckId": 51,
+          "cardGUID": "4bc360",
+          "sequence": 0
+        }
+      ],
+      "grids": {
+        "51": {
+          "cols": 3,
+          "rows": 3,
+          "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
+          "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/"
+        }
+      },
+      "transformation": {
+        "scale": [1, 1, 1],
+        "position": [-4.4997139, 1.07239735, 8.776062],
+        "rotation": [-8.688759734673492e-10, 3.141606232251374, -2.771431654293895e-9]
       }
     },
     {

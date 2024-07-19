@@ -1,7 +1,7 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
-import type { DeckState } from '@shared/dto/simulation';
+import type { CardState, DeckGrid, DeckState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 import { Card } from './Card';
@@ -51,6 +51,10 @@ export class Deck extends ActorBase {
   }
 
   renderDeck() {
+    if (this.cards.length === 0) {
+      this.setEnabled(false);
+    }
+
     const faceTexture = this.cards.at(0)![2].clone();
     const backTexture = this.cards.at(-1)![3];
 
@@ -84,6 +88,51 @@ export class Deck extends ActorBase {
     return new Deck(state, model, gridTextures);
   }
 
+  override toState() {
+    const deckGrids = new Map<string, CardState[]>();
+    this.cards.map(([card]) => {
+      const deckGrid: DeckGrid = {
+        faceURL: card.faceURL,
+        backURL: card.backURL,
+        cols: card.grid!.cols,
+        rows: card.grid!.rows,
+      };
+
+      const key = JSON.stringify(deckGrid);
+      if (!deckGrids.has(key)) {
+        deckGrids.set(key, [card]);
+      } else {
+        deckGrids.get(key)!.push(card);
+      }
+    });
+
+    const deckGridsArray = Array.from(deckGrids.entries());
+    const newGrids = Array.from(deckGridsArray).reduce(
+      (acc, [key, _cards], i) => {
+        const grid = JSON.parse(key) as DeckGrid;
+        acc[i] = grid;
+        return acc;
+      },
+      {} as DeckState['grids'],
+    );
+
+    const newCards: DeckState['cards'] = deckGridsArray
+      .map(([_key, cards], i) => {
+        return cards.map(card => ({
+          cardGUID: card.guid,
+          deckId: i,
+          sequence: card.grid!.sequence,
+        }));
+      })
+      .flat();
+
+    return {
+      ...super.toState(),
+      cards: newCards,
+      grids: newGrids,
+    };
+  }
+
   async pickCard() {
     this.model.scaling.x -= 1;
 
@@ -103,6 +152,7 @@ export class Deck extends ActorBase {
 
     const model = await Card.loadCardModel();
     if (!model) {
+      // eslint-disable-next-line no-console
       console.error('Failed to load card model');
       return;
     }

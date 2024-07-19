@@ -1,5 +1,5 @@
-import React from 'react';
 import { Input } from '@components/Input';
+import type React from 'react';
 
 const JoinRoom: React.FC = (): React.ReactNode => {
   return (

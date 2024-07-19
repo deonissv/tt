@@ -7,7 +7,7 @@ export enum MimeType {
   PNG = 'image/png',
   JPG = 'image/jpg',
   SVG = 'image/svg+xml',
-  TIF = 'image/tiff',
+  TIF = 'image/tif',
   TIFF = 'image/tiff',
   ICO = 'image/vnd.microsoft.icon',
   TXT = 'text/plain',

@@ -13,6 +13,17 @@ describe('TTSParser.parseTable', () => {
     });
   });
 
+  it('should return none table', () => {
+    expect(
+      TTSParser.parseTable({
+        Table: '',
+        TableURL: '',
+      } as unknown as SaveState),
+    ).toEqual({
+      type: 'None',
+    });
+  });
+
   it('should return custom table from chass5 save state', () => {
     expect(TTSParser.parseTable(CHESS5_OBJ as unknown as SaveState)).toEqual({
       type: 'Glass',

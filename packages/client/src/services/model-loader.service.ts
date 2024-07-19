@@ -11,7 +11,7 @@ export const modelLoaderService = {
       responseType: 'arraybuffer',
     });
     const blob = new Blob([response.data]);
-    const file = new File([blob], 'Stanford.obj', { type: MimeDetector.getMime(response.data) });
+    const file = new File([blob], 'Stanford.obj', { type: MimeDetector.getMime(response.data as ArrayBuffer) });
     return file;
   },
 };

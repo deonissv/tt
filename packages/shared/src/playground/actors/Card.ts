@@ -9,7 +9,7 @@ import type { CardGrid, CardState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
-const CARD_MODEL_URL = 'http://localhost:5500/Card_Mesh.obj';
+const CARD_MODEL_URL = 'http://192.168.43.141:5500/Card_Mesh.obj';
 
 const CARD_MASS = 1;
 const CARD_VERT_START = 0; //model.subMeshes[0].verticesStart
@@ -24,9 +24,11 @@ const CARD_BACK_INDEX_START = 240;
 const CARD_BACK_INDEX_COUNT = 60;
 
 export class Card extends ActorBase {
+  __state: CardState;
+
   constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
     const cardModel = Card.getCardModel(model, faceTexture, backTexture, state.grid);
-    super(state.guid, state.name, cardModel, undefined, state.transformation, CARD_MASS);
+    super(state.guid, state.name, cardModel, undefined, state.transformation, CARD_MASS, undefined, state);
   }
 
   static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid?: CardGrid) {

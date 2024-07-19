@@ -35,12 +35,14 @@ const GamesGallery: FC<Props> = ({ games }): ReactNode => {
           <div>{game.name}</div>
           <button
             className="bg-blue w-full rounded-full mb-1 py-1 text-white text-center"
+            // eslint-disable-next-line no-console
             onClick={() => onCreateRoom(game.code).catch(console.error)}
           >
             Create
           </button>
           <button
             className="bg-red  w-full rounded-full mb-5 py-1 text-white text-center"
+            // eslint-disable-next-line no-console
             onClick={() => onRemoveGame(game.code).catch(console.error)}
           >
             Remove

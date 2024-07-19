@@ -68,10 +68,10 @@ export class Simulation extends SimulationBase {
     });
   }
 
-  toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {
+  toStateUpdate(simState?: SimulationStateSave): SimulationStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
     this.actors.forEach(actor => {
-      const actorState = pgState?.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const actorState = simState?.actorStates?.find(actorState => actorState.guid === actor.guid);
       const stateUpdate = actor.toStateUpdate(actorState);
       if (stateUpdate) {
         actorStates.push(stateUpdate);

@@ -1,11 +1,10 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { Logger, Mesh, Scene } from '@babylonjs/core';
 import { jest } from '@jest/globals';
-import { initHavok } from '../utils';
 
 import type { ActorState, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { Loader } from '@shared/playground';
-import { omitKeys } from '@shared/utils';
+import { initHavok, omitKeys } from '@shared/utils';
 import Actor from './actor';
 import { Simulation } from './simulation';
 
@@ -168,7 +167,7 @@ describe('Simulation', () => {
       expect(sim.toStateUpdate(initialState)).toEqual({});
 
       // phisics required
-      // const newState = { actorStates: [{ guid: actorState.guid, transformation: { position: [1, 2, 3] } }] };
+      // const newState = { actorStates: [{ guid: 'actor1', transformation: { position: [1, 2, 3] } }] };
       // sim.update(newState);
       // sim.start();
       // await new Promise(resolve => setTimeout(resolve, 1000));

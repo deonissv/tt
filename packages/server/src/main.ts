@@ -3,9 +3,9 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
+import { initHavok } from '@shared/utils';
 import { AppModule } from './app.module';
 import { mainConfig } from './main.config';
-import { initHavok } from './utils';
 
 async function bootstrap() {
   await initHavok();

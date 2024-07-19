@@ -6,7 +6,7 @@ import type { TableState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
-const STATIC_SERVER = 'http://localhost:5500';
+const STATIC_SERVER = 'http://192.168.43.141:5500';
 const SCALING = 79;
 
 const meshSizes = (mesh: Mesh) => {

@@ -14,7 +14,8 @@
   },
   "references": [
     { "path": "./packages/server" },
-    { "path": "./packages/client" }
+    { "path": "./packages/client" },
+    { "path": "./packages/shared" }
 
   ],
   "include": ["packages/server/src/**/*", "packages/client/src/**/*", "packages/shared/**/*"],

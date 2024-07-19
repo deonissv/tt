@@ -1,3 +1,4 @@
+import type { Action } from '@shared/ws/ws';
 import type { ActorState, ActorStateUpdate } from './ActorState';
 import type { TableState } from './TableState';
 
@@ -18,6 +19,7 @@ export interface SimulationStateSave extends SimulationStateBase {
 
 export interface SimulationStateUpdate extends Omit<Partial<SimulationState>, 'actorStates'> {
   actorStates?: ActorStateUpdate[];
+  actions?: Action[];
 }
 
 export type CursorPositions = Record<string, number[]>;

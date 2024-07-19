@@ -17,8 +17,8 @@ const RETRY_DELAY = 500; // ms
 OBJFileLoader.SKIP_MATERIALS = true;
 
 class Loader {
-  private MeshAssets = new Map<string, Promise<Mesh | null>>();
-  private TextureAssets = new Map<string, Promise<Texture | null>>();
+  // private MeshAssets = new Map<string, Promise<Mesh | null>>();
+  // private TextureAssets = new Map<string, Promise<Texture | null>>();
   public Resources = new Map<string, string>();
 
   _getModelExtension(mime: MimeType): string {
@@ -44,46 +44,53 @@ class Loader {
     return [modelMesh, colliderMesh];
   }
 
-  async loadMesh(meshURL: string): Promise<Mesh | null> {
-    if (!this.MeshAssets.has(meshURL)) {
-      const meshPromise = async () => {
-        const arrayBuffer = await this.fetchFile(meshURL);
-        if (!arrayBuffer) {
-          console.error(`Empty fetch response: ${meshURL}`);
-          return null;
-        }
-
-        const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
-        if (mime == MimeType.HTML) {
-          console.error(`HTML mime type: ${meshURL}`);
-          return null;
-        }
-
-        const resourceURL = this.bufferToURL(arrayBuffer, meshURL, mime);
-        const container = await SceneLoader.LoadAssetContainerAsync(
-          '',
-          resourceURL,
-          undefined,
-          undefined,
-          this._getModelExtension(mime),
-        );
-        const nonEmptyMeshes = this.filterEmptyMeshes(container.meshes);
-        const mesh = Mesh.MergeMeshes(nonEmptyMeshes as Mesh[], false, true, undefined, true, true);
-        if (!mesh) {
-          console.error(`Empty mesh: ${meshURL}`);
-
-          return null;
-        }
-
-        mesh.setEnabled(false);
-        mesh.name = meshURL;
-        // container.removeAllFromScene();
-        return mesh.clone();
-      };
-      this.MeshAssets.set(meshURL, meshPromise());
+  async _loadMesh(meshURL: string): Promise<Mesh | null> {
+    const arrayBuffer = await this.fetchFile(meshURL);
+    if (!arrayBuffer) {
+      // eslint-disable-next-line no-console
+      console.error(`Empty fetch response: ${meshURL}`);
+      return null;
     }
-    const mesh = await this.MeshAssets.get(meshURL)!;
+
+    const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+    if (mime == MimeType.HTML) {
+      // eslint-disable-next-line no-console
+      console.error(`HTML mime type: ${meshURL}`);
+      return null;
+    }
+
+    const resourceURL = this.bufferToURL(arrayBuffer, meshURL, mime);
+    const container = await SceneLoader.LoadAssetContainerAsync(
+      '',
+      resourceURL,
+      undefined,
+      undefined,
+      this._getModelExtension(mime),
+    );
+    const nonEmptyMeshes = this.filterEmptyMeshes(container.meshes);
+    const mesh = Mesh.MergeMeshes(nonEmptyMeshes as Mesh[], false, true, undefined, true, true);
     if (!mesh) {
+      // eslint-disable-next-line no-console
+      console.error(`Empty mesh: ${meshURL}`);
+
+      return null;
+    }
+
+    mesh.setEnabled(false);
+    mesh.name = meshURL;
+    // container.removeAllFromScene();
+    // return mesh.clone();
+    return mesh;
+  }
+
+  async loadMesh(meshURL: string): Promise<Mesh | null> {
+    // if (!this.MeshAssets.has(meshURL)) {
+    //   this.MeshAssets.set(meshURL, () => this._loadMesh(meshURL));
+    // }
+    // const mesh = await this.MeshAssets.get(meshURL)!;
+    const mesh = await this._loadMesh(meshURL);
+    if (!mesh) {
+      // eslint-disable-next-line no-console
       console.error(`No mesh found: ${meshURL}`);
 
       return null;
@@ -110,19 +117,21 @@ class Loader {
     return material;
   }
 
-  async loadTexture(textureURL: string): Promise<Texture | null> {
-    if (!this.TextureAssets.has(textureURL)) {
-      const texturePromise = async () => {
-        const arrayBuffer = await this.fetchFile(textureURL);
-        if (!arrayBuffer) {
-          return null;
-        }
-        const resourceURL = this.bufferToURL(arrayBuffer, textureURL);
-        return new Texture(resourceURL);
-      };
-      this.TextureAssets.set(textureURL, texturePromise());
+  async _loadTexture(textureURL: string): Promise<Texture | null> {
+    const arrayBuffer = await this.fetchFile(textureURL);
+    if (!arrayBuffer) {
+      return null;
     }
-    const metarial = await this.TextureAssets.get(textureURL);
+    const resourceURL = this.bufferToURL(arrayBuffer, textureURL);
+    return new Texture(resourceURL);
+  }
+
+  async loadTexture(textureURL: string): Promise<Texture | null> {
+    // if (!this.TextureAssets.has(textureURL)) {
+    //   this.TextureAssets.set(textureURL, () => this._loadTexture(textureURL));
+    // }
+    // const metarial = await this.TextureAssets.get(textureURL);
+    const metarial = await this._loadTexture(textureURL);
     if (!metarial) {
       return null;
     }
@@ -163,10 +172,10 @@ class Loader {
     return URL.createObjectURL(blob);
   }
 
-  bufferToURL(buffer: ArrayBuffer, url: string, _type?: string): string {
+  bufferToURL(buffer: ArrayBuffer, _url: string, _type?: string): string {
     // const resourceURL = this._getObjectURL(buffer, type); // @TODO switch to getObjectURL, possible solution - wrapper for xhr2 using fetch
     const resourceURL = this._getB64URL(buffer);
-    this.Resources.set(url, resourceURL);
+    // this.Resources.set(url, resourceURL);
     return resourceURL;
   }
 }

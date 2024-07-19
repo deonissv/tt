@@ -18,6 +18,8 @@ import type { ActorStateBase, TableState } from '@shared/dto/simulation';
 import { ActorState, CardState, DeckState } from '@shared/dto/simulation';
 import type { ActorStateUpdate } from '@shared/dto/simulation/ActorState';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation/SimulationState';
+import type { Action } from '@shared/ws/ws';
+import { ACTIONS } from '@shared/ws/ws';
 import { Actor, ActorBase, Card, Deck, RectangleCustomTable } from '../actors';
 
 // WebGPU Extensions
@@ -84,11 +86,32 @@ export abstract class SimulationBase {
     }
   }
 
-  update(pgUpdate: SimulationStateUpdate) {
-    pgUpdate?.actorStates?.forEach(actorState => {
+  update(simUpdate: SimulationStateUpdate) {
+    simUpdate?.actorStates?.forEach(actorState => {
       const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor | undefined;
       actor?.update(actorState);
     });
+
+    simUpdate?.actions?.forEach(action => this.processAction(action));
+  }
+
+  processAction(action: Action) {
+    switch (action.type) {
+      case ACTIONS.PICK_DECK: {
+        const deckGUID = action.payload;
+        const actor = this.actors.find(a => a.guid === deckGUID);
+        if (actor) {
+          (actor as unknown as Deck)
+            .pickCard()
+            .then(() => {
+              // eslint-disable-next-line no-console
+              console.log(`Deck ${deckGUID} picked a card`);
+            })
+            // eslint-disable-next-line no-console
+            .catch(e => console.error(e));
+        }
+      }
+    }
   }
 
   toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {

@@ -9,6 +9,7 @@ import type { RoomsService } from './rooms.service';
 import { URL_PREFIX } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { WS } from '@shared/ws';
+import type { Action } from '@shared/ws/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -30,6 +31,8 @@ export class SimulationRoom {
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, number[]>;
   simSave: SimulationStateSave | undefined;
+  actions: Action[];
+
   downloadProgress: WS.DownloadProgress;
 
   savingDelay: number;
@@ -54,6 +57,8 @@ export class SimulationRoom {
     this.savingDelay = savingDelay;
     this.stateTickDelay = stateTickDelay;
     this.simSave = undefined;
+    this.actions = [];
+
     this.downloadProgress = {
       total: 0,
       loaded: 0,
@@ -127,9 +132,8 @@ export class SimulationRoom {
         });
       }
 
-      ws.onclose = (event: WebSocket.CloseEvent) => {
-        this.onClose(event);
-      };
+      ws.onmessage = event => this.onMessage(event);
+      ws.onclose = event => this.onClose(event);
     });
     return wss;
   }
@@ -146,6 +150,10 @@ export class SimulationRoom {
           this.cursors.set(event.target, cursor); // @TODO add typing for position
         }
         break;
+      }
+      case WS.ACTIONS.PICK_DECK: {
+        this.simulation.processAction(message);
+        this.actions.push(message);
       }
     }
   }
@@ -185,6 +193,11 @@ export class SimulationRoom {
 
     const delta = this.getDelta();
     update = { ...update, ...delta };
+
+    if (this.actions.length > 0) {
+      update.actions = this.actions;
+      this.actions = [];
+    }
 
     this.broadcast({
       type: WS.UPDATE,

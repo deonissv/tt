@@ -1,0 +1,121 @@
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { CreateBox, HavokPlugin, NullEngine, Scene, Texture, Vector3 } from '@babylonjs/core';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { GRAVITY } from '@shared/constants';
+import type { DeckState } from '@shared/dto/simulation';
+import { Card, Deck } from '@shared/playground/';
+import { initHavok } from '@shared/utils';
+
+vi.mock('@shared/playground/Loader', () => ({
+  Loader: {
+    loadMesh: () => Promise.resolve(CreateBox('testMesh', { size: 1 })),
+    loadTexture: () => Promise.resolve(new Texture('testTexture')),
+  },
+}));
+
+describe('Deck', () => {
+  let engine: NullEngine;
+  let scene: Scene;
+  let mesh: Mesh;
+  let texture: Texture;
+  let state: DeckState;
+
+  beforeAll(async () => {
+    await initHavok();
+  });
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+
+    vi.spyOn(Card, 'getCardModel').mockImplementation(() => {
+      return CreateBox('testMesh', { size: 1 }, scene);
+    });
+
+    engine = new NullEngine();
+    scene = new Scene(engine);
+    const hp = new HavokPlugin(true, global.havok);
+    const gravityVec = new Vector3(0, GRAVITY, 0);
+    scene.enablePhysics(gravityVec, hp);
+
+    mesh = CreateBox('testMesh', { size: 1 }, scene);
+    texture = new Texture('testTexture', scene);
+
+    state = {
+      guid: '1234',
+      name: 'testActor',
+      transformation: {
+        scale: [1, 1, 1],
+        rotation: [0, 0, 0],
+        position: [0, 0, 0],
+      },
+      cards: [
+        {
+          cardGUID: '0',
+          deckId: 0,
+          sequence: 0,
+        },
+        {
+          cardGUID: '1',
+          deckId: 0,
+          sequence: 0,
+        },
+      ],
+      grids: {
+        0: {
+          faceURL: 'testFaceURL',
+          backURL: 'testBackURL',
+          rows: 0,
+          cols: 0,
+        },
+      },
+    };
+  });
+  it('should construct with correct properties', () => {
+    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    expect(deck.size).toBe(2);
+  });
+
+  it('size getter returns correct number of cards', () => {
+    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    expect(deck.size).toBe(2);
+  });
+
+  it('renderDeck adjusts model scaling based on size', () => {
+    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    deck.renderDeck();
+    expect(deck.model.scaling.x).toBe(2);
+  });
+
+  it('pickCard removes a card and adjusts model scaling', async () => {
+    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    await deck.pickCard();
+    expect(deck.size).toBe(1);
+    expect(deck.model.scaling.x).toBeLessThan(2);
+  });
+
+  it('fromState creates a Deck instance with correct properties', () => {
+    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    expect(deck).toBeInstanceOf(Deck);
+    expect(deck.size).toBe(2);
+  });
+
+  it('fromState returns null if card model is not loaded', async () => {
+    vi.spyOn(Card, 'loadCardModel').mockResolvedValue(null);
+    const deck = await Deck.fromState(state);
+    expect(deck).toBeNull();
+  });
+
+  it('should construct using fromState value', async () => {
+    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    expect(deck).toBeInstanceOf(Deck);
+    expect(deck.size).toBe(2);
+
+    await deck.pickCard();
+    const stateFromState = deck.toState();
+    const newDeck = await Deck.fromState(stateFromState);
+
+    expect(newDeck).toBeInstanceOf(Deck);
+    expect(newDeck!.size).toBe(1);
+  });
+});
