@@ -1,15 +1,16 @@
+import { jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { authMockAdmin } from '../../test/authMock';
 import useConfigServiceMock from '../../test/useConfigServiceMock';
+import useDatabaseMock from '../../test/useDatabaseMock';
 import { AuthModule } from '../auth/auth.module';
+import { PrismaService } from '../prisma.service';
 import { RoomsModule } from './rooms.module';
 import { RoomsService } from './rooms.service';
-import { authMockAdmin } from '../../test/authMock';
-import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
-import { SimulationRoom } from './simulation-room';
+import type { SimulationRoom } from './simulation-room';
 
 describe('RoomsService', () => {
   let roomsService: RoomsService;
@@ -42,7 +43,7 @@ describe('RoomsService', () => {
 
   describe('RoomProgressUpdate', () => {
     it('it should be created', async () => {
-      const pgState: PlaygroundStateSave = {
+      const pgState: SimulationStateSave = {
         actorStates: [
           {
             name: 'Munchkin',
@@ -58,7 +59,7 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgStateUpdate: PlaygroundStateUpdate = {
+      const pgStateUpdate: SimulationStateUpdate = {
         actorStates: [
           {
             guid: '1',
@@ -157,7 +158,7 @@ describe('RoomsService', () => {
 
   describe('RoomProgressSave', () => {
     it('it should be created', async () => {
-      const pgState: PlaygroundStateSave = {
+      const pgState: SimulationStateSave = {
         actorStates: [
           {
             name: 'Munchkin',
@@ -173,7 +174,7 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgState2: PlaygroundStateSave = {
+      const pgState2: SimulationStateSave = {
         actorStates: [
           {
             name: 'Munchkin',
@@ -189,7 +190,7 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgStateUpdate: PlaygroundStateUpdate = {
+      const pgStateUpdate: SimulationStateUpdate = {
         actorStates: [
           {
             guid: '1',
@@ -200,7 +201,7 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgStateUpdate2: PlaygroundStateUpdate = {
+      const pgStateUpdate2: SimulationStateUpdate = {
         actorStates: [
           {
             guid: '2',
@@ -322,7 +323,7 @@ describe('RoomsService', () => {
 
       jest.spyOn(RoomsService.rooms, 'get').mockReturnValue({
         simulation: {
-          toStateSave: () => pgState2,
+          toState: () => pgState2,
         },
       } as SimulationRoom);
 

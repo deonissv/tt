@@ -1,14 +1,17 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { SimulationRoom } from './simulation-room';
-import { PrismaService } from '../prisma.service';
+import type { Prisma, Room } from '@prisma/client';
+import { Logger } from 'testcontainers/build/common';
 import { GamesService } from '../games/games.service';
-import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
-import { PlaygroundStateUpdate, PlaygroundStateSave } from '@shared/index';
-import { Prisma, Room } from '@prisma/client';
+import { PrismaService } from '../prisma.service';
+import { SimulationRoom } from './simulation-room';
+
+import type { RoomPreviewDto } from '@shared/dto/rooms';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { Simulation } from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {
+  private readonly logger = new Logger(RoomsService.name);
   static rooms = new Map<string, SimulationRoom>();
 
   constructor(
@@ -16,14 +19,13 @@ export class RoomsService {
     private readonly gameService: GamesService,
   ) {}
 
-  async startRoomSimulation(
-    roomCode: string,
-    savingDelay: number,
-    stateTickDelay: number,
-    pgSave?: PlaygroundStateSave,
-  ) {
+  startRoomSimulation(roomCode: string, savingDelay: number, stateTickDelay: number, simSave?: SimulationStateSave) {
     const room = new SimulationRoom(this, roomCode, savingDelay, stateTickDelay);
-    await room.init(pgSave);
+    try {
+      room.init(simSave).catch((e: Error) => this.logger.error(e.message));
+    } catch (e) {
+      this.logger.error((e as unknown as Error).message);
+    }
     RoomsService.setRoom(room);
     return roomCode;
   }
@@ -54,8 +56,8 @@ export class RoomsService {
       },
     });
 
-    const pgSave = gameVersion.content as PlaygroundStateSave;
-    return await this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, pgSave);
+    const simSave = gameVersion.content as SimulationStateSave;
+    return this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, simSave);
   }
 
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
@@ -109,16 +111,16 @@ export class RoomsService {
       },
     });
 
-    const pgSave = lastState.content;
+    const simSave = lastState.content;
 
     updates.forEach(update => {
-      Simulation.mergeStateDelta(pgSave, update.content as PlaygroundStateUpdate);
+      Simulation.mergeStateDelta(simSave, update.content as SimulationStateUpdate);
     });
 
-    return await this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, pgSave);
+    return this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, simSave);
   }
 
-  private async getRoomLastState(roomId: number): Promise<{ order: number; content: PlaygroundStateSave }> {
+  private async getRoomLastState(roomId: number): Promise<{ order: number; content: SimulationStateSave }> {
     const lastSave = await this.prismaService.roomProgressSave.findFirst({
       where: {
         roomId,
@@ -131,7 +133,7 @@ export class RoomsService {
     if (lastSave) {
       return {
         order: 0,
-        content: lastSave.content as PlaygroundStateSave,
+        content: lastSave.content as SimulationStateSave,
       };
     }
     const gameLoad = await this.prismaService.roomProgressGameLoad.findFirst({
@@ -150,11 +152,11 @@ export class RoomsService {
     }
     return {
       order: gameLoad.order,
-      content: gameLoad.GameVersion.content as PlaygroundStateSave,
+      content: gameLoad.GameVersion.content as SimulationStateSave,
     };
   }
 
-  async saveRoomProgressUpdate(roomCode: string, stateUpdate: PlaygroundStateUpdate) {
+  async saveRoomProgressUpdate(roomCode: string, stateUpdate: SimulationStateUpdate) {
     const room = await this.findRoomByCode(roomCode);
 
     if (!room) {
@@ -184,14 +186,14 @@ export class RoomsService {
       throw new BadRequestException('Room not found');
     }
 
-    const pgSave = simulationRoom.simulation.toStateSave();
+    const simSave = simulationRoom.simulation.toState();
 
     await this.prismaService.roomProgress.create({
       data: {
         roomId: room.roomId,
         RoomProgressSave: {
           create: {
-            content: pgSave as Prisma.InputJsonObject,
+            content: simSave as Prisma.InputJsonObject,
           },
         },
       },

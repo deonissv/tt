@@ -1,7 +1,11 @@
-import Input from '@components/Input';
-import { GameService } from '@services/game.service';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import Input from '@components/Input';
+import { GameService } from '@services/game.service';
+
+import { TTSParser } from '@client/src/TTSParser';
+import type { SimulationStateSave } from '@shared/dto/simulation';
 
 export const CreateGame = () => {
   const navigate = useNavigate();
@@ -24,11 +28,20 @@ export const CreateGame = () => {
     navigate('/');
   };
 
+  const parseGameText = (text: string): SimulationStateSave => {
+    const ttsGame = TTSParser.parse(text);
+    if (ttsGame) {
+      return ttsGame;
+    }
+    return JSON.parse(text) as SimulationStateSave; // @TODO add validation
+  };
+
   const readFile = (file: File) => {
     const reader = new FileReader();
     reader.readAsText(file);
     reader.onload = result => {
-      setContent(JSON.stringify(JSON.parse(result?.target?.result as string)));
+      const text = result?.target?.result as string;
+      setContent(JSON.stringify(parseGameText(text)));
     };
   };
 

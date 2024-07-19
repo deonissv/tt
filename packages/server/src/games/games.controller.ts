@@ -1,3 +1,4 @@
+import { subject } from '@casl/ability';
 import {
   Body,
   Controller,
@@ -12,18 +13,17 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { GamesService } from './games.service';
-import { CreateGameDto } from '@shared/dto/games/create-game.dto';
-import { UpdateGameDto } from '@shared/dto/games/update-game.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ValidatedUser } from '../auth/validated-user';
-import { GameDto } from '@shared/dto/games/game.dto';
-import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
+import type { AppAbility } from '../casl/casl-ability.factory';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
-import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { User } from '../decorators/user.decorator';
 import { PermissionsService } from '../permissions.service';
-import { subject } from '@casl/ability';
+import { GamesService } from './games.service';
+
+import type { GameDto, GamePreviewDto } from '@shared/dto/games';
+import { CreateGameDto, UpdateGameDto } from '@shared/dto/games';
 
 @ApiTags('games')
 @Controller('games')

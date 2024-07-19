@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
-import { Permission } from '@prisma/client';
-import { ValidatedUser } from './auth/validated-user';
-import { UserWithPermissions } from './casl/casl-ability.factory';
+import type { Permission } from '@prisma/client';
+import type { ValidatedUser } from './auth/validated-user';
+import type { UserWithPermissions } from './casl/casl-ability.factory';
 
 @Injectable()
 export class PermissionsService {

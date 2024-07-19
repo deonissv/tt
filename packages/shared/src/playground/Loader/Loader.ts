@@ -1,0 +1,183 @@
+import { SceneLoader } from '@babylonjs/core/Loading/sceneLoader';
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import { Color3 } from '@babylonjs/core/Maths/math.color';
+import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
+
+import { OBJFileLoader } from '@babylonjs/loaders';
+import type { ActorModel } from '@shared/dto/simulation';
+import type { ActorMaterial } from '@shared/dto/simulation/ActorMaterial';
+import MimeDetector from './MimeDetector';
+import { MimeType } from './MimeTypes';
+
+const RETRY_ATTEMPTS = 3;
+const RETRY_DELAY = 500; // ms
+
+OBJFileLoader.SKIP_MATERIALS = true;
+
+class Loader {
+  // private MeshAssets = new Map<string, Promise<Mesh | null>>();
+  // private TextureAssets = new Map<string, Promise<Texture | null>>();
+  public Resources = new Map<string, string>();
+
+  _getModelExtension(mime: MimeType): string {
+    // @TODO: add more extensions
+    // type ModelExtentions = '.obj' | '.gltf' | '.glb';
+
+    switch (mime) {
+      case MimeType.OBJ:
+      default:
+        return '.obj';
+    }
+  }
+
+  async loadModel(model: ActorModel): Promise<[Mesh | null, Mesh | null]> {
+    const modelMesh = await this.loadMesh(model.meshURL);
+
+    const colliderMesh = model.colliderURL ? await this.loadMesh(model.colliderURL) : modelMesh;
+    const loadedMaterial = await this.loadModelMaterial(model);
+
+    if (modelMesh?.material) {
+      modelMesh.material = loadedMaterial;
+    }
+    return [modelMesh, colliderMesh];
+  }
+
+  async _loadMesh(meshURL: string): Promise<Mesh | null> {
+    const arrayBuffer = await this.fetchFile(meshURL);
+    if (!arrayBuffer) {
+      // eslint-disable-next-line no-console
+      console.error(`Empty fetch response: ${meshURL}`);
+      return null;
+    }
+
+    const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+    if (mime == MimeType.HTML) {
+      // eslint-disable-next-line no-console
+      console.error(`HTML mime type: ${meshURL}`);
+      return null;
+    }
+
+    const resourceURL = this.bufferToURL(arrayBuffer, meshURL, mime);
+    const container = await SceneLoader.LoadAssetContainerAsync(
+      '',
+      resourceURL,
+      undefined,
+      undefined,
+      this._getModelExtension(mime),
+    );
+    const nonEmptyMeshes = this.filterEmptyMeshes(container.meshes);
+    const mesh = Mesh.MergeMeshes(nonEmptyMeshes as Mesh[], false, true, undefined, true, true);
+    if (!mesh) {
+      // eslint-disable-next-line no-console
+      console.error(`Empty mesh: ${meshURL}`);
+
+      return null;
+    }
+
+    mesh.setEnabled(false);
+    mesh.name = meshURL;
+    // container.removeAllFromScene();
+    // return mesh.clone();
+    return mesh;
+  }
+
+  async loadMesh(meshURL: string): Promise<Mesh | null> {
+    // if (!this.MeshAssets.has(meshURL)) {
+    //   this.MeshAssets.set(meshURL, () => this._loadMesh(meshURL));
+    // }
+    // const mesh = await this.MeshAssets.get(meshURL)!;
+    const mesh = await this._loadMesh(meshURL);
+    if (!mesh) {
+      // eslint-disable-next-line no-console
+      console.error(`No mesh found: ${meshURL}`);
+
+      return null;
+    }
+
+    return mesh.clone(mesh.name, null, true, true);
+  }
+
+  async loadModelMaterial(modelMaterial: ActorMaterial, name = ''): Promise<StandardMaterial> {
+    const material = new StandardMaterial(name);
+    material.diffuseColor = new Color3(1, 1, 1);
+    // @TODO test maps
+    material.diffuseTexture = modelMaterial.diffuseURL ? await this.loadTexture(modelMaterial.diffuseURL) : null;
+    material.ambientTexture = modelMaterial.ambientURL ? await this.loadTexture(modelMaterial.ambientURL) : null;
+    material.specularTexture = modelMaterial.specularURL ? await this.loadTexture(modelMaterial.specularURL) : null;
+    material.emissiveTexture = modelMaterial.emissiveURL ? await this.loadTexture(modelMaterial.emissiveURL) : null;
+    material.reflectionTexture = modelMaterial.reflectionURL
+      ? await this.loadTexture(modelMaterial.reflectionURL)
+      : null;
+    material.bumpTexture = modelMaterial.normalURL ? await this.loadTexture(modelMaterial.normalURL) : null;
+    material.opacityTexture = modelMaterial.opacityURL ? await this.loadTexture(modelMaterial.opacityURL) : null;
+    material.lightmapTexture = modelMaterial.lightMapURL ? await this.loadTexture(modelMaterial.lightMapURL) : null;
+
+    return material;
+  }
+
+  async _loadTexture(textureURL: string): Promise<Texture | null> {
+    const arrayBuffer = await this.fetchFile(textureURL);
+    if (!arrayBuffer) {
+      return null;
+    }
+    const resourceURL = this.bufferToURL(arrayBuffer, textureURL);
+    return new Texture(resourceURL);
+  }
+
+  async loadTexture(textureURL: string): Promise<Texture | null> {
+    // if (!this.TextureAssets.has(textureURL)) {
+    //   this.TextureAssets.set(textureURL, () => this._loadTexture(textureURL));
+    // }
+    // const metarial = await this.TextureAssets.get(textureURL);
+    const metarial = await this._loadTexture(textureURL);
+    if (!metarial) {
+      return null;
+    }
+
+    metarial.name = textureURL;
+    return metarial;
+  }
+
+  private filterEmptyMeshes(meshes: AbstractMesh[]): AbstractMesh[] {
+    return meshes.filter(mesh => mesh.getTotalVertices() > 0);
+  }
+
+  async fetchFile(url: string): Promise<ArrayBuffer | null> {
+    let attempts = 0;
+    for (attempts = 0; attempts < RETRY_ATTEMPTS; attempts++) {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      if (arrayBuffer) {
+        return arrayBuffer;
+      }
+      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+    }
+    return null;
+  }
+
+  _getB64URL(buffer: ArrayBuffer) {
+    const b64 = btoa(
+      Array.from(new Uint8Array(buffer))
+        .map(b => String.fromCharCode(b))
+        .join(''),
+    );
+    return `data:;base64,${b64}`;
+  }
+
+  _getObjectURL(buffer: ArrayBuffer, type?: string) {
+    type = type ?? MimeDetector.getMime(buffer);
+    const blob = new Blob([buffer], { type });
+    return URL.createObjectURL(blob);
+  }
+
+  bufferToURL(buffer: ArrayBuffer, _url: string, _type?: string): string {
+    // const resourceURL = this._getObjectURL(buffer, type); // @TODO switch to getObjectURL, possible solution - wrapper for xhr2 using fetch
+    const resourceURL = this._getB64URL(buffer);
+    // this.Resources.set(url, resourceURL);
+    return resourceURL;
+  }
+}
+
+export default new Loader();

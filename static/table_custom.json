@@ -1,0 +1,75 @@
+{
+  "SaveName": "Settlers of Catan [LoC]",
+  "EpochTime": 1626203250,
+  "Date": "7/13/2021 3:07:30 PM",
+  "VersionNumber": "v13.1.1",
+  "GameMode": "Settlers of Catan - Scripted",
+  "GameType": "Game",
+  "GameComplexity": "Medium Complexity",
+  "PlayingTime": [0, 90],
+  "PlayerCounts": [0, 6],
+  "Tags": [],
+  "Gravity": 0.5,
+  "PlayArea": 0.5,
+  "Table": "Table_Custom",
+  "TableURL": "http://cloud-3.steamusercontent.com/ugc/927086512537335212/26E7DDEC7FD3A9D3166BD20FD987E33AF60C532A/",
+  "Sky": "Sky_Tunnel",
+  "SkyURL": "http://u.cubeupload.com/noodlesinsoup/MilkywayBG22.jpg",
+  "Note": "\n\n\n\n\n\n\n\n[FFFFFF]\n[b]Starting a game[/b]\nStart by selecting a scenario on the control panel. It has multiple pages (states).\n\n[b]Rules[/b]\nRule books are to the left of the board.\n\n[b]Info[/b]\nScripting must be enabled. If there are no buttons on the control panel, enable scripting:\nGame Options -> Options -> Scripting\n\nThis is adapted from League of Catan and other workshop mods.",
+  "TabStates": {
+    "0": {
+      "title": "Rules",
+      "body": "[b]Game Rules[/b]\n\nThe red bag next to the control panel contains rule books for basic Catan and all expansions. The rules for all seafarers & additional scenarios are described in the Seafarers rule book.\n\nLinks to official rules:[sub]\nhttp://www.catan.com/service/game-rules\n[/sub]\nBase game:[sub]\nhttp://www.catan.com/files/downloads/catan_5th_ed_rules_eng_150303.pdf\n[/sub]\r\nSeafarers expansion:[sub]\nhttp://www.catan.com/files/downloads/seafarers_rv_rules_111105.pdf\n[/sub]\nCities & Knights expansion: (see also separate tab)[sub]\nhttp://www.catan.com/files/downloads/catan_ck_5th_ed_rules_150303.pdf\n[/sub]\nTreasures, Dragons & Discoverers Scenarios:\n[sub]The official rulebook is only available in German language. I translated them in the Seafarers rule book.[/sub]\n\n---- German Versions: ----\n[sub]\nhttp://www.catan.de/service/spielregeln\n[/sub]\nBasis-Spiel:[sub]\nhttp://www.catan.de/files/downloads/4002051693602_catan_-_das_spiel_0.pdf\n[/sub]\r\nSeefahrer Erweiterung:[sub]\nhttp://www.catan.de/files/downloads/4002051694104_seefahrer_0.pdf\n[/sub]\nStädte & Ritter (siehe auch separaten Tab):[sub]\nhttp://www.catan.de/files/downloads/4002051695101_staedte_ritter.pdf\n[/sub]\nSchätze, Drachen & Entdecker Szenarien:[sub]\nhttp://www.catan.de/files/downloads/siedler_von_catan-schaetze_drachen_und_entdecker-spielregel.pdf\n[/sub]\r\n",
+      "color": "Grey",
+      "visibleColor": {
+        "r": 0.5,
+        "g": 0.5,
+        "b": 0.5
+      },
+      "id": 0
+    },
+    "8": {
+      "title": "Dice Stats",
+      "body": "[u]Dice Roll statistics for [i]Settlers of Catan - Scripted[/i][/u]\n[sub](this page is generated automatically, any manual changes will be overwritten)[/sub]\n\nThe statistics are currently hidden; while the logging tool is present in the mod they are still recorded however. As soon as the host enables them, the full statistics will be displayed.\n\n[u]Info[/u]\nThe logger will record all dice rolls while the status says \"Active\". Even when the statistics are not displayed.\nIf the status says \"Inactive\" something is wrong:\n - Is the tool used outside the Settlers mod (or with     an older version of it)?\n - Is there more than one logger present? Only one       logger will record the dice rolls. If you wish to         switch active loggers, click the status text.\n\nThe host can make the statistics visible with the button at the bottom of the tile. As long as it is set to visible, everyone can view the current statistics in this notebook tab.\n\n[b]Important:[/b] The dice logger will only work properly when turns are used (Host -> Turns).\n",
+      "color": "Grey",
+      "visibleColor": {
+        "r": 0.5,
+        "g": 0.5,
+        "b": 0.5
+      },
+      "id": 8
+    },
+    "9": {
+      "title": "Workshop",
+      "body": "Download this table in the workshop :\n\nhttps://steamcommunity.com/sharedfiles/filedetails/?id=1683986042",
+      "color": "Grey",
+      "visibleColor": {
+        "r": 0.5,
+        "g": 0.5,
+        "b": 0.5
+      },
+      "id": 9
+    }
+  },
+  "Grid": {
+    "Type": 1,
+    "Lines": false,
+    "Color": {
+      "r": 0.0,
+      "g": 0.0,
+      "b": 0.0
+    },
+    "Opacity": 0.75,
+    "ThickLines": false,
+    "Snapping": false,
+    "Offset": false,
+    "BothSnapping": false,
+    "xSize": 4.0,
+    "ySize": 4.0,
+    "PosOffset": {
+      "x": 0.0,
+      "y": 1.0,
+      "z": 0.0
+    }
+  }
+}

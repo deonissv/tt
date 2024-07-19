@@ -1,5 +1,5 @@
-import React from 'react';
-import IProps from '@components/IProps';
+import type IProps from '@components/IProps';
+import type React from 'react';
 
 interface InputProps extends IProps {
   label?: string;

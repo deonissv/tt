@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { LOADER_URL } from '../config';
 import { getAccessToken } from '../utils';
-import { GamePreviewDto } from '@shared/dto/games/game-preview.dto';
-import { CreateGameDto } from '@shared/dto/games/create-game.dto';
+
+import type { CreateGameDto, GamePreviewDto } from '@shared/dto/games';
 
 export const GameService = {
   async getGamePreviews(): Promise<GamePreviewDto[]> {
@@ -30,5 +30,14 @@ export const GameService = {
       },
     });
     return response.data as GamePreviewDto;
+  },
+
+  async removeGame(code: string): Promise<string> {
+    const response = await axios.delete(LOADER_URL + `games/${code}`, {
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
+    });
+    return response.data as string;
   },
 };

@@ -1,8 +1,11 @@
-import * as request from 'supertest';
-import * as bcrypt from 'bcrypt';
+import request from 'supertest';
+import { jest } from '@jest/globals';
+import bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { UsersModule } from './users.module';
 
 import { AuthModule } from '../auth/auth.module';

@@ -1,36 +1,36 @@
-import * as bcrypt from 'bcrypt';
-import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { User } from '@prisma/client';
+import bcrypt from 'bcrypt';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import configServiceMock from '../../test/configServiceMock';
+import { PrismaService } from '../prisma.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import type { User } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
-import configServiceMock from '../../test/configServiceMock';
 
-const usersArray: User[] = [
-  {
-    userId: 1,
-    code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
-    email: 'email',
-    username: 'username',
-    passwordHash: 'passwordHash',
-    avatarUrl: 'avatarUrl',
-    deletedAt: null,
-    roleId: 2,
-  },
-];
+const user: User = {
+  userId: 1,
+  code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
+  email: 'email',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  avatarUrl: 'avatarUrl',
+  deletedAt: null,
+  roleId: 2,
+};
 
-const oneUser: User = usersArray[0];
+const usersArray: User[] = [user];
 
 const db = {
   user: {
-    findMany: jest.fn().mockResolvedValue(usersArray),
-    findUnique: jest.fn().mockResolvedValue(oneUser),
-    findFirst: jest.fn().mockResolvedValue(oneUser),
-    create: jest.fn().mockReturnValue(oneUser),
-    update: jest.fn().mockResolvedValue(oneUser),
-    delete: jest.fn().mockResolvedValue(oneUser),
+    findMany: vi.fn().mockResolvedValue(usersArray),
+    findUnique: vi.fn().mockResolvedValue(user),
+    findFirst: vi.fn().mockResolvedValue(user),
+    create: vi.fn().mockResolvedValue(user),
+    update: vi.fn().mockResolvedValue(user),
+    delete: vi.fn().mockResolvedValue(user),
   },
 };
 
@@ -65,7 +65,7 @@ describe('AuthService', () => {
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -74,9 +74,9 @@ describe('AuthService', () => {
 
   describe('generateToken', () => {
     it('should return a token', () => {
-      const signMock = jest.spyOn(JwtService.prototype, 'sign').mockReturnValue('token');
+      const signMock = vi.spyOn(JwtService.prototype, 'sign').mockReturnValue('token');
 
-      const token = authService.generateToken(oneUser);
+      const token = authService.generateToken(user);
 
       expect(token).toBeDefined();
       expect(token.access_token).toBeDefined();
@@ -93,11 +93,11 @@ describe('AuthService', () => {
 
   describe('validateUser', () => {
     it('should return a user', async () => {
-      const compareMock = jest.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
+      const compareMock = vi.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
 
       const user = await authService.validateUser('email', 'password');
       expect(user).toBeDefined();
-      expect(user).toEqual(oneUser);
+      expect(user).toEqual(user);
 
       expect(compareMock).toHaveBeenCalledTimes(1);
       expect(compareMock).toHaveBeenCalledWith('password', 'passwordHash');
@@ -115,8 +115,8 @@ describe('AuthService', () => {
 
   describe('signup', () => {
     it('should return an access token', async () => {
-      jest.spyOn(UsersService.prototype, 'emailExists').mockResolvedValue(false);
-      const signMock = jest.spyOn(JwtService.prototype, 'sign').mockReturnValue('token');
+      vi.spyOn(UsersService.prototype, 'emailExists').mockResolvedValue(false);
+      const signMock = vi.spyOn(JwtService.prototype, 'sign').mockReturnValue('token');
 
       const token = await authService.signup({
         email: 'email',

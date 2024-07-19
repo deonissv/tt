@@ -1,14 +1,16 @@
+import { subject } from '@casl/ability';
 import { Body, Controller, Delete, ForbiddenException, Param, Put, UseGuards } from '@nestjs/common';
-import { UsersService } from './users.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UpdateUserDto } from '@shared/dto/users/update-user.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ValidatedUser } from '../auth/validated-user';
-import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import type { AppAbility } from '../casl/casl-ability.factory';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
 import { User } from '../decorators/user.decorator';
 import { PermissionsService } from '../permissions.service';
-import { subject } from '@casl/ability';
+import { UsersService } from './users.service';
+
+import { UpdateUserDto } from '@shared/dto/users';
 
 @ApiTags('users')
 @Controller('users')

@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import RoomsGallery from '@components/RoomsGallery/RoomsGallery';
 import { AuthService } from '@services/auth.service';
 import { RoomService } from '@services/room.service';
-import { RoomPreviewDto } from '@shared/dto/rooms/room-preview.dto';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+
+import type { RoomPreviewDto } from '@shared/dto/rooms';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -30,7 +32,7 @@ const Profile = () => {
 
     // eslint-disable-next-line no-console
     loadPreviews().catch(console.error);
-  }, []);
+  }, [user]);
 
   return (
     <>

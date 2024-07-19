@@ -1,12 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import type { INestApplication } from '@nestjs/common';
 
 import { PrismaService } from '../prisma.service';
 import useDatabaseMock from '../../test/useDatabaseMock';
 import { EventsModule } from './events.module';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { WebSocket } from 'ws';
+import type { WebSocket } from 'ws';
 import { authMockAdminToken } from '../../test/authMock';
+
 import { wsConnect } from '@shared/utils';
 
 const PORT = 3333;

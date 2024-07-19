@@ -1,4 +1,4 @@
-import { AccessTokenDto } from '@shared/dto/auth/access-token';
+import type { AccessTokenDto } from '@shared/dto/auth';
 
 export const fileToUrl = (file: File, type = 'application/octet-stream'): string => {
   const textureBlob = new Blob([file], { type });
@@ -6,13 +6,15 @@ export const fileToUrl = (file: File, type = 'application/octet-stream'): string
 };
 
 export const saveAccessToken = (tokenDto: AccessTokenDto): void => {
-  document.cookie = `access_token=${tokenDto.access_token}`;
+  window.localStorage.setItem('access_token', tokenDto.access_token);
 };
 
-export const getAccessToken = (): string | undefined => {
-  return document.cookie.split('=')[1];
+export const getAccessToken = (): string | null => {
+  return window.localStorage.getItem('access_token');
 };
 
 export const resetAccessToken = (): void => {
-  document.cookie = 'access_token' + '=; Max-Age=0';
+  window.localStorage.removeItem('access_token');
 };
+
+export const degToRad = (deg: number): number => deg * (Math.PI / 180);

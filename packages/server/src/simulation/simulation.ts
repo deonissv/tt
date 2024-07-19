@@ -1,41 +1,63 @@
-import {
-  ArcRotateCamera,
-  CreateBox,
-  CreateGround,
-  CreateSphere,
-  HavokPlugin,
-  NullEngine,
-  PhysicsAggregate,
-  PhysicsBody,
-  PhysicsMotionType,
-  PhysicsShapeMesh,
-  PhysicsShapeType,
-  Scene,
-  Vector3,
-} from 'babylonjs';
+import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
+import { Scene } from '@babylonjs/core/scene';
 
-import { GRAVITY, PlaygroundStateSave, PlaygroundStateUpdate } from '@shared/index';
-import Actor from './actor';
-import { ActorState, ActorStateUpdate } from '@shared/dto/pg/actorState';
+import type { ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { SimulationBase } from '@shared/playground';
 
-export class Simulation {
-  private engine: NullEngine;
-  private scene: Scene;
+import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
+import { Logger } from '@nestjs/common';
 
-  constructor() {
+export class Simulation extends SimulationBase {
+  logger: Logger;
+
+  private constructor(initialState: SimulationStateSave) {
+    super();
     this.engine = new NullEngine();
     this.scene = new Scene(this.engine);
-    new ArcRotateCamera('Camera', 0, 0.8, 100, Vector3.Zero(), this.scene);
+    this.initialState = initialState;
+    this.scene.createDefaultCameraOrLight(false, false, false);
+    this.logger = new Logger(Simulation.name);
   }
 
-  async init(stateSave?: PlaygroundStateSave) {
-    this.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? false : stateSave.leftHandedSystem;
-    this.initPhysics(stateSave?.gravity);
-    const ground = CreateGround('___ground', { width: 100, height: 100 }, this.scene);
-    ground.isPickable = false;
-    new PhysicsAggregate(ground, PhysicsShapeType.BOX, { mass: 0 }, this.scene);
+  static async init(
+    stateSave: SimulationStateSave,
+    onModelLoaded?: () => void,
+    onSucceed?: (ActorState) => void,
+    onFailed?: (ActorState) => void,
+  ): Promise<Simulation> {
+    const sim = new Simulation(stateSave);
+    sim.logger.log('Simulation instance created');
 
-    await Promise.all((stateSave?.actorStates ?? []).map(actorState => Actor.fromState(actorState, this.scene)));
+    sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
+    // sim.initPhysics(stateSave?.gravity);
+
+    if (stateSave.table) {
+      try {
+        await SimulationBase.tableFromState(stateSave.table);
+      } catch (e) {
+        sim.logger.error(`Failed to load table: ${e}`);
+      }
+    }
+
+    await Promise.all(
+      (stateSave?.actorStates ?? []).map(async actorState => {
+        try {
+          const actor = await SimulationBase.actorFromState(actorState);
+          if (actor) {
+            onSucceed?.(actorState);
+          } else {
+            onFailed?.(actorState);
+          }
+          onModelLoaded?.();
+        } catch (e) {
+          onFailed?.(actorState);
+          sim.logger.error(`Failed to load actor ${actorState.guid}: ${e}`);
+        }
+      }),
+    );
+    sim.logger.log('Simulation actors created');
+
+    return sim;
   }
 
   start() {
@@ -46,94 +68,39 @@ export class Simulation {
     });
   }
 
-  update(pgUpdate: PlaygroundStateUpdate) {
-    pgUpdate?.actorStates?.forEach(actorState => {
-      const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor;
-      actor.update(actorState);
-    });
-  }
-
-  toStateUpdate(pgState?: PlaygroundStateSave): PlaygroundStateUpdate {
+  toStateUpdate(simState?: SimulationStateSave): SimulationStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
-    this.scene.meshes.forEach(mesh => {
-      if (mesh.parent instanceof Actor) {
-        const actorState = pgState?.actorStates?.find(actorState => actorState.guid === (mesh.parent as Actor).guid);
-        actorStates.push(mesh.parent.toStateUpdate(actorState));
-      }
-    });
-    return {
-      actorStates: actorStates,
-    };
-  }
-
-  toStateSave(): PlaygroundStateSave {
-    const actorStates: ActorState[] = [];
-    this.scene.meshes.forEach(mesh => {
-      if (mesh.parent instanceof Actor) {
-        actorStates.push(mesh.parent.toStateSave());
+    this.actors.forEach(actor => {
+      const actorState = simState?.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const stateUpdate = actor.toStateUpdate(actorState);
+      if (stateUpdate) {
+        actorStates.push(stateUpdate);
       }
     });
 
     if (actorStates.length === 0) {
       return {};
     }
+
     return {
       actorStates: actorStates,
     };
   }
 
-  private initPhysics(gravity = GRAVITY) {
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, gravity, 0);
+  toState(): SimulationStateSave {
+    const actorStates = this.actors.map(actor => actor.toState());
 
-    this.scene.enablePhysics(gravityVec, hp);
-  }
-
-  testSphere() {
-    const sphere = CreateSphere('___sphere', { diameter: 1 }, this.scene);
-    sphere.position = new Vector3(0, 10, 0);
-    const body = new PhysicsBody(sphere, PhysicsMotionType.DYNAMIC, false, this.scene);
-    body.shape = new PhysicsShapeMesh(sphere, this.scene);
-  }
-
-  testBox() {
-    const boxModel = CreateBox('___box', { width: 1, height: 1, depth: 1 }, this.scene);
-    new Actor(
-      {
-        name: 'box',
-        guid: '3',
-        model: {
-          meshURL: '',
-        },
-        transformation: {
-          position: [0, 10, 0],
-        },
-      },
-      boxModel,
-      this.scene,
-    );
-    // box.__move(0, 10, 0);
-    // eslint-disable-next-line no-console
-    console.log('box created');
-  }
-
-  static mergeStateDelta(state: PlaygroundStateSave, delta: PlaygroundStateUpdate): PlaygroundStateSave {
-    const rv: PlaygroundStateSave = {
-      leftHandedSystem: delta.leftHandedSystem ?? state.leftHandedSystem,
-      gravity: delta.gravity ?? state.gravity,
-      actorStates: state.actorStates,
+    return {
+      ...this.initialState,
+      actorStates: actorStates
+        .filter(actorState => actorState.guid != '')
+        .map(state => {
+          const initActorState = this.initialState.actorStates!.find(actorState => actorState.guid === state.guid);
+          return {
+            ...initActorState,
+            ...state,
+          };
+        }),
     };
-
-    if (state.actorStates) {
-      rv.actorStates = state.actorStates.map(actorState => {
-        const update = delta.actorStates?.find(actorUpdate => actorUpdate.guid === actorState.guid);
-        if (!update) {
-          return actorState;
-        }
-        return Actor.applyStateUpdate(actorState, update);
-      });
-    }
-
-    return rv;
   }
 }

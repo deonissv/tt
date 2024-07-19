@@ -1,84 +1,38 @@
-import { useRef, useEffect, useCallback, useState } from 'react';
-import Playground from '../../playground';
-import { RoomService } from '@services/room.service';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { PlaygroundStateSave, PlaygroundStateUpdate, WS } from '@shared/index';
+import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { useAppSelector } from '../../store/store';
 
-const frameRate = 60;
-
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
-  const ws = useRef<WebSocket>();
-  const updatePgStateInterval = useRef<NodeJS.Timeout>();
-
-  const cursor: [number, number] = [0, 0];
+  const simulationRoom = useRef<SimulationRoom>();
+  const cursor = useRef<[number, number]>([0, 0]);
   const canvas = useRef<HTMLCanvasElement>(null);
+
   const [cursors, setCursors] = useState<Record<string, number[]>>({});
   const nickname = useAppSelector(state => state.nickname.nickname);
 
-  const babylonInit = async (pgStateSave: PlaygroundStateSave, ws: WebSocket) => {
-    const playground = await Playground.init(canvas.current!, pgStateSave, ws);
-    return playground;
-  };
-
-  const init = useCallback(async (): Promise<[string, Playground]> => {
-    const [_ws, id, pgState] = await RoomService.connect(roomId, nickname);
-    ws.current = _ws;
-
-    const pg = await babylonInit(pgState, ws.current);
-
-    ws.current.addEventListener('message', event => {
-      const message = WS.read(event);
-
-      switch (message.type) {
-        case WS.UPDATE: {
-          const pgStateUpdate = message.payload;
-          pg.update(pgStateUpdate);
-          if (pgStateUpdate.cursorPositions) {
-            pg.update(pgStateUpdate);
-            setCursors(prev => ({ ...prev, ...pgStateUpdate.cursorPositions }));
-          }
-          break;
-        }
-        default:
-          break;
-      }
-    });
-
-    return [id, pg];
-  }, [nickname, roomId]);
-
-  const sendUpdate = (pgStateUpdate: PlaygroundStateUpdate) => {
-    ws.current &&
-      WS.send(ws.current, {
-        type: WS.UPDATE,
-        payload: pgStateUpdate,
-      });
-  };
+  const init = useCallback(async (): Promise<SimulationRoom> => {
+    return await SimulationRoom.init(canvas.current!, roomId, nickname, cursor, setCursors);
+  }, [cursor, nickname, roomId]);
 
   useEffect(() => {
     init()
-      .then(([id]) => {
+      .then(sr => {
+        simulationRoom.current = sr;
         canvas.current!.addEventListener('pointermove', event => {
-          cursor[0] = event.clientX;
-          cursor[1] = event.clientY;
+          cursor.current[0] = event.clientX;
+          cursor.current[1] = event.clientY;
         });
-
-        updatePgStateInterval.current = setInterval(() => {
-          const pgStateUpdate: PlaygroundStateUpdate = { cursorPositions: { [id]: cursor } };
-          sendUpdate(pgStateUpdate);
-        }, 1000 / frameRate);
       })
       // eslint-disable-next-line no-console
       .catch(console.error);
-  }, []);
+  }, [init]);
 
   useEffect(() => {
     return () => {
-      updatePgStateInterval && clearInterval(updatePgStateInterval.current);
-      ws.current?.close();
+      simulationRoom.current?.destructor();
     };
-  }, [ws, updatePgStateInterval]);
+  }, [simulationRoom]);
 
   return (
     <>

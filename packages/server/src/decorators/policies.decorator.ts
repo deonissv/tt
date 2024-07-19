@@ -1,7 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
+import type { CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { User } from '@prisma/client';
-import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import type { User } from '@prisma/client';
+import type { AppAbility } from '../casl/casl-ability.factory';
+import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { PermissionsService } from '../permissions.service';
 
 interface IPolicyHandler {

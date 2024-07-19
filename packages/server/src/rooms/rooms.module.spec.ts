@@ -1,17 +1,21 @@
-import * as request from 'supertest';
+import { jest } from '@jest/globals';
+import type { INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Test, TestingModule } from '@nestjs/testing';
-import { HttpStatus, INestApplication } from '@nestjs/common';
+import type { TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
+import request from 'supertest';
 
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
-import { mainConfig } from '../main.config';
-import { AuthModule } from '../auth/auth.module';
-import { RoomsModule } from './rooms.module';
 import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
+import useConfigServiceMock from '../../test/useConfigServiceMock';
+import useDatabaseMock from '../../test/useDatabaseMock';
+import { AuthModule } from '../auth/auth.module';
+import { mainConfig } from '../main.config';
+import { PrismaService } from '../prisma.service';
+import { RoomsModule } from './rooms.module';
 import { RoomsService } from './rooms.service';
-import { CreateRoomDto } from '@shared/dto/rooms/create-room.dto';
+
+import type { CreateRoomDto } from '@shared/dto/rooms';
 
 describe('Rooms', () => {
   let app: INestApplication;
@@ -73,7 +77,7 @@ describe('Rooms', () => {
         },
       });
 
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockResolvedValue('code');
+      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       const dto: CreateRoomDto = {
         gameCode: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
       };
@@ -217,7 +221,7 @@ describe('Rooms', () => {
         },
       });
 
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockResolvedValue('code');
+      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       const response = await request(app.getHttpServer())
         .post('/rooms/start/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
@@ -260,7 +264,7 @@ describe('Rooms', () => {
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body).toMatchObject({ message: 'Room not found' });
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockResolvedValue('code');
+      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       expect(startSimulationMock).toHaveBeenCalledTimes(0);
     });
 
@@ -311,7 +315,7 @@ describe('Rooms', () => {
         ],
       });
 
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockResolvedValue('code');
+      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       const response = await request(app.getHttpServer())
         .post('/rooms/start/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')

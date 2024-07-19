@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Typography, Link, IconButton } from '@mui/material';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { IconButton, Link, Typography } from '@mui/material';
+import type React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AuthService } from '../../services/auth.service';
 
 export const Header: React.FC = (): React.ReactNode => {
@@ -61,7 +62,7 @@ export const Header: React.FC = (): React.ReactNode => {
               <div data-popover-target="popover">
                 {AuthService.authorized()?.avatar_url ? (
                   <img
-                    src={AuthService.authorized()?.avatar_url}
+                    src={AuthService.authorized()!.avatar_url!}
                     alt="Avatar"
                     className="h-11 w-auto cursor-pointer"
                     onClick={() => navigate('/profile')}
