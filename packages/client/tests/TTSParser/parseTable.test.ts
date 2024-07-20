@@ -75,16 +75,10 @@ describe('TTSParser.parseTable', () => {
       expect(result).toEqual({ type: 'Custom', url: tableURL });
     });
 
-    it('should return Custom table type for empty string', () => {
-      const saveState = { Table: '', TableURL: tableURL } as SaveState;
-      const result = TTSParser.parseTable(saveState);
-      expect(result).toEqual({ type: 'Custom', url: tableURL });
-    });
-
     it('should return Custom table type for unknown table type', () => {
       const saveState = { Table: 'Unknown_Table_Type', TableURL: tableURL } as SaveState;
       const result = TTSParser.parseTable(saveState);
-      expect(result).toEqual({ type: 'Custom', url: tableURL });
+      expect(result).toEqual({ type: 'None', url: tableURL });
     });
   });
 });

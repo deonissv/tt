@@ -18,9 +18,11 @@ import type { ActorStateBase, TableState } from '@shared/dto/simulation';
 import { ActorState, CardState, DeckState } from '@shared/dto/simulation';
 import type { ActorStateUpdate } from '@shared/dto/simulation/ActorState';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation/SimulationState';
+import { TileState } from '@shared/dto/simulation/TileState';
 import type { Action } from '@shared/ws/ws';
 import { ACTIONS } from '@shared/ws/ws';
 import { Actor, ActorBase, Card, Deck, RectangleCustomTable } from '../actors';
+import { Tile } from '../actors/Tile';
 
 // WebGPU Extensions
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
@@ -65,7 +67,9 @@ export abstract class SimulationBase {
   }
 
   static async actorFromState(actorState: ActorStateBase): Promise<ActorBase | null> {
-    if (CardState.validate(actorState)) {
+    if (TileState.validate(actorState)) {
+      return await Tile.fromState(actorState);
+    } else if (CardState.validate(actorState)) {
       return await Card.fromState(actorState);
     } else if (DeckState.validate(actorState)) {
       return await Deck.fromState(actorState);
