@@ -8,6 +8,7 @@ import type {
   TableType,
   Transformation,
 } from '@shared/dto/simulation';
+import type { Tiles, TileState } from '@shared/dto/simulation/TileState';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import type { SaveState } from '@shared/tts-model/SaveState';
 import type { TransformState } from '@shared/tts-model/TransformState';
@@ -48,10 +49,14 @@ class TTSParser {
   }
 
   parseTable = (obj: SaveState): TableState => {
-    return {
+    const tableState: TableState = {
       type: this.mapTableType(obj.Table),
-      url: obj.TableURL,
     };
+
+    const tableURL = obj.TableURL;
+    tableURL && (tableState.url = tableURL);
+
+    return tableState;
   };
 
   mapTableType(type: string): TableType {
@@ -78,20 +83,21 @@ class TTSParser {
   }
 
   parseObject = (objectState: ObjectState): ActorState | null => {
-    let actorState: ActorState | null = null;
-
-    actorState = this.parseDeck(objectState) as unknown as ActorState;
-    if (actorState) {
-      return actorState;
+    try {
+      switch (objectState.Name) {
+        case 'Custom_Tile':
+          return this.parseTile(objectState) as unknown as ActorState;
+        case 'Deck':
+          return this.parseDeck(objectState) as unknown as ActorState;
+        case 'Custom_Model':
+          return this.parseCustomObject(objectState);
+        default:
+          return null;
+      }
+    } catch (e) {
+      this.errors.push(objectState.GUID);
+      return null;
     }
-
-    actorState = this.parseCustomObject(objectState);
-    if (actorState) {
-      return actorState;
-    }
-
-    this.errors.push(objectState.GUID);
-    return null;
   };
 
   parseDeck(objectState: ObjectState): DeckState | null {
@@ -122,6 +128,23 @@ class TTSParser {
       };
 
       return deckState;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  parseTile(objectState: ObjectState): TileState | null {
+    try {
+      const tileState: TileState = {
+        ...this.parseActorBase(objectState),
+        faceURL: objectState.CustomImage?.ImageURL,
+        type: objectState.CustomImage?.CustomTile.Type as unknown as Tiles,
+      };
+
+      const backURL = objectState.CustomImage?.ImageSecondaryURL;
+      backURL && (tileState.backURL = backURL);
+
+      return tileState;
     } catch (e) {
       return null;
     }

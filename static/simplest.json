@@ -7,7 +7,7 @@
       "name": "Munchkin",
       "guid": "1",
       "transformation": {
-        "position": [0, 50, 0]
+        "position": [0, 0, 0]
       },
       "mass": 1,
       "model": {
@@ -22,9 +22,7 @@
         "colliderURL": "http://localhost:5500/rothygus.obj"
       },
       "transformation": {
-        "scale": [1, 1, 1],
-        "position": [-10.9353037, 20.6019473, 87.02083],
-        "rotation": [0, 0, 0]
+        "position": [0, 0, 5]
       }
     },
     {
@@ -136,9 +134,7 @@
         }
       },
       "transformation": {
-        "scale": [1, 1, 1],
-        "position": [-4.4997139, 1.07239735, 8.776062],
-        "rotation": [-8.688759734673492e-10, 3.141606232251374, -2.771431654293895e-9]
+        "position": [5, 0, 0]
       }
     },
     {
@@ -151,9 +147,47 @@
         "diffuseURL": "http://i.imgur.com/FMisrth.png"
       },
       "transformation": {
-        "scale": [0.905000031, 0.905000031, 0.905000031],
-        "position": [58.4391, 12.2183409, -8.5435915],
-        "rotation": [0.000009092958, 295.8001, -0.00000192609241]
+        "position": [5, 0, 5]
+      }
+    },
+    {
+      "guid": "boxtile",
+      "name": "BoxTile",
+      "type": 0,
+      "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
+      "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
+      "transformation": {
+        "position": [10, 0, 0]
+      }
+    },
+    {
+      "guid": "hextile",
+      "name": "hexTile",
+      "type": 1,
+      "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
+      "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
+      "transformation": {
+        "position": [10, 0, 5]
+      }
+    },
+    {
+      "guid": "roundedtile",
+      "name": "roundedTile",
+      "type": 2,
+      "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
+      "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
+      "transformation": {
+        "position": [10, 0, 10]
+      }
+    },
+    {
+      "guid": "circletile",
+      "name": "circleTile",
+      "type": 3,
+      "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
+      "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
+      "transformation": {
+        "position": [15, 0, 0]
       }
     }
   ]

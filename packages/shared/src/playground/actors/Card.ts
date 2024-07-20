@@ -1,13 +1,11 @@
-import { MultiMaterial } from '@babylonjs/core/Materials/multiMaterial';
-import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { SubMesh } from '@babylonjs/core/Meshes/subMesh';
 
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { CardGrid, CardState } from '@shared/dto/simulation';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
+import { FlatMoodel } from './models';
 
 const CARD_MODEL_URL = 'http://192.168.43.141:5500/Card_Mesh.obj';
 
@@ -45,24 +43,23 @@ export class Card extends ActorBase {
       faceTexture.vScale = cardHeight;
     }
 
-    const mat = new StandardMaterial('material');
-    const matFace = new StandardMaterial('face');
-    matFace.diffuseTexture = faceTexture;
-
-    const matBack = new StandardMaterial('back');
-    matBack.diffuseTexture = backTexture;
-
-    const cardMat = new MultiMaterial('card');
-    cardMat.subMaterials.push(mat);
-    cardMat.subMaterials.push(matFace);
-    cardMat.subMaterials.push(matBack);
-
-    model.name = 'card';
-
-    new SubMesh(1, CARD_VERT_START, CARD_VERT_COUNT, CARD_FACE_INDEX_START, CARD_FACE_INDEX_COUNT, model);
-    new SubMesh(2, CARD_VERT_START, CARD_VERT_COUNT, CARD_BACK_INDEX_START, CARD_BACK_INDEX_COUNT, model);
-    model.material = cardMat;
-    return model;
+    return FlatMoodel(
+      model,
+      {
+        texture: faceTexture,
+        vertStart: CARD_VERT_START,
+        vertCount: CARD_VERT_COUNT,
+        faceIndexStart: CARD_FACE_INDEX_START,
+        faceIndexCount: CARD_FACE_INDEX_COUNT,
+      },
+      {
+        texture: backTexture,
+        vertStart: CARD_VERT_START,
+        vertCount: CARD_VERT_COUNT,
+        faceIndexStart: CARD_BACK_INDEX_START,
+        faceIndexCount: CARD_BACK_INDEX_COUNT,
+      },
+    );
   }
 
   static getColRow(sequence: number, cols: number, rows: number): [number, number] {
