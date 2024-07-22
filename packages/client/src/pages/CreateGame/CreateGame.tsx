@@ -5,7 +5,7 @@ import Input from '@components/Input';
 import { GameService } from '@services/game.service';
 
 import { TTSParser } from '@client/src/TTSParser';
-import type { SimulationStateSave } from '@shared/dto/simulation';
+import type { SimulationStateSave } from '@shared/dto/states';
 
 export const CreateGame = () => {
   const navigate = useNavigate();

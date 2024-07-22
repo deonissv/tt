@@ -1,11 +1,11 @@
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { Scene } from '@babylonjs/core/scene';
 
-import type { ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
 import { SimulationBase } from '@shared/playground';
 
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 import { Logger } from '@nestjs/common';
+import type { ActorStateUpdate, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 
 export class Simulation extends SimulationBase {
   logger: Logger;

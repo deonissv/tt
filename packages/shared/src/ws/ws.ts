@@ -1,4 +1,4 @@
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation';
 import type ws from 'ws';
 
 export const CLIENT_ID = 'clientId';
@@ -9,7 +9,7 @@ export const UPDATE = 'update';
 export const DOWNLOAD_PROGRESS = 'downloadProgress';
 
 export enum ACTIONS {
-  PICK_DECK,
+  PICK_ITEM,
 }
 
 export interface Action {
@@ -44,7 +44,7 @@ export type MSG =
     };
 
 export const send = (ws: WebSocket | ws.WebSocket, msg: MSG) => {
-  ws.send(JSON.stringify(msg));
+  ws && ws.readyState == ws.OPEN && ws.send(JSON.stringify(msg));
 };
 
 export const read = (event: MessageEvent | ws.MessageEvent): MSG => {

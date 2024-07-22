@@ -1,5 +1,7 @@
-export const PRECISION_EPSILON = 0.005;
+export const STATIC_HOST = 'http://192.168.43.141:5500';
 export const URL_PREFIX = 'http://192.168.43.141:3000/?url=';
+
+export const PRECISION_EPSILON = 0.005;
 
 export const CAMERA_DEFAULT_ALPHA = 0;
 export const CAMERA_DEFAULT_BETA = 0;

@@ -1,4 +1,4 @@
-import type { Transformation } from '@shared/dto/simulation';
+import type { Transformation } from '@shared/dto/states';
 
 export const ACTOR_UPDATE = 'ACTOR_UPDATE';
 

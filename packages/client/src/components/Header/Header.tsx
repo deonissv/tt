@@ -1,10 +1,10 @@
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { IconButton, Link, Typography } from '@mui/material';
+import { AuthService } from '@services/auth.service';
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthService } from '../../services/auth.service';
 
 export const Header: React.FC = (): React.ReactNode => {
   const navigate = useNavigate();

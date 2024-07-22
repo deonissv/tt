@@ -3,7 +3,7 @@ import { LOADER_URL, WSS_URL } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { CreateRoomDto, RoomPreviewDto } from '@shared/dto/rooms';
-import type { SimulationStateSave } from '@shared/dto/simulation';
+import type { SimulationStateSave } from '@shared/dto/states';
 import { WS } from '@shared/ws';
 
 export const RoomService = {
@@ -55,8 +55,8 @@ export const RoomService = {
 
               if (message.type == WS.STATE) {
                 ws.removeEventListener('message', stateListener);
-                const pgState = message.payload;
-                resolve([ws, id, pgState]);
+                const simState = message.payload;
+                resolve([ws, id, simState]);
               }
             };
             ws.removeEventListener('message', idListener);

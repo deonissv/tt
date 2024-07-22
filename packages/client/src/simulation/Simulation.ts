@@ -16,12 +16,13 @@ import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
 import { FLIP_BIND_KEYS } from '@shared/constants';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import type { Actor } from '@shared/playground';
-import { ActorBase, Deck, SimulationBase } from '@shared/playground';
+import { ActorBase, SimulationBase } from '@shared/playground';
+import { isContainable } from '@shared/playground/actions/Containable';
 
 export interface SimulationCallbacks {
-  onDeckPick: (deck: Deck) => void;
+  onPickItem: (deck: ActorBase) => void;
 }
 
 export class Simulation extends SimulationBase {
@@ -86,9 +87,7 @@ export class Simulation extends SimulationBase {
 
     sim._handleHoverHighlight();
     sim._bindAction(FLIP_BIND_KEYS, actor => {
-      if (actor instanceof Deck) {
-        cbs.onDeckPick && cbs.onDeckPick(actor);
-      }
+      isContainable(actor) && cbs.onPickItem?.(actor);
     });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);

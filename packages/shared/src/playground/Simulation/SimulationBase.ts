@@ -14,14 +14,22 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
 import { GRAVITY } from '@shared/constants';
-import type { ActorStateBase, TableState } from '@shared/dto/simulation';
-import { ActorState, CardState, DeckState } from '@shared/dto/simulation';
-import type { ActorStateUpdate } from '@shared/dto/simulation/ActorState';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation/SimulationState';
-import { TileState } from '@shared/dto/simulation/TileState';
+import type {
+  ActorState,
+  ActorStateUpdate,
+  BagState,
+  CardState,
+  DeckState,
+  TableState,
+  TileState,
+} from '@shared/dto/states';
+import { ActorType, type ActorStateBase } from '@shared/dto/states';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
 import type { Action } from '@shared/ws/ws';
 import { ACTIONS } from '@shared/ws/ws';
+import { isContainable } from '../actions/Containable';
 import { Actor, ActorBase, Card, Deck, RectangleCustomTable } from '../actors';
+import { Bag } from '../actors/Bag';
 import { Tile } from '../actors/Tile';
 
 // WebGPU Extensions
@@ -67,16 +75,21 @@ export abstract class SimulationBase {
   }
 
   static async actorFromState(actorState: ActorStateBase): Promise<ActorBase | null> {
-    if (TileState.validate(actorState)) {
-      return await Tile.fromState(actorState);
-    } else if (CardState.validate(actorState)) {
-      return await Card.fromState(actorState);
-    } else if (DeckState.validate(actorState)) {
-      return await Deck.fromState(actorState);
-    } else if (ActorState.validate(actorState)) {
-      return await Actor.fromState(actorState);
-    } else {
-      throw new Error('Unknown actor type');
+    switch (actorState.type) {
+      case ActorType.TILE:
+        return await Tile.fromState(actorState as TileState);
+      case ActorType.BAG:
+        return await Bag.fromState(actorState as BagState);
+      case ActorType.CARD:
+        return await Card.fromState(actorState as CardState);
+      case ActorType.DECK:
+        return await Deck.fromState(actorState as DeckState);
+      case ActorType.ACTOR:
+        return await Actor.fromState(actorState as ActorState);
+      default:
+        // eslint-disable-next-line no-console
+        console.error(`Unknown actor type: ${actorState.type}`);
+        return null;
     }
   }
 
@@ -101,27 +114,25 @@ export abstract class SimulationBase {
 
   processAction(action: Action) {
     switch (action.type) {
-      case ACTIONS.PICK_DECK: {
+      case ACTIONS.PICK_ITEM: {
         const deckGUID = action.payload;
         const actor = this.actors.find(a => a.guid === deckGUID);
-        if (actor) {
-          (actor as unknown as Deck)
-            .pickCard()
-            .then(() => {
-              // eslint-disable-next-line no-console
-              console.log(`Deck ${deckGUID} picked a card`);
-            })
+        if (isContainable(actor)) {
+          try {
+            actor.pickItem();
+          } catch (e) {
             // eslint-disable-next-line no-console
-            .catch(e => console.error(e));
+            console.error(e);
+          }
         }
       }
     }
   }
 
-  toStateUpdate(pgState?: SimulationStateSave): SimulationStateUpdate {
+  toStateUpdate(simState?: SimulationStateSave): SimulationStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
     this.actors.forEach(actor => {
-      const actorState = pgState?.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const actorState = simState?.actorStates?.find(actorState => actorState.guid === actor.guid);
       const stateUpdate = actor.toStateUpdate(actorState);
       if (stateUpdate) {
         actorStates.push(stateUpdate);

@@ -63,7 +63,7 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
   }
 
   detachControl(): void {
-    throw new Error('Method not implemented.');
+    throw new Error('Not implemented: detachControl');
   }
 
   public checkInputs(): void {

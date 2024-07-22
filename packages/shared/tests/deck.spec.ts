@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CreateBox, HavokPlugin, NullEngine, Scene, Texture, Vector3 } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { GRAVITY } from '@shared/constants';
-import type { DeckState } from '@shared/dto/simulation';
+import type { DeckState } from '@shared/dto/states';
 import { Card, Deck } from '@shared/playground/';
 import { initHavok } from '@shared/utils';
 
@@ -42,6 +42,7 @@ describe('Deck', () => {
     texture = new Texture('testTexture', scene);
 
     state = {
+      type: 3,
       guid: '1234',
       name: 'testActor',
       transformation: {
@@ -51,53 +52,54 @@ describe('Deck', () => {
       },
       cards: [
         {
-          cardGUID: '0',
-          deckId: 0,
+          type: 2,
+          guid: '0',
+          name: 'testCard',
+          faceURL: 'testURL',
+          backURL: 'testURL',
+          cols: 1,
+          rows: 1,
           sequence: 0,
         },
         {
-          cardGUID: '1',
-          deckId: 0,
+          type: 2,
+          guid: '1',
+          name: 'testCard',
+          faceURL: 'testURL',
+          backURL: 'testURL',
+          cols: 1,
+          rows: 1,
           sequence: 0,
         },
       ],
-      grids: {
-        0: {
-          faceURL: 'testFaceURL',
-          backURL: 'testBackURL',
-          rows: 0,
-          cols: 0,
-        },
-      },
     };
   });
   it('should construct with correct properties', () => {
-    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    const deck = new Deck(state, mesh, texture, texture);
     expect(deck.size).toBe(2);
   });
 
   it('size getter returns correct number of cards', () => {
-    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    const deck = new Deck(state, mesh, texture, texture);
     expect(deck.size).toBe(2);
   });
 
   it('renderDeck adjusts model scaling based on size', () => {
-    const deck = new Deck(state, mesh, { 0: [texture, texture] });
-    deck.renderDeck();
+    const deck = new Deck(state, mesh, texture, texture);
     expect(deck.model.scaling.x).toBe(2);
   });
 
   it('pickCard removes a card and adjusts model scaling', async () => {
-    const deck = new Deck(state, mesh, { 0: [texture, texture] });
-    await deck.pickCard();
+    const deck = new Deck(state, mesh, texture, texture);
+    await deck.pickItem();
     expect(deck.size).toBe(1);
     expect(deck.model.scaling.x).toBeLessThan(2);
   });
 
-  it('fromState creates a Deck instance with correct properties', () => {
-    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+  it('fromState creates a Deck instance with correct properties', async () => {
+    const deck = await Deck.fromState(state);
     expect(deck).toBeInstanceOf(Deck);
-    expect(deck.size).toBe(2);
+    expect(deck!.size).toBe(2);
   });
 
   it('fromState returns null if card model is not loaded', async () => {
@@ -107,11 +109,11 @@ describe('Deck', () => {
   });
 
   it('should construct using fromState value', async () => {
-    const deck = new Deck(state, mesh, { 0: [texture, texture] });
+    const deck = new Deck(state, mesh, texture, texture);
     expect(deck).toBeInstanceOf(Deck);
     expect(deck.size).toBe(2);
 
-    await deck.pickCard();
+    await deck.pickItem();
     const stateFromState = deck.toState();
     const newDeck = await Deck.fromState(stateFromState);
 

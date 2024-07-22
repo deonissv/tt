@@ -2,12 +2,13 @@ import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import type { CardGrid, CardState } from '@shared/dto/simulation';
+import { STATIC_HOST } from '@shared/constants';
+import type { CardGrid, CardState } from '@shared/dto/states';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 import { FlatMoodel } from './models';
 
-const CARD_MODEL_URL = 'http://192.168.43.141:5500/Card_Mesh.obj';
+const CARD_MODEL_URL = STATIC_HOST + '/Card_Mesh.obj';
 
 const CARD_MASS = 1;
 const CARD_VERT_START = 0; //model.subMeshes[0].verticesStart
@@ -25,23 +26,21 @@ export class Card extends ActorBase {
   __state: CardState;
 
   constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
-    const cardModel = Card.getCardModel(model, faceTexture, backTexture, state.grid);
+    const cardModel = Card.getCardModel(model, faceTexture, backTexture, state);
     super(state.guid, state.name, cardModel, undefined, state.transformation, CARD_MASS, undefined, state);
   }
 
-  static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid?: CardGrid) {
-    if (grid) {
-      const [col, row] = Card.getColRow(grid.sequence, grid.cols, grid.rows);
+  static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid: CardGrid) {
+    const [col, row] = Card.getColRow(grid.sequence, grid.cols, grid.rows);
 
-      const cardWidth = 1 / grid.cols;
-      const cardHeight = 1 / grid.rows;
+    const cardWidth = 1 / grid.cols;
+    const cardHeight = 1 / grid.rows;
 
-      faceTexture.uOffset = col * cardWidth;
-      faceTexture.vOffset = -cardHeight - row * cardHeight;
+    faceTexture.uOffset = col * cardWidth;
+    faceTexture.vOffset = -cardHeight - row * cardHeight;
 
-      faceTexture.uScale = cardWidth;
-      faceTexture.vScale = cardHeight;
-    }
+    faceTexture.uScale = cardWidth;
+    faceTexture.vScale = cardHeight;
 
     return FlatMoodel(
       model,
@@ -93,8 +92,6 @@ export class Card extends ActorBase {
     if (!faceTexture || !backTexture) {
       return null;
     }
-
-    model.setEnabled(true);
 
     return new Card(state, model, faceTexture, backTexture);
   }

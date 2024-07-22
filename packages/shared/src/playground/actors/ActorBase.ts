@@ -6,15 +6,14 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
+import { MASS_DEFAULT, MOVEMENT_VELOCITY, PRECISION_EPSILON, ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import {
-  LIFH_HIGHT,
-  MASS_DEFAULT,
-  MOVEMENT_VELOCITY,
-  PRECISION_EPSILON,
-  ROTATE_STEP,
-  SCALE_COEF,
-} from '@shared/constants';
-import type { ActorState, ActorStateBase, ActorStateUpdate, Transformation } from '@shared/dto/simulation';
+  ActorType,
+  type ActorState,
+  type ActorStateBase,
+  type ActorStateUpdate,
+  type Transformation,
+} from '@shared/dto/states';
 import { floatCompare } from '@shared/utils';
 import { Loader } from '../Loader';
 
@@ -57,10 +56,11 @@ export class ActorBase extends TransformNode {
     this.__model = modelMesh;
     this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
 
-    this.__state = state ?? { guid, name, transformation, mass };
+    this.__state = state ?? { type: ActorType.ACTOR, guid, name, transformation, mass };
 
     modelMesh.name = `${this.name}: model`;
     modelMesh.setParent(this);
+    modelMesh.setEnabled(true);
 
     this.colorDiffuse = colorDiffuse ?? [];
 
@@ -163,12 +163,12 @@ export class ActorBase extends TransformNode {
     }
   }
 
-  pick() {
-    this._setMass(0);
-    this.move(0, LIFH_HIGHT, 0);
-    // this.__model.translate(Axis.Y, LIFH_HIGHT, Space.LOCAL);
-    // this._forceUpdate();
-  }
+  // pick() {
+  // this._setMass(0);
+  // this.move(0, LIFH_HIGHT, 0);
+  // this.__model.translate(Axis.Y, LIFH_HIGHT, Space.LOCAL);
+  // this._forceUpdate();
+  // }
 
   release() {
     this._setMass(this.__mass);
@@ -231,7 +231,7 @@ export class ActorBase extends TransformNode {
   }
 
   static fromState(_actorState: object): Promise<ActorBase | null> {
-    throw new Error('Not implemented');
+    throw new Error('Not implemented: fromState');
   }
 
   static async modelFromState(actorState: ActorState, child = false): Promise<Mesh | null> {
@@ -309,7 +309,7 @@ export class ActorBase extends TransformNode {
     const currentState = this.toState();
 
     if (!actorState) {
-      return currentState;
+      return null;
     }
 
     const rv: ActorStateUpdate = {
@@ -375,6 +375,8 @@ export class ActorBase extends TransformNode {
     const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
 
     const rv: ActorState = {
+      type: actorState.type,
+
       guid: actorStateUpdate.guid,
       model: actorStateUpdate.model ?? actorState.model,
       name: actorStateUpdate.name ?? actorState.name,

@@ -2,7 +2,7 @@ import { jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { authMockAdmin } from '../../test/authMock';
 import useConfigServiceMock from '../../test/useConfigServiceMock';
 import useDatabaseMock from '../../test/useDatabaseMock';
@@ -43,9 +43,10 @@ describe('RoomsService', () => {
 
   describe('RoomProgressUpdate', () => {
     it('it should be created', async () => {
-      const pgState: SimulationStateSave = {
+      const simState: SimulationStateSave = {
         actorStates: [
           {
+            type: 0,
             name: 'Munchkin',
             guid: '1',
             transformation: {
@@ -59,9 +60,10 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgStateUpdate: SimulationStateUpdate = {
+      const simStateUpdate: SimulationStateUpdate = {
         actorStates: [
           {
+            type: 0,
             guid: '1',
             transformation: {
               position: [0, 100, 0],
@@ -88,7 +90,7 @@ describe('RoomsService', () => {
             create: [
               {
                 version: 1,
-                content: JSON.stringify(pgState),
+                content: JSON.stringify(simState),
               },
             ],
           },
@@ -128,7 +130,7 @@ describe('RoomsService', () => {
         },
       });
 
-      await roomsService.saveRoomProgressUpdate('4dbab385-0a62-442c-a4b2-c22e8ae35cb7', pgStateUpdate);
+      await roomsService.saveRoomProgressUpdate('4dbab385-0a62-442c-a4b2-c22e8ae35cb7', simStateUpdate);
 
       const roomProgressUpdate = await prismaService.roomProgressUpdate.findFirst({
         where: {
@@ -158,9 +160,10 @@ describe('RoomsService', () => {
 
   describe('RoomProgressSave', () => {
     it('it should be created', async () => {
-      const pgState: SimulationStateSave = {
+      const simState: SimulationStateSave = {
         actorStates: [
           {
+            type: 0,
             name: 'Munchkin',
             guid: '1',
             transformation: {
@@ -174,9 +177,10 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgState2: SimulationStateSave = {
+      const simState2: SimulationStateSave = {
         actorStates: [
           {
+            type: 0,
             name: 'Munchkin',
             guid: '2',
             transformation: {
@@ -190,7 +194,7 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgStateUpdate: SimulationStateUpdate = {
+      const simStateUpdate: SimulationStateUpdate = {
         actorStates: [
           {
             guid: '1',
@@ -201,7 +205,7 @@ describe('RoomsService', () => {
         ],
       };
 
-      const pgStateUpdate2: SimulationStateUpdate = {
+      const simStateUpdate2: SimulationStateUpdate = {
         actorStates: [
           {
             guid: '2',
@@ -230,7 +234,7 @@ describe('RoomsService', () => {
             create: [
               {
                 version: 1,
-                content: JSON.stringify(pgState),
+                content: JSON.stringify(simState),
               },
             ],
           },
@@ -251,7 +255,7 @@ describe('RoomsService', () => {
             create: [
               {
                 version: 1,
-                content: JSON.stringify(pgState2),
+                content: JSON.stringify(simState2),
               },
             ],
           },
@@ -292,7 +296,7 @@ describe('RoomsService', () => {
           roomId: 1,
           RoomProgressUpdate: {
             create: {
-              content: JSON.stringify(pgStateUpdate),
+              content: JSON.stringify(simStateUpdate),
             },
           },
         },
@@ -315,7 +319,7 @@ describe('RoomsService', () => {
           roomId: 1,
           RoomProgressUpdate: {
             create: {
-              content: JSON.stringify(pgStateUpdate2),
+              content: JSON.stringify(simStateUpdate2),
             },
           },
         },
@@ -323,7 +327,7 @@ describe('RoomsService', () => {
 
       jest.spyOn(RoomsService.rooms, 'get').mockReturnValue({
         simulation: {
-          toState: () => pgState2,
+          toState: () => simState2,
         },
       } as SimulationRoom);
 
@@ -341,7 +345,7 @@ describe('RoomsService', () => {
       expect(roomProgressSave).toMatchObject({
         order: 5,
         roomId: 1,
-        content: pgState2,
+        content: simState2,
       });
     });
   });

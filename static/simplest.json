@@ -4,6 +4,7 @@
   },
   "actorStates": [
     {
+      "type": 0,
       "name": "Munchkin",
       "guid": "1",
       "transformation": {
@@ -15,6 +16,7 @@
       }
     },
     {
+      "type": 0,
       "guid": "0f9227",
       "name": "[00A164]Ротигус, Великий Нечистый",
       "model": {
@@ -26,6 +28,7 @@
       }
     },
     {
+      "type": 3,
       "guid": "162411",
       "name": "Deck",
       "cards": [
@@ -138,6 +141,7 @@
       }
     },
     {
+      "type": 1,
       "guid": "6c95a9",
       "name": "Custom_Model_Infinite_Bag",
       "model": {
@@ -151,9 +155,10 @@
       }
     },
     {
+      "type": 5,
       "guid": "boxtile",
       "name": "BoxTile",
-      "type": 0,
+      "tileType": 0,
       "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
       "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
       "transformation": {
@@ -171,9 +176,10 @@
       }
     },
     {
+      "type": 5,
       "guid": "roundedtile",
       "name": "roundedTile",
-      "type": 2,
+      "tileType": 2,
       "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
       "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
       "transformation": {
@@ -181,9 +187,10 @@
       }
     },
     {
+      "type": 5,
       "guid": "circletile",
       "name": "circleTile",
-      "type": 3,
+      "tileType": 3,
       "faceURL": "http://cloud-3.steamusercontent.com/ugc/450740801085189347/F2190E4E8C93F1618399C40F603922AD7632DFEC/",
       "backURL": "http://cloud-3.steamusercontent.com/ugc/155773601379978926/E64780188E430DC0EA026912425FDB8A12FE8815/",
       "transformation": {
