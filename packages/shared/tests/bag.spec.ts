@@ -6,7 +6,7 @@ import { GRAVITY } from '@shared/constants';
 import type { ActorStateBase, BagState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { Bag } from '@shared/playground/actors/Bag';
-import { initHavok } from '@shared/utils';
+import { initHavok } from './testUtils';
 
 vi.mock('@shared/playground/Loader', () => ({
   Loader: {

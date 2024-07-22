@@ -23,6 +23,6 @@
       "@shared/*": ["shared/src/*"]
     }
   },
-  "include": ["src",  "/src/**/*",  "./src/**/*", "../shared/src/**/*", "./../server/**/*"],
+  "include": ["./../server/**/*",  "../shared/src/**/*"],
   "exclude": ["node_modules", "dist"],
 }

@@ -199,6 +199,11 @@ class TTSParser {
   }
 
   parseDeck(objectState: ObjectState): DeckState | null {
+    if (!Array.isArray(objectState.ContainedObjects)) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
     const cards = objectState.ContainedObjects.reduce<CardState[]>((acc, o) => {
       const cardState = this.parseCard(o, objectState);
       if (cardState) {

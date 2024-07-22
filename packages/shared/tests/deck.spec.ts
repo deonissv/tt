@@ -5,7 +5,7 @@ import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { GRAVITY } from '@shared/constants';
 import type { DeckState } from '@shared/dto/states';
 import { Card, Deck } from '@shared/playground/';
-import { initHavok } from '@shared/utils';
+import { initHavok } from './testUtils';
 
 vi.mock('@shared/playground/Loader', () => ({
   Loader: {

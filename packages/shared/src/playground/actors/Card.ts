@@ -23,7 +23,7 @@ const CARD_BACK_INDEX_START = 240;
 const CARD_BACK_INDEX_COUNT = 60;
 
 export class Card extends ActorBase {
-  __state: CardState;
+  declare __state: CardState;
 
   constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
     const cardModel = Card.getCardModel(model, faceTexture, backTexture, state);
