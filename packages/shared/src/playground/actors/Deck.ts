@@ -31,7 +31,7 @@ export class Deck extends ActorBase implements Containable {
       this.setEnabled(false);
     }
 
-    const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, this.items.at(0)!);
+    const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, this.items.at(-1)!);
     this.__model = cardModel;
     this.model.scaling.x = this.size;
   }
@@ -43,8 +43,8 @@ export class Deck extends ActorBase implements Containable {
       return null;
     }
 
-    const faceTexture = await Loader.loadTexture(state.cards.at(0)!.faceURL);
-    const backTexture = await Loader.loadTexture(state.cards.at(-1)!.backURL);
+    const faceTexture = await Loader.loadTexture(state.cards.at(-1)!.faceURL);
+    const backTexture = await Loader.loadTexture(state.cards.at(0)!.backURL);
 
     if (!faceTexture || !backTexture) {
       return null;
@@ -66,7 +66,7 @@ export class Deck extends ActorBase implements Containable {
     if (this.size < 1) {
       return;
     }
-    const isFipped = false;
+    const isFipped = true;
     const cardState = isFipped ? this.items.pop()! : this.items.shift()!;
 
     cardState.transformation = this.transformation;
@@ -74,8 +74,8 @@ export class Deck extends ActorBase implements Containable {
 
     const newCard = await Card.fromState(cardState);
 
-    const faceTexture = await Loader.loadTexture(this.items.at(0)!.faceURL);
-    const backTexture = await Loader.loadTexture(this.items.at(-1)!.backURL);
+    const faceTexture = await Loader.loadTexture(this.items.at(-1)!.faceURL);
+    const backTexture = await Loader.loadTexture(this.items.at(0)!.backURL);
 
     if (!faceTexture || !backTexture) {
       return null;

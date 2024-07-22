@@ -82,4 +82,14 @@ describe('Card', () => {
 
     expect(newCard).toBeInstanceOf(Card);
   });
+
+  it('should get col and row from sequence', () => {
+    expect(Card.getColRow(0, 1)).toEqual([0, 0]);
+
+    expect(Card.getColRow(0, 10)).toEqual([0, 0]);
+    expect(Card.getColRow(9, 10)).toEqual([9, 0]);
+    expect(Card.getColRow(60, 10)).toEqual([0, 6]);
+    expect(Card.getColRow(69, 10)).toEqual([9, 6]);
+    expect(Card.getColRow(68, 10)).toEqual([8, 6]);
+  });
 });

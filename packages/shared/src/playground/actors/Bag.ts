@@ -34,7 +34,7 @@ export class Bag extends ActorBase implements Containable {
       return null;
     }
 
-    const item = this.items.pop()!;
+    const item = this.items.shift()!;
     await SimulationBase.actorFromState(item);
     return item;
   }

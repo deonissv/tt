@@ -31,7 +31,7 @@ export class Card extends ActorBase {
   }
 
   static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid: CardGrid) {
-    const [col, row] = Card.getColRow(grid.sequence, grid.cols, grid.rows);
+    const [col, row] = Card.getColRow(grid.sequence, grid.cols);
 
     const cardWidth = 1 / grid.cols;
     const cardHeight = 1 / grid.rows;
@@ -61,9 +61,9 @@ export class Card extends ActorBase {
     );
   }
 
-  static getColRow(sequence: number, cols: number, rows: number): [number, number] {
-    const col = Math.floor(sequence / cols);
-    const row = sequence % rows;
+  static getColRow(sequence: number, cols: number): [number, number] {
+    const col = sequence % cols;
+    const row = Math.floor(sequence / cols);
     return [col, row];
   }
 

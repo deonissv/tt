@@ -137,12 +137,17 @@ class Loader {
   async _fetchFile(url: string): Promise<ArrayBuffer | null> {
     let attempts = 0;
     for (attempts = 0; attempts < RETRY_ATTEMPTS; attempts++) {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-      if (arrayBuffer) {
-        return arrayBuffer;
+      try {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+        if (arrayBuffer) {
+          return arrayBuffer;
+        }
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed attempt to fetch: ${url}`);
       }
-      await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
     // eslint-disable-next-line no-console
     console.error(`Failed to fetch: ${url}`);
