@@ -16,7 +16,7 @@ const BAG_MODEL: Model = {
 };
 
 export class Bag extends ActorBase implements Containable {
-  __state: BagState;
+  declare __state: BagState;
   items: ActorStateBase[];
 
   constructor(state: BagState, model: Mesh, colliderMesh?: Mesh) {

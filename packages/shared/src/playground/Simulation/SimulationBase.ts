@@ -1,9 +1,6 @@
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 import type { Scene } from '@babylonjs/core/scene';
 
-import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import { HavokPlugin } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
-
 // Side efects
 import '@babylonjs/core/Culling/ray';
 import '@babylonjs/core/Materials/standardMaterial';
@@ -13,7 +10,6 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
-import { GRAVITY } from '@shared/constants';
 import type {
   ActorState,
   ActorStateUpdate,
@@ -57,12 +53,12 @@ export abstract class SimulationBase {
   scene: Scene;
   initialState: SimulationStateSave;
 
-  private initPhysics(gravity = GRAVITY) {
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, gravity, 0);
+  // private initPhysics(gravity = GRAVITY) {
+  //   const hp = new HavokPlugin(true, global.havok);
+  //   const gravityVec = new Vector3(0, gravity, 0);
 
-    this.scene.enablePhysics(gravityVec, hp);
-  }
+  //   this.scene.enablePhysics(gravityVec, hp);
+  // }
 
   get actors() {
     return this.scene.rootNodes.reduce((acc, node) => {

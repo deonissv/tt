@@ -4,7 +4,8 @@ import { jest } from '@jest/globals';
 
 import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
-import { initHavok, omitKeys } from '@shared/utils';
+import { omitKeys } from '@shared/utils';
+import { initHavok } from '../utils';
 import Actor from './actor';
 import { Simulation } from './simulation';
 

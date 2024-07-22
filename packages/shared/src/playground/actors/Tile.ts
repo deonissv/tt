@@ -14,7 +14,7 @@ const SQUARE_TILE_URL = `${STATIC_HOST}/square_tile.obj`;
 const TILE_MASS = 1;
 
 export class Tile extends ActorBase {
-  __state: TileState;
+  declare __state: TileState;
 
   constructor(state: TileState, model: Mesh) {
     super(state.guid, state.name, model, undefined, state.transformation, TILE_MASS, undefined, state);

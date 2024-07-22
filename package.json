@@ -9,6 +9,7 @@
   "scripts": {
     "client": "npm -w ./packages/client run",
     "server": "npm -w ./packages/server run",
+    "shared": "npm -w ./packages/shared run",
     "build": "npx concurrently \"npm run server build\" \"npm run client build:v\"",
     "start": "npx concurrently \"npm run client start\" \"npm run server start\"",
     "dev": "npx concurrently \"npm run client dev\" \"npm run server dev\" \"npm run shared dev\"",
@@ -20,6 +21,11 @@
     "format:client": "prettier --config .prettierrc --write \"packages/client/**/*.ts\"",
     "format:server": "prettier --config .prettierrc --write \"packages/server/**/*.ts\"",
     "format:shared": "prettier --config .prettierrc --write \"packages/shared/**/*.ts\"",
+    "typecheck": "npx conc \"npm:typecheck:*\"",
+    "typecheck:client": "tsc --noEmit --skipLibCheck --project packages/client/tsconfig.json",
+    "typecheck:server": "tsc --noEmit --skipLibCheck --project packages/server/tsconfig.json",
+    "typecheck:shared": "tsc --noEmit --skipLibCheck --project packages/shared/tsconfig.json",
+    "check": "npm run typecheck && npm run lint",
     "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' + && find . -name 'build' -type d -prune -exec rm -rf '{}' +",
     "i:all": "npm i && npm -w ./packages/server i  && npm -w ./packages/client i"
   },

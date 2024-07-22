@@ -10,7 +10,7 @@ import { Card } from './Card';
 const CARD_MASS = 1;
 
 export class Deck extends ActorBase implements Containable {
-  __state: DeckState;
+  declare __state: DeckState;
   items: CardState[];
 
   constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {

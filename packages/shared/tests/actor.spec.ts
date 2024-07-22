@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { HavokPlugin, Logger, Mesh, NullEngine, Scene, Vector3 } from '@babylonjs/core';
-import { jest } from '@jest/globals';
-import Actor from './actor';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { HavokPlugin, Logger, Mesh, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { GRAVITY } from '@shared/constants';
 import type { ActorState } from '@shared/dto/states';
-import { Loader } from '@shared/playground';
-import { initHavok } from '@shared/utils';
+import { Actor, Loader } from '@shared/playground';
+import { initHavok } from './testUtils';
 
 Logger.LogLevels = 0;
-jest.mock('@shared/playground');
+vi.mock('@shared/playground');
 
 describe('Actor Class', () => {
   let engine: NullEngine;
@@ -46,7 +45,7 @@ describe('Actor Class', () => {
     };
     actor = new Actor(state, modelMesh);
 
-    jest.spyOn(Loader, 'loadMesh').mockImplementation(() => {
+    vi.spyOn(Loader, 'loadMesh').mockImplementation(() => {
       return Promise.resolve(new Mesh('testMesh'));
     });
   });
@@ -87,7 +86,7 @@ describe('Actor Class', () => {
   });
 
   it('should create an actor from state', async () => {
-    jest.spyOn(Loader, 'loadModel').mockResolvedValue([modelMesh, null]);
+    vi.spyOn(Loader, 'loadModel').mockResolvedValue([modelMesh, null]);
     const newActor = await Actor.fromState(state);
     expect(newActor).toBeInstanceOf(Actor);
     expect(newActor!.guid).toBe(state.guid);
