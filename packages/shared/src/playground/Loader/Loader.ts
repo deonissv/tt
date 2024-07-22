@@ -15,10 +15,13 @@ const RETRY_DELAY = 500; // ms
 
 OBJFileLoader.SKIP_MATERIALS = true;
 
+interface FetchedFile {
+  url: string;
+  mime: MimeType;
+}
+
 class Loader {
-  // private MeshAssets = new Map<string, Promise<Mesh | null>>();
-  // private TextureAssets = new Map<string, Promise<Texture | null>>();
-  public Resources = new Map<string, string>();
+  public Assets = new Map<string, Promise<FetchedFile | null>>();
 
   _getModelExtension(mime: MimeType): string {
     // @TODO: add more extensions
@@ -44,27 +47,24 @@ class Loader {
   }
 
   async _loadMesh(meshURL: string): Promise<Mesh | null> {
-    const arrayBuffer = await this.fetchFile(meshURL);
-    if (!arrayBuffer) {
+    const fetchedFile = await this.fetchFile(meshURL);
+    if (!fetchedFile) {
       // eslint-disable-next-line no-console
       console.error(`Empty fetch response: ${meshURL}`);
       return null;
     }
 
-    const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
-    if (mime == MimeType.HTML) {
+    if (fetchedFile.mime == MimeType.HTML) {
       // eslint-disable-next-line no-console
       console.error(`HTML mime type: ${meshURL}`);
       return null;
     }
-
-    const resourceURL = this.bufferToURL(arrayBuffer, meshURL, mime);
     const container = await SceneLoader.LoadAssetContainerAsync(
       '',
-      resourceURL,
+      fetchedFile.url,
       undefined,
       undefined,
-      this._getModelExtension(mime),
+      this._getModelExtension(fetchedFile.mime),
     );
     const nonEmptyMeshes = this.filterEmptyMeshes(container.meshes);
     const mesh = Mesh.MergeMeshes(nonEmptyMeshes as Mesh[], false, true, undefined, true, true);
@@ -83,10 +83,6 @@ class Loader {
   }
 
   async loadMesh(meshURL: string): Promise<Mesh | null> {
-    // if (!this.MeshAssets.has(meshURL)) {
-    //   this.MeshAssets.set(meshURL, () => this._loadMesh(meshURL));
-    // }
-    // const mesh = await this.MeshAssets.get(meshURL)!;
     const mesh = await this._loadMesh(meshURL);
     if (!mesh) {
       // eslint-disable-next-line no-console
@@ -117,19 +113,14 @@ class Loader {
   }
 
   async _loadTexture(textureURL: string): Promise<Texture | null> {
-    const arrayBuffer = await this.fetchFile(textureURL);
-    if (!arrayBuffer) {
+    const fetchedFile = await this.fetchFile(textureURL);
+    if (!fetchedFile) {
       return null;
     }
-    const resourceURL = this.bufferToURL(arrayBuffer, textureURL);
-    return new Texture(resourceURL);
+    return new Texture(fetchedFile.url);
   }
 
   async loadTexture(textureURL: string): Promise<Texture | null> {
-    // if (!this.TextureAssets.has(textureURL)) {
-    //   this.TextureAssets.set(textureURL, () => this._loadTexture(textureURL));
-    // }
-    // const metarial = await this.TextureAssets.get(textureURL);
     const metarial = await this._loadTexture(textureURL);
     if (!metarial) {
       return null;
@@ -143,7 +134,7 @@ class Loader {
     return meshes.filter(mesh => mesh.getTotalVertices() > 0);
   }
 
-  async fetchFile(url: string): Promise<ArrayBuffer | null> {
+  async _fetchFile(url: string): Promise<ArrayBuffer | null> {
     let attempts = 0;
     for (attempts = 0; attempts < RETRY_ATTEMPTS; attempts++) {
       const response = await fetch(url);
@@ -156,6 +147,24 @@ class Loader {
     // eslint-disable-next-line no-console
     console.error(`Failed to fetch: ${url}`);
     return null;
+  }
+
+  async fetchFile(url: string): Promise<FetchedFile | null> {
+    if (!this.Assets.has(url)) {
+      const promiseCb = async (): Promise<FetchedFile | null> => {
+        const arrayBuffer = await this._fetchFile(url);
+        if (!arrayBuffer) {
+          return null;
+        }
+
+        const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+        const b64 = this._getB64URL(arrayBuffer);
+
+        return { url: b64, mime };
+      };
+      this.Assets.set(url, promiseCb());
+    }
+    return this.Assets.get(url)!;
   }
 
   _getB64URL(buffer: ArrayBuffer) {
