@@ -7,7 +7,7 @@ import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
 import { URL_PREFIX } from '@shared/constants';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { WS } from '@shared/ws';
 import type { Action } from '@shared/ws/ws';
 
@@ -151,7 +151,7 @@ export class SimulationRoom {
         }
         break;
       }
-      case WS.ACTIONS.PICK_DECK: {
+      case WS.ACTIONS.PICK_ITEM: {
         this.simulation.processAction(message);
         this.actions.push(message);
       }

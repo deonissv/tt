@@ -1,64 +1,37 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
-import type { CardState, DeckGrid, DeckState } from '@shared/dto/simulation';
+import type { CardState, DeckState } from '@shared/dto/states';
+import type { Containable } from '../actions/Containable';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 import { Card } from './Card';
 
 const CARD_MASS = 1;
 
-type CardCtorParams = ConstructorParameters<typeof Card>;
-
-export class Deck extends ActorBase {
+export class Deck extends ActorBase implements Containable {
   __state: DeckState;
-  cards: CardCtorParams[];
-  gridTextures: Record<number, [Texture, Texture]>;
+  items: CardState[];
 
-  constructor(state: DeckState, model: Mesh, gridTextures: Record<number, [Texture, Texture]>) {
-    const cards: CardCtorParams[] = state.cards.map(({ cardGUID, deckId, sequence }) => {
-      const faceTexture = gridTextures[deckId][0];
-      const backTexture = gridTextures[deckId][1];
-      const cols = state.grids[deckId].cols;
-      const rows = state.grids[deckId].rows;
-      return [
-        {
-          guid: cardGUID,
-          name: '',
-          faceURL: state.grids[deckId].faceURL,
-          backURL: state.grids[deckId].backURL,
-          grid: {
-            cols,
-            rows,
-            sequence,
-          },
-        },
-        model,
-        faceTexture,
-        backTexture,
-      ] as CardCtorParams;
-    });
+  constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+    const items = state.cards;
 
-    super(state.guid, state.name, model, undefined, state.transformation, CARD_MASS * cards.length, undefined, state);
-    this.gridTextures = gridTextures;
-    this.cards = cards;
+    super(state.guid, state.name, model, undefined, state.transformation, CARD_MASS * items.length, undefined, state);
 
-    this.renderDeck();
+    this.items = items;
+    this.renderDeck(faceTexture, backTexture);
   }
 
   get size() {
-    return this.cards.length;
+    return this.items.length;
   }
 
-  renderDeck() {
-    if (this.cards.length === 0) {
+  renderDeck(faceTexture: Texture, backTexture: Texture) {
+    if (this.items.length === 0) {
       this.setEnabled(false);
     }
 
-    const faceTexture = this.cards.at(0)![2].clone();
-    const backTexture = this.cards.at(-1)![3];
-
-    const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, this.cards.at(0)![0].grid);
+    const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, this.items.at(0)!);
     this.__model = cardModel;
     this.model.scaling.x = this.size;
   }
@@ -70,95 +43,45 @@ export class Deck extends ActorBase {
       return null;
     }
 
-    const loadedTextures = await Promise.all(
-      Object.entries(state.grids).map(async ([id, grid]) => ({
-        [id]: [(await Loader.loadTexture(grid.faceURL))!, (await Loader.loadTexture(grid.backURL))!],
-      })),
-    );
-    const gridTextures = loadedTextures.reduce((acc, val) => {
-      const [key, value] = Object.entries(val)[0];
-      acc[Number(key)] = value;
-      return acc;
-    }, {}) as Record<number, [Texture, Texture]>;
+    const faceTexture = await Loader.loadTexture(state.cards.at(0)!.faceURL);
+    const backTexture = await Loader.loadTexture(state.cards.at(-1)!.backURL);
 
-    // @todo error handling
+    if (!faceTexture || !backTexture) {
+      return null;
+    }
 
-    model.setEnabled(true);
-
-    return new Deck(state, model, gridTextures);
+    return new Deck(state, model, faceTexture, backTexture);
   }
 
   override toState() {
-    const deckGrids = new Map<string, CardState[]>();
-    this.cards.map(([card]) => {
-      const deckGrid: DeckGrid = {
-        faceURL: card.faceURL,
-        backURL: card.backURL,
-        cols: card.grid!.cols,
-        rows: card.grid!.rows,
-      };
-
-      const key = JSON.stringify(deckGrid);
-      if (!deckGrids.has(key)) {
-        deckGrids.set(key, [card]);
-      } else {
-        deckGrids.get(key)!.push(card);
-      }
-    });
-
-    const deckGridsArray = Array.from(deckGrids.entries());
-    const newGrids = Array.from(deckGridsArray).reduce(
-      (acc, [key, _cards], i) => {
-        const grid = JSON.parse(key) as DeckGrid;
-        acc[i] = grid;
-        return acc;
-      },
-      {} as DeckState['grids'],
-    );
-
-    const newCards: DeckState['cards'] = deckGridsArray
-      .map(([_key, cards], i) => {
-        return cards.map(card => ({
-          cardGUID: card.guid,
-          deckId: i,
-          sequence: card.grid!.sequence,
-        }));
-      })
-      .flat();
-
     return {
       ...super.toState(),
-      cards: newCards,
-      grids: newGrids,
+      cards: this.items,
     };
   }
 
-  async pickCard() {
+  async pickItem() {
     this.model.scaling.x -= 1;
 
     if (this.size < 1) {
       return;
     }
     const isFipped = false;
-    const card = isFipped ? this.cards.pop()! : this.cards.shift()!;
+    const cardState = isFipped ? this.items.pop()! : this.items.shift()!;
 
-    const state = {
-      ...card[0],
-      transformation: {
-        ...card[0].transformation,
-        position: [this.position.x + 1, this.position.y, this.position.z],
-      },
-    };
+    cardState.transformation = this.transformation;
+    cardState.transformation.position![0] -= 4;
 
-    const model = await Card.loadCardModel();
-    if (!model) {
-      // eslint-disable-next-line no-console
-      console.error('Failed to load card model');
-      return;
+    const newCard = await Card.fromState(cardState);
+
+    const faceTexture = await Loader.loadTexture(this.items.at(0)!.faceURL);
+    const backTexture = await Loader.loadTexture(this.items.at(-1)!.backURL);
+
+    if (!faceTexture || !backTexture) {
+      return null;
     }
-    model.setEnabled(true);
 
-    new Card(state, model, card[2].clone(), card[3].clone());
-    this.renderDeck();
+    this.renderDeck(faceTexture, backTexture);
+    return newCard;
   }
 }

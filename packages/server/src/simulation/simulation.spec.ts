@@ -2,16 +2,16 @@
 import { Logger, Mesh, Scene } from '@babylonjs/core';
 import { jest } from '@jest/globals';
 
-import type { ActorState, SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { initHavok, omitKeys } from '@shared/utils';
 import Actor from './actor';
 import { Simulation } from './simulation';
 
-Logger.LogLevels = 0;
-
 describe('Simulation', () => {
   beforeAll(async () => {
+    Logger.LogLevels = 0;
+
     await initHavok();
   });
 
@@ -43,6 +43,7 @@ describe('Simulation', () => {
       const initialState: SimulationStateSave = {
         actorStates: [
           {
+            type: 0,
             guid: '1',
             name: '',
             model: {
@@ -50,6 +51,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '2',
             name: '',
             model: {
@@ -68,6 +70,7 @@ describe('Simulation', () => {
       const initialState = {
         actorStates: [
           {
+            type: 0,
             guid: '1',
             name: '',
             model: {
@@ -89,6 +92,7 @@ describe('Simulation', () => {
       const initialState = {
         actorStates: [
           {
+            type: 0,
             guid: '1',
             name: '',
             model: {
@@ -155,7 +159,13 @@ describe('Simulation', () => {
     it('returns actor state updates', async () => {
       const initialState: SimulationStateSave = {
         actorStates: [
-          { guid: 'actor1', name: 'actor1', model: { meshURL: '' }, transformation: { position: [0, 0, 0] } },
+          {
+            type: 0,
+            guid: 'actor1',
+            name: 'actor1',
+            model: { meshURL: '' },
+            transformation: { position: [0, 0, 0] },
+          },
         ],
         leftHandedSystem: false,
         gravity: -9.8,
@@ -187,6 +197,7 @@ describe('Simulation', () => {
         gravity: 0.5,
         actorStates: [
           {
+            type: 0,
             guid: '4deedc',
             name: 'Road',
             model: { meshURL: '' },
@@ -198,6 +209,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'cc04c1',
             name: 'Road',
             model: { meshURL: '' },
@@ -209,6 +221,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'ec6baf',
             name: 'Road',
             model: { meshURL: '' },
@@ -220,6 +233,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'a25ed9',
             name: 'Road',
             model: { meshURL: '' },
@@ -231,6 +245,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '338d84',
             name: 'Road',
             model: { meshURL: '' },
@@ -242,6 +257,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '4258fc',
             name: 'Road',
             model: { meshURL: '' },
@@ -253,6 +269,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'be6eac',
             name: 'Road',
             model: { meshURL: '' },
@@ -264,6 +281,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '8308b8',
             name: 'Road',
             model: { meshURL: '' },
@@ -275,6 +293,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '8037ee',
             name: 'Road',
             model: { meshURL: '' },
@@ -286,6 +305,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '569a1b',
             name: 'Road',
             model: { meshURL: '' },
@@ -297,6 +317,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '641e9b',
             name: 'Road',
             model: { meshURL: '' },
@@ -308,6 +329,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '7ad8ce',
             name: 'Road',
             model: { meshURL: '' },
@@ -319,6 +341,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '179e08',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -330,6 +353,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '0ac7cb',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -341,6 +365,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'd55405',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -352,6 +377,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '4edfbe',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -363,6 +389,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '3c94b0',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -374,6 +401,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'f7103c',
             name: 'Road',
             model: { meshURL: '' },
@@ -385,6 +413,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'f66474',
             name: 'Road',
             model: { meshURL: '' },
@@ -396,6 +425,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '608cbc',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -407,6 +437,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'c090bf',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -418,6 +449,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'e450b4',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -429,6 +461,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'f02479',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -440,6 +473,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '9649a4',
             name: 'Road',
             model: { meshURL: '' },
@@ -451,6 +485,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: 'd05034',
             name: 'Road',
             model: { meshURL: '' },
@@ -462,6 +497,7 @@ describe('Simulation', () => {
             },
           },
           {
+            type: 0,
             guid: '553bb7',
             name: 'Traders & Barbarians - Game Logic',
             model: { meshURL: '' },
@@ -480,7 +516,7 @@ describe('Simulation', () => {
       });
       const sim = await Simulation.init(initialState);
 
-      const expected = {
+      const expected: SimulationStateSave = {
         table: {
           url: '',
           type: 'Custom',
@@ -488,6 +524,7 @@ describe('Simulation', () => {
         gravity: 0.5,
         actorStates: [
           {
+            type: 0,
             guid: '641e9b',
             name: 'Road',
             model: { meshURL: '' },
@@ -500,6 +537,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '4deedc',
             name: 'Road',
             model: { meshURL: '' },
@@ -512,6 +550,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '8308b8',
             name: 'Road',
             model: { meshURL: '' },
@@ -524,6 +563,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '7ad8ce',
             name: 'Road',
             model: { meshURL: '' },
@@ -536,6 +576,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'ec6baf',
             name: 'Road',
             model: { meshURL: '' },
@@ -548,6 +589,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '338d84',
             name: 'Road',
             model: { meshURL: '' },
@@ -560,6 +602,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'a25ed9',
             name: 'Road',
             model: { meshURL: '' },
@@ -572,6 +615,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'f7103c',
             name: 'Road',
             model: { meshURL: '' },
@@ -584,6 +628,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '179e08',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -596,6 +641,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '569a1b',
             name: 'Road',
             model: { meshURL: '' },
@@ -608,6 +654,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '8037ee',
             name: 'Road',
             model: { meshURL: '' },
@@ -620,6 +667,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'be6eac',
             name: 'Road',
             model: { meshURL: '' },
@@ -632,6 +680,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '4258fc',
             name: 'Road',
             model: { meshURL: '' },
@@ -644,6 +693,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'cc04c1',
             name: 'Road',
             model: { meshURL: '' },
@@ -656,6 +706,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '0ac7cb',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -668,6 +719,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '3c94b0',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -680,6 +732,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'e450b4',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -692,6 +745,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '9649a4',
             name: 'Road',
             model: { meshURL: '' },
@@ -704,6 +758,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'f02479',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -716,6 +771,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'c090bf',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -728,6 +784,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'd55405',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -740,6 +797,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '553bb7',
             name: 'Traders & Barbarians - Game Logic',
             model: { meshURL: '' },
@@ -752,6 +810,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '4edfbe',
             name: 'Settlement',
             model: { meshURL: '' },
@@ -764,6 +823,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'f66474',
             name: 'Road',
             model: { meshURL: '' },
@@ -776,6 +836,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: 'd05034',
             name: 'Road',
             model: { meshURL: '' },
@@ -788,6 +849,7 @@ describe('Simulation', () => {
             mass: 1,
           },
           {
+            type: 0,
             guid: '608cbc',
             name: 'City',
             model: { meshURL: '', colliderURL: '' },
@@ -806,7 +868,7 @@ describe('Simulation', () => {
       const result = sim.toState();
 
       expect(sim.actors.length).toBe(initialState.actorStates?.length);
-      expect(omitKeys(result, ['actorStates'])).toBe(omitKeys(expected, ['actorStates']));
+      expect(omitKeys(result, ['actorStates'])).toStrictEqual(omitKeys(expected, ['actorStates']));
       result.actorStates?.forEach(actorState => {
         const expectedActorState = expected.actorStates?.find(
           expectedActorState => expectedActorState.guid === actorState.guid,
@@ -865,7 +927,7 @@ describe('Simulation', () => {
     it('prioritizes delta actorStates', () => {
       const actorGuid = '123';
       const initialState = {
-        actorStates: [{ guid: actorGuid, name: 'zxc', model: { meshURL: '' }, position: [0, 0, 0] }],
+        actorStates: [{ type: 0, guid: actorGuid, name: 'zxc', model: { meshURL: '' }, position: [0, 0, 0] }],
       };
       const delta: SimulationStateUpdate = {
         actorStates: [{ guid: actorGuid, transformation: { position: [1, 2, 3] } }],
@@ -879,8 +941,8 @@ describe('Simulation', () => {
       const actorGuid2 = '222';
       const initialState = {
         actorStates: [
-          { guid: actorGuid1, name: 'zxc', model: { meshURL: '' }, position: [1, 2, 3] },
-          { guid: actorGuid2, name: 'zxc', model: { meshURL: '' }, position: [4, 5, 6] },
+          { type: 0, guid: actorGuid1, name: 'zxc', model: { meshURL: '' }, position: [1, 2, 3] },
+          { type: 0, guid: actorGuid2, name: 'zxc', model: { meshURL: '' }, position: [4, 5, 6] },
         ],
       };
       const delta = { actorStates: [{ guid: actorGuid1, transformation: { position: [0, 0, 1] } }] };
@@ -894,7 +956,7 @@ describe('Simulation', () => {
     it('ignores missing actor states in delta', () => {
       const actorGuid = '123';
       const initialState = {
-        actorStates: [{ guid: 'unknown', name: 'zxc', model: { meshURL: '' }, position: [0, 0, 0] }],
+        actorStates: [{ type: 0, guid: 'unknown', name: 'zxc', model: { meshURL: '' }, position: [0, 0, 0] }],
       };
       const delta: SimulationStateUpdate = {
         actorStates: [{ guid: actorGuid, transformation: { position: [1, 2, 3] } }],

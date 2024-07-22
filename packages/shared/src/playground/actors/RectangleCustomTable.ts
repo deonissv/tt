@@ -2,11 +2,11 @@ import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
-import type { TableState } from '@shared/dto/simulation';
+import { STATIC_HOST } from '@shared/constants';
+import type { TableState } from '@shared/dto/states';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 
-const STATIC_SERVER = 'http://192.168.43.141:5500';
 const SCALING = 79;
 
 const meshSizes = (mesh: Mesh) => {
@@ -18,15 +18,15 @@ const meshSizes = (mesh: Mesh) => {
 };
 
 const model = {
-  meshURL: `${STATIC_SERVER}/GreenFelt_Table.obj`,
-  diffuseURL: `${STATIC_SERVER}/GreenFeltTable_D.png`,
-  specularURL: `${STATIC_SERVER}/GreenFeltTable_S.png`,
-  normalURL: `${STATIC_SERVER}/GreenFeltTable_N.png`,
+  meshURL: `${STATIC_HOST}/GreenFelt_Table.obj`,
+  diffuseURL: `${STATIC_HOST}/GreenFeltTable_D.png`,
+  specularURL: `${STATIC_HOST}/GreenFeltTable_S.png`,
+  normalURL: `${STATIC_HOST}/GreenFeltTable_N.png`,
 };
 
 export class RectangleCustomTable extends ActorBase {
   static async fromState(tableState: TableState): Promise<RectangleCustomTable | null> {
-    const wrapper = await Loader.loadMesh(`${STATIC_SERVER}/GreenFelt_Table.obj`);
+    const wrapper = await Loader.loadMesh(`${STATIC_HOST}/GreenFelt_Table.obj`);
     if (!wrapper) {
       return null;
     }
@@ -34,16 +34,15 @@ export class RectangleCustomTable extends ActorBase {
     const material = await Loader.loadModelMaterial(model);
     wrapper.material = material;
 
-    const grid = await Loader.loadMesh(`${STATIC_SERVER}/GreenFelt_Table_Grid.obj`);
+    const grid = await Loader.loadMesh(`${STATIC_HOST}/GreenFelt_Table_Grid.obj`);
 
     if (grid) {
       grid.material = material;
-      grid.setEnabled(true);
       wrapper.addChild(grid);
       grid.rotation.x = -Math.PI / 2;
     }
 
-    const felt = await Loader.loadMesh(`${STATIC_SERVER}/GreenFelt_Table_Felt.obj`);
+    const felt = await Loader.loadMesh(`${STATIC_HOST}/GreenFelt_Table_Felt.obj`);
 
     if (!felt) {
       return null;
@@ -62,7 +61,6 @@ export class RectangleCustomTable extends ActorBase {
     wrapper.scaling = new Vector3(SCALING, SCALING, SCALING);
     const wrapperHeight = meshSizes(wrapper).height;
     wrapper.position.y = -(wrapperHeight * SCALING) / 2;
-    wrapper.setEnabled(true);
 
     const table = new RectangleCustomTable('#RectangleCustomTable', '#RectangleCustomTable', wrapper);
     if (table) {

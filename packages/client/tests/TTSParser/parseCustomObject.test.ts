@@ -1,12 +1,14 @@
 import { CHESS_PAWN_OBJ } from '@assets/chess5';
 import TTSParser from '@client/src/TTSParser/TTSParser';
 import { degToRad } from '@client/src/utils';
+import type { ActorState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseCustomObject', () => {
   it('should correctly parse a custom object with all properties', () => {
-    const expected = {
+    const expected: ActorState = {
+      type: 0,
       guid: '8d1169',
       name: 'Custom_Model',
       transformation: {

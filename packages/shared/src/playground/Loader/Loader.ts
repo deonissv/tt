@@ -6,8 +6,7 @@ import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { OBJFileLoader } from '@babylonjs/loaders';
-import type { ActorModel } from '@shared/dto/simulation';
-import type { ActorMaterial } from '@shared/dto/simulation/ActorMaterial';
+import type { Material, Model } from '@shared/dto/states';
 import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
 
@@ -32,10 +31,10 @@ class Loader {
     }
   }
 
-  async loadModel(model: ActorModel): Promise<[Mesh | null, Mesh | null]> {
+  async loadModel(model: Model): Promise<[Mesh | null, Mesh | null]> {
     const modelMesh = await this.loadMesh(model.meshURL);
 
-    const colliderMesh = model.colliderURL ? await this.loadMesh(model.colliderURL) : modelMesh;
+    const colliderMesh = model.colliderURL ? await this.loadMesh(model.colliderURL) : null;
     const loadedMaterial = await this.loadModelMaterial(model);
 
     if (modelMesh?.material) {
@@ -99,7 +98,7 @@ class Loader {
     return mesh.clone(mesh.name, null, true, true);
   }
 
-  async loadModelMaterial(modelMaterial: ActorMaterial, name = ''): Promise<StandardMaterial> {
+  async loadModelMaterial(modelMaterial: Material, name = ''): Promise<StandardMaterial> {
     const material = new StandardMaterial(name);
     material.diffuseColor = new Color3(1, 1, 1);
     // @TODO test maps
@@ -154,6 +153,8 @@ class Loader {
       }
       await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
     }
+    // eslint-disable-next-line no-console
+    console.error(`Failed to fetch: ${url}`);
     return null;
   }
 

@@ -1,14 +1,15 @@
 import { type Mesh } from '@babylonjs/core';
-import type { TileState } from '@shared/dto/simulation/TileState';
-import { Tiles } from '@shared/dto/simulation/TileState';
+import { STATIC_HOST } from '@shared/constants';
+import type { TileState } from '@shared/dto/states';
+import { TileType } from '@shared/dto/states';
 import { Loader } from '../Loader';
 import { ActorBase } from './ActorBase';
 import type { TextureBounds } from './models';
 import { FlatMoodel } from './models';
 
-const HEX_TILE_URL = 'http://192.168.43.141:5500/hex_tile.obj';
-const ROUND_TILE_URL = 'http://192.168.43.141:5500/round_tile.obj';
-const SQUARE_TILE_URL = 'http://192.168.43.141:5500/square_tile.obj';
+const HEX_TILE_URL = `${STATIC_HOST}/hex_tile.obj`;
+const ROUND_TILE_URL = `${STATIC_HOST}/round_tile.obj`;
+const SQUARE_TILE_URL = `${STATIC_HOST}/square_tile.obj`;
 
 const TILE_MASS = 1;
 
@@ -19,8 +20,8 @@ export class Tile extends ActorBase {
     super(state.guid, state.name, model, undefined, state.transformation, TILE_MASS, undefined, state);
   }
 
-  static async fromState(state: TileState): Promise<Tile | null> {
-    const tileModel = await Tile.getTileModel(state.type, state.faceURL, state.backURL);
+  static override async fromState(state: TileState): Promise<Tile | null> {
+    const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
     if (!tileModel) {
       return null;
     }
@@ -28,18 +29,18 @@ export class Tile extends ActorBase {
     return new Tile(state, tileModel);
   }
 
-  static async getTileModel(type: Tiles, faceURL: string, backURL?: string) {
+  static async getTileModel(type: TileType, faceURL: string, backURL?: string) {
     switch (type) {
-      case Tiles.BOX: {
+      case TileType.BOX: {
         return Tile.getBoxTileModel(faceURL, backURL);
       }
-      case Tiles.HEX: {
+      case TileType.HEX: {
         return Tile.getHexTileModel(faceURL, backURL);
       }
-      case Tiles.CIRCLE: {
+      case TileType.CIRCLE: {
         return Tile.getCircleTileModel(faceURL, backURL);
       }
-      case Tiles.ROUNDED: {
+      case TileType.ROUNDED: {
         return Tile.getBoxTileModel(faceURL, backURL);
       }
       default: {
@@ -54,8 +55,6 @@ export class Tile extends ActorBase {
     if (!model) {
       return null;
     }
-
-    model.setEnabled(true);
 
     const faceTexture = await Loader.loadTexture(faceURL);
     if (!faceTexture) {
@@ -92,7 +91,6 @@ export class Tile extends ActorBase {
       return null;
     }
 
-    model?.setEnabled(true);
     const faceTexture = await Loader.loadTexture(faceURL);
     if (!faceTexture) {
       return null;
@@ -128,7 +126,6 @@ export class Tile extends ActorBase {
       return null;
     }
 
-    model?.setEnabled(true);
     const faceTexture = await Loader.loadTexture(faceURL);
     if (!faceTexture) {
       return null;

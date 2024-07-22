@@ -1,7 +1,7 @@
 import { CATAN_LONGEST_ROAD_OBJ } from '@assets/catan';
 import TTSParser from '@client/src/TTSParser/TTSParser';
 import { degToRad } from '@client/src/utils';
-import type { TileState } from '@shared/dto/simulation/TileState';
+import type { TileState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { describe, expect, it } from 'vitest';
 
@@ -15,7 +15,8 @@ describe('TTSParser - parseTile', () => {
         rotation: [-0.000286009861, 90.01969, -0.000416184164].map(degToRad),
         scale: [2.11755562, 1.0, 2.11755562],
       },
-      type: 0,
+      type: 5,
+      tileType: 0,
       faceURL: 'http://cloud-3.steamusercontent.com/ugc/155773601379927983/C7109CE55B4403815B5515C29EC5E3B9E534FEEC/',
     };
 

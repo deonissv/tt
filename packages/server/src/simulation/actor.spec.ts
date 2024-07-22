@@ -4,7 +4,7 @@ import { jest } from '@jest/globals';
 import Actor from './actor';
 
 import { GRAVITY } from '@shared/constants';
-import type { ActorState } from '@shared/dto/simulation';
+import type { ActorState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { initHavok } from '@shared/utils';
 
@@ -31,6 +31,7 @@ describe('Actor Class', () => {
 
     modelMesh = new Mesh('testMesh', scene);
     state = {
+      type: 0,
       guid: '1234',
       name: 'testActor',
       model: {
@@ -59,6 +60,7 @@ describe('Actor Class', () => {
 
   it('should update state correctly with toStateUpdate', () => {
     const actorStateUpdate: ActorState = {
+      type: 0,
       guid: '1234',
       transformation: {
         scale: [2, 2, 2],
@@ -96,13 +98,15 @@ describe('Actor Class', () => {
 
   it('should convert to state correctly', () => {
     const actorState = actor.toState();
-    expect(actorState).toEqual({
+    const expected: ActorState = {
+      type: 0,
       guid: state.guid,
       name: state.name,
       model: state.model,
       transformation: state.transformation,
       mass: state.mass,
-    });
+    };
+    expect(actorState).toEqual(expected);
   });
 
   it('should apply state update correctly with applyStateUpdate', () => {
@@ -115,7 +119,8 @@ describe('Actor Class', () => {
       },
     };
     const updatedState = Actor.applyStateUpdate(state, actorStateUpdate);
-    expect(updatedState).toEqual({
+    const expected: ActorState = {
+      type: 0,
       guid: '1234',
       model: state.model,
       name: state.name,
@@ -125,7 +130,8 @@ describe('Actor Class', () => {
         position: [2, 2, 2],
       },
       mass: state.mass,
-    });
+    };
+    expect(updatedState).toEqual(expected);
   });
 
   // it('should update actor state correctly with update', () => {

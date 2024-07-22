@@ -1,16 +1,19 @@
-import type {
-  ActorState,
-  ActorStateBase,
-  DeckGrid,
-  DeckState,
-  SimulationStateSave,
-  TableState,
-  TableType,
-  Transformation,
-} from '@shared/dto/simulation';
-import type { Tiles, TileState } from '@shared/dto/simulation/TileState';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import type { SaveState } from '@shared/tts-model/SaveState';
+
+import type { ActorStateBase, CardState, Transformation } from '@shared/dto/states';
+import {
+  ActorType,
+  type ActorState,
+  type BagState,
+  type DeckState,
+  type Model,
+  type SimulationStateSave,
+  type TableState,
+  type TableType,
+  type TileState,
+  type TileType,
+} from '@shared/dto/states';
 import type { TransformState } from '@shared/tts-model/TransformState';
 import { degToRad } from '../utils';
 
@@ -32,7 +35,7 @@ class TTSParser {
         save.actorStates = obj.ObjectStates.reduce<ActorState[]>((acc, o) => {
           const actorState = this.parseObject(o);
           if (actorState) {
-            acc.push(actorState);
+            acc.push(actorState as ActorState);
           }
           return acc;
         }, []);
@@ -53,8 +56,7 @@ class TTSParser {
       type: this.mapTableType(obj.Table),
     };
 
-    const tableURL = obj.TableURL;
-    tableURL && (tableState.url = tableURL);
+    tableState.url ||= TTSParser.parseURL(obj.TableURL);
 
     return tableState;
   };
@@ -82,14 +84,36 @@ class TTSParser {
     }
   }
 
-  parseObject = (objectState: ObjectState): ActorState | null => {
+  mapType(type: string): ActorType | null {
+    const loweredType = type.toLowerCase();
+    if (loweredType.includes('bag')) {
+      return ActorType.BAG;
+    } else if (loweredType.includes('card')) {
+      return ActorType.CARD;
+    } else if (loweredType.includes('deck')) {
+      return ActorType.DECK;
+    } else if (loweredType.includes('tile')) {
+      return ActorType.TILE;
+    } else if (loweredType.includes('model')) {
+      return ActorType.ACTOR;
+    } else {
+      return null;
+    }
+  }
+
+  parseObject = (objectState: ObjectState): ActorStateBase | null => {
     try {
-      switch (objectState.Name) {
-        case 'Custom_Tile':
+      const type = this.mapType(objectState.Name);
+      switch (type) {
+        case ActorType.BAG:
+          return this.parseBag(objectState) as unknown as ActorState;
+        case ActorType.CARD:
+          return this.parseCard(objectState) as unknown as ActorState;
+        case ActorType.TILE:
           return this.parseTile(objectState) as unknown as ActorState;
-        case 'Deck':
+        case ActorType.DECK:
           return this.parseDeck(objectState) as unknown as ActorState;
-        case 'Custom_Model':
+        case ActorType.ACTOR:
           return this.parseCustomObject(objectState);
         default:
           return null;
@@ -100,66 +124,133 @@ class TTSParser {
     }
   };
 
-  parseDeck(objectState: ObjectState): DeckState | null {
+  parseBag(objectState: ObjectState): BagState | null {
     try {
-      const cardsGUID = objectState.ContainedObjects.map(o => o.GUID);
-      const cards = objectState.DeckIDs.slice(0, cardsGUID.length).map((id, i) => {
-        const deckId = +id.toString().slice(0, -2);
-        const sequence = +id.toString().slice(-2);
-        return {
-          cardGUID: cardsGUID[i],
-          deckId,
-          sequence,
-        };
+      const containedObjects = objectState.ContainedObjects.map(o => {
+        const actorState = this.parseObject(o);
+        if (actorState) {
+          return actorState;
+        }
+        return null;
       });
 
-      const deckState: DeckState = {
+      const model = this.parseModel(objectState);
+
+      const bagState: BagState = {
+        type: ActorType.BAG,
         ...this.parseActorBase(objectState),
-        cards,
-        grids: Object.entries(objectState.CustomDeck).reduce<Record<number, DeckGrid>>((acc, [key, d]) => {
-          acc[+key] = {
-            faceURL: d.FaceURL,
-            backURL: d.BackURL,
-            cols: d.NumWidth ? +d.NumWidth : 10,
-            rows: d.NumHeight ? +d.NumHeight : 7,
-          };
-          return acc;
-        }, {}),
+        containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
       };
 
-      return deckState;
+      model && (bagState.model = model);
+
+      return bagState;
     } catch (e) {
       return null;
     }
   }
 
-  parseTile(objectState: ObjectState): TileState | null {
-    try {
-      const tileState: TileState = {
-        ...this.parseActorBase(objectState),
-        faceURL: objectState.CustomImage?.ImageURL,
-        type: objectState.CustomImage?.CustomTile.Type as unknown as Tiles,
-      };
-
-      const backURL = objectState.CustomImage?.ImageSecondaryURL;
-      backURL && (tileState.backURL = backURL);
-
-      return tileState;
-    } catch (e) {
+  parseCard(objectState: ObjectState, deck?: ObjectState): CardState | null {
+    const cardID = objectState.CardID;
+    if (!cardID) {
+      this.errors.push(objectState.GUID);
       return null;
     }
+
+    const deckId = +cardID.toString().slice(0, -2);
+    const sequence = +cardID.toString().slice(-2);
+    if (!deckId || !sequence) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId];
+    if (!customDeckObj) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const faceURL = TTSParser.parseURL(customDeckObj.FaceURL);
+    if (!faceURL) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const backURL = TTSParser.parseURL(customDeckObj.BackURL);
+    if (!backURL) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const cols = customDeckObj.NumWidth ? +customDeckObj.NumWidth : 1;
+    const rows = customDeckObj.NumHeight ? +customDeckObj.NumHeight : 1;
+
+    const cardState: CardState = {
+      type: ActorType.CARD,
+      ...this.parseActorBase(objectState),
+      faceURL,
+      backURL,
+      cols,
+      rows,
+      sequence,
+    };
+
+    return cardState;
+  }
+
+  parseDeck(objectState: ObjectState): DeckState | null {
+    const cards = objectState.ContainedObjects.reduce<CardState[]>((acc, o) => {
+      const cardState = this.parseCard(o, objectState);
+      if (cardState) {
+        acc.push(cardState);
+      }
+      return acc;
+    }, []);
+
+    if (cards.length === 0) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    return {
+      type: ActorType.DECK,
+
+      ...this.parseActorBase(objectState),
+      cards,
+    };
+  }
+
+  parseTile(objectState: ObjectState): TileState | null {
+    const faceURL = TTSParser.parseURL(objectState.CustomImage?.ImageURL);
+    if (!faceURL) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const tileState: TileState = {
+      type: ActorType.TILE,
+      ...this.parseActorBase(objectState),
+      faceURL,
+      tileType: objectState.CustomImage?.CustomTile.Type as unknown as TileType,
+    };
+
+    const backURL = TTSParser.parseURL(objectState.CustomImage?.ImageSecondaryURL);
+    backURL && (tileState.backURL = backURL);
+
+    return tileState;
   }
 
   parseCustomObject(objectState: ObjectState): ActorState | null {
     try {
+      const model = this.parseModel(objectState);
+      if (!model) {
+        return null;
+      }
+
       const actorState: ActorState = {
+        type: ActorType.ACTOR,
         ...this.parseActorBase(objectState),
-        model: {
-          meshURL: objectState.CustomMesh.MeshURL,
-          colliderURL: objectState.CustomMesh.ColliderURL != '' ? objectState.CustomMesh.ColliderURL : undefined,
-          diffuseURL: objectState.CustomMesh.DiffuseURL != '' ? objectState.CustomMesh.DiffuseURL : undefined,
-          normalURL: objectState.CustomMesh.NormalURL != '' ? objectState.CustomMesh.NormalURL : undefined,
-        },
+        model,
       };
 
       if (objectState?.ColorDiffuse) {
@@ -173,7 +264,7 @@ class TTSParser {
         actorState.children = objectState.ChildObjects.reduce<ActorState[]>((acc, o) => {
           const actorState = this.parseObject(o);
           if (actorState) {
-            acc.push(actorState);
+            acc.push(actorState as ActorState);
           }
           return acc;
         }, []);
@@ -185,6 +276,25 @@ class TTSParser {
     }
   }
 
+  parseModel(objectState: ObjectState): Model | undefined {
+    const meshURL = TTSParser.parseURL(objectState?.CustomMesh?.MeshURL);
+
+    if (!meshURL) {
+      this.errors.push(objectState.GUID);
+      return undefined;
+    }
+
+    const model: Model = {
+      meshURL: meshURL,
+    };
+
+    model.colliderURL ||= TTSParser.parseURL(objectState?.CustomMesh?.ColliderURL);
+    model.diffuseURL ||= TTSParser.parseURL(objectState?.CustomMesh?.DiffuseURL);
+    model.normalURL ||= TTSParser.parseURL(objectState?.CustomMesh?.NormalURL);
+
+    return model;
+  }
+
   parseTransform(transform: TransformState): Transformation {
     return {
       position: [transform.posX, transform.posY, transform.posZ],
@@ -193,8 +303,8 @@ class TTSParser {
     };
   }
 
-  parseActorBase(objectState: ObjectState): ActorStateBase {
-    const actorState: ActorStateBase = {
+  parseActorBase(objectState: ObjectState): Omit<ActorStateBase, 'type'> {
+    const actorState: Omit<ActorStateBase, 'type'> = {
       name: objectState.Name,
       guid: objectState.GUID,
       transformation: this.parseTransform(objectState.Transform),
@@ -205,6 +315,11 @@ class TTSParser {
     }
 
     return actorState;
+  }
+
+  static parseURL(url: string | undefined): string | undefined {
+    if (!url) return undefined;
+    return url !== '' ? url : undefined;
   }
 }
 

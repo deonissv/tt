@@ -1,7 +1,7 @@
 import { CHESS5_OBJ } from '@assets/chess5';
 import { MUNCHKIN_OBJ } from '@assets/munchkin';
 import { TTSParser } from '@client/src/TTSParser';
-import type { TableState } from '@shared/dto/simulation';
+import type { TableState } from '@shared/dto/states/simulation';
 import type { SaveState } from '@shared/tts-model/SaveState';
 import { describe, expect, it } from 'vitest';
 

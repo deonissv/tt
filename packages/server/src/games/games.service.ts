@@ -4,7 +4,7 @@ import type { Game, GameVersion, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 
 import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
-import type { SimulationStateSave } from '@shared/dto/simulation';
+import type { SimulationStateSave } from '../../../shared/src/dto/states/simulation';
 
 @Injectable()
 export class GamesService {

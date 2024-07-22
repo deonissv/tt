@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma.service';
 import { SimulationRoom } from './simulation-room';
 
 import type { RoomPreviewDto } from '@shared/dto/rooms';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/simulation';
+import type { SimulationStateSave, SimulationStateUpdate } from '../../../shared/src/dto/states/simulation';
 import { Simulation } from '../simulation/simulation';
 
 @Injectable()

@@ -1,17 +1,16 @@
 import { RoomService } from '@services/room.service';
-import type { SimulationStateUpdate } from '@shared/dto/simulation';
-import type { Deck } from '@shared/playground';
+import type { SimulationStateUpdate } from '@shared/dto/states';
+import type { ActorBase } from '@shared/playground';
 import { WS } from '@shared/ws';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 
 const FRAME_RATE = 60;
 
-const onDeckPick = (ws: WebSocket, deck: Deck) => {
-  // @TDOD check if ws is defined & open
+const onPickItem = (ws: WebSocket, actor: ActorBase) => {
   WS.send(ws, {
-    type: WS.ACTIONS.PICK_DECK,
-    payload: deck.guid,
+    type: WS.ACTIONS.PICK_ITEM,
+    payload: actor.guid,
   });
 };
 
@@ -62,7 +61,7 @@ export class SimulationRoom {
   ): Promise<SimulationRoom> {
     const [ws, clientId, simState] = await RoomService.connect(roomId, nickname);
     const sim = await Simulation.init(canvas, simState, {
-      onDeckPick: actor => onDeckPick(ws, actor),
+      onPickItem: actor => onPickItem(ws, actor),
     });
 
     ws.addEventListener('message', event => {

@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import GamesGallery from '@components/GamesGallery';
 import { Input } from '@components/Input';
 import { GameService } from '@services/game.service';
 import type { GamePreviewDto } from '@shared/dto/games';
-import GamesGallery from '../../components/GamesGallery';
 
 const CreateRoom = () => {
   const [nickname, setNickname] = useState('');
