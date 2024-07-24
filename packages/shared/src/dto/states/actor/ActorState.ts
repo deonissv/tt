@@ -1,4 +1,4 @@
-import type { OpnitalAllBut } from '@shared/utils';
+import type { OpnitalAllBut } from '@shared/types';
 import type { Model } from '../Model';
 import type { ActorStateBase } from './ActorStateBase';
 import type { ActorType } from './ActorType';

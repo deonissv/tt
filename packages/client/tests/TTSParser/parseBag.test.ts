@@ -1,4 +1,4 @@
-import { DEMO_BAG_OBJ, DEMO_CUSTOM_BAG_OBJ } from '@assets/demo';
+import { DEMO } from '@assets/demo';
 import { TTSParser } from '@client/src/TTSParser';
 import type { BagState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
@@ -25,7 +25,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = TTSParser.parseBag(DEMO_BAG_OBJ as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 
@@ -48,7 +48,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = TTSParser.parseBag(DEMO_CUSTOM_BAG_OBJ as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 });

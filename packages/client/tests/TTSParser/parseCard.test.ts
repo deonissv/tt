@@ -1,4 +1,4 @@
-import { DEMO_CARD_OBJ } from '@assets/demo';
+import { DEMO } from '@assets/demo';
 import { TTSParser } from '@client/src/TTSParser';
 import type { CardState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
@@ -20,7 +20,7 @@ describe('TTSParser - parseCard', () => {
       sequence: 33,
     };
 
-    const result = TTSParser.parseCard(DEMO_CARD_OBJ as unknown as ObjectState);
+    const result = TTSParser.parseCard(DEMO.CARD as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 });

@@ -16,6 +16,12 @@ import type {
   BagState,
   CardState,
   DeckState,
+  Die10State,
+  Die12State,
+  Die20State,
+  Die4State,
+  Die6State,
+  Die8State,
   TableState,
   TileState,
 } from '@shared/dto/states';
@@ -24,9 +30,21 @@ import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/sta
 import type { Action } from '@shared/ws/ws';
 import { ACTIONS } from '@shared/ws/ws';
 import { isContainable } from '../actions/Containable';
-import { Actor, ActorBase, Card, Deck, RectangleCustomTable } from '../actors';
-import { Bag } from '../actors/Bag';
-import { Tile } from '../actors/Tile';
+import {
+  Actor,
+  ActorBase,
+  Bag,
+  Card,
+  Deck,
+  Die10,
+  Die12,
+  Die20,
+  Die4,
+  Die6,
+  Die8,
+  RectangleCustomTable,
+  Tile,
+} from '../actors';
 
 // WebGPU Extensions
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
@@ -82,9 +100,20 @@ export abstract class SimulationBase {
         return await Deck.fromState(actorState as DeckState);
       case ActorType.ACTOR:
         return await Actor.fromState(actorState as ActorState);
-      default:
-        // eslint-disable-next-line no-console
-        console.error(`Unknown actor type: ${actorState.type}`);
+      case ActorType.DIE4:
+        return await Die4.fromState(actorState as Die4State);
+      case ActorType.DIE6:
+        return await Die6.fromState(actorState as Die6State);
+      case ActorType.DIE8:
+        return await Die8.fromState(actorState as Die8State);
+      case ActorType.DIE10:
+        return await Die10.fromState(actorState as Die10State);
+      case ActorType.DIE12:
+        return await Die12.fromState(actorState as Die12State);
+      case ActorType.DIE20:
+        return await Die20.fromState(actorState as Die20State);
+
+      case ActorType.TABLE:
         return null;
     }
   }
