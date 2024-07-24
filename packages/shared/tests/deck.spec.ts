@@ -1,29 +1,23 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CreateBox, HavokPlugin, NullEngine, Scene, Texture, Vector3 } from '@babylonjs/core';
+import { CreateBox, Texture } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { GRAVITY } from '@shared/constants';
 import type { DeckState } from '@shared/dto/states';
 import { Card, Deck } from '@shared/playground/';
-import { initHavok } from './testUtils';
+import { useSimulationMock } from './mocks/SimulationMock';
 
-vi.mock('@shared/playground/Loader', () => ({
-  Loader: {
-    loadMesh: () => Promise.resolve(CreateBox('testMesh', { size: 1 })),
-    loadTexture: () => Promise.resolve(new Texture('testTexture')),
-  },
-}));
-
+vi.mock('@shared/playground/Loader', async () => {
+  const { LoaderMock } = await import('./mocks/LoaderMock');
+  return {
+    Loader: LoaderMock,
+  };
+});
 describe('Deck', () => {
-  let engine: NullEngine;
-  let scene: Scene;
+  const { scene } = useSimulationMock();
+
   let mesh: Mesh;
   let texture: Texture;
   let state: DeckState;
-
-  beforeAll(async () => {
-    await initHavok();
-  });
 
   beforeEach(() => {
     vi.restoreAllMocks();
@@ -31,12 +25,6 @@ describe('Deck', () => {
     vi.spyOn(Card, 'getCardModel').mockImplementation(() => {
       return CreateBox('testMesh', { size: 1 }, scene);
     });
-
-    engine = new NullEngine();
-    scene = new Scene(engine);
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, GRAVITY, 0);
-    scene.enablePhysics(gravityVec, hp);
 
     mesh = CreateBox('testMesh', { size: 1 }, scene);
     texture = new Texture('testTexture', scene);
@@ -77,15 +65,6 @@ describe('Deck', () => {
   it('should construct with correct properties', () => {
     const deck = new Deck(state, mesh, texture, texture);
     expect(deck.size).toBe(2);
-  });
-
-  it('size getter returns correct number of cards', () => {
-    const deck = new Deck(state, mesh, texture, texture);
-    expect(deck.size).toBe(2);
-  });
-
-  it('renderDeck adjusts model scaling based on size', () => {
-    const deck = new Deck(state, mesh, texture, texture);
     expect(deck.model.scaling.x).toBe(2);
   });
 
@@ -98,26 +77,27 @@ describe('Deck', () => {
 
   it('fromState creates a Deck instance with correct properties', async () => {
     const deck = await Deck.fromState(state);
-    expect(deck).toBeInstanceOf(Deck);
+    expect(deck instanceof Deck).toBeTruthy();
+
     expect(deck!.size).toBe(2);
   });
 
   it('fromState returns null if card model is not loaded', async () => {
     vi.spyOn(Card, 'loadCardModel').mockResolvedValue(null);
     const deck = await Deck.fromState(state);
-    expect(deck).toBeNull();
+    expect(deck === null).toBeTruthy();
   });
 
   it('should construct using fromState value', async () => {
     const deck = new Deck(state, mesh, texture, texture);
-    expect(deck).toBeInstanceOf(Deck);
+    expect(deck instanceof Deck).toBeTruthy();
     expect(deck.size).toBe(2);
 
     await deck.pickItem();
     const stateFromState = deck.toState();
     const newDeck = await Deck.fromState(stateFromState);
 
-    expect(newDeck).toBeInstanceOf(Deck);
+    expect(newDeck instanceof Deck).toBeTruthy();
     expect(newDeck!.size).toBe(1);
   });
 });

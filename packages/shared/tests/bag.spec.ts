@@ -1,38 +1,27 @@
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CreateBox, HavokPlugin, NullEngine, Scene, Vector3 } from '@babylonjs/core';
+import { CreateBox } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { GRAVITY } from '@shared/constants';
 import type { ActorStateBase, BagState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { Bag } from '@shared/playground/actors/Bag';
-import { initHavok } from './testUtils';
+import { useSimulationMock } from './mocks/SimulationMock';
 
-vi.mock('@shared/playground/Loader', () => ({
-  Loader: {
-    loadMesh: () => Promise.resolve(CreateBox('testMesh', { size: 1 })),
-  },
-}));
+vi.mock('@shared/playground/Loader', async () => {
+  const { LoaderMock } = await import('./mocks/LoaderMock');
+  return {
+    Loader: LoaderMock,
+  };
+});
 
 describe('Bag', () => {
-  let engine: NullEngine;
-  let scene: Scene;
+  const { scene } = useSimulationMock();
+
   let mesh: Mesh;
   let state: BagState;
 
-  beforeAll(async () => {
-    await initHavok();
-  });
-
   beforeEach(() => {
     vi.restoreAllMocks();
-
-    engine = new NullEngine();
-    scene = new Scene(engine);
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, GRAVITY, 0);
-    scene.enablePhysics(gravityVec, hp);
-
     mesh = CreateBox('testMesh', { size: 1 }, scene);
 
     state = {
@@ -66,27 +55,27 @@ describe('Bag', () => {
 
   it('should construct with correct properties', () => {
     const bag = new Bag(state, mesh);
-    expect(bag).toBeInstanceOf(Bag);
+    expect(bag instanceof Bag).toBeTruthy();
   });
 
   it('fromState creates a Bag instance with correct properties', async () => {
     const bag = await Bag.fromState(state);
-    expect(bag).toBeInstanceOf(Bag);
+    expect(bag instanceof Bag).toBeTruthy();
   });
 
   it('fromState returns null if model is not loaded', async () => {
-    vi.spyOn(Loader, 'loadMesh').mockResolvedValue(null);
+    vi.spyOn(Loader, 'loadModel').mockResolvedValue([null, null]);
     const bag = await Bag.fromState(state);
-    expect(bag).toBeNull();
+    expect(bag == null).toBeTruthy();
   });
 
   it('should construct using fromState value', async () => {
     const bag = new Bag(state, mesh);
-    expect(bag).toBeInstanceOf(Bag);
+    expect(bag instanceof Bag).toBeTruthy();
 
     const stateFromState = bag.toState();
     const newBag = await Bag.fromState(stateFromState);
 
-    expect(newBag).toBeInstanceOf(Bag);
+    expect(newBag instanceof Bag).toBeTruthy();
   });
 });

@@ -1,9 +1,25 @@
 import { DEMO_OBJ } from './demo.obj';
 
-export { DEMO_OBJ };
-export const DEMO_CARD_OBJ = DEMO_OBJ.ObjectStates[1];
-export const DEMO_DECK_OBJ = DEMO_OBJ.ObjectStates[0];
-export const DEMO_BAG_OBJ = DEMO_OBJ.ObjectStates[2];
-export const DEMO_CUSTOM_BAG_OBJ = DEMO_OBJ.ObjectStates[19];
-export const DEMO_TILE_OBJ = DEMO_OBJ.ObjectStates[3];
-export const DEMO_ACTOR_OBJ = DEMO_OBJ.ObjectStates[16];
+export const DEMO = {
+  OBJ: DEMO_OBJ,
+  DECK: DEMO_OBJ.ObjectStates[0],
+  CARD: DEMO_OBJ.ObjectStates[1],
+  BAG: DEMO_OBJ.ObjectStates[2],
+  TILE_REC: DEMO_OBJ.ObjectStates[3],
+  TILE_HEX: DEMO_OBJ.ObjectStates[4],
+  TILE_CIRCLE: DEMO_OBJ.ObjectStates[5],
+  TILE_ROUND: DEMO_OBJ.ObjectStates[6],
+  TOKEN: DEMO_OBJ.ObjectStates[7],
+  FIGURE: DEMO_OBJ.ObjectStates[8],
+  DIE4: DEMO_OBJ.ObjectStates[9],
+  DIE6: DEMO_OBJ.ObjectStates[10],
+  DIE8: DEMO_OBJ.ObjectStates[11],
+  DIE10: DEMO_OBJ.ObjectStates[12],
+  DIE12: DEMO_OBJ.ObjectStates[13],
+  DIE20: DEMO_OBJ.ObjectStates[14],
+  CUSTOM_MODEL: DEMO_OBJ.ObjectStates[15],
+  INFINITE_BAG: DEMO_OBJ.ObjectStates[16],
+  TILE_STACK: DEMO_OBJ.ObjectStates[17],
+  COMPOSED_MODEL: DEMO_OBJ.ObjectStates[18],
+  CUSTOM_BAG: DEMO_OBJ.ObjectStates[19],
+};

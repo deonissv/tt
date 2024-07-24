@@ -106,6 +106,6 @@ describe('TTSParser - parseDeck', () => {
   });
 
   it('should return null for incorrect or malformed deck objects', () => {
-    expect(TTSParser.parseDeck({} as unknown as ObjectState)).toBeNull();
+    expect(TTSParser.parseDeck({} as unknown as ObjectState) === null).toBeTruthy();
   });
 });

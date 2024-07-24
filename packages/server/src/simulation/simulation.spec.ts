@@ -31,7 +31,7 @@ describe('Simulation', () => {
       const initialState = { leftHandedSystem: false };
       const sim = await Simulation.init(initialState, jest.fn());
 
-      expect(sim['scene']).toBeInstanceOf(Scene);
+      expect(sim['scene'] instanceof Scene).toBe(true);
       expect(sim['scene'].useRightHandedSystem).toBe(true);
 
       const leftHandedState = { leftHandedSystem: true };

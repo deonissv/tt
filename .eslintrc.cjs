@@ -47,4 +47,13 @@ module.exports = {
     'no-console': 'error',
     'no-debugger': 'error',
   },
+  overrides: [
+    {
+      files: ['packages/server/**/*.{ts,tsx}'],
+      rules: {
+        'react/prop-types': 'off',
+        'react-hooks/rules-of-hooks': 'off',
+      },
+    },
+  ],
 };

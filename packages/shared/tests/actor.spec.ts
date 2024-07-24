@@ -1,34 +1,27 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { HavokPlugin, Logger, Mesh, NullEngine, Scene, Vector3 } from '@babylonjs/core';
-import { GRAVITY } from '@shared/constants';
+import { Mesh } from '@babylonjs/core';
 import type { ActorState } from '@shared/dto/states';
-import { Actor, Loader } from '@shared/playground';
-import { initHavok } from './testUtils';
+import { Actor } from '@shared/playground';
+import { useSimulationMock } from './mocks/SimulationMock';
 
-Logger.LogLevels = 0;
-vi.mock('@shared/playground');
+vi.mock('@shared/playground/Loader', async () => {
+  const { LoaderMock } = await import('./mocks/LoaderMock');
+  return {
+    Loader: LoaderMock,
+  };
+});
 
 describe('Actor Class', () => {
-  let engine: NullEngine;
-  let scene: Scene;
+  useSimulationMock();
+
   let modelMesh: Mesh;
   let state: ActorState;
   let actor: Actor;
 
-  beforeAll(async () => {
-    await initHavok();
-  });
-
   beforeEach(() => {
-    engine = new NullEngine();
-    scene = new Scene(engine);
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, GRAVITY, 0);
-    scene.enablePhysics(gravityVec, hp);
-
-    modelMesh = new Mesh('testMesh', scene);
+    modelMesh = new Mesh('testMesh');
     state = {
       type: 0,
       guid: '1234',
@@ -44,10 +37,6 @@ describe('Actor Class', () => {
       },
     };
     actor = new Actor(state, modelMesh);
-
-    vi.spyOn(Loader, 'loadMesh').mockImplementation(() => {
-      return Promise.resolve(new Mesh('testMesh'));
-    });
   });
 
   it('should create an actor with the correct initial state', () => {
@@ -86,9 +75,8 @@ describe('Actor Class', () => {
   });
 
   it('should create an actor from state', async () => {
-    vi.spyOn(Loader, 'loadModel').mockResolvedValue([modelMesh, null]);
     const newActor = await Actor.fromState(state);
-    expect(newActor).toBeInstanceOf(Actor);
+    expect(newActor instanceof Actor).toBeTruthy();
     expect(newActor!.guid).toBe(state.guid);
     expect(newActor!.name).toBe(state.name);
     expect(newActor!.mass).toBe(state.mass);

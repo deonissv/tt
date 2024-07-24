@@ -1,22 +1,22 @@
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { CreateBox, HavokPlugin, NullEngine, Scene, Texture, Vector3 } from '@babylonjs/core';
+import { CreateBox, Texture } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { GRAVITY } from '@shared/constants';
 import type { CardState } from '@shared/dto/states';
 import { Card } from '@shared/playground/';
+import { useSimulationMock } from './mocks/SimulationMock';
 import { initHavok } from './testUtils';
 
-vi.mock('@shared/playground/Loader', () => ({
-  Loader: {
-    loadMesh: () => Promise.resolve(CreateBox('testMesh', { size: 1 })),
-    loadTexture: () => Promise.resolve(new Texture('testTexture')),
-  },
-}));
+vi.mock('@shared/playground/Loader', async () => {
+  const { LoaderMock } = await import('./mocks/LoaderMock');
+  return {
+    Loader: LoaderMock,
+  };
+});
 
 describe('Card', () => {
-  let engine: NullEngine;
-  let scene: Scene;
+  const { scene } = useSimulationMock();
+
   let mesh: Mesh;
   let texture: Texture;
   let state: CardState;
@@ -31,12 +31,6 @@ describe('Card', () => {
     vi.spyOn(Card, 'getCardModel').mockImplementation(() => {
       return CreateBox('testMesh', { size: 1 }, scene);
     });
-
-    engine = new NullEngine();
-    scene = new Scene(engine);
-    const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, GRAVITY, 0);
-    scene.enablePhysics(gravityVec, hp);
 
     mesh = CreateBox('testMesh', { size: 1 }, scene);
     texture = new Texture('testTexture', scene);
@@ -59,28 +53,28 @@ describe('Card', () => {
   });
   it('should construct with correct properties', () => {
     const card = new Card(state, mesh, texture, texture);
-    expect(card).toBeInstanceOf(Card);
+    expect(card instanceof Card).toBeTruthy();
   });
 
   it('fromState creates a Card instance with correct properties', async () => {
     const card = await Card.fromState(state);
-    expect(card).toBeInstanceOf(Card);
+    expect(card instanceof Card).toBeTruthy();
   });
 
   it('fromState returns null if card model is not loaded', async () => {
     vi.spyOn(Card, 'loadCardModel').mockResolvedValue(null);
     const card = await Card.fromState(state);
-    expect(card).toBeNull();
+    expect(card === null).toBeTruthy();
   });
 
   it('should construct using fromState value', async () => {
     const card = new Card(state, mesh, texture, texture);
-    expect(card).toBeInstanceOf(Card);
+    expect(card instanceof Card).toBeTruthy();
 
     const stateFromState = card.toState();
     const newCard = await Card.fromState(stateFromState);
 
-    expect(newCard).toBeInstanceOf(Card);
+    expect(newCard instanceof Card).toBeTruthy();
   });
 
   it('should get col and row from sequence', () => {

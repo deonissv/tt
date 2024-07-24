@@ -1,4 +1,4 @@
-import { DEMO_OBJ } from '@assets/demo';
+import { DEMO } from '@assets/demo';
 import { TTSParser } from '@client/src/TTSParser';
 import { ActorType } from '@shared/dto/states';
 import { describe, expect, it } from 'vitest';
@@ -15,12 +15,12 @@ describe('TTSParser - mapType', () => {
       ActorType.TILE,
       null,
       null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
+      ActorType.DIE4,
+      ActorType.DIE6,
+      ActorType.DIE8,
+      ActorType.DIE10,
+      ActorType.DIE12,
+      ActorType.DIE20,
       ActorType.ACTOR,
       ActorType.BAG,
       ActorType.TILE,
@@ -28,7 +28,12 @@ describe('TTSParser - mapType', () => {
       ActorType.BAG,
     ];
 
-    const result = DEMO_OBJ.ObjectStates.map(obj => TTSParser.mapType(obj.Name));
+    const result = DEMO.OBJ.ObjectStates.map(obj => TTSParser.mapType(obj.Name));
     expect(result).toEqual(expected);
+  });
+
+  it('should return null for unknown types', () => {
+    const result = TTSParser.mapType('Unknown');
+    expect(result === null).toBeTruthy();
   });
 });

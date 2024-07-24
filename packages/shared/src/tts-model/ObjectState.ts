@@ -56,7 +56,7 @@ export interface ObjectState {
   FogSeethrough?: boolean;
   DeckIDs: number[];
   CustomDeck: Record<number, CustomDeckState>;
-  CustomMesh?: CustomMeshState;
+  CustomMesh: CustomMeshState;
   CustomImage: CustomImageState;
   CustomAssetbundle: CustomAssetbundleState;
   FogOfWar: FogOfWarSaveState;

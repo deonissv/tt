@@ -1,21 +1,32 @@
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import type { SaveState } from '@shared/tts-model/SaveState';
 
-import type { ActorStateBase, CardState, Transformation } from '@shared/dto/states';
+import type {
+  ActorStateBase,
+  CardState,
+  DeckState,
+  DieBaseState,
+  Model,
+  RotationValue,
+  TableType,
+  Transformation,
+} from '@shared/dto/states';
 import {
   ActorType,
   type ActorState,
   type BagState,
-  type DeckState,
-  type Model,
   type SimulationStateSave,
   type TableState,
-  type TableType,
   type TileState,
   type TileType,
 } from '@shared/dto/states';
+import { hasProperty, isNumber, isObject, isString, isTuple } from '@shared/guards';
 import type { TransformState } from '@shared/tts-model/TransformState';
+import type { OpnitalAllBut } from '@shared/types';
+import { ActorMapper, DieMapper, type DieNState, type DieType } from '../../../shared/src/dto/states/actor/DieState';
 import { degToRad } from '../utils';
+
+type MinimalObjectState = OpnitalAllBut<ObjectState, 'GUID'>;
 
 class TTSParser {
   error = false;
@@ -50,6 +61,92 @@ class TTSParser {
       return null;
     }
   }
+
+  parseActorBase(objectState: ObjectState): Omit<ActorStateBase, 'type'> {
+    const actorState: Omit<ActorStateBase, 'type'> = {
+      name: objectState.Name,
+      guid: objectState.GUID,
+      transformation: this.parseTransform(objectState.Transform),
+    };
+
+    if (objectState?.Rigidbody?.Mass) {
+      actorState.mass = objectState?.Rigidbody?.Mass;
+    }
+
+    return actorState;
+  }
+
+  parseModel(objectState: ObjectState): Model | undefined {
+    const meshURL = TTSParser.parseURL(objectState?.CustomMesh?.MeshURL);
+
+    if (!meshURL) {
+      this.errors.push(objectState.GUID);
+      return undefined;
+    }
+
+    const model: Model = {
+      meshURL: meshURL,
+    };
+
+    model.colliderURL ||= TTSParser.parseURL(objectState?.CustomMesh?.ColliderURL);
+    model.diffuseURL ||= TTSParser.parseURL(objectState?.CustomMesh?.DiffuseURL);
+    model.normalURL ||= TTSParser.parseURL(objectState?.CustomMesh?.NormalURL);
+
+    return model;
+  }
+
+  parseTransform(transform: TransformState): Transformation {
+    return {
+      position: [transform.posX, transform.posY, transform.posZ],
+      rotation: [transform.rotX, transform.rotY, transform.rotZ].map(degToRad),
+      scale: [transform.scaleX, transform.scaleY, transform.scaleZ],
+    };
+  }
+
+  parseObject = (objectState: MinimalObjectState): ActorStateBase | null => {
+    try {
+      if (!hasProperty(objectState, 'Name')) {
+        this.errors.push(objectState.GUID);
+        return null;
+      }
+
+      if (typeof objectState.Name !== 'string') {
+        this.errors.push(objectState.GUID);
+        return null;
+      }
+
+      const type = this.mapType(objectState.Name);
+      if (type === null) {
+        this.errors.push(objectState.GUID);
+        return null;
+      }
+
+      switch (type) {
+        case ActorType.BAG:
+          return this.parseBag(objectState as ObjectState) as unknown as ActorState;
+        case ActorType.CARD:
+          return this.parseCard(objectState as ObjectState) as unknown as ActorState;
+        case ActorType.TILE:
+          return this.parseTile(objectState as ObjectState) as unknown as ActorState;
+        case ActorType.DECK:
+          return this.parseDeck(objectState as ObjectState) as unknown as ActorState;
+        case ActorType.DIE4:
+        case ActorType.DIE6:
+        case ActorType.DIE8:
+        case ActorType.DIE10:
+        case ActorType.DIE12:
+        case ActorType.DIE20:
+          return this.parseDieN(objectState as ObjectState, ActorMapper[type]) as unknown as ActorState;
+        case ActorType.ACTOR:
+          return this.parseCustomObject(objectState as ObjectState) as unknown as ActorState;
+        default:
+          return null;
+      }
+    } catch (e) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+  };
 
   parseTable = (obj: SaveState): TableState => {
     const tableState: TableState = {
@@ -86,53 +183,31 @@ class TTSParser {
 
   mapType(type: string): ActorType | null {
     const loweredType = type.toLowerCase();
-    if (loweredType.includes('bag')) {
-      return ActorType.BAG;
-    } else if (loweredType.includes('card')) {
-      return ActorType.CARD;
-    } else if (loweredType.includes('deck')) {
-      return ActorType.DECK;
-    } else if (loweredType.includes('tile')) {
-      return ActorType.TILE;
-    } else if (loweredType.includes('model')) {
-      return ActorType.ACTOR;
-    } else {
-      return null;
-    }
-  }
+    const pattern = {
+      bag: ActorType.BAG,
+      card: ActorType.CARD,
+      deck: ActorType.DECK,
+      tile: ActorType.TILE,
+      die_4: ActorType.DIE4,
+      die_6: ActorType.DIE6,
+      die_8: ActorType.DIE8,
+      die_10: ActorType.DIE10,
+      die_12: ActorType.DIE12,
+      die_20: ActorType.DIE20,
+      model: ActorType.ACTOR,
+    };
 
-  parseObject = (objectState: ObjectState): ActorStateBase | null => {
-    try {
-      const type = this.mapType(objectState.Name);
-      switch (type) {
-        case ActorType.BAG:
-          return this.parseBag(objectState) as unknown as ActorState;
-        case ActorType.CARD:
-          return this.parseCard(objectState) as unknown as ActorState;
-        case ActorType.TILE:
-          return this.parseTile(objectState) as unknown as ActorState;
-        case ActorType.DECK:
-          return this.parseDeck(objectState) as unknown as ActorState;
-        case ActorType.ACTOR:
-          return this.parseCustomObject(objectState);
-        default:
-          return null;
+    for (const [p, v] of Object.entries(pattern)) {
+      if (loweredType.includes(p)) {
+        return v;
       }
-    } catch (e) {
-      this.errors.push(objectState.GUID);
-      return null;
     }
-  };
+    return null;
+  }
 
   parseBag(objectState: ObjectState): BagState | null {
     try {
-      const containedObjects = objectState.ContainedObjects.map(o => {
-        const actorState = this.parseObject(o);
-        if (actorState) {
-          return actorState;
-        }
-        return null;
-      });
+      const containedObjects = objectState.ContainedObjects.map(o => this.parseObject(o));
 
       const model = this.parseModel(objectState);
 
@@ -281,50 +356,169 @@ class TTSParser {
     }
   }
 
-  parseModel(objectState: ObjectState): Model | undefined {
-    const meshURL = TTSParser.parseURL(objectState?.CustomMesh?.MeshURL);
-
-    if (!meshURL) {
+  parseDieN<N extends DieType>(objectState: ObjectState, dieType: N): DieNState<N> | null {
+    const rotationValues = this.parseRotatioValues(objectState);
+    if (!rotationValues) {
       this.errors.push(objectState.GUID);
-      return undefined;
+      return null;
     }
 
-    const model: Model = {
-      meshURL: meshURL,
-    };
+    if (!isTuple(rotationValues, dieType)) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
 
-    model.colliderURL ||= TTSParser.parseURL(objectState?.CustomMesh?.ColliderURL);
-    model.diffuseURL ||= TTSParser.parseURL(objectState?.CustomMesh?.DiffuseURL);
-    model.normalURL ||= TTSParser.parseURL(objectState?.CustomMesh?.NormalURL);
-
-    return model;
-  }
-
-  parseTransform(transform: TransformState): Transformation {
     return {
-      position: [transform.posX, transform.posY, transform.posZ],
-      rotation: [transform.rotX, transform.rotY, transform.rotZ].map(degToRad),
-      scale: [transform.scaleX, transform.scaleY, transform.scaleZ],
+      ...this.parseActorBase(objectState),
+      type: DieMapper[dieType],
+      rotationValues,
     };
   }
 
-  parseActorBase(objectState: ObjectState): Omit<ActorStateBase, 'type'> {
-    const actorState: Omit<ActorStateBase, 'type'> = {
-      name: objectState.Name,
-      guid: objectState.GUID,
-      transformation: this.parseTransform(objectState.Transform),
-    };
+  // parseDie4(objectState: ObjectState): Die4State | null {
+  //   const dieBase = this.parseDieBase(objectState);
+  //   if (!dieBase) {
+  //     this.errors.push(objectState.GUID);
+  //     return null;
+  //   }
 
-    if (objectState?.Rigidbody?.Mass) {
-      actorState.mass = objectState?.Rigidbody?.Mass;
+  //   const rotationValues = dieBase.rotationValues;
+  //   if (!isTuple(rotationValues, 4)) {
+  //     this.errors.push(objectState.GUID);
+  //     return null;
+  //   }
+
+  //   return {
+  //     ...dieBase,
+  //     type: ActorType.DIE_4,
+  //     rotationValues,
+  //   };
+  // }
+
+  // parseDie6(objectState: ObjectState): Die6State | null {
+  //   const dieBase = this.parseDieBase(objectState);
+  //   if (!dieBase) {
+  //     this.errors.push(objectState.GUID);
+  //     return null;
+  //   }
+
+  //   const rotationValues = dieBase.rotationValues;
+  //   if (!isTuple(rotationValues, 6)) {
+  //     this.errors.push(objectState.GUID);
+  //     return null;
+  //   }
+
+  //   return {
+  //     ...dieBase,
+  //     type: ActorType.DIE_6,
+  //     rotationValues,
+  //   };
+  // }
+
+  parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {
+    const rotationValues = this.parseRotatioValues(objectState);
+    if (!rotationValues) {
+      this.errors.push(objectState.GUID);
+      return null;
     }
 
-    return actorState;
+    const dieState = {
+      ...this.parseActorBase(objectState),
+      rotationValues,
+    };
+
+    return dieState;
+  }
+
+  parseRotatioValues(objectState: ObjectState): RotationValue[] | null {
+    if (!Object.hasOwnProperty.call(objectState, 'RotationValues')) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    if (!Array.isArray(objectState.RotationValues)) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const rotationValues = new Array<RotationValue>();
+    for (const rotationValue of objectState.RotationValues) {
+      const parsedRotationValue = this.parseRotationValue(rotationValue, objectState.GUID);
+      if (!parsedRotationValue) {
+        this.errors.push(objectState.GUID);
+        return null;
+      }
+      rotationValues.push(parsedRotationValue);
+    }
+
+    return rotationValues;
+  }
+
+  parseRotationValue(rotationValue: unknown, guid: string): RotationValue | null {
+    if (!isObject(rotationValue)) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    if (!hasProperty(rotationValue, 'Rotation')) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    if (!hasProperty(rotationValue, 'Value')) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    const value = TTSParser.parseNumber(rotationValue.Value);
+    if (!value) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    if (!isObject(rotationValue.Rotation)) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    if (
+      !hasProperty(rotationValue.Rotation, 'x') ||
+      !hasProperty(rotationValue.Rotation, 'y') ||
+      !hasProperty(rotationValue.Rotation, 'z')
+    ) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    const rotation: number[] = [];
+    for (const r of ['x', 'y', 'z'] as const) {
+      const candidate = TTSParser.parseNumber(rotationValue.Rotation[r]);
+      if (candidate === null) {
+        this.errors.push(guid);
+        return null;
+      }
+      rotation.push(candidate);
+    }
+    if (!isTuple(rotation, 3)) {
+      this.errors.push(guid);
+      return null;
+    }
+
+    return { rotation, value };
   }
 
   static parseURL(url: string | undefined): string | undefined {
     if (!url) return undefined;
     return url !== '' ? url : undefined;
+  }
+
+  static parseNumber(value: unknown): number | null {
+    if (isNumber(value)) return value;
+    if (isString(value)) {
+      const candidate = parseInt(value);
+      if (!isNaN(candidate)) return candidate;
+    }
+    return null;
   }
 }
 
