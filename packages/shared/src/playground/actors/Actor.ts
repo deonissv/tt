@@ -1,9 +1,10 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { ActorState } from '@shared/dto/states';
+import { Logger } from '../Logger';
 import { ActorBase } from './ActorBase';
 
 export class Actor extends ActorBase {
-  public __state: ActorState;
+  declare __state: ActorState;
 
   constructor(actorState: ActorState, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(
@@ -14,15 +15,14 @@ export class Actor extends ActorBase {
       actorState.transformation,
       actorState.mass,
       actorState.colorDiffuse,
+      actorState,
     );
-    this.__state = actorState;
   }
 
   static async fromState(actorState: ActorState): Promise<Actor | null> {
     const modelMesh = await Actor.modelFromState(actorState);
     if (!modelMesh) {
-      // eslint-disable-next-line no-console
-      console.log('Failed to load model mesh');
+      Logger.log('Failed to load model mesh');
       return null;
     }
 

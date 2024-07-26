@@ -1,14 +1,17 @@
-import CreateRoom from './pages/CreateRoom';
-import { Route, Routes } from 'react-router-dom';
-import JoinRoom from './pages/JoinRoom';
-import NotFoundPage from 'client/src/pages/NotFoundPage';
-import Room from './pages/Room';
 import Layout from '@components/Layout/Layout';
-import Signup from './pages/Signup/Signup';
-import Login from './pages/Login/Login';
-import { CreateGame } from './pages/CreateGame/CreateGame';
 import RequireAuth from '@components/RequireAuth/RequireAuth';
+import { Logger } from '@shared/playground';
+import NotFoundPage from 'client/src/pages/NotFoundPage';
+import { Route, Routes } from 'react-router-dom';
+import { CreateGame } from './pages/CreateGame/CreateGame';
+import CreateRoom from './pages/CreateRoom';
+import JoinRoom from './pages/JoinRoom';
+import Login from './pages/Login/Login';
 import Profile from './pages/Profile/Profile';
+import Room from './pages/Room';
+import Signup from './pages/Signup/Signup';
+
+Logger.register(console);
 
 const App = () => {
   const protectedRoutes = [

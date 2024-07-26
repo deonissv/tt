@@ -4,7 +4,6 @@ import HavokPhysics from '@babylonjs/havok';
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import { Scene } from '@babylonjs/core/scene';
 
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
 import { CameraKeyboardMoveInput } from './cameraInputs/cameraKeyboardMoveInput';
@@ -20,8 +19,9 @@ import {
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
 } from '@shared/constants';
+import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
 
-export class SimulationScene extends Scene {
+export class SimulationScene extends SimulationSceneBase {
   private constructor(engine: AbstractEngine) {
     super(engine);
   }
@@ -31,12 +31,18 @@ export class SimulationScene extends Scene {
     gravity = GRAVITY,
     leftHandedSystem = false,
   ): Promise<SimulationScene> {
-    const canvas = engine.getRenderingCanvas()!;
     const scene = new SimulationScene(engine);
+    const canvas = engine.getRenderingCanvas();
     scene.useRightHandedSystem = !leftHandedSystem;
 
-    scene.initCamera(canvas);
-    scene.initLight();
+    if (canvas) {
+      scene.initCamera(canvas);
+      scene.initLight();
+      window.addEventListener('resize', () => {
+        engine.resize();
+      });
+    }
+
     await scene.initPhysics(gravity);
 
     return scene;

@@ -28,7 +28,6 @@ import type {
 import { ActorType, type ActorStateBase } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
-import type { Logger } from '@shared/logger';
 import type { Action } from '@shared/ws/ws';
 import { ACTIONS } from '@shared/ws/ws';
 import { isContainable } from '../actions/Containable';
@@ -48,6 +47,8 @@ import {
   Tile,
 } from '../actors';
 import { TileStack } from '../actors/TileStack';
+import { Logger } from '../Logger';
+import { EngineFactory } from './SimulationEngine';
 
 // WebGPU Extensions
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
@@ -70,8 +71,6 @@ import { TileStack } from '../actors/TileStack';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
 export abstract class SimulationBase {
-  logger: Logger | null = null;
-
   engine: AbstractEngine;
   scene: Scene;
   initialState: SimulationStateSave;
@@ -91,6 +90,9 @@ export abstract class SimulationBase {
       }
       return acc;
     }, [] as Actor[]);
+  }
+  static async initEngine(canvas: HTMLCanvasElement | undefined): Promise<AbstractEngine> {
+    return await EngineFactory(canvas);
   }
 
   static async actorFromState(actorState: ActorStateBase): Promise<ActorBase | null> {
@@ -121,7 +123,10 @@ export abstract class SimulationBase {
         return await Die20.fromState(actorState as Die20State);
       case ActorType.TABLE:
         return null;
+      default:
+        null;
     }
+    return null;
   }
 
   static async tableFromState(tableState: TableState): Promise<ActorBase | null> {
@@ -152,8 +157,7 @@ export abstract class SimulationBase {
           try {
             actor.pickItem();
           } catch (e) {
-            // eslint-disable-next-line no-console
-            console.error(e);
+            Logger.error(e);
           }
         }
       }

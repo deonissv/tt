@@ -58,8 +58,7 @@ class TTSParser {
       return save;
     } catch (e) {
       this.error = true;
-      // eslint-disable-next-line no-console
-      console.error('Tts parse failed', e);
+      this.errors.push('TTS_PARSE');
       return null;
     }
   }

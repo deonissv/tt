@@ -44,14 +44,14 @@ describe('TileStack', () => {
   it('should construct with correct properties', () => {
     const tileStack = new TileStack(state, mesh);
     expect(tileStack.size).toBe(10);
-    expect(tileStack.model.scaling.x).toBe(10);
+    expect(tileStack.model.scaling.y).toBe(10);
   });
 
   it('pickItem creates tile and adjusts model scaling', async () => {
     const deck = new TileStack(state, mesh);
     await deck.pickItem();
     expect(deck.size).toBe(9);
-    expect(deck.model.scaling.x).toBeLessThan(11);
+    expect(deck.model.scaling.y).toBeLessThan(11);
   });
 
   it('fromState creates a Deck instance with correct properties', async () => {

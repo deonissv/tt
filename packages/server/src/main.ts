@@ -1,14 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
+import { Logger as PGLogger } from '@shared/playground';
 import { AppModule } from './app.module';
 import { mainConfig } from './main.config';
 import { initHavok } from './utils';
 
 async function bootstrap() {
   await initHavok();
+  PGLogger.register(new Logger('Playground'));
 
   const app = await NestFactory.create(AppModule);
   app.useWebSocketAdapter(new WsAdapter(app));

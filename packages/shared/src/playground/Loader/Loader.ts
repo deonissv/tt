@@ -7,6 +7,7 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { OBJFileLoader } from '@babylonjs/loaders';
 import type { Material, Model } from '@shared/dto/states';
+import { Logger } from '../Logger';
 import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
 
@@ -35,9 +36,11 @@ class Loader {
   }
 
   async loadModel(model: Model): Promise<[Mesh | null, Mesh | null]> {
+    Logger.log(`Loading model`);
     const modelMesh = await this.loadMesh(model.meshURL);
-
+    Logger.log(`Loading collider: ${model.colliderURL}`);
     const colliderMesh = model.colliderURL ? await this.loadMesh(model.colliderURL) : null;
+    Logger.log(`Loading material: ${JSON.stringify(model)}`);
     const loadedMaterial = await this.loadModelMaterial(model);
 
     if (modelMesh?.material) {
@@ -49,28 +52,37 @@ class Loader {
   async _loadMesh(meshURL: string): Promise<Mesh | null> {
     const fetchedFile = await this.fetchFile(meshURL);
     if (!fetchedFile) {
-      // eslint-disable-next-line no-console
-      console.error(`Empty fetch response: ${meshURL}`);
+      Logger.error(`Empty fetch response: ${meshURL}`);
       return null;
     }
 
     if (fetchedFile.mime == MimeType.HTML) {
-      // eslint-disable-next-line no-console
-      console.error(`HTML mime type: ${meshURL}`);
+      Logger.error(`HTML mime type: ${meshURL}`);
       return null;
     }
+
+    const extention = this._getModelExtension(fetchedFile.mime);
+    Logger.log(`Extention found: ${meshURL} - ${extention}`);
+
     const container = await SceneLoader.LoadAssetContainerAsync(
       '',
       fetchedFile.url,
       undefined,
       undefined,
-      this._getModelExtension(fetchedFile.mime),
-    );
+      extention,
+    ).catch(e => {
+      Logger.error(`Failed to load asset container: ${meshURL} - ${(e as Error).toString().slice(0, 100)}`);
+      return null;
+    });
+    if (!container) {
+      Logger.log(`Empty container: ${meshURL}`);
+      return null;
+    }
+
     const nonEmptyMeshes = this.filterEmptyMeshes(container.meshes);
     const mesh = Mesh.MergeMeshes(nonEmptyMeshes as Mesh[], false, true, undefined, true, true);
     if (!mesh) {
-      // eslint-disable-next-line no-console
-      console.error(`Empty mesh: ${meshURL}`);
+      Logger.error(`Empty mesh: ${meshURL}`);
 
       return null;
     }
@@ -83,18 +95,23 @@ class Loader {
   }
 
   async loadMesh(meshURL: string): Promise<Mesh | null> {
+    Logger.log(`Loading mesh: ${meshURL}`);
     const mesh = await this._loadMesh(meshURL);
+
     if (!mesh) {
-      // eslint-disable-next-line no-console
-      console.error(`No mesh found: ${meshURL}`);
+      Logger.error(`No mesh found: ${meshURL}`);
 
       return null;
     }
 
-    return mesh.clone(mesh.name, null, true, true);
+    const clonedMesh = mesh.clone(mesh.name, null, true, true);
+    Logger.log(`Mesh loaded: ${meshURL}`);
+    return clonedMesh;
   }
 
   async loadModelMaterial(modelMaterial: Material, name = ''): Promise<StandardMaterial> {
+    Logger.log(`Loading material: ${JSON.stringify(modelMaterial)}`);
+
     const material = new StandardMaterial(name);
     material.diffuseColor = new Color3(1, 1, 1);
     // @TODO test maps
@@ -121,6 +138,7 @@ class Loader {
   }
 
   async loadTexture(textureURL: string): Promise<Texture | null> {
+    Logger.log(`Loading texture: ${textureURL}`);
     const metarial = await this._loadTexture(textureURL);
     if (!metarial) {
       return null;
@@ -145,12 +163,9 @@ class Loader {
         }
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(`Failed attempt to fetch: ${url}`);
+        Logger.log(`Failed attempt to fetch: ${url}`);
       }
     }
-    // eslint-disable-next-line no-console
-    console.error(`Failed to fetch: ${url}`);
     return null;
   }
 
@@ -159,12 +174,14 @@ class Loader {
       const promiseCb = async (): Promise<FetchedFile | null> => {
         const arrayBuffer = await this._fetchFile(url);
         if (!arrayBuffer) {
+          Logger.error(`Empty arrayBuffer: ${url}`);
           return null;
         }
 
         const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
         const b64 = this._getB64URL(arrayBuffer);
 
+        Logger.log(`Fetched file: ${url}`);
         return { url: b64, mime };
       };
       this.Assets.set(url, promiseCb());

@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { Engine } from '@babylonjs/core/Engines/engine';
-import { WebGPUEngine } from '@babylonjs/core/Engines/webgpuEngine';
 import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { Scene } from '@babylonjs/core/scene';
+import type { Scene } from '@babylonjs/core/scene';
 
 import { Inspector } from '@babylonjs/inspector';
 
@@ -12,13 +10,10 @@ import { SimulationScene } from './SimulationScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
-import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
-import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
-
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import type { Actor } from '@shared/playground';
-import { ActorBase, SimulationBase } from '@shared/playground';
+import { ActorBase, EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 
 export interface SimulationCallbacks {
@@ -42,20 +37,12 @@ export class Simulation extends SimulationBase {
   }
 
   static async init(
-    canvas: HTMLCanvasElement | null,
+    canvas: HTMLCanvasElement | undefined,
     stateSave: SimulationStateSave,
     cbs: SimulationCallbacks,
   ): Promise<Simulation> {
-    const engine = await this.initEngine(canvas);
-    const scene = canvas
-      ? await SimulationScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem)
-      : new Scene(engine);
-
-    canvas &&
-      window.addEventListener('resize', () => {
-        engine.resize();
-      });
-
+    const engine = await EngineFactory(canvas);
+    const scene = await SimulationScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem);
     const sim = new Simulation(scene, cbs);
 
     if (stateSave.table) {
@@ -69,13 +56,11 @@ export class Simulation extends SimulationBase {
           if (actor) {
             return actor;
           } else {
-            // eslint-disable-next-line no-console
-            console.error(`Null actor ${actorState.guid}`);
+            Logger.error(`Null actor ${actorState.guid}`);
             return null;
           }
         } catch (e) {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to load actor ${actorState.guid}: ${(e as Error).toString()}`);
+          Logger.error(`Failed to load actor ${actorState.guid}: ${(e as Error).toString()}`);
           return null;
         }
       }),
@@ -105,25 +90,6 @@ export class Simulation extends SimulationBase {
   private _pickActor(): ActorBase | null {
     const pickedMesh = this._pickMesh();
     return pickedMesh?.parent instanceof ActorBase ? pickedMesh.parent : null;
-  }
-
-  private static async initEngine(canvas: HTMLCanvasElement | null): Promise<AbstractEngine> {
-    let engine: AbstractEngine;
-    const engineOptions = {
-      stencil: true,
-    };
-    if (!canvas) {
-      return new NullEngine();
-    }
-
-    const webgpuSupported = await WebGPUEngine.IsSupportedAsync;
-    if (webgpuSupported) {
-      engine = new WebGPUEngine(canvas, engineOptions);
-      await (engine as WebGPUEngine).initAsync();
-    } else {
-      engine = new Engine(canvas, true, engineOptions, true);
-    }
-    return engine;
   }
 
   private _handleHoverHighlight() {

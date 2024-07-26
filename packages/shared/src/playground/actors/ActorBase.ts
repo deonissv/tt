@@ -7,6 +7,7 @@ import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
 import { MASS_DEFAULT, MOVEMENT_VELOCITY, PRECISION_EPSILON, ROTATE_STEP, SCALE_COEF } from '@shared/constants';
+import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import {
   ActorType,
   type ActorState,
@@ -16,13 +17,9 @@ import {
 } from '@shared/dto/states';
 import { floatCompare } from '@shared/utils';
 import { Loader } from '../Loader';
+import { Logger } from '../Logger';
 
 export class ActorBase extends TransformNode {
-  static DEFAULT_MASS = 1;
-  static DEFAULT_SCALE = [1, 1, 1];
-  static DEFAULT_ROTATION = [0, 0, 0];
-  static DEFAULT_POSITION = [0, 0, 0];
-
   guid: string;
 
   __mass: number;
@@ -83,6 +80,8 @@ export class ActorBase extends TransformNode {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     // this._scene.onBeforeRenderObservable.add(this._beforeRender.bind(this));
     // this._forceUpdate();
+
+    Logger.log(`Actor created. guid: ${guid} type: ${state?.type}`);
   }
 
   protected _beforeRender() {
@@ -238,8 +237,7 @@ export class ActorBase extends TransformNode {
     const modelMesh = await Loader.loadMesh(actorState.model.meshURL);
 
     if (!modelMesh) {
-      // eslint-disable-next-line no-console
-      console.error(`ActorBase.modelFromState: Model ${actorState.guid} not found`);
+      Logger.error(`ActorBase.modelFromState: Model ${actorState.guid} not found`);
       return null;
     }
 
@@ -325,9 +323,9 @@ export class ActorBase extends TransformNode {
     }
 
     const stateTransformation = {
-      scale: actorState.transformation?.scale ?? ActorBase.DEFAULT_SCALE,
-      rotation: actorState.transformation?.rotation ?? ActorBase.DEFAULT_ROTATION,
-      position: actorState.transformation?.position ?? ActorBase.DEFAULT_POSITION,
+      scale: actorState.transformation?.scale ?? DEFAULT_SCALE,
+      rotation: actorState.transformation?.rotation ?? DEFAULT_ROTATION,
+      position: actorState.transformation?.position ?? DEFAULT_POSITION,
     };
 
     const updatePosition = stateTransformation.position.some(

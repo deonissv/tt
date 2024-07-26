@@ -16,7 +16,7 @@ export class TileStack extends ActorBase implements Containable {
     super(state.guid, state.name, model, undefined, state.transformation, TILE_MASS * state.size, undefined, state);
 
     this.size = state.size;
-    model.scaling.x = this.size;
+    model.scaling.y = this.size;
   }
 
   static override async fromState(state: TileStackState): Promise<TileStack | null> {
