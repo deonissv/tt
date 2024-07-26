@@ -1,8 +1,8 @@
 import { CANAT_DECK_OBJ } from '@assets/catan';
 import { MUNCHKIN_DECK_OBJ } from '@assets/munchkin';
 import { TTSParser } from '@client/src/TTSParser';
-import { degToRad } from '@client/src/utils';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
+import { degToRad } from '@shared/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseActorBase', () => {

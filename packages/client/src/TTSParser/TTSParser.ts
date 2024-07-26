@@ -20,11 +20,13 @@ import {
   type TileState,
   type TileType,
 } from '@shared/dto/states';
+import type { CustomImage } from '@shared/dto/states/actor/FlatActorState';
+import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import { hasProperty, isNumber, isObject, isString, isTuple } from '@shared/guards';
 import type { TransformState } from '@shared/tts-model/TransformState';
 import type { OpnitalAllBut } from '@shared/types';
+import { degToRad } from '@shared/utils';
 import { ActorMapper, DieMapper, type DieNState, type DieType } from '../../../shared/src/dto/states/actor/DieState';
-import { degToRad } from '../utils';
 
 type MinimalObjectState = OpnitalAllBut<ObjectState, 'GUID'>;
 
@@ -103,6 +105,26 @@ class TTSParser {
     };
   }
 
+  parseCustomImage(objectState: ObjectState): CustomImage | null {
+    const faceURL = TTSParser.parseURL(objectState.CustomImage?.ImageURL);
+    if (!faceURL) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const flatActorState: CustomImage = {
+      faceURL,
+    };
+
+    const backURL = TTSParser.parseURL(objectState.CustomImage?.ImageSecondaryURL);
+    backURL && (flatActorState.backURL = backURL);
+
+    const widthScale = TTSParser.parseNumber(objectState.CustomImage?.WidthScale);
+    widthScale && (flatActorState.widthScale = widthScale);
+
+    return flatActorState;
+  }
+
   parseObject = (objectState: MinimalObjectState): ActorStateBase | null => {
     try {
       if (!hasProperty(objectState, 'Name')) {
@@ -128,6 +150,8 @@ class TTSParser {
           return this.parseCard(objectState as ObjectState) as unknown as ActorState;
         case ActorType.TILE:
           return this.parseTile(objectState as ObjectState) as unknown as ActorState;
+        case ActorType.TILE_STACK:
+          return this.parseTileStack(objectState as ObjectState) as unknown as ActorState;
         case ActorType.DECK:
           return this.parseDeck(objectState as ObjectState) as unknown as ActorState;
         case ActorType.DIE4:
@@ -183,6 +207,9 @@ class TTSParser {
 
   mapType(type: string): ActorType | null {
     const loweredType = type.toLowerCase();
+
+    const stack = loweredType.includes('stack');
+
     const pattern = {
       bag: ActorType.BAG,
       card: ActorType.CARD,
@@ -199,6 +226,11 @@ class TTSParser {
 
     for (const [p, v] of Object.entries(pattern)) {
       if (loweredType.includes(p)) {
+        if (stack) {
+          if (v === ActorType.TILE) {
+            return ActorType.TILE_STACK;
+          }
+        }
         return v;
       }
     }
@@ -307,17 +339,40 @@ class TTSParser {
       return null;
     }
 
+    const customImage = this.parseCustomImage(objectState);
+    if (!customImage) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
     const tileState: TileState = {
       type: ActorType.TILE,
       ...this.parseActorBase(objectState),
-      faceURL,
+      ...customImage,
       tileType: objectState.CustomImage?.CustomTile.Type as unknown as TileType,
     };
 
-    const backURL = TTSParser.parseURL(objectState.CustomImage?.ImageSecondaryURL);
-    backURL && (tileState.backURL = backURL);
-
     return tileState;
+  }
+
+  parseTileStack(objectState: ObjectState): TileStackState | null {
+    const tileState = this.parseTile(objectState);
+    if (!tileState) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    const size = TTSParser.parseNumber(objectState?.Number);
+    if (!size) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    return {
+      ...tileState,
+      type: ActorType.TILE_STACK,
+      size,
+    };
   }
 
   parseCustomObject(objectState: ObjectState): ActorState | null {
@@ -374,46 +429,6 @@ class TTSParser {
       rotationValues,
     };
   }
-
-  // parseDie4(objectState: ObjectState): Die4State | null {
-  //   const dieBase = this.parseDieBase(objectState);
-  //   if (!dieBase) {
-  //     this.errors.push(objectState.GUID);
-  //     return null;
-  //   }
-
-  //   const rotationValues = dieBase.rotationValues;
-  //   if (!isTuple(rotationValues, 4)) {
-  //     this.errors.push(objectState.GUID);
-  //     return null;
-  //   }
-
-  //   return {
-  //     ...dieBase,
-  //     type: ActorType.DIE_4,
-  //     rotationValues,
-  //   };
-  // }
-
-  // parseDie6(objectState: ObjectState): Die6State | null {
-  //   const dieBase = this.parseDieBase(objectState);
-  //   if (!dieBase) {
-  //     this.errors.push(objectState.GUID);
-  //     return null;
-  //   }
-
-  //   const rotationValues = dieBase.rotationValues;
-  //   if (!isTuple(rotationValues, 6)) {
-  //     this.errors.push(objectState.GUID);
-  //     return null;
-  //   }
-
-  //   return {
-  //     ...dieBase,
-  //     type: ActorType.DIE_6,
-  //     rotationValues,
-  //   };
-  // }
 
   parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {
     const rotationValues = this.parseRotatioValues(objectState);

@@ -26,7 +26,9 @@ import type {
   TileState,
 } from '@shared/dto/states';
 import { ActorType, type ActorStateBase } from '@shared/dto/states';
+import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
+import type { Logger } from '@shared/logger';
 import type { Action } from '@shared/ws/ws';
 import { ACTIONS } from '@shared/ws/ws';
 import { isContainable } from '../actions/Containable';
@@ -45,6 +47,7 @@ import {
   RectangleCustomTable,
   Tile,
 } from '../actors';
+import { TileStack } from '../actors/TileStack';
 
 // WebGPU Extensions
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.alpha';
@@ -67,6 +70,8 @@ import {
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
 export abstract class SimulationBase {
+  logger: Logger | null = null;
+
   engine: AbstractEngine;
   scene: Scene;
   initialState: SimulationStateSave;
@@ -92,6 +97,8 @@ export abstract class SimulationBase {
     switch (actorState.type) {
       case ActorType.TILE:
         return await Tile.fromState(actorState as TileState);
+      case ActorType.TILE_STACK:
+        return await TileStack.fromState(actorState as TileStackState);
       case ActorType.BAG:
         return await Bag.fromState(actorState as BagState);
       case ActorType.CARD:
@@ -112,7 +119,6 @@ export abstract class SimulationBase {
         return await Die12.fromState(actorState as Die12State);
       case ActorType.DIE20:
         return await Die20.fromState(actorState as Die20State);
-
       case ActorType.TABLE:
         return null;
     }

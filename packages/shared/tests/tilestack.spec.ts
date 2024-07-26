@@ -1,0 +1,82 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { Mesh } from '@babylonjs/core';
+import { CreateBox } from '@babylonjs/core';
+import { ActorType } from '@shared/dto/states';
+import type { TileStackState } from '@shared/dto/states/actor/Stack';
+import { Loader } from '@shared/playground';
+import { TileStack } from '@shared/playground/actors/TileStack';
+import { degToRad } from '@shared/utils';
+import { useSimulationMock } from './mocks/SimulationMock';
+
+vi.mock('@shared/playground/Loader', async () => {
+  const { LoaderMock } = await import('./mocks/LoaderMock');
+  return {
+    Loader: LoaderMock,
+  };
+});
+describe('TileStack', () => {
+  const { scene } = useSimulationMock();
+
+  let mesh: Mesh;
+  let state: TileStackState;
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+
+    mesh = CreateBox('testMesh', { size: 1 }, scene);
+
+    state = {
+      guid: '51d35d',
+      name: 'Custom_Tile_Stack',
+      transformation: {
+        position: [-4.740222, 0.91, 6.6680603],
+        rotation: [-2.115622e-6, 179.9947, 2.31118474e-6].map(degToRad),
+        scale: [0.692878, 1.0, 0.692878],
+      },
+      type: ActorType.TILE_STACK,
+      tileType: 2,
+      faceURL: 'http://i.imgur.com/vURavdX.jpg',
+      backURL: 'http://i.imgur.com/vURavdX.jpg',
+      size: 10,
+    };
+  });
+  it('should construct with correct properties', () => {
+    const tileStack = new TileStack(state, mesh);
+    expect(tileStack.size).toBe(10);
+    expect(tileStack.model.scaling.x).toBe(10);
+  });
+
+  it('pickItem creates tile and adjusts model scaling', async () => {
+    const deck = new TileStack(state, mesh);
+    await deck.pickItem();
+    expect(deck.size).toBe(9);
+    expect(deck.model.scaling.x).toBeLessThan(11);
+  });
+
+  it('fromState creates a Deck instance with correct properties', async () => {
+    const tileStack = await TileStack.fromState(state);
+    expect(tileStack instanceof TileStack).toBeTruthy();
+
+    expect(tileStack!.size).toBe(10);
+  });
+
+  it('fromState returns null if tile model is not loaded', async () => {
+    vi.spyOn(Loader, 'loadMesh').mockResolvedValue(null);
+    const tileStack = await TileStack.fromState(state);
+    expect(tileStack === null).toBeTruthy();
+  });
+
+  it('should construct using fromState value', async () => {
+    const tileStack = new TileStack(state, mesh);
+    expect(tileStack instanceof TileStack).toBeTruthy();
+    expect(tileStack.size).toBe(10);
+
+    await tileStack.pickItem();
+    const stateFromState = tileStack.toState();
+    const newTileStack = await TileStack.fromState(stateFromState);
+
+    expect(newTileStack instanceof TileStack).toBeTruthy();
+    expect(newTileStack!.size).toBe(9);
+  });
+});

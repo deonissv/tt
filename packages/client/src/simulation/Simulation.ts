@@ -18,7 +18,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import type { Actor } from '@shared/playground';
-import { ActorBase, Die4, SimulationBase } from '@shared/playground';
+import { ActorBase, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 
 export interface SimulationCallbacks {
@@ -61,30 +61,6 @@ export class Simulation extends SimulationBase {
     if (stateSave.table) {
       await SimulationBase.tableFromState(stateSave.table);
     }
-
-    await Die4.fromState({
-      guid: '1',
-      name: 'Die_4',
-      type: 4,
-      rotationValues: [
-        {
-          value: 1,
-          rotation: [18, -241, -120],
-        },
-        {
-          value: 2,
-          rotation: [-90, -60, 0],
-        },
-        {
-          value: 3,
-          rotation: [18, -121, 0],
-        },
-        {
-          value: 4,
-          rotation: [18, 0, -240],
-        },
-      ],
-    });
 
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {

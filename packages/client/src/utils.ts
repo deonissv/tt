@@ -16,5 +16,3 @@ export const getAccessToken = (): string | null => {
 export const resetAccessToken = (): void => {
   window.localStorage.removeItem('access_token');
 };
-
-export const degToRad = (deg: number): number => deg * (Math.PI / 180);

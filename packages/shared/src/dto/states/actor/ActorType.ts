@@ -11,4 +11,5 @@ export const enum ActorType {
   DIE10,
   DIE12,
   DIE20,
+  TILE_STACK,
 }

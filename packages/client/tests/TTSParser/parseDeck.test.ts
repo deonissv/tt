@@ -1,9 +1,8 @@
 import { MUNCHKIN_DECK_OBJ } from '@assets/munchkin';
 import TTSParser from '@client/src/TTSParser/TTSParser';
-import { degToRad } from '@client/src/utils';
 import type { ActorStateBase, CardState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
-import { omitKeys } from '@shared/utils';
+import { degToRad, omitKeys } from '@shared/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseDeck', () => {

@@ -1,8 +1,8 @@
 import { CHESS_PAWN_OBJ } from '@assets/chess5';
 import TTSParser from '@client/src/TTSParser/TTSParser';
-import { degToRad } from '@client/src/utils';
 import type { ActorState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
+import { degToRad } from '@shared/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseCustomObject', () => {

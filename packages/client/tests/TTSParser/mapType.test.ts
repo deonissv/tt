@@ -23,7 +23,7 @@ describe('TTSParser - mapType', () => {
       ActorType.DIE20,
       ActorType.ACTOR,
       ActorType.BAG,
-      ActorType.TILE,
+      ActorType.TILE_STACK,
       ActorType.ACTOR,
       ActorType.BAG,
     ];

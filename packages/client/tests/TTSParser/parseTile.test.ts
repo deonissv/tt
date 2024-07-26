@@ -1,8 +1,8 @@
 import { CATAN_LONGEST_ROAD_OBJ } from '@assets/catan';
 import TTSParser from '@client/src/TTSParser/TTSParser';
-import { degToRad } from '@client/src/utils';
 import type { TileState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
+import { degToRad } from '@shared/utils';
 import { describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseTile', () => {

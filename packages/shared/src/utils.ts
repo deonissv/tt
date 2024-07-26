@@ -28,3 +28,5 @@ export const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]): any => {
     return acc as object;
   }, {});
 };
+
+export const degToRad = (deg: number): number => deg * (Math.PI / 180);

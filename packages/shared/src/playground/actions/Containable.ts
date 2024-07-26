@@ -1,8 +1,4 @@
-import type { ActorStateBase } from '@shared/dto/states';
-
 export interface Containable {
-  items: ActorStateBase[];
-
   get size(): number;
   pickItem(): void;
 }
