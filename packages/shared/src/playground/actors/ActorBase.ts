@@ -303,7 +303,7 @@ export class ActorBase extends TransformNode {
     };
   }
 
-  toStateUpdate(actorState?: ActorState): ActorStateUpdate | null {
+  toStateUpdate(actorState?: ActorStateBase): ActorStateUpdate | null {
     const currentState = this.toState();
 
     if (!actorState) {
@@ -367,16 +367,16 @@ export class ActorBase extends TransformNode {
     }
   }
 
-  static applyStateUpdate(actorState: ActorState, actorStateUpdate: ActorStateUpdate): ActorState {
+  static applyStateUpdate(actorState: ActorStateBase, actorStateUpdate: ActorStateUpdate): ActorStateBase {
     const mergedScale = actorStateUpdate.transformation?.scale ?? actorState.transformation?.scale;
     const mergedPosition = actorStateUpdate.transformation?.position ?? actorState.transformation?.position;
     const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
 
-    const rv: ActorState = {
+    const rv: ActorStateBase = {
       type: actorState.type,
 
       guid: actorStateUpdate.guid,
-      model: actorStateUpdate.model ?? actorState.model,
+      // model: actorStateUpdate.model ?? actorState.model,
       name: actorStateUpdate.name ?? actorState.name,
       mass: actorStateUpdate.mass ?? actorState.mass,
     };

@@ -6,13 +6,17 @@ import type {
   CardState,
   DeckState,
   DieBaseState,
+  DieNState,
+  DieType,
   Model,
   RotationValue,
   TableType,
   Transformation,
 } from '@shared/dto/states';
 import {
+  ActorMapper,
   ActorType,
+  DieMapper,
   type ActorState,
   type BagState,
   type SimulationStateSave,
@@ -26,7 +30,6 @@ import { hasProperty, isNumber, isObject, isString, isTuple } from '@shared/guar
 import type { TransformState } from '@shared/tts-model/TransformState';
 import type { OpnitalAllBut } from '@shared/types';
 import { degToRad } from '@shared/utils';
-import { ActorMapper, DieMapper, type DieNState, type DieType } from '../../../shared/src/dto/states/actor/DieState';
 
 type MinimalObjectState = OpnitalAllBut<ObjectState, 'GUID'>;
 
@@ -45,10 +48,10 @@ class TTSParser {
       save.table = this.parseTable(obj);
 
       if (obj.ObjectStates && Array.isArray(obj.ObjectStates)) {
-        save.actorStates = obj.ObjectStates.reduce<ActorState[]>((acc, o) => {
+        save.actorStates = obj.ObjectStates.reduce<ActorStateBase[]>((acc, o) => {
           const actorState = this.parseObject(o);
           if (actorState) {
-            acc.push(actorState as ActorState);
+            acc.push(actorState);
           }
           return acc;
         }, []);
