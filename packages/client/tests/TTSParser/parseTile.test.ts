@@ -1,11 +1,17 @@
-import { CATAN_LONGEST_ROAD_OBJ } from '@assets/catan';
-import TTSParser from '@client/src/TTSParser/TTSParser';
+import { CATAN } from '@assets/catan';
+import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import type { TileState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseTile', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse catan box tile', () => {
     const expected: TileState = {
       guid: 'c7db6b',
@@ -18,9 +24,11 @@ describe('TTSParser - parseTile', () => {
       type: 5,
       tileType: 0,
       faceURL: 'http://cloud-3.steamusercontent.com/ugc/155773601379927983/C7109CE55B4403815B5515C29EC5E3B9E534FEEC/',
+      widthScale: 0,
     };
 
-    const parsed = TTSParser.parseTile(CATAN_LONGEST_ROAD_OBJ as unknown as ObjectState)!;
+    const parsed = parser.parseTile(CATAN.LONGEST_ROAD as unknown as ObjectState);
+    expect(parsed !== null).toBeTruthy();
     expect(parsed).toStrictEqual(expected);
   });
 });

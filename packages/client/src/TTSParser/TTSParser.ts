@@ -1,8 +1,7 @@
 import type { ObjectState } from '@shared/tts-model/ObjectState';
-import type { SaveState } from '@shared/tts-model/SaveState';
 
 import type {
-  ActorStateBase,
+  ActorBaseState,
   CardState,
   DeckState,
   DieBaseState,
@@ -26,160 +25,241 @@ import {
 } from '@shared/dto/states';
 import type { CustomImage } from '@shared/dto/states/actor/FlatActorState';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { hasProperty, isNumber, isObject, isString, isTuple } from '@shared/guards';
+import { hasProperty, isObject, isTuple } from '@shared/guards';
+import type { CustomImageState } from '@shared/tts-model/CustomImageState';
+import type { CustomMeshState } from '@shared/tts-model/CustomMeshState';
 import type { TransformState } from '@shared/tts-model/TransformState';
-import type { OpnitalAllBut } from '@shared/types';
+import type { DeepPartial, Defined, OptionalAllBut } from '@shared/types';
 import { degToRad } from '@shared/utils';
+import { ParserBase } from './ParserBase';
 
-type MinimalObjectState = OpnitalAllBut<ObjectState, 'GUID'>;
+type MinimalObjectState = OptionalAllBut<ObjectState, ['GUID', 'Name']>;
 
-class TTSParser {
-  error = false;
-  errors: string[] = [];
-
+export class TTSParserC extends ParserBase {
   parse(tts: string): SimulationStateSave | null {
     try {
-      const obj = JSON.parse(tts) as SaveState;
-      const save: SimulationStateSave = {};
+      const obj = JSON.parse(tts) as unknown;
+      const save: SimulationStateSave = {
+        leftHandedSystem: true,
+      };
 
-      save.gravity = obj.Gravity;
-      save.leftHandedSystem = true;
+      if (!this.isObject(obj, 'ERROR 1')) return null;
+      if (!this.hasProperty(obj, 'ObjectStates', 'ERROR 2')) return null;
+      if (!this.isArray(obj.ObjectStates, 'ERROR 3')) return null;
 
-      save.table = this.parseTable(obj);
-
-      if (obj.ObjectStates && Array.isArray(obj.ObjectStates)) {
-        save.actorStates = obj.ObjectStates.reduce<ActorStateBase[]>((acc, o) => {
-          const actorState = this.parseObject(o);
-          if (actorState) {
-            acc.push(actorState);
-          }
-          return acc;
-        }, []);
-      } else {
-        return null;
+      if (hasProperty(obj, 'Gravity')) {
+        const candidate = this.parseNumber(obj.Gravity);
+        candidate && Object.assign(save, { gravity: candidate });
       }
+
+      const candidate = this.parseTable(obj);
+      if (candidate) save.table = candidate;
+
+      save.actorStates = obj.ObjectStates.reduce<Defined<SimulationStateSave['actorStates']>>((acc, o) => {
+        const actorState = this.parseObject(o);
+        if (actorState) {
+          acc.push(actorState);
+        }
+        return acc;
+      }, []);
+
       return save;
     } catch (e) {
-      this.error = true;
       this.errors.push('TTS_PARSE');
       return null;
     }
   }
 
-  parseActorBase(objectState: ObjectState): Omit<ActorStateBase, 'type'> {
-    const actorState: Omit<ActorStateBase, 'type'> = {
-      name: objectState.Name,
+  parseObject = (objectState: unknown): ActorBaseState | null => {
+    if (!this.isObject(objectState, 'ERROR 4')) return null;
+    if (!this.hasProperty(objectState, 'GUID', 'ERROR 5')) return null;
+    if (!this.isPropertyString(objectState, 'GUID', 'ERROR 6')) return null;
+    if (!this.hasProperty(objectState, 'Name', 'ERROR 7')) return null;
+    if (!this.isPropertyString(objectState, 'Name', 'ERROR 8')) return null;
+
+    this.guids.push(objectState.GUID);
+
+    const type = this.mapType(objectState.Name);
+    this.assert(type !== null, `Failed to parse object type ${this.guid}`);
+
+    const parsedObject = this.parseMinimalObject(objectState);
+
+    this.guids.pop();
+    return parsedObject;
+  };
+
+  parseMinimalObject(objectState: MinimalObjectState): ActorBaseState | null {
+    const type = this.mapType(objectState.Name);
+    if (type === null) {
+      this.errors.push(objectState.GUID);
+      return null;
+    }
+
+    switch (type) {
+      case ActorType.BAG:
+        return this.parseBag(objectState as ObjectState);
+      case ActorType.CARD:
+        return this.parseCard(objectState as ObjectState);
+      case ActorType.TILE:
+        return this.parseTile(objectState as ObjectState);
+      case ActorType.TILE_STACK:
+        return this.parseTileStack(objectState as ObjectState);
+      case ActorType.DECK:
+        return this.parseDeck(objectState as ObjectState);
+      case ActorType.DIE4:
+      case ActorType.DIE6:
+      case ActorType.DIE8:
+      case ActorType.DIE10:
+      case ActorType.DIE12:
+      case ActorType.DIE20:
+        return this.parseDieN(objectState as ObjectState, ActorMapper[type]) as unknown as ActorState;
+      case ActorType.ACTOR:
+        return this.parseCustomObject(objectState as ObjectState) as unknown as ActorState;
+      default:
+        return null;
+    }
+  }
+
+  parseActorBase(objectState: MinimalObjectState): Omit<ActorBaseState, 'type'> | null {
+    const actorState: Omit<ActorBaseState, 'type'> = {
       guid: objectState.GUID,
-      transformation: this.parseTransform(objectState.Transform),
+      name: objectState.Name,
     };
 
-    if (objectState?.Rigidbody?.Mass) {
-      actorState.mass = objectState?.Rigidbody?.Mass;
+    if (this.hasProperty(objectState, 'Transform')) {
+      if (this.isObject(objectState.Transform, 'ERROR 9')) {
+        const transformation = this.parseTransform(objectState.Transform);
+        if (transformation !== null) {
+          actorState.transformation = transformation;
+        }
+      }
+    }
+
+    if (this.hasProperty(objectState, 'Rigidbody') && this.isObject(objectState.Rigidbody, 'ERROR 10')) {
+      if (this.hasProperty(objectState.Rigidbody, 'Mass')) {
+        const mass = this.parseNumber(objectState.Rigidbody.Mass);
+        if (mass !== null) {
+          actorState.mass = mass;
+        }
+      }
     }
 
     return actorState;
   }
 
-  parseModel(objectState: ObjectState): Model | undefined {
-    const meshURL = TTSParser.parseURL(objectState?.CustomMesh?.MeshURL);
-
-    if (!meshURL) {
-      this.errors.push(objectState.GUID);
-      return undefined;
-    }
+  parseModel(modelState: DeepPartial<CustomMeshState>): Model | null {
+    if (!this.hasProperty(modelState, 'MeshURL', this.errorsText.MODEL.MESH.NO_URL)) return null;
+    if (!this.isPropertyString(modelState, 'MeshURL', this.errorsText.MODEL.MESH.URL_INVALID)) return null;
+    if (!this.isURL(modelState.MeshURL, this.errorsText.MODEL.MESH.URL_INVALID)) return null;
 
     const model: Model = {
-      meshURL: meshURL,
+      meshURL: modelState.MeshURL,
     };
 
-    model.colliderURL ||= TTSParser.parseURL(objectState?.CustomMesh?.ColliderURL);
-    model.diffuseURL ||= TTSParser.parseURL(objectState?.CustomMesh?.DiffuseURL);
-    model.normalURL ||= TTSParser.parseURL(objectState?.CustomMesh?.NormalURL);
+    if (
+      this.hasProperty(modelState, 'ColliderURL') &&
+      this.isPropertyString(modelState, 'ColliderURL', this.errorsText.MODEL.COLLDER.URL_NOT_STRING) &&
+      this.isURL(modelState.ColliderURL, this.errorsText.MODEL.COLLDER.URL_INVALID)
+    ) {
+      model.colliderURL = modelState.ColliderURL;
+    }
+
+    if (
+      this.hasProperty(modelState, 'DiffuseURL') &&
+      this.isPropertyString(modelState, 'DiffuseURL', this.errorsText.MODEL.DIFFUSE.URL_NOT_STRING) &&
+      this.isURL(modelState.DiffuseURL, this.errorsText.MODEL.DIFFUSE.URL_INVALID)
+    ) {
+      model.diffuseURL = modelState.DiffuseURL;
+    }
+
+    if (
+      this.hasProperty(modelState, 'NormalURL') &&
+      this.isPropertyString(modelState, 'NormalURL', this.errorsText.MODEL.NORMAL.URL_NOT_STRING) &&
+      this.isURL(modelState.NormalURL, this.errorsText.MODEL.NORMAL.URL_INVALID)
+    ) {
+      model.normalURL = modelState.NormalURL;
+    }
 
     return model;
   }
 
-  parseTransform(transform: TransformState): Transformation {
-    return {
-      position: [transform.posX, transform.posY, transform.posZ],
-      rotation: [transform.rotX, transform.rotY, transform.rotZ].map(degToRad),
-      scale: [transform.scaleX, transform.scaleY, transform.scaleZ],
-    };
-  }
+  parseTransform(transform: DeepPartial<TransformState>): Transformation | null {
+    const transformState: Transformation = {};
 
-  parseCustomImage(objectState: ObjectState): CustomImage | null {
-    const faceURL = TTSParser.parseURL(objectState.CustomImage?.ImageURL);
-    if (!faceURL) {
-      this.errors.push(objectState.GUID);
-      return null;
+    if (!this.hasProperty(transform, 'posX', this.errorsText.TRANSFORM.NO_POS_X)) return null;
+    if (!this.hasProperty(transform, 'posY', this.errorsText.TRANSFORM.NO_POS_Y)) return null;
+    if (!this.hasProperty(transform, 'posZ', this.errorsText.TRANSFORM.NO_POS_Z)) return null;
+
+    const posX = this.parseNumber(transform.posX);
+    const posY = this.parseNumber(transform.posY);
+    const posZ = this.parseNumber(transform.posZ);
+    if (posX !== null && posY !== null && posZ !== null) {
+      transformState.position = [posX, posY, posZ];
     }
 
+    if (!this.hasProperty(transform, 'rotX', this.errorsText.TRANSFORM.NO_ROT_X)) return null;
+    if (!this.hasProperty(transform, 'rotY', this.errorsText.TRANSFORM.NO_ROT_Y)) return null;
+    if (!this.hasProperty(transform, 'rotZ', this.errorsText.TRANSFORM.NO_ROT_Z)) return null;
+
+    const rotX = this.parseNumber(transform.rotX);
+    const rotY = this.parseNumber(transform.rotY);
+    const rotZ = this.parseNumber(transform.rotZ);
+    if (rotX !== null && rotY !== null && rotZ !== null) {
+      transformState.rotation = [rotX, rotY, rotZ].map(degToRad);
+    }
+
+    if (!this.hasProperty(transform, 'scaleX', this.errorsText.TRANSFORM.NO_SCALE_X)) return null;
+    if (!this.hasProperty(transform, 'scaleY', this.errorsText.TRANSFORM.NO_SCALE_Y)) return null;
+    if (!this.hasProperty(transform, 'scaleZ', this.errorsText.TRANSFORM.NO_SCALE_Z)) return null;
+
+    const scaleX = this.parseNumber(transform.scaleX);
+    const scaleY = this.parseNumber(transform.scaleY);
+    const scaleZ = this.parseNumber(transform.scaleZ);
+    if (scaleX !== null && scaleY !== null && scaleZ !== null) {
+      transformState.scale = [scaleX, scaleY, scaleZ];
+    }
+
+    return transformState;
+  }
+
+  parseCustomImage(customImage: DeepPartial<CustomImageState>): CustomImage | null {
+    if (!this.hasProperty(customImage, 'ImageURL', this.errorsText.CUSTOM_IMAGE.IMAGE_URL.NO_PROPERTY)) return null;
+    if (!this.isPropertyString(customImage, 'ImageURL', this.errorsText.CUSTOM_IMAGE.IMAGE_URL.NOT_STRING)) return null;
+    if (!this.isURL(customImage.ImageURL, this.errorsText.CUSTOM_IMAGE.IMAGE_URL.INVALID)) return null;
+
     const flatActorState: CustomImage = {
-      faceURL,
+      faceURL: customImage.ImageURL,
     };
 
-    const backURL = TTSParser.parseURL(objectState.CustomImage?.ImageSecondaryURL);
-    backURL && (flatActorState.backURL = backURL);
+    if (
+      this.hasProperty(customImage, 'ImageSecondaryURL') &&
+      this.isPropertyString(customImage, 'ImageSecondaryURL', this.errorsText.CUSTOM_IMAGE.SECONDARY_URL.NOT_STRING) &&
+      this.isURL(customImage.ImageSecondaryURL, this.errorsText.CUSTOM_IMAGE.SECONDARY_URL.INVALID)
+    ) {
+      flatActorState.backURL = customImage.ImageSecondaryURL;
+    }
 
-    const widthScale = TTSParser.parseNumber(objectState.CustomImage?.WidthScale);
-    widthScale && (flatActorState.widthScale = widthScale);
+    if (this.hasProperty(customImage, 'WidthScale')) {
+      const widthScale = this.parseNumber(customImage.WidthScale);
+      if (widthScale !== null) flatActorState.widthScale = widthScale;
+    }
 
     return flatActorState;
   }
 
-  parseObject = (objectState: MinimalObjectState): ActorStateBase | null => {
-    try {
-      if (!hasProperty(objectState, 'Name')) {
-        this.errors.push(objectState.GUID);
-        return null;
-      }
+  parseTable = (tableObj: object): TableState | null => {
+    if (!this.hasProperty(tableObj, 'Table', this.errorsText.TALBE.NO_TYPE_PROPERTY)) return null;
+    if (!this.isPropertyString(tableObj, 'Table', this.errorsText.TALBE.TYPE_PROPERTY_NOT_STRING)) return null;
 
-      if (typeof objectState.Name !== 'string') {
-        this.errors.push(objectState.GUID);
-        return null;
-      }
-
-      const type = this.mapType(objectState.Name);
-      if (type === null) {
-        this.errors.push(objectState.GUID);
-        return null;
-      }
-
-      switch (type) {
-        case ActorType.BAG:
-          return this.parseBag(objectState as ObjectState) as unknown as ActorState;
-        case ActorType.CARD:
-          return this.parseCard(objectState as ObjectState) as unknown as ActorState;
-        case ActorType.TILE:
-          return this.parseTile(objectState as ObjectState) as unknown as ActorState;
-        case ActorType.TILE_STACK:
-          return this.parseTileStack(objectState as ObjectState) as unknown as ActorState;
-        case ActorType.DECK:
-          return this.parseDeck(objectState as ObjectState) as unknown as ActorState;
-        case ActorType.DIE4:
-        case ActorType.DIE6:
-        case ActorType.DIE8:
-        case ActorType.DIE10:
-        case ActorType.DIE12:
-        case ActorType.DIE20:
-          return this.parseDieN(objectState as ObjectState, ActorMapper[type]) as unknown as ActorState;
-        case ActorType.ACTOR:
-          return this.parseCustomObject(objectState as ObjectState) as unknown as ActorState;
-        default:
-          return null;
-      }
-    } catch (e) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-  };
-
-  parseTable = (obj: SaveState): TableState => {
     const tableState: TableState = {
-      type: this.mapTableType(obj.Table),
+      type: this.mapTableType(tableObj.Table),
     };
 
-    tableState.url ||= TTSParser.parseURL(obj.TableURL);
+    if (hasProperty(tableObj, 'TableURL')) {
+      if (!this.isPropertyString(tableObj, 'TableURL', this.errorsText.TALBE.TABLE_URL_NOT_STRING)) return null;
+      if (!this.isURL(tableObj.TableURL, this.errorsText.TALBE.TABLE_URL_INVALID)) return null;
+      tableState.url = tableObj.TableURL;
+    }
 
     return tableState;
   };
@@ -239,32 +319,40 @@ class TTSParser {
     return null;
   }
 
-  parseBag(objectState: ObjectState): BagState | null {
-    try {
-      const containedObjects = objectState.ContainedObjects.map(o => this.parseObject(o));
+  parseBag(objectState: MinimalObjectState): BagState | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
 
-      const model = this.parseModel(objectState);
+    if (!this.hasProperty(objectState, 'ContainedObjects', 'ERROR 11')) return null;
+    if (!this.isArray(objectState.ContainedObjects, 'ERROR 12')) return null;
 
-      const bagState: BagState = {
-        type: ActorType.BAG,
-        ...this.parseActorBase(objectState),
-        containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
-      };
+    const containedObjects = objectState.ContainedObjects.map(o => this.parseObject(o));
 
-      model && (bagState.model = model);
+    const model = this.parseModel(objectState);
 
-      return bagState;
-    } catch (e) {
-      return null;
-    }
+    const bagState: BagState = {
+      type: ActorType.BAG,
+      ...actorBase,
+      containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
+    };
+
+    model && (bagState.model = model);
+
+    return bagState;
   }
 
-  parseCard(objectState: ObjectState, deck?: ObjectState): CardState | null {
+  parseCard(objectState: MinimalObjectState, deck?: MinimalObjectState): CardState | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
     const cardID = objectState.CardID;
     if (!cardID) {
       this.errors.push(objectState.GUID);
       return null;
     }
+
+    if (!this.hasProperty(objectState, 'CustomDeck', 'ERROR 12')) return null;
+    if (!this.isObject(objectState.CustomDeck, 'ERROR 13')) return null;
 
     const deckId = +cardID.toString().slice(0, -2);
     const sequence = +cardID.toString().slice(-2);
@@ -273,32 +361,25 @@ class TTSParser {
       return null;
     }
 
-    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId];
-    if (!customDeckObj) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
+    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId]; // @todo validate
+    if (!this.isObject(customDeckObj, 'ERROR 14')) return null;
 
-    const faceURL = TTSParser.parseURL(customDeckObj.FaceURL);
-    if (!faceURL) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
+    if (!this.hasProperty(customDeckObj, 'FaceURL', 'ERROR 15')) return null;
+    if (!this.isString(customDeckObj.FaceURL, 'ERROR 16')) return null;
+    if (!this.isURL(customDeckObj.FaceURL, 'ERROR 17')) return null;
 
-    const backURL = TTSParser.parseURL(customDeckObj.BackURL);
-    if (!backURL) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
+    if (!this.hasProperty(customDeckObj, 'BackURL', 'ERROR 18')) return null;
+    if (!this.isString(customDeckObj.BackURL, 'ERROR 19')) return null;
+    if (!this.isURL(customDeckObj.BackURL, 'ERROR 20')) return null;
 
     const cols = customDeckObj.NumWidth ? +customDeckObj.NumWidth : 1;
     const rows = customDeckObj.NumHeight ? +customDeckObj.NumHeight : 1;
 
     const cardState: CardState = {
       type: ActorType.CARD,
-      ...this.parseActorBase(objectState),
-      faceURL,
-      backURL,
+      ...actorBase,
+      faceURL: customDeckObj.FaceURL,
+      backURL: customDeckObj.BackURL,
       cols,
       rows,
       sequence,
@@ -307,7 +388,10 @@ class TTSParser {
     return cardState;
   }
 
-  parseDeck(objectState: ObjectState): DeckState | null {
+  parseDeck(objectState: MinimalObjectState): DeckState | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
     if (!Array.isArray(objectState.ContainedObjects)) {
       this.errors.push(objectState.GUID);
       return null;
@@ -328,28 +412,24 @@ class TTSParser {
 
     return {
       type: ActorType.DECK,
-
-      ...this.parseActorBase(objectState),
+      ...actorBase,
       cards,
     };
   }
 
-  parseTile(objectState: ObjectState): TileState | null {
-    const faceURL = TTSParser.parseURL(objectState.CustomImage?.ImageURL);
-    if (!faceURL) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
+  parseTile(objectState: MinimalObjectState): TileState | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
 
-    const customImage = this.parseCustomImage(objectState);
-    if (!customImage) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
+    if (!this.hasProperty(objectState, 'CustomImage', this.errorsText.TILE.CUSTOM_IMAGE.NO_PROPERTY)) return null;
+    if (!this.isObject(objectState.CustomImage, this.errorsText.TILE.CUSTOM_IMAGE.NOT_OBJECT)) return null;
+
+    const customImage = this.parseCustomImage(objectState.CustomImage);
+    if (!customImage) return null;
 
     const tileState: TileState = {
       type: ActorType.TILE,
-      ...this.parseActorBase(objectState),
+      ...actorBase,
       ...customImage,
       tileType: objectState.CustomImage?.CustomTile.Type as unknown as TileType,
     };
@@ -357,14 +437,14 @@ class TTSParser {
     return tileState;
   }
 
-  parseTileStack(objectState: ObjectState): TileStackState | null {
+  parseTileStack(objectState: MinimalObjectState): TileStackState | null {
     const tileState = this.parseTile(objectState);
     if (!tileState) {
       this.errors.push(objectState.GUID);
       return null;
     }
 
-    const size = TTSParser.parseNumber(objectState?.Number);
+    const size = this.parseNumber(objectState?.Number);
     if (!size) {
       this.errors.push(objectState.GUID);
       return null;
@@ -377,43 +457,48 @@ class TTSParser {
     };
   }
 
-  parseCustomObject(objectState: ObjectState): ActorState | null {
-    try {
-      const model = this.parseModel(objectState);
-      if (!model) {
-        return null;
-      }
+  parseCustomObject(objectState: MinimalObjectState): ActorState | null {
+    if (!this.hasProperty(objectState, 'CustomMesh', this.errorsText.ACTOR.CUSTOM_MESH.NO_PROPERTY)) return null;
+    if (!this.isObject(objectState.CustomMesh, this.errorsText.ACTOR.CUSTOM_MESH.NOT_OBJECT)) return null;
 
-      const actorState: ActorState = {
-        type: ActorType.ACTOR,
-        ...this.parseActorBase(objectState),
-        model,
-      };
-
-      if (objectState?.ColorDiffuse) {
-        actorState.colorDiffuse = [objectState.ColorDiffuse.r, objectState.ColorDiffuse.g, objectState.ColorDiffuse.b];
-        if (objectState.ColorDiffuse.a && objectState.ColorDiffuse.a !== 1) {
-          actorState.colorDiffuse.push(objectState.ColorDiffuse.a);
-        }
-      }
-
-      if (objectState?.ChildObjects) {
-        actorState.children = objectState.ChildObjects.reduce<ActorState[]>((acc, o) => {
-          const actorState = this.parseObject(o);
-          if (actorState) {
-            acc.push(actorState as ActorState);
-          }
-          return acc;
-        }, []);
-      }
-
-      return actorState;
-    } catch (e) {
+    const model = this.parseModel(objectState.CustomMesh);
+    if (!model) {
       return null;
     }
+
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
+    const actorState: ActorState = {
+      type: ActorType.ACTOR,
+      ...actorBase,
+      model,
+    };
+
+    if (objectState?.ColorDiffuse) {
+      actorState.colorDiffuse = [objectState.ColorDiffuse.r, objectState.ColorDiffuse.g, objectState.ColorDiffuse.b];
+      if (objectState.ColorDiffuse.a && objectState.ColorDiffuse.a !== 1) {
+        actorState.colorDiffuse.push(objectState.ColorDiffuse.a);
+      }
+    }
+
+    if (objectState?.ChildObjects) {
+      actorState.children = objectState.ChildObjects.reduce<ActorState[]>((acc, o) => {
+        const actorState = this.parseObject(o);
+        if (actorState) {
+          acc.push(actorState as ActorState);
+        }
+        return acc;
+      }, []);
+    }
+
+    return actorState;
   }
 
   parseDieN<N extends DieType>(objectState: ObjectState, dieType: N): DieNState<N> | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
     const rotationValues = this.parseRotatioValues(objectState);
     if (!rotationValues) {
       this.errors.push(objectState.GUID);
@@ -426,13 +511,16 @@ class TTSParser {
     }
 
     return {
-      ...this.parseActorBase(objectState),
+      ...actorBase,
       type: DieMapper[dieType],
       rotationValues,
     };
   }
 
   parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
     const rotationValues = this.parseRotatioValues(objectState);
     if (!rotationValues) {
       this.errors.push(objectState.GUID);
@@ -440,7 +528,7 @@ class TTSParser {
     }
 
     const dieState = {
-      ...this.parseActorBase(objectState),
+      ...actorBase,
       rotationValues,
     };
 
@@ -487,7 +575,7 @@ class TTSParser {
       return null;
     }
 
-    const value = TTSParser.parseNumber(rotationValue.Value);
+    const value = this.parseNumber(rotationValue.Value);
     if (!value) {
       this.errors.push(guid);
       return null;
@@ -509,7 +597,7 @@ class TTSParser {
 
     const rotation: number[] = [];
     for (const r of ['x', 'y', 'z'] as const) {
-      const candidate = TTSParser.parseNumber(rotationValue.Rotation[r]);
+      const candidate = this.parseNumber(rotationValue.Rotation[r]);
       if (candidate === null) {
         this.errors.push(guid);
         return null;
@@ -523,20 +611,6 @@ class TTSParser {
 
     return { rotation, value };
   }
-
-  static parseURL(url: string | undefined): string | undefined {
-    if (!url) return undefined;
-    return url !== '' ? url : undefined;
-  }
-
-  static parseNumber(value: unknown): number | null {
-    if (isNumber(value)) return value;
-    if (isString(value)) {
-      const candidate = parseInt(value);
-      if (!isNaN(candidate)) return candidate;
-    }
-    return null;
-  }
 }
 
-export default new TTSParser();
+export const TTSParser = new TTSParserC();

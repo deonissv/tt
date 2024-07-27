@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { CreateBox } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { ActorStateBase, BagState } from '@shared/dto/states';
+import type { ActorBaseState, BagState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { Bag } from '@shared/playground/actors/Bag';
 import { useSimulationMock } from './mocks/SimulationMock';
@@ -48,7 +48,7 @@ describe('Bag', () => {
           rows: 1,
           cols: 1,
           sequence: 0,
-        } as ActorStateBase,
+        } as ActorBaseState,
       ],
     };
   });

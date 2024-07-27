@@ -1,11 +1,17 @@
 import { DEMO } from '@assets/demo';
-import { TTSParser } from '@client/src/TTSParser';
+import { TTSParserC } from '@client/src/TTSParser';
 import type { CardState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseCard', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse demo types', () => {
     const expected: CardState = {
       guid: '0c029c',
@@ -20,7 +26,7 @@ describe('TTSParser - parseCard', () => {
       sequence: 33,
     };
 
-    const result = TTSParser.parseCard(DEMO.CARD as unknown as ObjectState);
+    const result = parser.parseCard(DEMO.CARD as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 });

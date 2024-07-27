@@ -1,13 +1,19 @@
-import { MUNCHKIN_DECK_OBJ } from '@assets/munchkin';
-import TTSParser from '@client/src/TTSParser/TTSParser';
-import type { ActorStateBase, CardState } from '@shared/dto/states';
+import { MUNCHKIN } from '@assets/munchkin';
+import { TTSParserC } from '@client/src/TTSParser';
+import type { ActorBaseState, CardState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad, omitKeys } from '@shared/utils';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseDeck', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse a deck  with all properties', () => {
-    const expected: ActorStateBase & { cards: (ActorStateBase & Partial<CardState>)[] } = {
+    const expected: ActorBaseState & { cards: (ActorBaseState & Partial<CardState>)[] } = {
       type: 3,
       guid: '482ca1',
       name: 'Deck',
@@ -93,7 +99,7 @@ describe('TTSParser - parseDeck', () => {
       ],
     };
 
-    const parsed = TTSParser.parseDeck(MUNCHKIN_DECK_OBJ as unknown as ObjectState)!;
+    const parsed = parser.parseDeck(MUNCHKIN.DECK as unknown as ObjectState)!;
     expect(omitKeys(parsed, ['cards'])).toStrictEqual(omitKeys(expected, ['cards']));
 
     expected?.cards?.sort((a, b) => a.guid.localeCompare(b.guid));
@@ -105,6 +111,6 @@ describe('TTSParser - parseDeck', () => {
   });
 
   it('should return null for incorrect or malformed deck objects', () => {
-    expect(TTSParser.parseDeck({} as unknown as ObjectState) === null).toBeTruthy();
+    expect(parser.parseDeck({} as unknown as ObjectState) === null).toBeTruthy();
   });
 });

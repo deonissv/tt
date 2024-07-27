@@ -1,15 +1,15 @@
-import type { OpnitalAllBut } from '@shared/types';
+import type { OptionalAllBut } from '@shared/types';
 import type { Model } from '../Model';
-import type { ActorStateBase } from './ActorStateBase';
+import type { ActorBaseState } from './ActorBaseState';
 import type { ActorType } from './ActorType';
 
-export interface ActorState extends ActorStateBase {
+export interface ActorState extends ActorBaseState {
   type: ActorType.ACTOR;
 
   model: Model;
   colorDiffuse?: number[]; // default: [1, 1, 1]
   children?: ActorState[];
-  containedObjects?: ActorStateBase[];
+  containedObjects?: ActorBaseState[];
 }
 
-export type ActorStateUpdate = OpnitalAllBut<ActorState, 'guid'>;
+export type ActorStateUpdate = OptionalAllBut<ActorState, 'guid'>;

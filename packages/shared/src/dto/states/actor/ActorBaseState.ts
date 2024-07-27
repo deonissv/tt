@@ -1,7 +1,7 @@
 import type { Transformation } from '../Transformation';
 import type { ActorType } from './ActorType';
 
-export interface ActorStateBase {
+export interface ActorBaseState {
   type: ActorType;
 
   guid: string;

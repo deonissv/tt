@@ -1,11 +1,17 @@
 import { DEMO } from '@assets/demo';
-import { TTSParser } from '@client/src/TTSParser';
+import { TTSParserC } from '@client/src/TTSParser';
 import type { BagState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseBag', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse demo bag', () => {
     const expected: BagState = {
       guid: '7a0b0b',
@@ -25,7 +31,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = TTSParser.parseBag(DEMO.BAG as unknown as ObjectState);
+    const result = parser.parseBag(DEMO.BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 
@@ -48,7 +54,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = TTSParser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
+    const result = parser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 });

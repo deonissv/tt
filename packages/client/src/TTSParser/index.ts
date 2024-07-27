@@ -1,1 +1,1 @@
-export { default as TTSParser } from './TTSParser';
+export * from './TTSParser';

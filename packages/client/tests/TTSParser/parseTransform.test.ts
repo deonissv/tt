@@ -1,7 +1,13 @@
-import TTSParser from '@client/src/TTSParser/TTSParser';
-import { describe, expect, it } from 'vitest';
+import { TTSParserC } from '@client/src/TTSParser';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseTransform', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse a standard transformation object', () => {
     const transform = {
       posX: 10,
@@ -19,7 +25,7 @@ describe('TTSParser - parseTransform', () => {
       rotation: [45, 90, 180].map(deg => (deg * Math.PI) / 180),
       scale: [1, 1, 1],
     };
-    expect(TTSParser.parseTransform(transform)).toEqual(expected);
+    expect(parser.parseTransform(transform)).toEqual(expected);
   });
 
   it('should handle negative values for position and rotation', () => {
@@ -39,7 +45,7 @@ describe('TTSParser - parseTransform', () => {
       rotation: [-45, -90, -180].map(deg => (deg * Math.PI) / 180),
       scale: [1, 1, 1],
     };
-    expect(TTSParser.parseTransform(transform)).toEqual(expected);
+    expect(parser.parseTransform(transform)).toEqual(expected);
   });
 
   it('should correctly handle zero values', () => {
@@ -59,6 +65,6 @@ describe('TTSParser - parseTransform', () => {
       rotation: [0, 0, 0].map(deg => (deg * Math.PI) / 180),
       scale: [1, 1, 1],
     };
-    expect(TTSParser.parseTransform(transform)).toEqual(expected);
+    expect(parser.parseTransform(transform)).toEqual(expected);
   });
 });

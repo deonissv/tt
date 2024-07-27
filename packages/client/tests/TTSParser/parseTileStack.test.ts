@@ -1,12 +1,18 @@
 import { DEMO } from '@assets/demo';
-import TTSParser from '@client/src/TTSParser/TTSParser';
+import { TTSParserC } from '@client/src/TTSParser';
 import { ActorType } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseTile', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse catan box tile', () => {
     const expected: TileStackState = {
       guid: '51d35d',
@@ -21,9 +27,10 @@ describe('TTSParser - parseTile', () => {
       faceURL: 'http://i.imgur.com/vURavdX.jpg',
       backURL: 'http://i.imgur.com/vURavdX.jpg',
       size: 10,
+      widthScale: 0,
     };
 
-    const parsed = TTSParser.parseTileStack(DEMO.TILE_STACK as unknown as ObjectState)!;
+    const parsed = parser.parseTileStack(DEMO.TILE_STACK as unknown as ObjectState)!;
     expect(parsed).toStrictEqual(expected);
   });
 });

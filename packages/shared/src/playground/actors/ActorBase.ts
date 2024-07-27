@@ -10,8 +10,8 @@ import { MASS_DEFAULT, MOVEMENT_VELOCITY, PRECISION_EPSILON, ROTATE_STEP, SCALE_
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import {
   ActorType,
+  type ActorBaseState,
   type ActorState,
-  type ActorStateBase,
   type ActorStateUpdate,
   type Transformation,
 } from '@shared/dto/states';
@@ -25,7 +25,7 @@ export class ActorBase extends TransformNode {
   __mass: number;
   __model: Mesh;
   __collider: Mesh;
-  __state: ActorStateBase;
+  __state: ActorBaseState;
 
   _body: PhysicsBody;
   __flipTranslate = 0;
@@ -41,7 +41,7 @@ export class ActorBase extends TransformNode {
     transformation?: Transformation,
     mass?: number,
     colorDiffuse?: number[],
-    state?: ActorStateBase,
+    state?: ActorBaseState,
   ) {
     super(name || guid, undefined, true);
 
@@ -303,7 +303,7 @@ export class ActorBase extends TransformNode {
     };
   }
 
-  toStateUpdate(actorState?: ActorStateBase): ActorStateUpdate | null {
+  toStateUpdate(actorState?: ActorBaseState): ActorStateUpdate | null {
     const currentState = this.toState();
 
     if (!actorState) {
@@ -367,12 +367,12 @@ export class ActorBase extends TransformNode {
     }
   }
 
-  static applyStateUpdate(actorState: ActorStateBase, actorStateUpdate: ActorStateUpdate): ActorStateBase {
+  static applyStateUpdate(actorState: ActorBaseState, actorStateUpdate: ActorStateUpdate): ActorBaseState {
     const mergedScale = actorStateUpdate.transformation?.scale ?? actorState.transformation?.scale;
     const mergedPosition = actorStateUpdate.transformation?.position ?? actorState.transformation?.position;
     const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
 
-    const rv: ActorStateBase = {
+    const rv: ActorBaseState = {
       type: actorState.type,
 
       guid: actorStateUpdate.guid,

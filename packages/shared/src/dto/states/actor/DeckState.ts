@@ -1,8 +1,8 @@
-import type { ActorStateBase } from './ActorStateBase';
+import type { ActorBaseState } from './ActorBaseState';
 import type { ActorType } from './ActorType';
 import type { CardState } from './CardState';
 
-export interface DeckState extends ActorStateBase {
+export interface DeckState extends ActorBaseState {
   type: ActorType.DECK;
   cards: CardState[];
 }

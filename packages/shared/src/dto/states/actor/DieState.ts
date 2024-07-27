@@ -1,5 +1,5 @@
 import type { Tuple } from '@shared/types';
-import type { ActorStateBase } from './ActorStateBase';
+import type { ActorBaseState } from './ActorBaseState';
 import { ActorType } from './ActorType';
 
 export interface RotationValue {
@@ -7,7 +7,7 @@ export interface RotationValue {
   rotation: Tuple<number, 3>;
 }
 
-export interface DieBaseState extends ActorStateBase {
+export interface DieBaseState extends ActorBaseState {
   rotationValues: RotationValue[];
 }
 

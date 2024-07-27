@@ -1,4 +1,4 @@
-import type { ActorStateBase } from './ActorStateBase';
+import type { ActorBaseState } from './ActorBaseState';
 import type { ActorType } from './ActorType';
 import type { CustomImage } from './FlatActorState';
 
@@ -9,7 +9,7 @@ export enum TileType {
   ROUNDED,
 }
 
-export interface TileState extends ActorStateBase, CustomImage {
+export interface TileState extends ActorBaseState, CustomImage {
   type: ActorType.TILE;
 
   tileType: TileType;

@@ -1,11 +1,17 @@
-import { CHESS_PAWN_OBJ } from '@assets/chess5';
-import TTSParser from '@client/src/TTSParser/TTSParser';
+import { CHESS5 } from '@assets/chess5';
+import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import type { ActorState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseCustomObject', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse a custom object with all properties', () => {
     const expected: ActorState = {
       type: 0,
@@ -23,6 +29,6 @@ describe('TTSParser - parseCustomObject', () => {
       },
       colorDiffuse: [1.0, 1.0, 1.0],
     };
-    expect(TTSParser.parseCustomObject(CHESS_PAWN_OBJ as unknown as ObjectState)).toEqual(expected);
+    expect(parser.parseCustomObject(CHESS5.PAWN as unknown as ObjectState)).toEqual(expected);
   });
 });

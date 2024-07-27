@@ -25,7 +25,7 @@ import type {
   TableState,
   TileState,
 } from '@shared/dto/states';
-import { ActorType, type ActorStateBase } from '@shared/dto/states';
+import { ActorType, type ActorBaseState } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
 import type { Action } from '@shared/ws/ws';
@@ -95,7 +95,7 @@ export abstract class SimulationBase {
     return await EngineFactory(canvas);
   }
 
-  static async actorFromState(actorState: ActorStateBase): Promise<ActorBase | null> {
+  static async actorFromState(actorState: ActorBaseState): Promise<ActorBase | null> {
     switch (actorState.type) {
       case ActorType.TILE:
         return await Tile.fromState(actorState as TileState);

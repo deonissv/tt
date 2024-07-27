@@ -1,4 +1,4 @@
-import type { ActorStateBase } from './ActorStateBase';
+import type { ActorBaseState } from './ActorBaseState';
 import type { ActorType } from './ActorType';
 
 export interface CardGrid {
@@ -10,6 +10,6 @@ export interface CardGrid {
   sequence: number;
 }
 
-export interface CardState extends ActorStateBase, CardGrid {
+export interface CardState extends ActorBaseState, CardGrid {
   type: ActorType.CARD;
 }

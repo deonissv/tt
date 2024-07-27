@@ -1,11 +1,17 @@
 import { DEMO } from '@assets/demo';
-import { TTSParser } from '@client/src/TTSParser';
+import { TTSParserC } from '@client/src/TTSParser';
 import type { Die4State, Die6State, Die8State } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseDie', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse demo die4', () => {
     const expected: Die4State = {
       guid: '60c5a3',
@@ -31,7 +37,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = TTSParser.parseDieN(DEMO.DIE4 as unknown as ObjectState, 4);
+    const result = parser.parseDieN(DEMO.DIE4 as unknown as ObjectState, 4);
     expect(result).toMatchObject(expected);
   });
 
@@ -68,7 +74,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = TTSParser.parseDieN(DEMO.DIE6 as unknown as ObjectState, 6);
+    const result = parser.parseDieN(DEMO.DIE6 as unknown as ObjectState, 6);
     expect(result).toMatchObject(expected);
   });
 
@@ -113,7 +119,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = TTSParser.parseDieN(DEMO.DIE8 as unknown as ObjectState, 8);
+    const result = parser.parseDieN(DEMO.DIE8 as unknown as ObjectState, 8);
     expect(result).toMatchObject(expected);
   });
 });

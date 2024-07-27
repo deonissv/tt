@@ -1,9 +1,15 @@
 import { DEMO } from '@assets/demo';
-import { TTSParser } from '@client/src/TTSParser';
+import { TTSParserC } from '@client/src/TTSParser';
 import { ActorType } from '@shared/dto/states';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - mapType', () => {
+  let parser: TTSParserC;
+
+  beforeEach(() => {
+    parser = new TTSParserC();
+  });
+
   it('should correctly parse demo types', () => {
     const expected = [
       ActorType.DECK,
@@ -28,12 +34,12 @@ describe('TTSParser - mapType', () => {
       ActorType.BAG,
     ];
 
-    const result = DEMO.OBJ.ObjectStates.map(obj => TTSParser.mapType(obj.Name));
+    const result = DEMO.OBJ.ObjectStates.map(obj => parser.mapType(obj.Name));
     expect(result).toEqual(expected);
   });
 
   it('should return null for unknown types', () => {
-    const result = TTSParser.mapType('Unknown');
+    const result = parser.mapType('Unknown');
     expect(result === null).toBeTruthy();
   });
 });

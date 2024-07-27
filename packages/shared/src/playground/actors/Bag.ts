@@ -1,6 +1,6 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { STATIC_HOST } from '@shared/constants';
-import type { ActorStateBase, BagState, Model } from '@shared/dto/states';
+import type { ActorBaseState, BagState, Model } from '@shared/dto/states';
 import type { Containable } from '../actions/Containable';
 import { Loader } from '../Loader';
 import { SimulationBase } from '../Simulation';
@@ -17,7 +17,7 @@ const BAG_MODEL: Model = {
 
 export class Bag extends ActorBase implements Containable {
   declare __state: BagState;
-  items: ActorStateBase[];
+  items: ActorBaseState[];
 
   constructor(state: BagState, model: Mesh, colliderMesh?: Mesh) {
     super(state.guid, state.name, model, colliderMesh, state.transformation, BAG_MASS, undefined, state);

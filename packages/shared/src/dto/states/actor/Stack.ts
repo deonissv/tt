@@ -1,9 +1,9 @@
-import type { ActorStateBase } from './ActorStateBase';
+import type { ActorBaseState } from './ActorBaseState';
 import type { ActorType } from './ActorType';
 import type { CustomImage } from './FlatActorState';
 import type { TileType } from './TileState';
 
-export interface StackBaseState extends ActorStateBase, CustomImage {
+export interface StackBaseState extends ActorBaseState, CustomImage {
   size: number;
 }
 
