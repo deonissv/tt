@@ -7,6 +7,7 @@ import { CreateGame } from './pages/CreateGame/CreateGame';
 import CreateRoom from './pages/CreateRoom';
 import JoinRoom from './pages/JoinRoom';
 import Login from './pages/Login/Login';
+import Playground from './pages/Playground';
 import Profile from './pages/Profile/Profile';
 import Room from './pages/Room';
 import Signup from './pages/Signup/Signup';
@@ -40,6 +41,7 @@ const App = () => {
   return (
     <Routes>
       <Route path="room/:roomCode" element={<Room />} />
+      <Route path="playground" element={<Playground />} />
       <Route element={<Layout />}>
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
