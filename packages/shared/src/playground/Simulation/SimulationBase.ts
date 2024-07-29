@@ -36,6 +36,7 @@ import {
   ActorBase,
   Bag,
   Card,
+  CustomRectangleTable,
   Deck,
   Die10,
   Die12,
@@ -43,9 +44,14 @@ import {
   Die4,
   Die6,
   Die8,
-  RectangleCustomTable,
   Tile,
 } from '../actors';
+import { CircleTable } from '../actors/CircleTable';
+import { CustomSquareTable } from '../actors/CustomSquareTable';
+import { GlassTable } from '../actors/GlassTable';
+import { HexTable } from '../actors/HexTable';
+import { OctagonTable } from '../actors/OctagonTable';
+import { SquareTable } from '../actors/SquareTable';
 import { TileStack } from '../actors/TileStack';
 import { Logger } from '../Logger';
 import { EngineFactory } from './SimulationEngine';
@@ -130,11 +136,25 @@ export abstract class SimulationBase {
   }
 
   static async tableFromState(tableState: TableState): Promise<ActorBase | null> {
+    Logger.log(`Initializing table type: ${tableState.type}`);
     switch (tableState.type) {
+      case 'Hexagon':
+        return await HexTable.fromState();
+      case 'Circle':
+        return await CircleTable.fromState();
+      case 'CircleGlass':
+        return await GlassTable.fromState();
+      case 'Square':
+        return await SquareTable.fromState();
+      case 'CustomRectangle':
+        return await CustomRectangleTable.fromState(tableState);
+      case 'Octagon':
+        return await OctagonTable.fromState();
+      case 'CustomSquare':
+        return await CustomSquareTable.fromState(tableState);
       case 'Rectangle':
-      case 'Custom':
-        return await RectangleCustomTable.fromState(tableState);
-      default:
+      case 'Poker':
+      case 'None':
         return null;
     }
   }

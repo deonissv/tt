@@ -256,9 +256,12 @@ export class TTSParserC extends ParserBase {
     };
 
     if (hasProperty(tableObj, 'TableURL')) {
-      if (!this.isPropertyString(tableObj, 'TableURL', this.errorsText.TALBE.TABLE_URL_NOT_STRING)) return null;
-      if (!this.isURL(tableObj.TableURL, this.errorsText.TALBE.TABLE_URL_INVALID)) return null;
-      tableState.url = tableObj.TableURL;
+      if (
+        this.isPropertyString(tableObj, 'TableURL', this.errorsText.TALBE.TABLE_URL_NOT_STRING) &&
+        this.isURL(tableObj.TableURL, this.errorsText.TALBE.TABLE_URL_INVALID)
+      ) {
+        tableState.url = tableObj.TableURL;
+      }
     }
 
     return tableState;
@@ -270,7 +273,7 @@ export class TTSParserC extends ParserBase {
       case 'Table_Circular':
         return 'Circle';
       case 'Table_Glass':
-        return 'Glass';
+        return 'CircleGlass';
       case 'Table_Hexagon':
         return 'Hexagon';
       case 'Table_Octagon':
@@ -278,10 +281,11 @@ export class TTSParserC extends ParserBase {
       case 'Table_Poker':
         return 'Poker';
       case 'Table_RPG':
-        return 'RPG';
+        return 'Rectangle';
       case 'Table_Custom':
-        return 'Custom';
-      case '':
+        return 'CustomRectangle';
+      case 'Table_Custom_Square':
+        return 'CustomSquare';
       default:
         return 'None';
     }

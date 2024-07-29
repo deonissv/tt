@@ -12,7 +12,7 @@ import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
 
 const RETRY_ATTEMPTS = 3;
-const RETRY_DELAY = 500; // ms
+const RETRY_DELAY = 1000; // ms
 
 OBJFileLoader.SKIP_MATERIALS = true;
 

@@ -1,3 +1,4 @@
+import type { Texture } from '@babylonjs/core';
 import { type Mesh } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
 import type { TileState } from '@shared/dto/states';
@@ -49,6 +50,23 @@ export class Tile extends ActorBase {
     }
   }
 
+  static getTextureBounds(
+    texture: Texture | null,
+    vertStart: number,
+    vertCount: number,
+    faceIndexStart: number,
+    faceIndexCount: number,
+  ): TextureBounds | undefined {
+    if (!texture) return undefined;
+    return {
+      texture,
+      vertStart,
+      vertCount,
+      faceIndexStart,
+      faceIndexCount,
+    };
+  }
+
   static async getBoxTileModel(faceURL: string, backURL?: string) {
     const model = await Loader.loadMesh(SQUARE_TILE_URL);
 
@@ -57,29 +75,13 @@ export class Tile extends ActorBase {
     }
 
     const faceTexture = await Loader.loadTexture(faceURL);
-    if (!faceTexture) {
-      return null;
-    }
-
     const backTexture = backURL ? await Loader.loadTexture(backURL) : faceTexture;
 
     const vertStart = 0;
     const vertCount = 24;
-    const faceTextureBounds: TextureBounds = {
-      texture: faceTexture,
-      vertStart,
-      vertCount,
-      faceIndexStart: 24,
-      faceIndexCount: 6,
-    };
 
-    const backTextureBounds: TextureBounds = {
-      texture: backTexture ?? faceTexture,
-      vertStart,
-      vertCount,
-      faceIndexStart: 30,
-      faceIndexCount: 6,
-    };
+    const faceTextureBounds = Tile.getTextureBounds(faceTexture, vertStart, vertCount, 24, 6);
+    const backTextureBounds = Tile.getTextureBounds(backTexture, vertStart, vertCount, 30, 6);
 
     return FlatMoodel(model, faceTextureBounds, backTextureBounds);
   }
@@ -92,29 +94,12 @@ export class Tile extends ActorBase {
     }
 
     const faceTexture = await Loader.loadTexture(faceURL);
-    if (!faceTexture) {
-      return null;
-    }
-
     const backTexture = backURL ? await Loader.loadTexture(backURL) : faceTexture;
 
     const vertStart = 0;
     const vertCount = 38;
-    const faceTextureBounds: TextureBounds = {
-      texture: faceTexture,
-      vertStart,
-      vertCount,
-      faceIndexStart: 36,
-      faceIndexCount: 18,
-    };
-
-    const backTextureBounds: TextureBounds = {
-      texture: backTexture ?? faceTexture,
-      vertStart,
-      vertCount,
-      faceIndexStart: 54,
-      faceIndexCount: 18,
-    };
+    const faceTextureBounds = Tile.getTextureBounds(faceTexture, vertStart, vertCount, 36, 18);
+    const backTextureBounds = Tile.getTextureBounds(backTexture, vertStart, vertCount, 54, 18);
 
     return FlatMoodel(model, faceTextureBounds, backTextureBounds);
   }
@@ -127,29 +112,12 @@ export class Tile extends ActorBase {
     }
 
     const faceTexture = await Loader.loadTexture(faceURL);
-    if (!faceTexture) {
-      return null;
-    }
-
     const backTexture = backURL ? await Loader.loadTexture(backURL) : faceTexture;
 
     const vertStart = 0;
     const vertCount = 132;
-    const faceTextureBounds: TextureBounds = {
-      texture: faceTexture,
-      vertStart,
-      vertCount,
-      faceIndexStart: 192,
-      faceIndexCount: 96,
-    };
-
-    const backTextureBounds: TextureBounds = {
-      texture: backTexture ?? faceTexture,
-      vertStart,
-      vertCount,
-      faceIndexStart: 288,
-      faceIndexCount: 96,
-    };
+    const faceTextureBounds = Tile.getTextureBounds(faceTexture, vertStart, vertCount, 192, 96);
+    const backTextureBounds = Tile.getTextureBounds(backTexture, vertStart, vertCount, 288, 96);
 
     return FlatMoodel(model, faceTextureBounds, backTextureBounds);
   }

@@ -28,7 +28,7 @@ export class ActorBase extends TransformNode {
   __state: ActorBaseState;
 
   _body: PhysicsBody;
-  __flipTranslate = 0;
+  __flipTranslate = 1;
   __targetPosition: Vector3 | null = null;
 
   colorDiffuse: number[] = [];
@@ -73,7 +73,6 @@ export class ActorBase extends TransformNode {
     //   inertiaOrientation: Quaternion.Identity(),
     // });
 
-    this.__flipTranslate = 1;
     this._setTransformations(transformation);
     // this._addDragBehavior();
 
@@ -287,7 +286,7 @@ export class ActorBase extends TransformNode {
     }
 
     const meshes = [colliderMesh, ...childMeshes];
-    const mesh = meshes.length > 1 ? Mesh.MergeMeshes(meshes, true, true, undefined, false, false)! : meshes[0];
+    const mesh = meshes.length > 1 ? Mesh.MergeMeshes(meshes, true, true, undefined, true, true)! : meshes[0];
 
     mesh.setEnabled(true);
     return mesh;
