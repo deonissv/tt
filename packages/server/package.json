@@ -5,8 +5,8 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-require-module --experimental-vm-modules \" webpack --config webpack.config.js --env production",
-    "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-require-module --experimental-vm-modules \" webpack --config webpack.config.js --watch",
+    "build": "NODE_OPTIONS=\"$NODE_OPTIONS NODE_NO_WARNINGS=1 --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules \" NODE_NO_WARNINGS=1  webpack --config ./webpack.config.js --env production",
+    "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules\" NODE_NO_WARNINGS=1  webpack --config ./webpack.config.js --watch",
     "lint": "eslint --ext .ts src",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "vitest run --config ../../vitest.config.ts",

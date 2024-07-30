@@ -1,5 +1,15 @@
+import HavokPhysics from '@babylonjs/havok';
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { WebSocket } from 'ws';
 import { PRECISION_EPSILON } from './constants';
+
+export async function initHavok() {
+  const wasm = path.join(__dirname, '../node_modules/@babylonjs/havok/lib/esm/HavokPhysics.wasm');
+  const wasmBinary = fs.readFileSync(wasm);
+  global.havok = await HavokPhysics({ wasmBinary });
+}
 
 export function floatCompare(a: number, b: number, epsilon = PRECISION_EPSILON): boolean {
   return Math.abs(a - b) < epsilon;

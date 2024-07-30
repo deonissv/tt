@@ -5,9 +5,9 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { Logger as PGLogger } from '@shared/playground';
+import { initHavok } from '@shared/utils';
 import { AppModule } from './app.module';
 import { mainConfig } from './main.config';
-import { initHavok } from './utils';
 
 declare const module: any;
 
