@@ -16,6 +16,9 @@ export default defineConfig({
     globals: true,
     root: './',
   },
+  testTimeout: 30000,
+  hookTimeout: 60000,
+  teardownTimeout: 60000,
   plugins: [
     swc.vite({
       module: { type: 'es6' },
