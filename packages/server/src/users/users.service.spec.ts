@@ -1,13 +1,9 @@
-import bcrypt from 'bcrypt';
-import { jest } from '@jest/globals';
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
+import type { User } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
-import { ConfigService } from '@nestjs/config';
-import type { PrismaClient, User } from '@prisma/client';
 
-import { PrismaService } from '../prisma.service';
-import configServiceMock from '../../test/configServiceMock';
+import { configServiceMock } from '../../test/configServiceMock';
+import type { PrismaService } from '../prisma.service';
 
 const user: User = {
   userId: 1,
@@ -21,41 +17,28 @@ const user: User = {
 };
 
 const usersArray: User[] = [user];
-
-const db = {
+const useDb = () => ({
   user: {
-    findMany: jest.fn<typeof PrismaClient.prototype.user.findMany>().mockResolvedValue(usersArray),
-    findUnique: jest.fn<typeof PrismaClient.prototype.user.findUnique>().mockResolvedValue(user),
-    findFirst: jest.fn<typeof PrismaClient.prototype.user.findFirst>().mockResolvedValue(user),
-    create: jest.fn<typeof PrismaClient.prototype.user.create>().mockResolvedValue(user),
-    update: jest.fn<typeof PrismaClient.prototype.user.update>().mockResolvedValue(user),
-    delete: jest.fn<typeof PrismaClient.prototype.user.delete>().mockResolvedValue(user),
+    findMany: vi.fn().mockResolvedValue(usersArray),
+    findUnique: vi.fn().mockResolvedValue(user),
+    findFirst: vi.fn().mockResolvedValue(user),
+    create: vi.fn().mockResolvedValue(user),
+    update: vi.fn().mockResolvedValue(user),
+    delete: vi.fn().mockResolvedValue(user),
   },
-};
+});
 
 describe('AuthService', () => {
   let usersService: UsersService;
+  let db = useDb();
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UsersService,
-        {
-          provide: PrismaService,
-          useValue: db,
-        },
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
-      ],
-    }).compile();
-
-    usersService = module.get<UsersService>(UsersService);
+  beforeEach(() => {
+    db = useDb();
+    usersService = new UsersService(db as unknown as PrismaService, configServiceMock);
   });
 
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should be defined', () => {
@@ -64,8 +47,8 @@ describe('AuthService', () => {
 
   describe('create', () => {
     it('should create a user', async () => {
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
-      db.user.findUnique.mockResolvedValueOnce(null);
+      vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
+      vi.spyOn(db.user, 'findUnique').mockResolvedValueOnce(null);
 
       await usersService.create({
         email: 'email',
@@ -86,7 +69,7 @@ describe('AuthService', () => {
     });
 
     it('should throw as email exists', async () => {
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
+      vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
 
       await expect(
         usersService.create({
@@ -101,7 +84,7 @@ describe('AuthService', () => {
 
   describe('update', () => {
     it('should update a user', async () => {
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
+      vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
       await usersService.update(1, {
         username: 'username',
         avatarUrl: 'avatarUrl',

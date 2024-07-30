@@ -4,10 +4,12 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
+import { initHavok } from '@shared/initHavok';
 import { Logger as PGLogger } from '@shared/playground';
 import { AppModule } from './app.module';
 import { mainConfig } from './main.config';
-import { initHavok } from './utils';
+
+declare const module: any;
 
 async function bootstrap() {
   await initHavok();
@@ -43,5 +45,13 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   await app.listen(configService.getOrThrow<string>('PORT'));
+
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  if (module.hot) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    module.hot.accept();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    module.hot.dispose(() => app.close());
+  }
 }
 void bootstrap();

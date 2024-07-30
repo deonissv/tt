@@ -1,5 +1,5 @@
 import { execSync } from 'child_process';
-import type { StartedTestContainer } from 'testcontainers';
+import type { StartedTestContainer, TestContainer } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
 
 const POSTGRES_USER = 'test';
@@ -14,6 +14,9 @@ export function prismaMigrate(databaseUrl: string): void {
     env: { ...process.env, DATABASE_URL: databaseUrl },
   });
 }
+export const container: TestContainer = new GenericContainer('alpine');
+// const startedContainer: StartedTestContainer = await container.start();
+// const stoppedContainer: StoppedTestContainer = await startedContainer.stop();
 
 export async function startContainer(): Promise<StartedTestContainer> {
   return await new GenericContainer('postgres:14-alpine')

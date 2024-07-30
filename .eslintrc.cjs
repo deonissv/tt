@@ -3,7 +3,6 @@ module.exports = {
   env: {
     browser: true,
     node: true,
-    jest: true,
     es2020: true,
   },
   parser: '@typescript-eslint/parser',
@@ -26,7 +25,7 @@ module.exports = {
     'plugin:@typescript-eslint/stylistic-type-checked',
     'plugin:@typescript-eslint/recommended-type-checked',
   ],
-  ignorePatterns: ['dist', '.eslintrc.cjs'],
+  ignorePatterns: ['dist', '.eslintrc.cjs', '*.config.ts', '*.config.js', 'vitest*'],
   plugins: ['react-refresh', '@typescript-eslint'],
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',

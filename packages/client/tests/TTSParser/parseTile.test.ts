@@ -3,7 +3,6 @@ import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import type { TileState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
-import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseTile', () => {
   let parser: TTSParserC;

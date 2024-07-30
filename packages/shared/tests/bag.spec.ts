@@ -1,5 +1,3 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { CreateBox } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { ActorBaseState, BagState } from '@shared/dto/states';
