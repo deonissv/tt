@@ -12,7 +12,7 @@
     "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite",
     "test": "vitest run --config ../../vitest.config.ts",
     "test:w": "vitest --config ../../vitest.config.ts",
-    "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"
   },
