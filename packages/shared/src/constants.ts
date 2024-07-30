@@ -1,5 +1,9 @@
-export const STATIC_HOST = 'http://192.168.43.141:5500';
-export const URL_PREFIX = 'http://192.168.43.141:3000/?url=';
+// export const HOST= '192.168.43.141';
+export const HOST = 'localhost';
+export const API_PORT = 3000;
+
+export const STATIC_HOST = `http://${HOST}:5500`;
+export const URL_PREFIX = `http://${HOST}:3000/?url=`;
 
 export const PRECISION_EPSILON = 0.005;
 

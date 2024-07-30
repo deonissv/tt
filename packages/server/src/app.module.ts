@@ -1,18 +1,21 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import path from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { RoomsModule } from './rooms/rooms.module';
+import { EventsModule } from './events/events.module';
 import { GamesModule } from './games/games.module';
 import { MessagesModule } from './messages/messages.module';
-import { ConfigModule } from '@nestjs/config';
-import { EventsModule } from './events/events.module';
+import { RoomsModule } from './rooms/rooms.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env',
+      envFilePath: path.resolve(__dirname, '..', '.env'),
+      expandVariables: true,
+      isGlobal: true,
     }),
     UsersModule,
     RoomsModule,

@@ -1,40 +1,29 @@
-import { jest } from '@jest/globals';
-import { ConfigService } from '@nestjs/config';
-import { Test } from '@nestjs/testing';
-
+import type { INestApplication } from '@nestjs/common';
+import { useApp } from '@server/test/useApp';
+import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { authMockAdmin } from '../../test/authMock';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import { AuthModule } from '../auth/auth.module';
-import { PrismaService } from '../prisma.service';
-import { RoomsModule } from './rooms.module';
+import type { PrismaService } from '../prisma.service';
 import { RoomsService } from './rooms.service';
 import type { SimulationRoom } from './simulation-room';
 
 describe('RoomsService', () => {
-  let roomsService: RoomsService;
+  useDatabaseMock();
   let prismaService: PrismaService;
-  const mockDB = useDatabaseMock();
+  let app: INestApplication;
+  let roomsService: RoomsService;
 
   beforeAll(async () => {
-    prismaService = mockDB();
+    [app, prismaService] = await useApp();
+    roomsService = app.get<RoomsService>(RoomsService);
+  });
 
-    const configService = useConfigServiceMock();
-    const module = await Test.createTestingModule({
-      imports: [RoomsModule, AuthModule],
-    })
-      .overrideProvider(PrismaService)
-      .useValue(prismaService)
-      .overrideProvider(ConfigService)
-      .useValue(configService)
-      .compile();
-
-    roomsService = module.get<RoomsService>(RoomsService);
+  afterAll(async () => {
+    await app.close();
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -325,7 +314,7 @@ describe('RoomsService', () => {
         },
       });
 
-      jest.spyOn(RoomsService.rooms, 'get').mockReturnValue({
+      vi.spyOn(RoomsService.rooms, 'get').mockReturnValue({
         simulation: {
           toState: () => simState2,
         },

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "types": ["vitest/globals"],
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -20,7 +21,8 @@
     "rootDir": "../",
     "composite": true,
     "paths": {
-      "@shared/*": ["shared/src/*"]
+      "@shared/*": ["shared/src/*"],
+      "@server/*": ["server/*"]
     }
   },
   "include": ["./../server/**/*",  "../shared/src/**/*"],

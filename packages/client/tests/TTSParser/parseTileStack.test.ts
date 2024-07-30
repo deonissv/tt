@@ -4,7 +4,6 @@ import { ActorType } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
-import { beforeEach, describe, expect, it } from 'vitest';
 
 describe('TTSParser - parseTile', () => {
   let parser: TTSParserC;

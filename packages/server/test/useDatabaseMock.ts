@@ -3,7 +3,7 @@ import type { StartedTestContainer } from 'testcontainers';
 import { PrismaService } from '../src/prisma.service';
 import { getDatabaseUrl, prismaMigrate, startContainer } from './testUtils';
 
-export default (): (() => PrismaService) => {
+const DBMockFactory = (): (() => PrismaService) => {
   let container: StartedTestContainer;
   let prismaService: PrismaService;
   let dbUrl: string;
@@ -29,3 +29,5 @@ export default (): (() => PrismaService) => {
 
   return () => prismaService;
 };
+
+export const useDatabaseMock = DBMockFactory();

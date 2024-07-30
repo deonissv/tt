@@ -1,10 +1,10 @@
 import * as http from 'http';
 import type internal from 'node:stream';
 
+import { HttpAdapterHost } from '@nestjs/core';
 import type { OnGatewayInit } from '@nestjs/websockets';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'ws';
-import { HttpAdapterHost } from '@nestjs/core';
 import { AuthService } from '../auth/auth.service';
 import { JwtStrategy } from '../auth/jwt.strategy';
 import { RoomsService } from '../rooms/rooms.service';
@@ -55,7 +55,7 @@ export class EventsGateway implements OnGatewayInit {
 
   afterInit(_wss: Server) {
     _wss.setMaxListeners(255);
-    const httpServer = this.adapterHost.httpAdapter.getHttpServer() as http.Server;
+    const httpServer = (this.adapterHost ? this.adapterHost.httpAdapter.getHttpServer() : this.server) as http.Server;
     httpServer.removeAllListeners('upgrade');
     httpServer.on('upgrade', async (request, socket, head) => {
       const tokenString = request.headers['sec-websocket-protocol']?.split(' ').find(p => p.startsWith('Bearer'));

@@ -1,37 +1,24 @@
-import { beforeAll, describe, it, expect } from 'vitest';
-import * as request from 'supertest';
-import { ConfigService } from '@nestjs/config';
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
+import request from 'supertest';
 
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import { AuthModule } from './auth.module';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
+import type { User } from '@prisma/client';
+import { useApp } from '@server/test/useApp';
+import type { CreateUserDto } from '@shared/dto/users';
+import { useDatabaseMock } from '../../test/useDatabaseMock';
+import type { PrismaService } from '../prisma.service';
 
 describe('AuthModule', () => {
-  let app: INestApplication;
-  let module: TestingModule;
+  useDatabaseMock();
   let prismaService: PrismaService;
-  const mockDB = useDatabaseMock();
+  let app: INestApplication;
 
   beforeAll(async () => {
-    prismaService = mockDB();
+    [app, prismaService] = await useApp();
+  });
 
-    const configService = useConfigServiceMock();
-    module = await Test.createTestingModule({
-      imports: [AuthModule],
-    })
-      .overrideProvider(PrismaService)
-      .useValue(prismaService)
-      .overrideProvider(ConfigService)
-      .useValue(configService)
-      .compile();
-
-    app = module.createNestApplication({});
-    await app.init();
+  afterAll(async () => {
+    await app.close();
   });
 
   it('should be defined', () => {
@@ -39,26 +26,34 @@ describe('AuthModule', () => {
   });
 
   describe('/auth/signup', () => {
-    it('should sign user up', async () => {
+    it('should sign user up and return jwt', async () => {
+      const reqBody: CreateUserDto = {
+        email: 'email',
+        username: 'username',
+        password: 'password',
+        avatarUrl: 'avatarUrl',
+      };
+
       await request(app.getHttpServer())
         .post('/auth/signup')
         .set('Accept', 'application/json')
-        .send({
-          email: 'email',
-          username: 'username',
-          password: 'password',
-          avatarUrl: 'avatarUrl',
-        })
+        .send(reqBody)
         .expect(HttpStatus.CREATED)
         .expect(res => expect(res.body).toMatchObject({ access_token: expect.any(String) as string }));
 
       const users = await prismaService.user.findMany();
+      const expectedUser: Partial<User> = {
+        userId: 1,
+        email: 'email',
+        username: 'username',
+        passwordHash: expect.any(String) as string,
+        avatarUrl: 'avatarUrl',
+        deletedAt: null,
+        roleId: 2,
+      };
+
       expect(users.length).toBe(1);
-      expect(users[0].userId).toBe(1);
-      expect(users[0].email).toBe('email');
-      expect(users[0].username).toBe('username');
-      expect(users[0].passwordHash).toBeDefined();
-      expect(users[0].avatarUrl).toBe('avatarUrl');
+      expect(users.at(0)).toMatchObject(expectedUser);
     });
 
     it('should not create user with same email', async () => {

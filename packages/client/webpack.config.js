@@ -1,6 +1,11 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+
+const tsconfig = 'tsconfig.json';
 
 module.exports = {
   entry: path.resolve(__dirname, 'src/index.tsx'),
@@ -12,6 +17,8 @@ module.exports = {
   },
   optimization: {
     usedExports: true,
+    minimize: true,
+    minimizer: [new TerserPlugin()],
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
@@ -19,11 +26,12 @@ module.exports = {
       fs: false,
       path: false,
     },
-    alias: {
-      '@shared': path.resolve(__dirname, '../shared/src/'),
-      '@components': path.resolve(__dirname, './src/components/'),
-      '@services': path.resolve(__dirname, './src/services/'),
-    },
+    plugins: [new TsconfigPathsPlugin({ configFile: tsconfig })],
+    // alias: {
+    //   '@shared': path.resolve(__dirname, '../shared/src/'),
+    //   '@components': path.resolve(__dirname, './src/components/'),
+    //   '@services': path.resolve(__dirname, './src/services/'),
+    // },
   },
   module: {
     rules: [
@@ -31,8 +39,10 @@ module.exports = {
         test: /\.m?js$/,
       },
       {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
+        test: /.tsx?$/,
+        use: {
+          loader: 'swc-loader',
+        },
         exclude: /node_modules/,
       },
       {
@@ -46,6 +56,11 @@ module.exports = {
     ],
   },
   plugins: [
+    new ForkTsCheckerWebpackPlugin({
+      typescript: {
+        configFile: tsconfig,
+      },
+    }),
     new HtmlWebpackPlugin({
       template: path.join(__dirname, '.', 'index.html'),
     }),

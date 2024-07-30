@@ -1,6 +1,5 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import type { Prisma, Room } from '@prisma/client';
-import { Logger } from 'testcontainers/build/common';
 import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma.service';
 import { SimulationRoom } from './simulation-room';
@@ -11,7 +10,7 @@ import { Simulation } from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {
-  private readonly logger = new Logger(RoomsService.name);
+  private readonly logger = new Logger(this.constructor.name);
   static rooms = new Map<string, SimulationRoom>();
 
   constructor(

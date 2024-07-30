@@ -1,8 +1,6 @@
-import { beforeAll, beforeEach } from 'vitest';
-
 import { HavokPlugin, Logger, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { GRAVITY } from '@shared/constants';
-import { initHavok } from '../testUtils';
+import { initHavok } from '@shared/initHavok';
 
 export const SimulationMock = (): (() => { scene: Scene; engine: NullEngine }) => {
   let engine: NullEngine;
