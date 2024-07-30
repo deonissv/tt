@@ -1,52 +1,30 @@
-import request from 'supertest';
-import { ConfigService } from '@nestjs/config';
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
+import request from 'supertest';
 
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
-import { GamesModule } from './games.module';
-import { mainConfig } from '../main.config';
-import { AuthModule } from '../auth/auth.module';
+import { useApp } from '@server/test/useApp';
+import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import {
-  authMockAdminToken,
   authMockAdmin,
-  authMockUser,
-  authMockUserToken,
+  authMockAdminToken,
   authMockGuest,
   authMockGuestToken,
+  authMockUser,
+  authMockUserToken,
 } from '../../test/authMock';
-import { PermissionsService } from '../permissions.service';
+import type { PrismaService } from '../prisma.service';
 
 describe('GamesModule', () => {
-  let app: INestApplication;
-  let module: TestingModule;
+  useDatabaseMock();
   let prismaService: PrismaService;
-  const mockDB = useDatabaseMock();
+  let app: INestApplication;
 
   beforeAll(async () => {
-    prismaService = mockDB();
+    [app, prismaService] = await useApp();
+  });
 
-    const configService = useConfigServiceMock();
-    module = await Test.createTestingModule({
-      imports: [GamesModule, AuthModule],
-      providers: [PermissionsService],
-    })
-      .overrideProvider(PermissionsService)
-      .useValue(new PermissionsService())
-      .overrideProvider(PrismaService)
-      .useValue(prismaService)
-      .overrideProvider(ConfigService)
-      .useValue(configService)
-      .compile();
-
-    app = module.createNestApplication({});
-    mainConfig(app);
-
-    await app.init();
+  afterAll(async () => {
+    await app.close();
   });
 
   it('should be defined', () => {

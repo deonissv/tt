@@ -34,7 +34,7 @@
     "@nestjs/mapped-types": "^2.0.4",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/platform-ws": "^10.3.3",
+    "@nestjs/platform-ws": "^10.3.10",
     "@nestjs/swagger": "^7.1.16",
     "@nestjs/websockets": "^10.3.3",
     "@prisma/client": "^5.8.1",
@@ -51,6 +51,8 @@
     "prisma-extension-soft-delete": "^1.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
+    "ts-node": "^10.9.2",
+    "unplugin-swc": "^1.5.1",
     "ws": "^8.13.0"
   },
   "devDependencies": {

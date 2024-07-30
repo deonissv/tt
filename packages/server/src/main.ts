@@ -4,8 +4,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
+import { initHavok } from '@shared/initHavok';
 import { Logger as PGLogger } from '@shared/playground';
-import { initHavok } from '@shared/utils';
 import { AppModule } from './app.module';
 import { mainConfig } from './main.config';
 

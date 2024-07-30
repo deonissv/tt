@@ -14,8 +14,8 @@ import { UsersModule } from './users/users.module';
   imports: [
     ConfigModule.forRoot({
       envFilePath: path.resolve(__dirname, '..', '.env'),
-      isGlobal: true,
       expandVariables: true,
+      isGlobal: true,
     }),
     UsersModule,
     RoomsModule,

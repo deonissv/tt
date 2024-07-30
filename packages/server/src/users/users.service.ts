@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma.service';
@@ -7,6 +7,8 @@ import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(this.constructor.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,

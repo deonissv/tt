@@ -3,8 +3,9 @@
 import { Logger, Mesh, Scene } from '@babylonjs/core';
 
 import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
+import { initHavok } from '@shared/initHavok';
 import { Loader } from '@shared/playground';
-import { initHavok, omitKeys } from '@shared/utils';
+import { omitKeys } from '@shared/utils';
 import Actor from './actor';
 import { Simulation } from './simulation';
 

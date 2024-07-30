@@ -10,7 +10,7 @@ import { Simulation } from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {
-  private readonly logger = new Logger(RoomsService.name);
+  private readonly logger = new Logger(this.constructor.name);
   static rooms = new Map<string, SimulationRoom>();
 
   constructor(

@@ -1,44 +1,26 @@
 import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
 import request from 'supertest';
 
 import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import { AuthModule } from '../auth/auth.module';
-import { mainConfig } from '../main.config';
-import { PrismaService } from '../prisma.service';
-import { RoomsModule } from './rooms.module';
+import type { PrismaService } from '../prisma.service';
 import { RoomsService } from './rooms.service';
 
+import { useApp } from '@server/test/useApp';
+import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import type { CreateRoomDto } from '@shared/dto/rooms';
 
 describe('Rooms', () => {
-  let app: INestApplication;
-  let module: TestingModule;
+  useDatabaseMock();
   let prismaService: PrismaService;
-  const mockDB = useDatabaseMock();
+  let app: INestApplication;
 
   beforeAll(async () => {
-    prismaService = mockDB();
+    [app, prismaService] = await useApp();
+  });
 
-    const configService = useConfigServiceMock();
-    module = await Test.createTestingModule({
-      imports: [RoomsModule, AuthModule],
-    })
-      .overrideProvider(PrismaService)
-      .useValue(prismaService)
-      .overrideProvider(ConfigService)
-      .useValue(configService)
-      .compile();
-
-    app = module.createNestApplication({});
-    mainConfig(app);
-
-    await app.init();
+  afterAll(async () => {
+    await app.close();
   });
 
   beforeEach(() => {
