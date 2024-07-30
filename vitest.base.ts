@@ -13,12 +13,13 @@ export default defineConfig({
     },
   },
   test: {
+    isolate: false,
     globals: true,
     root: './',
   },
-  testTimeout: 30000,
-  hookTimeout: 60000,
-  teardownTimeout: 60000,
+  testTimeout: 30_000,
+  hookTimeout: 60_000,
+  teardownTimeout: 60_000,
   plugins: [
     swc.vite({
       module: { type: 'es6' },
