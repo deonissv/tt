@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -43,7 +42,7 @@ describe('Rooms', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -77,7 +76,7 @@ describe('Rooms', () => {
         },
       });
 
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       const dto: CreateRoomDto = {
         gameCode: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
       };
@@ -221,7 +220,7 @@ describe('Rooms', () => {
         },
       });
 
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       const response = await request(app.getHttpServer())
         .post('/rooms/start/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
@@ -264,7 +263,7 @@ describe('Rooms', () => {
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body).toMatchObject({ message: 'Room not found' });
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       expect(startSimulationMock).toHaveBeenCalledTimes(0);
     });
 
@@ -315,7 +314,7 @@ describe('Rooms', () => {
         ],
       });
 
-      const startSimulationMock = jest.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
       const response = await request(app.getHttpServer())
         .post('/rooms/start/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')

@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
@@ -34,7 +33,7 @@ describe('RoomsService', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -325,7 +324,7 @@ describe('RoomsService', () => {
         },
       });
 
-      jest.spyOn(RoomsService.rooms, 'get').mockReturnValue({
+      vi.spyOn(RoomsService.rooms, 'get').mockReturnValue({
         simulation: {
           toState: () => simState2,
         },

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { Logger, Mesh, Scene } from '@babylonjs/core';
-import { jest } from '@jest/globals';
 
 import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
@@ -17,11 +16,11 @@ describe('Simulation', () => {
   });
 
   beforeEach(() => {
-    jest.resetAllMocks();
-    jest.spyOn(Loader, 'loadModel').mockImplementation(() => {
+    vi.resetAllMocks();
+    vi.spyOn(Loader, 'loadModel').mockImplementation(() => {
       return Promise.resolve([new Mesh('testMesh'), null]);
     });
-    jest.spyOn(Loader, 'loadMesh').mockImplementation(() => {
+    vi.spyOn(Loader, 'loadMesh').mockImplementation(() => {
       return Promise.resolve(new Mesh('testMesh'));
     });
   });
@@ -29,18 +28,18 @@ describe('Simulation', () => {
   describe('init', () => {
     it('Simulation init creates scene and sets left handed system', async () => {
       const initialState = { leftHandedSystem: false };
-      const sim = await Simulation.init(initialState, jest.fn());
+      const sim = await Simulation.init(initialState, vi.fn());
 
       expect(sim['scene'] instanceof Scene).toBe(true);
       expect(sim['scene'].useRightHandedSystem).toBe(true);
 
       const leftHandedState = { leftHandedSystem: true };
-      const sim2 = await Simulation.init(leftHandedState, jest.fn());
+      const sim2 = await Simulation.init(leftHandedState, vi.fn());
       expect(sim2['scene'].useRightHandedSystem).toBe(false);
     });
 
     it('Simulation init calls onModelLoaded for each loaded actor', async () => {
-      const mockOnModelLoaded = jest.fn();
+      const mockOnModelLoaded = vi.fn();
       const initialState: SimulationStateSave = {
         actorStates: [
           {
@@ -67,7 +66,7 @@ describe('Simulation', () => {
     });
 
     it('Simulation init calls onSucceed for successfully loaded actors', async () => {
-      const mockOnSucceed = jest.fn();
+      const mockOnSucceed = vi.fn();
       const initialState = {
         actorStates: [
           {
@@ -80,16 +79,16 @@ describe('Simulation', () => {
           },
         ],
       };
-      jest.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
+      vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
         return Promise.resolve(new Actor(state, new Mesh('testMesh')));
       });
-      await Simulation.init(initialState, jest.fn(), mockOnSucceed);
+      await Simulation.init(initialState, vi.fn(), mockOnSucceed);
 
       expect(mockOnSucceed).toHaveBeenCalledTimes(1);
     });
 
     it('Simulation init calls onFailed for failed actors', async () => {
-      const mockOnFailed = jest.fn();
+      const mockOnFailed = vi.fn();
       const initialState = {
         actorStates: [
           {
@@ -102,9 +101,9 @@ describe('Simulation', () => {
           },
         ],
       };
-      jest.spyOn(Loader, 'loadModel').mockReturnValueOnce(Promise.resolve([null, null]));
-      jest.spyOn(Actor, 'fromState').mockReturnValueOnce(Promise.resolve(null));
-      await Simulation.init(initialState, jest.fn(), jest.fn(), mockOnFailed);
+      vi.spyOn(Loader, 'loadModel').mockReturnValueOnce(Promise.resolve([null, null]));
+      vi.spyOn(Actor, 'fromState').mockReturnValueOnce(Promise.resolve(null));
+      await Simulation.init(initialState, vi.fn(), vi.fn(), mockOnFailed);
 
       expect(mockOnFailed).toHaveBeenCalledTimes(1);
     });
@@ -120,7 +119,7 @@ describe('Simulation', () => {
   //       gravity: -9.8,
   //     };
   //     const actorState = initialState.actorStates![0];
-  //     jest.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
+  //     vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
   //       return Promise.resolve(new Actor(state, new Mesh('testMesh')));
   //     });
   //     const sim = await Simulation.init(initialState);
@@ -142,7 +141,7 @@ describe('Simulation', () => {
   //     leftHandedSystem: false,
   //     gravity: -9.8,
   //   };
-  //   jest.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
+  //   vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
   //     return Promise.resolve(new Actor(state, new Mesh('testMesh')));
   //   });
   //   const sim = await Simulation.init(initialState);
@@ -171,7 +170,7 @@ describe('Simulation', () => {
         leftHandedSystem: false,
         gravity: -9.8,
       };
-      jest.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
+      vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
         return Promise.resolve(new Actor(state, new Mesh('testMesh')));
       });
       const sim = await Simulation.init(initialState);
@@ -512,7 +511,7 @@ describe('Simulation', () => {
         ],
         leftHandedSystem: true,
       };
-      jest.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
+      vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
         return Promise.resolve(new Actor(state, new Mesh('testMesh')));
       });
       const sim = await Simulation.init(initialState);

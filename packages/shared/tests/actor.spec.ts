@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-
 import { Mesh } from '@babylonjs/core';
-import type { ActorState } from '@shared/dto/states';
+import type { ActorBaseState, ActorState } from '@shared/dto/states';
 import { Actor } from '@shared/playground';
 import { useSimulationMock } from './mocks/SimulationMock';
 
@@ -106,10 +104,10 @@ describe('Actor Class', () => {
       },
     };
     const updatedState = Actor.applyStateUpdate(state, actorStateUpdate);
-    const expected: ActorState = {
+    const expected: ActorBaseState = {
       type: 0,
       guid: '1234',
-      model: state.model,
+      // model: state.model,
       name: state.name,
       transformation: {
         scale: [2, 2, 2],

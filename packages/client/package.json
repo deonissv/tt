@@ -6,11 +6,12 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.js",
+    "build": "webpack --config webpack.config.js",
     "build:v": "vite build",
     "start": "vite preview",
     "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite",
-    "test": "vitest",
+    "test": "vitest run --config ../../vitest.config.ts",
+    "test:w": "vitest --config ../../vitest.config.ts",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"
@@ -28,7 +29,7 @@
     "postcss-loader": "^7.3.3",
     "react-router-dom": "^6.16.0",
     "tailwindcss": "^3.3.3",
-    "ts-loader": "^9.4.4",
+    "terser-webpack-plugin": "^5.3.10",
     "typescript": "^5.2.2",
     "vite": "^4.4.5",
     "vite-tsconfig-paths": "^4.2.1",

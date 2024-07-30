@@ -1,17 +1,12 @@
-import request from 'supertest';
-import { jest } from '@jest/globals';
-import bcrypt from 'bcrypt';
+import type { INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import type { INestApplication } from '@nestjs/common';
-import { HttpStatus } from '@nestjs/common';
+import bcrypt from 'bcryptjs';
+import request from 'supertest';
 import { UsersModule } from './users.module';
 
-import { AuthModule } from '../auth/auth.module';
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import useConfigServiceMock from '../../test/useConfigServiceMock';
 import {
   authMockAdmin,
   authMockAdminToken,
@@ -20,7 +15,11 @@ import {
   authMockUser,
   authMockUserToken,
 } from '../../test/authMock';
+import useConfigServiceMock from '../../test/useConfigServiceMock';
+import useDatabaseMock from '../../test/useDatabaseMock';
+import { AuthModule } from '../auth/auth.module';
 import { mainConfig } from '../main.config';
+import { PrismaService } from '../prisma.service';
 
 describe('UsersModule', () => {
   let app: INestApplication;
@@ -53,7 +52,7 @@ describe('UsersModule', () => {
 
   describe('PUT /users', () => {
     it('should update user', async () => {
-      jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));
+      vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));
 
       await prismaService.user.create({
         data: authMockAdmin,

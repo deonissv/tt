@@ -1,5 +1,3 @@
-import { beforeAll, beforeEach } from 'vitest';
-
 import { HavokPlugin, Logger, NullEngine, Scene, Vector3 } from '@babylonjs/core';
 import { GRAVITY } from '@shared/constants';
 import { initHavok } from '../testUtils';

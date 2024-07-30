@@ -1,15 +1,14 @@
-import { beforeAll, describe, it, expect } from 'vitest';
-import * as request from 'supertest';
+import type { INestApplication } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { TestingModule } from '@nestjs/testing';
 import { Test } from '@nestjs/testing';
-import type { INestApplication } from '@nestjs/common';
-import { HttpStatus } from '@nestjs/common';
+import * as request from 'supertest';
 
-import { PrismaService } from '../prisma.service';
-import useDatabaseMock from '../../test/useDatabaseMock';
-import { AuthModule } from './auth.module';
 import useConfigServiceMock from '../../test/useConfigServiceMock';
+import useDatabaseMock from '../../test/useDatabaseMock';
+import { PrismaService } from '../prisma.service';
+import { AuthModule } from './auth.module';
 
 describe('AuthModule', () => {
   let app: INestApplication;

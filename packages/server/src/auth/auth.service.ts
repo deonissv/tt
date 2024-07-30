@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 import type { AccessTokenDto, JWTPayload, SignInDto } from '@shared/dto/auth';
 import type { CreateUserDto } from '@shared/dto/users';

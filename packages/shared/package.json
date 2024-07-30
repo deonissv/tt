@@ -6,7 +6,8 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "test": "vitest",
+    "test": "vitest run",
+    "test:w": "vitest",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"
@@ -14,17 +15,11 @@
   "devDependencies": {
     "@babylonjs/inspector": "^7.0.0",
     "react-router-dom": "^6.16.0",
-    "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",
-    "vite": "^4.4.5",
+    "vitest": "^2.0.4",
     "vite-tsconfig-paths": "^4.2.1"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.0.0",
-    "@babylonjs/havok": "^1.2.1",
-    "@babylonjs/loaders": "^7.0.0"
-  },
-  "peerDependencies": {
     "@babylonjs/core": "^7.0.0",
     "@babylonjs/havok": "^1.2.1",
     "@babylonjs/loaders": "^7.0.0"

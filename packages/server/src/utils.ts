@@ -4,7 +4,7 @@ import * as path from 'path';
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 export async function initHavok() {
   const HavokPhysics = await import('@babylonjs/havok');
-  const hp = (process.env.NODE_ENV === 'test' ? HavokPhysics.default : HavokPhysics) as unknown as (
+  const hp = (process.env.NODE_ENV === 'test' ? HavokPhysics.default : HavokPhysics.default) as unknown as (
     object,
   ) => Promise<object>;
   const wasm = path.join(path.resolve(), '../../static/HavokPhysics.wasm');

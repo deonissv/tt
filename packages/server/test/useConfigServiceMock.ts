@@ -1,5 +1,3 @@
-import { vi } from 'vitest';
-
 let counter = 0;
 
 export default () => {

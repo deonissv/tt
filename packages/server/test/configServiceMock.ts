@@ -1,5 +1,3 @@
-import { vi } from 'vitest';
-
 export default {
   getOrThrow: vi.fn((key: string) => {
     const env: Record<string, string> = {
