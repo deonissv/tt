@@ -1,12 +1,9 @@
-import { ConfigService } from '@nestjs/config';
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 
-import configServiceMock from '../../test/configServiceMock';
-import { PrismaService } from '../prisma.service';
+import { configServiceMock } from '../../test/configServiceMock';
+import type { PrismaService } from '../prisma.service';
 
 const user: User = {
   userId: 1,
@@ -20,8 +17,7 @@ const user: User = {
 };
 
 const usersArray: User[] = [user];
-
-const db = {
+const useDb = () => ({
   user: {
     findMany: vi.fn().mockResolvedValue(usersArray),
     findUnique: vi.fn().mockResolvedValue(user),
@@ -30,27 +26,15 @@ const db = {
     update: vi.fn().mockResolvedValue(user),
     delete: vi.fn().mockResolvedValue(user),
   },
-};
+});
 
 describe('AuthService', () => {
   let usersService: UsersService;
+  let db = useDb();
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UsersService,
-        {
-          provide: PrismaService,
-          useValue: db,
-        },
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
-      ],
-    }).compile();
-
-    usersService = module.get<UsersService>(UsersService);
+  beforeEach(() => {
+    db = useDb();
+    usersService = new UsersService(db as unknown as PrismaService, configServiceMock);
   });
 
   afterEach(() => {
@@ -64,7 +48,7 @@ describe('AuthService', () => {
   describe('create', () => {
     it('should create a user', async () => {
       vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
-      db.user.findUnique.mockResolvedValueOnce(null);
+      vi.spyOn(db.user, 'findUnique').mockResolvedValueOnce(null);
 
       await usersService.create({
         email: 'email',

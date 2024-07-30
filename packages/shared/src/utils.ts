@@ -6,8 +6,10 @@ import { WebSocket } from 'ws';
 import { PRECISION_EPSILON } from './constants';
 
 export async function initHavok() {
-  const wasm = path.join(__dirname, '../node_modules/@babylonjs/havok/lib/esm/HavokPhysics.wasm');
+  const wasmPathPrefix = process.env.NODE_ENV === 'test' ? '../../../' : '..';
+  const wasm = path.join(__dirname, wasmPathPrefix, 'node_modules/@babylonjs/havok/lib/esm/HavokPhysics.wasm');
   const wasmBinary = fs.readFileSync(wasm);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
   global.havok = await HavokPhysics({ wasmBinary });
 }
 

@@ -2,8 +2,8 @@ import { CreateBox, Texture } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { CardState } from '@shared/dto/states';
 import { Card } from '@shared/playground/';
+import { initHavok } from '@shared/utils';
 import { useSimulationMock } from './mocks/SimulationMock';
-import { initHavok } from './testUtils';
 
 vi.mock('@shared/playground/Loader', async () => {
   const { LoaderMock } = await import('./mocks/LoaderMock');

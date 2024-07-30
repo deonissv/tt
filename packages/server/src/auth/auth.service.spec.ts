@@ -1,11 +1,8 @@
-import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import type { TestingModule } from '@nestjs/testing';
-import { Test } from '@nestjs/testing';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import configServiceMock from '../../test/configServiceMock';
-import { PrismaService } from '../prisma.service';
+import { configServiceMock } from '../../test/configServiceMock';
+import type { PrismaService } from '../prisma.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
@@ -21,8 +18,7 @@ const user: User = {
 };
 
 const usersArray: User[] = [user];
-
-const db = {
+const useDb = () => ({
   user: {
     findMany: vi.fn().mockResolvedValue(usersArray),
     findUnique: vi.fn().mockResolvedValue(user),
@@ -31,36 +27,19 @@ const db = {
     update: vi.fn().mockResolvedValue(user),
     delete: vi.fn().mockResolvedValue(user),
   },
-};
+});
 
 describe('AuthService', () => {
   let authService: AuthService;
+  let db = useDb();
 
-  beforeEach(async () => {
+  beforeEach(() => {
+    db = useDb();
     const jwtService = new JwtService({
       secret: 'secret',
       signOptions: { expiresIn: '7d' },
     });
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        UsersService,
-        {
-          provide: PrismaService,
-          useValue: db,
-        },
-        {
-          provide: ConfigService,
-          useValue: configServiceMock,
-        },
-        {
-          provide: JwtService,
-          useValue: jwtService,
-        },
-      ],
-    }).compile();
-
-    authService = module.get<AuthService>(AuthService);
+    authService = new AuthService(new UsersService(db as unknown as PrismaService, configServiceMock), jwtService);
   });
 
   afterEach(() => {

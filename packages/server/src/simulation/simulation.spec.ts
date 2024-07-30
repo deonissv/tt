@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/dot-notation */
 import { Logger, Mesh, Scene } from '@babylonjs/core';
 
@@ -39,23 +40,23 @@ describe('Simulation', () => {
 
     it('Simulation init calls onModelLoaded for each loaded actor', async () => {
       const mockOnModelLoaded = vi.fn();
-      const initialState: SimulationStateSave = {
+      const initialState: { actorStates: ActorState[] } = {
         actorStates: [
           {
             type: 0,
             guid: '1',
             name: '',
-            // model: {
-            //   meshURL: '',
-            // },
+            model: {
+              meshURL: '',
+            },
           },
           {
             type: 0,
             guid: '2',
             name: '',
-            // model: {
-            //   meshURL: '',
-            // },
+            model: {
+              meshURL: '',
+            },
           },
         ],
       };

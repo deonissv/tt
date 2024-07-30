@@ -1,4 +1,7 @@
-export default {
+import type { ConfigService } from '@nestjs/config';
+import type { Mocked } from 'vitest';
+
+export const configServiceMock = {
   getOrThrow: vi.fn((key: string) => {
     const env: Record<string, string> = {
       PORT: '11000',
@@ -12,4 +15,4 @@ export default {
     }
     return env[key];
   }),
-};
+} as unknown as Mocked<ConfigService>;
