@@ -251,9 +251,10 @@ export class TTSParserC extends ParserBase {
     if (!this.hasProperty(tableObj, 'Table', this.errorsText.TALBE.NO_TYPE_PROPERTY)) return null;
     if (!this.isPropertyString(tableObj, 'Table', this.errorsText.TALBE.TYPE_PROPERTY_NOT_STRING)) return null;
 
-    const tableState: TableState = {
-      type: this.mapTableType(tableObj.Table),
-    };
+    const type = this.mapTableType(tableObj.Table);
+    if (type === null) return null;
+
+    const tableState: TableState = { type };
 
     if (hasProperty(tableObj, 'TableURL')) {
       if (
@@ -267,7 +268,7 @@ export class TTSParserC extends ParserBase {
     return tableState;
   };
 
-  mapTableType(type: string): TableType {
+  mapTableType(type: string): TableType | null {
     // https://kb.tabletopsimulator.com/host-guides/tables/
     switch (type) {
       case 'Table_Circular':
@@ -287,7 +288,7 @@ export class TTSParserC extends ParserBase {
       case 'Table_Custom_Square':
         return 'CustomSquare';
       default:
-        return 'None';
+        return null;
     }
   }
 

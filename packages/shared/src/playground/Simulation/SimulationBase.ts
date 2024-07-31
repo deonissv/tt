@@ -37,6 +37,7 @@ import {
   Bag,
   Card,
   CustomRectangleTable,
+  CustomSquareTable,
   Deck,
   Die10,
   Die12,
@@ -44,14 +45,15 @@ import {
   Die4,
   Die6,
   Die8,
+  GlassTable,
+  HexTable,
+  OctagonTable,
+  PokerTable,
+  RectangleTable,
+  SquareTable,
   Tile,
 } from '../actors';
 import { CircleTable } from '../actors/CircleTable';
-import { CustomSquareTable } from '../actors/CustomSquareTable';
-import { GlassTable } from '../actors/GlassTable';
-import { HexTable } from '../actors/HexTable';
-import { OctagonTable } from '../actors/OctagonTable';
-import { SquareTable } from '../actors/SquareTable';
 import { TileStack } from '../actors/TileStack';
 import { Logger } from '../Logger';
 import { EngineFactory } from './SimulationEngine';
@@ -153,8 +155,10 @@ export abstract class SimulationBase {
       case 'CustomSquare':
         return await CustomSquareTable.fromState(tableState);
       case 'Rectangle':
+        return await RectangleTable.fromState();
       case 'Poker':
-      case 'None':
+        return await PokerTable.fromState();
+      case null:
         return null;
     }
   }

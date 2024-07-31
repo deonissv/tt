@@ -18,3 +18,28 @@ export type DeepPartial<T> = T extends object
 
 export type Spiced<T extends object> = T & Omit<UnknownObject, keyof T>;
 export type Defined<T> = T extends undefined ? never : T;
+
+/**
+ * Represents a type that requires at least one property from a given set of properties.
+ *
+ * @template T - The original type.
+ * @template U - The set of properties from which at least one is required.
+ * @example
+ *
+ * interface I {
+ *  T1?: string;
+ *  T2?: string;
+ * }
+ *
+ * type IAtLeastOne = RequireAtLeastOne<I, ['T1', 'T2']>;
+ *
+ * const example1: I = { T1: 'value1' }; // Valid
+ * const example2: I = { T2: 'value2' }; // Valid
+ * const example3: I = { T1: 'value1', T2: 'value2' }; // Valid
+ * const example4: I = {}; // Invalid, will cause a TypeScript error
+ *
+ */
+export type RequireAtLeastOne<T, U extends (keyof T)[]> = Omit<T, U[number]> &
+  {
+    [K in U[number]]-?: Required<Pick<T, K>>;
+  }[U[number]];

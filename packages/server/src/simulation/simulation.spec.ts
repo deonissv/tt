@@ -193,7 +193,7 @@ describe('Simulation', () => {
       const initialState: SimulationStateSave = {
         table: {
           url: '',
-          type: 'Custom',
+          type: 'CustomRectangle',
         },
         gravity: 0.5,
         actorStates: [
@@ -520,7 +520,7 @@ describe('Simulation', () => {
       const expected: SimulationStateSave = {
         table: {
           url: '',
-          type: 'Custom',
+          type: 'CustomRectangle',
         },
         gravity: 0.5,
         actorStates: [

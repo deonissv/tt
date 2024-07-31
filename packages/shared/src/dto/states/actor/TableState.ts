@@ -12,5 +12,4 @@ export type TableType =
   | 'Rectangle'
   | 'CircleGlass'
   | 'CustomRectangle'
-  | 'CustomSquare'
-  | 'None';
+  | 'CustomSquare';
