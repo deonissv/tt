@@ -1,4 +1,4 @@
-import { Mesh, Vector3 } from '@babylonjs/core';
+import { Mesh } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
 import { Loader } from '../../Loader';
 import { ActorBase } from '../ActorBase';
@@ -26,7 +26,7 @@ export class PokerTable extends ActorBase {
 
     legs.position.z = -0.223;
 
-    wrapper.scaling = Vector3.FromArray(Array(3).fill(40.5));
+    wrapper.scaling = wrapper.scaling.scale(40.5);
     wrapper.position.y = -9.25;
     wrapper.rotation.x = (3 * Math.PI) / 2;
 

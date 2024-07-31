@@ -1,4 +1,4 @@
-import { Mesh, Vector3 } from '@babylonjs/core';
+import { Mesh } from '@babylonjs/core';
 import { feltMaterialProps, woodMaterialProps } from '@shared/assets';
 import { STATIC_HOST } from '@shared/constants';
 import { Loader } from '../../Loader';
@@ -26,7 +26,7 @@ export class RectangleTable extends ActorBase {
 
     wrapper.rotation.x = (3 * Math.PI) / 2;
     wrapper.position.y = -1.4;
-    wrapper.scaling = Vector3.FromArray(Array(3).fill(1.01));
+    wrapper.scaling = wrapper.scaling.scale(1.01);
 
     const table = new RectangleTable('#RectangleTable', '#RectangleTable', wrapper);
     if (table) {
