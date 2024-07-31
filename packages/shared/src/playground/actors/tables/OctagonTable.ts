@@ -1,5 +1,6 @@
 import { Mesh } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
+import { degToRad } from '@shared/utils';
 import { Loader } from '../../Loader';
 import { ActorBase } from '../ActorBase';
 
@@ -27,7 +28,11 @@ export class OctagonTable extends ActorBase {
     const wrapper = new Mesh('octagon_table_wrapper');
     wrapper.addChild(top);
     wrapper.addChild(leg);
+
     wrapper.rotation.x = (6 * Math.PI) / 4;
+    wrapper.rotation.y = degToRad(22.5);
+    wrapper.scaling = wrapper.scaling.scale(1.04);
+    wrapper.position.y = -0.65;
 
     const table = new OctagonTable('#OctagonTable', '#OctagonTable', wrapper);
     if (table) {
