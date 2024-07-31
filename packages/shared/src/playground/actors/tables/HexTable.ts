@@ -28,6 +28,9 @@ export class HexTable extends ActorBase {
     wrapper.addChild(top);
     wrapper.addChild(leg);
     wrapper.rotation.x = (6 * Math.PI) / 4;
+    wrapper.rotation.y = Math.PI / 6;
+    wrapper.scaling = wrapper.scaling.scale(0.94);
+    wrapper.position.y = -0.5;
 
     const table = new HexTable('#HexTable', '#HexTable', wrapper);
     if (table) {
