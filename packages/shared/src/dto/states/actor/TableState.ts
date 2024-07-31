@@ -3,4 +3,13 @@ export interface TableState {
   url?: string;
 }
 
-export type TableType = 'Circle' | 'Rectangle' | 'Hexagon' | 'Octagon' | 'Custom' | 'Glass' | 'Poker' | 'RPG' | 'None';
+export type TableType =
+  | 'Square'
+  | 'Hexagon'
+  | 'Octagon'
+  | 'Circle'
+  | 'Poker'
+  | 'Rectangle'
+  | 'CircleGlass'
+  | 'CustomRectangle'
+  | 'CustomSquare';

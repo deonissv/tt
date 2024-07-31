@@ -18,7 +18,7 @@ module.exports = env => {
   console.log(`Running in ${isProduction ? 'production' : 'development'} mode`);
 
   const mode = isProduction ? 'production' : 'development';
-  const devtool = isProduction ? false : 'source-map';
+  const devtool = isProduction ? false : 'inline-source-map';
   const outDir = isProduction ? 'build' : 'dist';
   const entry = isDev ? [hmrFile, entryFile] : entryFile;
   const nodeExternalsOptions = {
@@ -96,7 +96,7 @@ module.exports = env => {
         ? [
             new webpack.HotModuleReplacementPlugin(),
             new webpack.WatchIgnorePlugin({ paths: [/\.js$/, /\.d\.ts$/] }),
-            new RunScriptWebpackPlugin({ name: 'main.js', autoRestart: false }),
+            new RunScriptWebpackPlugin({ name: 'main.js', autoRestart: true }),
           ]
         : []),
     ],

@@ -1,3 +1,4 @@
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { WebSocket } from 'ws';
 import { PRECISION_EPSILON } from './constants';
 
@@ -30,3 +31,10 @@ export const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]): any => {
 };
 
 export const degToRad = (deg: number): number => deg * (Math.PI / 180);
+export const meshSizes = (mesh: Mesh) => {
+  const vectorsWorld = mesh.getBoundingInfo().boundingBox.vectorsWorld;
+  const width = Math.abs(vectorsWorld[1].x - vectorsWorld[0].x);
+  const height = Math.abs(vectorsWorld[1].y - vectorsWorld[0].y);
+  const depth = Math.abs(vectorsWorld[1].z - vectorsWorld[0].z);
+  return { width, height, depth };
+};
