@@ -121,7 +121,7 @@ export class SimulationRoom {
 
     wss.on('connection', async (ws: WebSocket) => {
       const client = await Client.init(ws); // @TODO send actual state @TODO catch reject
-      this.closeTimeout && clearTimeout(this.closeTimeout);
+      if (this.closeTimeout) clearTimeout(this.closeTimeout);
 
       this.clients.set(ws, client);
 
@@ -171,8 +171,8 @@ export class SimulationRoom {
   }
 
   private async closeRoom() {
-    this.tickInterval && clearInterval(this.tickInterval);
-    this.savingInterval && clearInterval(this.savingInterval);
+    if (this.tickInterval) clearInterval(this.tickInterval);
+    if (this.savingInterval) clearInterval(this.savingInterval);
     await this.roomsService.saveRoomState(this.id);
     this.wss.close();
   }

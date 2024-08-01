@@ -14,7 +14,7 @@ export class ParserBase {
 
   assert(condition: boolean, message?: string): boolean {
     if (!condition) {
-      message && this.errors.push(message);
+      if (message) this.errors.push(message);
       return false;
     }
     return true;
@@ -56,7 +56,7 @@ export class ParserBase {
     let url;
     try {
       url = new URL(urlString);
-    } catch (e) {
+    } catch {
       return false;
     }
     return url.protocol === 'http:' || url.protocol === 'https:';

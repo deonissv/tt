@@ -2,8 +2,8 @@ export type UnknownObject = Record<string | symbol, unknown>;
 export type OptionalAllBut<T, K extends keyof T | (keyof T)[]> = K extends keyof T
   ? Required<Pick<T, K>> & Omit<Partial<T>, K>
   : K extends (keyof T)[]
-  ? Required<Pick<T, K[number]>> & Omit<Partial<T>, K[number]>
-  : never;
+    ? Required<Pick<T, K[number]>> & Omit<Partial<T>, K[number]>
+    : never;
 
 export type Optinal<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 

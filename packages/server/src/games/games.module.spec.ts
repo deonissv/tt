@@ -4,6 +4,7 @@ import request from 'supertest';
 
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
+import type { Server } from 'net';
 import {
   authMockAdmin,
   authMockAdminToken,
@@ -17,7 +18,7 @@ import type { PrismaService } from '../prisma.service';
 describe('GamesModule', () => {
   useDatabaseMock();
   let prismaService: PrismaService;
-  let app: INestApplication;
+  let app: INestApplication<Server>;
 
   beforeAll(async () => {
     [app, prismaService] = await useApp();

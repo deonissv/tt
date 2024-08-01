@@ -85,7 +85,7 @@ export class SimulationRoom {
   }
 
   destructor() {
-    this.updateTimeout && clearInterval(this.updateTimeout);
+    if (this.updateTimeout) clearInterval(this.updateTimeout);
     this.ws.close();
   }
 }

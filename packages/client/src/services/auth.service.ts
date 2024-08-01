@@ -35,7 +35,7 @@ export const AuthService = {
   decode(token: string): JWT | null {
     try {
       return JSON.parse(window.atob(token.split('.')[1])) as JWT;
-    } catch (e) {
+    } catch {
       return null;
     }
   },

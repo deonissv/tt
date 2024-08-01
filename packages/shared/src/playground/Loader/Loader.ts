@@ -162,7 +162,7 @@ class Loader {
           return arrayBuffer;
         }
         await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
-      } catch (e) {
+      } catch {
         Logger.log(`Failed attempt to fetch: ${url}`);
       }
     }

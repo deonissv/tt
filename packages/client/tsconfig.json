@@ -44,7 +44,7 @@
       "@assets/*": [ "shared/tests/assets/*" ],
     }
   },
-  "include": ["src",  "./src/**/*", "../shared/src/**/*", "../client/**/*", "../shared/tests/assets/**/*"],
+  "include": ["./src/**/*", "./tests/**/*", "../shared/src/**/*", "../shared/tests/assets/**/*"],
   "exclude": ["node_modules", "dist"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

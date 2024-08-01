@@ -9,11 +9,12 @@ import { RoomsService } from './rooms.service';
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import type { CreateRoomDto } from '@shared/dto/rooms';
+import type { Server } from 'net';
 
 describe('Rooms', () => {
   useDatabaseMock();
   let prismaService: PrismaService;
-  let app: INestApplication;
+  let app: INestApplication<Server>;
 
   beforeAll(async () => {
     [app, prismaService] = await useApp();

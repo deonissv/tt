@@ -71,7 +71,7 @@ export class EventsGateway implements OnGatewayInit {
         if (!validatedUser) {
           abortHandshake(socket, 500, 'Token is damaged');
         }
-      } catch (e) {
+      } catch {
         abortHandshake(socket, 401, 'Unauthorized');
         return;
       }

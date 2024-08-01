@@ -5,11 +5,12 @@ import { authMockAdminToken } from '../../test/authMock';
 
 import { useApp } from '@server/test/useApp';
 import { wsConnect } from '@shared/utils';
+import type { Server } from 'net';
 
 const PORT = 3333;
 
 describe('AuthModule', () => {
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let ws: WebSocket;
   let wsUrl: string;
 

@@ -44,7 +44,7 @@ export type MSG =
     };
 
 export const send = (ws: WebSocket | ws.WebSocket, msg: MSG) => {
-  ws && ws.readyState == ws.OPEN && ws.send(JSON.stringify(msg));
+  if (ws && ws.readyState == ws.OPEN) ws.send(JSON.stringify(msg));
 };
 
 export const read = (event: MessageEvent | ws.MessageEvent): MSG => {

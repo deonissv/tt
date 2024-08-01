@@ -77,9 +77,8 @@ export class SimulationScene extends SimulationSceneBase {
     light.intensity = 0.8;
   }
 
-  private async initPhysics(gravity: number) {
+  private async initPhysics(_gravity: number) {
     await HavokPhysics();
-    gravity;
     // const hk = new HavokPlugin(true, await HavokPhysics());
     // const gravityVec = new Vector3(0, -gravity, 0);
     // this.enablePhysics(gravityVec, hk);

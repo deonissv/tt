@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
+// eslint-disable-next-line @typescript-eslint/no-empty-interface, @typescript-eslint/no-empty-object-type
 export interface JointState {
   // http://docs.unity3d.com/ScriptReference/Joint.html
   // Anchor: Vector,

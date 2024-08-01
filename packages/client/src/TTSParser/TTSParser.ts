@@ -49,7 +49,7 @@ export class TTSParserC extends ParserBase {
 
       if (hasProperty(obj, 'Gravity')) {
         const candidate = this.parseNumber(obj.Gravity);
-        candidate && Object.assign(save, { gravity: candidate });
+        if (candidate) Object.assign(save, { gravity: candidate });
       }
 
       const candidate = this.parseTable(obj);
@@ -64,7 +64,7 @@ export class TTSParserC extends ParserBase {
       }, []);
 
       return save;
-    } catch (e) {
+    } catch {
       this.errors.push('TTS_PARSE');
       return null;
     }
@@ -341,7 +341,7 @@ export class TTSParserC extends ParserBase {
       containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
     };
 
-    model && (bagState.model = model);
+    if (model) bagState.model = model;
 
     return bagState;
   }

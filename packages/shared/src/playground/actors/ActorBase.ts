@@ -241,9 +241,9 @@ export class ActorBase extends TransformNode {
     }
 
     if (child) {
-      actorState.transformation?.position && (modelMesh.position = new Vector3(...actorState.transformation.position));
-      actorState.transformation?.rotation && (modelMesh.rotation = new Vector3(...actorState.transformation.rotation));
-      actorState.transformation?.scale && (modelMesh.scaling = new Vector3(...actorState.transformation.scale));
+      if (actorState.transformation?.position) modelMesh.position = new Vector3(...actorState.transformation.position);
+      if (actorState.transformation?.rotation) modelMesh.rotation = new Vector3(...actorState.transformation.rotation);
+      if (actorState.transformation?.scale) modelMesh.scaling = new Vector3(...actorState.transformation.scale);
     }
 
     const material = await Loader.loadModelMaterial(actorState.model, `${actorState.guid}: material`);
@@ -258,7 +258,7 @@ export class ActorBase extends TransformNode {
     let childMeshes: Mesh[] = [];
     if (actorState?.children) {
       const loadedMeshes = await Promise.all(actorState.children.map(child => ActorBase.modelFromState(child, true)));
-      childMeshes = loadedMeshes.filter(mesh => mesh !== null) as Mesh[];
+      childMeshes = loadedMeshes.filter(mesh => mesh !== null);
     }
 
     const meshes = [modelMesh, ...childMeshes];
@@ -282,7 +282,7 @@ export class ActorBase extends TransformNode {
     let childMeshes: Mesh[] = [];
     if (actorState?.children) {
       const loadedMeshes = await Promise.all(actorState.children.map(child => ActorBase.colliderFromState(child)));
-      childMeshes = loadedMeshes.filter(mesh => mesh !== null) as Mesh[];
+      childMeshes = loadedMeshes.filter(mesh => mesh !== null);
     }
 
     const meshes = [colliderMesh, ...childMeshes];

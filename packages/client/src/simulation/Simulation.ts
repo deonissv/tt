@@ -73,7 +73,7 @@ export class Simulation extends SimulationBase {
 
     sim._handleHoverHighlight();
     sim._bindAction(FLIP_BIND_KEYS, actor => {
-      isContainable(actor) && cbs.onPickItem?.(actor);
+      if (isContainable(actor)) cbs.onPickItem?.(actor);
     });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);

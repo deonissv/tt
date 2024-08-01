@@ -30,14 +30,14 @@ export class Client {
 
       ws.addEventListener('message', handler);
 
-      ws.onerror = () => {
+      ws.onerror = error => {
         ws.removeEventListener('message', handler);
-        reject();
+        reject(new Error(error.type));
       };
 
-      ws.onclose = () => {
+      ws.onclose = error => {
         ws.removeEventListener('message', handler);
-        reject();
+        reject(new Error(error.type));
       };
     });
   }

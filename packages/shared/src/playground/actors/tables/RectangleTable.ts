@@ -22,7 +22,6 @@ export class RectangleTable extends ActorBase {
     const wrapper = new Mesh('rectangle_table_wrapper');
     [tableFrame, handles, felt].forEach(mesh => mesh.setEnabled(true));
     [tableFrame, handles, felt].forEach(mesh => wrapper.addChild(mesh));
-    [tableFrame];
 
     wrapper.rotation.x = (3 * Math.PI) / 2;
     wrapper.position.y = -1.4;

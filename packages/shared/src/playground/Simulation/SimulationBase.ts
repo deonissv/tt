@@ -131,10 +131,7 @@ export abstract class SimulationBase {
         return await Die20.fromState(actorState as Die20State);
       case ActorType.TABLE:
         return null;
-      default:
-        null;
     }
-    return null;
   }
 
   static async tableFromState(tableState: TableState): Promise<ActorBase | null> {

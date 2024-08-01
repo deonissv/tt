@@ -2,6 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
+import type { Server } from 'net';
 import { authMockAdmin } from '../../test/authMock';
 import type { PrismaService } from '../prisma.service';
 import { RoomsService } from './rooms.service';
@@ -10,7 +11,7 @@ import type { SimulationRoom } from './simulation-room';
 describe('RoomsService', () => {
   useDatabaseMock();
   let prismaService: PrismaService;
-  let app: INestApplication;
+  let app: INestApplication<Server>;
   let roomsService: RoomsService;
 
   beforeAll(async () => {

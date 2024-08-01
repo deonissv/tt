@@ -66,7 +66,7 @@ export const RoomService = {
         ws.addEventListener('message', idListener);
       };
       ws.onerror = error => {
-        reject(error);
+        reject(new Error(error.type));
       };
     });
   },
