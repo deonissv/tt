@@ -38,4 +38,4 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run server db
-      - run: npm run test:e2e -- --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+      - run: npx vitest --config vitest.e2e.config.ts --testTimeout=3000000 --hookTimeout=6000000 --teardownTimeout=6000000 --shard=${{ matrix.shard }}/${{ strategy.job-total }}
