@@ -29,10 +29,6 @@ describe('UsersModule', () => {
     await app.close();
   });
 
-  it('should be defined', () => {
-    expect(app).toBeDefined();
-  });
-
   describe('PUT /users', () => {
     it('should update user', async () => {
       vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('newPasswordHash'));

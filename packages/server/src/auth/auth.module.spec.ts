@@ -22,10 +22,6 @@ describe('AuthModule', () => {
     await app.close();
   });
 
-  it('should be defined', () => {
-    expect(app).toBeDefined();
-  });
-
   describe('/auth/signup', () => {
     it('should sign user up and return jwt', async () => {
       const reqBody: CreateUserDto = {

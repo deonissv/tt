@@ -28,10 +28,6 @@ describe('GamesModule', () => {
     await app.close();
   });
 
-  it('should be defined', () => {
-    expect(app).toBeDefined();
-  });
-
   describe('GET /games', () => {
     it('should return game previews', async () => {
       await prismaService.user.create({

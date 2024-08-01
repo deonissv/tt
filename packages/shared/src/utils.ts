@@ -13,7 +13,7 @@ export async function wsConnect(url: string, protocol?: string | string[]): Prom
       resolve(ws);
     };
     ws.onerror = err => {
-      reject(err.error as Error);
+      reject(new Error(err.message));
     };
   });
 }

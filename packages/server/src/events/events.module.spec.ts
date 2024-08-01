@@ -1,15 +1,17 @@
 import type { INestApplication } from '@nestjs/common';
 
-import type { WebSocket } from 'ws';
+import { WebSocket } from 'ws';
 import { authMockAdminToken } from '../../test/authMock';
 
 import { useApp } from '@server/test/useApp';
+import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import { wsConnect } from '@shared/utils';
 import type { Server } from 'net';
 
 const PORT = 3333;
 
-describe('AuthModule', () => {
+describe('WS', () => {
+  useDatabaseMock();
   let app: INestApplication<Server>;
   let ws: WebSocket;
   let wsUrl: string;
@@ -31,31 +33,28 @@ describe('AuthModule', () => {
     }
   });
 
-  it('should be defined', () => {
-    expect(app).toBeDefined();
-  });
-
   describe('ws auth', () => {
-    // it('should be complete successfully', async () => {
-    //    // start room
-    //   ws = await wsConnect(wsUrl, `Bearer.${authMockAdminToken}`);
-    //   expect(ws.readyState).toBe(WebSocket.OPEN);
-    // });
+    it('should be complete successfully', async () => {
+      // start room
+      ws = await wsConnect(wsUrl, `Bearer.${authMockAdminToken}`);
+      // ws = no room found
+      expect(ws.readyState).toBe(WebSocket.OPEN);
+    });
 
     it('should not found the room', async () => {
-      await expect(wsConnect(wsUrl, `Bearer.${authMockAdminToken}`)).rejects.toMatchObject({ type: 'error' });
+      await expect(wsConnect(wsUrl, `Bearer.${authMockAdminToken}`)).rejects.toThrowError();
     });
 
     it('should fail with no tocken', async () => {
-      await expect(wsConnect(wsUrl)).rejects.toMatchObject({ type: 'error' });
+      await expect(wsConnect(wsUrl)).rejects.toThrowError();
     });
 
     it('should fail on damaged tocken', async () => {
-      await expect(wsConnect(wsUrl, `Bearer.${authMockAdminToken}.asd`)).rejects.toMatchObject({ type: 'error' });
+      await expect(wsConnect(wsUrl, `Bearer.${authMockAdminToken}.asd`)).rejects.toThrowError();
     });
 
     it('should fail on empty token', async () => {
-      await expect(wsConnect(wsUrl, `Bearer`)).rejects.toMatchObject({ type: 'error' });
+      await expect(wsConnect(wsUrl, `Bearer`)).rejects.toThrowError();
     });
   });
 });

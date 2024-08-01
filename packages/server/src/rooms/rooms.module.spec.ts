@@ -28,10 +28,6 @@ describe('Rooms', () => {
     vi.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(app).toBeDefined();
-  });
-
   describe('POST /rooms', () => {
     it('should create a room', async () => {
       await prismaService.user.create({

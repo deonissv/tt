@@ -27,10 +27,6 @@ describe('RoomsService', () => {
     vi.clearAllMocks();
   });
 
-  it('should be defined', () => {
-    expect(roomsService).toBeDefined();
-  });
-
   describe('RoomProgressUpdate', () => {
     it('it should be created', async () => {
       const simState: SimulationStateSave = {

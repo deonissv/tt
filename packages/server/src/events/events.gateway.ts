@@ -1,6 +1,7 @@
 import * as http from 'http';
 import type internal from 'node:stream';
 
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { OnGatewayInit } from '@nestjs/websockets';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -73,13 +74,13 @@ export class EventsGateway implements OnGatewayInit {
         }
       } catch {
         abortHandshake(socket, 401, 'Unauthorized');
-        return;
+        return new UnauthorizedException();
       }
 
       const roomId = this.getRoomUrl(request);
       if (!roomId || !RoomsService.hasRoom(roomId)) {
         abortHandshake(socket, 400, 'No room found');
-        return;
+        return new BadRequestException('no room found');
       }
 
       const wss = RoomsService.getRoom(roomId)!.wss;
