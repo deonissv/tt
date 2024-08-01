@@ -11,17 +11,5 @@
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"
-  },
-  "devDependencies": {
-    "@babylonjs/inspector": "^7.0.0",
-    "react-router-dom": "^6.16.0",
-    "typescript": "^5.2.2",
-    "vitest": "^2.0.4",
-    "vite-tsconfig-paths": "^4.2.1"
-  },
-  "dependencies": {
-    "@babylonjs/core": "^7.0.0",
-    "@babylonjs/havok": "^1.2.1",
-    "@babylonjs/loaders": "^7.0.0"
   }
 }
