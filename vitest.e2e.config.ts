@@ -7,6 +7,7 @@ export default mergeConfig(config, {
   hookTimeout: 6000000,
   teardownTimeout: 6000000,
   test: {
+    fileParallelism: false,
     include: ['**/*.module.spec.ts'],
   },
 });

@@ -13,7 +13,6 @@ export default defineConfig({
     },
   },
   test: {
-    isolate: false,
     globals: true,
     root: './',
   },

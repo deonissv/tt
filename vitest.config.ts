@@ -4,6 +4,7 @@ import config from './vitest.base';
 
 export default mergeConfig(config, {
   test: {
+    isolate: false,
     exclude: ['**/*.module.spec.ts'],
   },
 });
