@@ -2,40 +2,40 @@ name: main CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ['main']
   pull_request:
-    branches: [ "main" ]
+    branches: ['main']
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: 22.x
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run server db
-    - run: npm run lint
-    - run: npm run typecheck
-    - run: npm test
-    - run: npm run build --if-present
-    
-  e2e:
-      runs-on: ubuntu-latest
-  
-      strategy:
-        matrix:
-          shard: [1, 2, 3, 4, 5]
-      steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
           cache: 'npm'
       - run: npm ci
       - run: npm run server db
-      - run: npm run test:e2e -- --testTimeout=3000000 --hookTimeout=6000000 --teardownTimeout=6000000 --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build --if-present
+
+  e2e:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+      - run: npm ci
+      - run: npm run server db
+      - run: npm run test:e2e -ws --if-present -- --testTimeout=3000000 --hookTimeout=6000000 --teardownTimeout=6000000 --shard=${{ matrix.shard }}/${{ strategy.job-total }}
