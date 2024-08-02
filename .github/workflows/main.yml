@@ -39,4 +39,4 @@ jobs:
       - run: npm ci
       - run: npm run server db
       # - run: npm run test:e2e -ws --if-present --  --shard=${{ matrix.shard }}/${{ strategy.job-total }}
-      - run: npm run test:e2e -ws --if-present --  --shard=1/3
+      - run: npm run test:e2e -ws --if-present --  --shard=1/3 --no-file-parallelism

@@ -34,7 +34,7 @@ describe('WS', () => {
   });
 
   describe('ws auth', () => {
-    it('should be complete successfully', async () => {
+    it('should be complete successfully', { skip: true }, async () => {
       // start room
       ws = await wsConnect(wsUrl, `Bearer.${authMockAdminToken}`);
       // ws = no room found

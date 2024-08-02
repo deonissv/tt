@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "test": "vitest run --config ../../vitest.config.ts",
     "test:w": "vitest --config ../../vitest.config.ts",
-    "test:e2e": "vitest run --config ../../vitest.e2e.config.ts --reporter=tap",
+    "test:e2e": "vitest run --config ../../vitest.e2e.config.ts",
     "typecheck": "tsc --noEmit",
     "start": "node dist/server/src/main.js -e 'node --experimental-require-module'",
     "debug": "nest start --debug --watch -e 'node --experimental-require-module'",
