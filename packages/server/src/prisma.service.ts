@@ -1,12 +1,13 @@
 import type { OnModuleInit } from '@nestjs/common';
-import { Injectable, Logger } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import type { PrismaClientInitializationError } from '@prisma/client/runtime/library';
 import { createSoftDeleteExtension } from 'prisma-extension-soft-delete';
 
+const logger = new ConsoleLogger('Prisma');
+
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit {
-  private logger = new Logger(PrismaService.name);
   constructor() {
     super();
 
@@ -30,11 +31,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onModuleInit() {
-    this.logger.log(`Initializing prisma connection: ${process.env.DATABASE_URL}`);
+    logger.log(`Initializing prisma connection: ${process.env.DATABASE_URL}`);
     await this.$connect().catch((e: PrismaClientInitializationError) => {
-      this.logger.error(`Failed to connect to database ${process.env.DATABASE_URL}`);
-      this.logger.error(e);
-      this.logger.error('Exiting process...');
+      logger.error(`Failed to connect to database ${process.env.DATABASE_URL}`);
+      logger.error(e);
+      logger.error('Exiting process...');
       process.kill(process.pid, 'SIGTERM');
     });
   }

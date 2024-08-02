@@ -26,9 +26,9 @@ jobs:
   e2e:
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        shard: [1, 2, 3, 4, 5]
+    # strategy:
+    #   matrix:
+    #     shard: [1, 2, 3, 4, 5]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js 22.x
