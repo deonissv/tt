@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 
 import { configServiceMock } from '../../test/configServiceMock';
-import type { PrismaService } from '../prisma.service';
+import type { PrismaService } from '../prisma/prisma.service';
 
 const user: User = {
   userId: 1,

@@ -13,7 +13,7 @@ import {
   authMockUser,
   authMockUserToken,
 } from '../../test/authMock';
-import type { PrismaService } from '../prisma.service';
+import type { PrismaService } from '../prisma/prisma.service';
 
 describe('GamesModule', () => {
   useDatabaseMock();

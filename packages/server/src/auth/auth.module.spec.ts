@@ -7,7 +7,7 @@ import { useApp } from '@server/test/useApp';
 import type { CreateUserDto } from '@shared/dto/users';
 import type { Server } from 'net';
 import { useDatabaseMock } from '../../test/useDatabaseMock';
-import type { PrismaService } from '../prisma.service';
+import type { PrismaService } from '../prisma/prisma.service';
 
 describe('AuthModule', () => {
   useDatabaseMock();

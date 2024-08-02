@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { GamesModule } from '../games/games.module';
 import { PermissionsService } from '../permissions.service';
-import { PrismaService } from '../prisma.service';
 import { RoomsController } from './rooms.controller';
 import { RoomsService } from './rooms.service';
 
 @Module({
   imports: [GamesModule],
-  providers: [RoomsService, PrismaService, PermissionsService],
+  providers: [RoomsService, PermissionsService],
   controllers: [RoomsController],
   exports: [RoomsService],
 })

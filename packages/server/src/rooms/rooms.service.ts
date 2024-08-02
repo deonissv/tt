@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import type { Prisma, Room } from '@prisma/client';
 import { GamesService } from '../games/games.service';
-import { PrismaService } from '../prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { SimulationRoom } from './simulation-room';
 
 import type { RoomPreviewDto } from '@shared/dto/rooms';

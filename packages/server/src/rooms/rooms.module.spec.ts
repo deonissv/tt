@@ -3,7 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 
 import { authMockAdmin, authMockAdminToken } from '../../test/authMock';
-import type { PrismaService } from '../prisma.service';
+import type { PrismaService } from '../prisma/prisma.service';
 import { RoomsService } from './rooms.service';
 
 import { useApp } from '@server/test/useApp';

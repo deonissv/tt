@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-import { GamesService } from './games.service';
-import { GamesController } from './games.controller';
-import { PrismaService } from '../prisma.service';
 import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { PermissionsService } from '../permissions.service';
+import { GamesController } from './games.controller';
+import { GamesService } from './games.service';
 
 @Module({
-  providers: [GamesService, PrismaService, PermissionsService, CaslAbilityFactory],
+  providers: [GamesService, PermissionsService, CaslAbilityFactory],
   exports: [GamesService],
   controllers: [GamesController],
 })

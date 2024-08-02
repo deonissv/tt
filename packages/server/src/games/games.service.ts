@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { Game, GameVersion, Prisma } from '@prisma/client';
 
-import { PrismaService } from '../prisma.service';
-
 import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
-import type { SimulationStateSave } from '../../../shared/src/dto/states/simulation';
+import { SimulationStateSave } from '@shared/dto/states';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GamesService {
@@ -111,7 +110,7 @@ export class GamesService {
       },
     });
 
-    if (!game || !game.GameVersion?.[0]?.content) {
+    if (!game?.GameVersion?.[0]?.content) {
       this.logger.log(`Content not found for game with code: ${code}`);
       return null;
     }

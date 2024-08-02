@@ -1,7 +1,7 @@
 import type { StartedTestContainer } from 'testcontainers';
 
 import { ConsoleLogger } from '@nestjs/common';
-import type { PrismaService } from '../src/prisma.service';
+import type { PrismaService } from '../src/prisma/prisma.service';
 import { getDatabaseUrl, prismaMigrate, startContainer } from './testUtils';
 
 const logger = new ConsoleLogger('DB Mock');

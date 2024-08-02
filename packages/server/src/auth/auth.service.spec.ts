@@ -2,7 +2,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { configServiceMock } from '../../test/configServiceMock';
-import type { PrismaService } from '../prisma.service';
+import type { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 

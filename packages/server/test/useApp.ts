@@ -4,8 +4,8 @@ import type { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { AppModule } from '@server/src/app.module';
-import { PrismaService } from '@server/src/prisma.service';
 import type { Server } from 'net';
+import { PrismaService } from '../src/prisma/prisma.service';
 import useConfigServiceMock from './useConfigServiceMock';
 
 export const useApp = async () => {

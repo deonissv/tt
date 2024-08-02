@@ -4,7 +4,7 @@ import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import type { Server } from 'net';
 import { authMockAdmin } from '../../test/authMock';
-import type { PrismaService } from '../prisma.service';
+import type { PrismaService } from '../prisma/prisma.service';
 import { RoomsService } from './rooms.service';
 import type { SimulationRoom } from './simulation-room';
 
