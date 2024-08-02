@@ -30,8 +30,11 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   }
 
   async onModuleInit() {
+    this.logger.log(`Initializing prisma connection: ${process.env.DATABASE_URL}`);
     await this.$connect().catch((e: PrismaClientInitializationError) => {
+      this.logger.error(`Failed to connect to database ${process.env.DATABASE_URL}`);
       this.logger.error(e);
+      this.logger.error('Exiting process...');
       process.kill(process.pid, 'SIGTERM');
     });
   }

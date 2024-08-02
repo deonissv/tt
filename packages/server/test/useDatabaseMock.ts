@@ -1,10 +1,10 @@
 import type { StartedTestContainer } from 'testcontainers';
 
-import { Logger } from '@nestjs/common';
+import { ConsoleLogger } from '@nestjs/common';
 import type { PrismaService } from '../src/prisma.service';
 import { getDatabaseUrl, prismaMigrate, startContainer } from './testUtils';
 
-const logger = new Logger('DB Mock');
+const logger = new ConsoleLogger('DB Mock');
 
 const DBMockFactory = (): (() => PrismaService) => {
   let container: StartedTestContainer;
@@ -13,7 +13,7 @@ const DBMockFactory = (): (() => PrismaService) => {
 
   beforeAll(async () => {
     logger.log('Starting DB Mock...');
-    container = await startContainer();
+    container = (await startContainer())!;
 
     const host = container.getHost();
     const port = container.getMappedPort(5432);

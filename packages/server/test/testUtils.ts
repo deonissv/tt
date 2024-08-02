@@ -1,9 +1,9 @@
-import { Logger } from '@nestjs/common';
+import { ConsoleLogger } from '@nestjs/common';
 import { execSync } from 'child_process';
 import type { StartedTestContainer } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
 
-const logger = new Logger('TestUtils');
+const logger = new ConsoleLogger('TestUtils');
 
 const POSTGRES_USER = 'test';
 const POSTGRES_PASSWORD = 'test';
@@ -18,7 +18,7 @@ export function prismaMigrate(databaseUrl: string): void {
   });
 }
 
-export async function startContainer(): Promise<StartedTestContainer> {
+export async function startContainer(): Promise<StartedTestContainer | null> {
   const container_name = 'postgres:14-alpine';
   logger.log(`Starting ${container_name} container...`);
   const container = await new GenericContainer(container_name)
@@ -29,7 +29,13 @@ export async function startContainer(): Promise<StartedTestContainer> {
       POSTGRES_DB: POSTGRES_DB,
       POSTGRES_SERVER: POSTGRES_SERVER,
     })
-    .start();
+    .start()
+    .catch(e => {
+      logger.error('Failed to start container');
+      logger.error(e);
+      process.kill(process.pid, 'SIGTERM');
+      return null;
+    });
   logger.log('Container started successfully');
   return container;
 }
