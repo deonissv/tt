@@ -28,8 +28,9 @@ import type {
 import { ActorType, type ActorBaseState } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
-import type { Action } from '@shared/ws/ws';
-import { ACTIONS } from '@shared/ws/ws';
+import { isTuple } from '@shared/guards';
+import type { Tuple } from '@shared/types';
+import { WS } from '@shared/ws';
 import { isContainable } from '../actions/Containable';
 import {
   Actor,
@@ -160,19 +161,19 @@ export abstract class SimulationBase {
     }
   }
 
-  update(simUpdate: SimulationStateUpdate) {
-    simUpdate?.actorStates?.forEach(actorState => {
-      const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor | undefined;
-      actor?.update(actorState);
-    });
-
-    simUpdate?.actions?.forEach(action => this.handleAction(action));
+  update(msg: WS.MSG) {
+    msg.map(msg => this.handleAction(msg));
   }
 
-  handleAction(action: Action) {
+  handleAction(action: WS.SimAction) {
     switch (action.type) {
-      case ACTIONS.PICK_ITEM: {
+      case WS.SimActionType.MOVE_ACTOR: {
+        this.handleMoveActor(action.payload.guid, action.payload.position);
+        break;
+      }
+      case WS.SimActionType.PICK_ITEM: {
         this.handlePickItem(action.payload);
+        break;
       }
     }
   }
@@ -185,6 +186,13 @@ export abstract class SimulationBase {
       } catch (e) {
         Logger.error(e);
       }
+    }
+  }
+
+  handleMoveActor(guid: string, position: Tuple<number, 3>) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.move(...position);
     }
   }
 
@@ -205,6 +213,20 @@ export abstract class SimulationBase {
     return {
       actorStates: actorStates,
     };
+  }
+
+  getSimActions(simStateUpdate: SimulationStateUpdate = this.toStateUpdate()): WS.SimAction[] {
+    const actions: WS.SimAction[] = [];
+
+    simStateUpdate.actorStates?.forEach(actorState => {
+      if (actorState.transformation?.position && isTuple(actorState.transformation.position, 3))
+        actions.push({
+          type: WS.SimActionType.MOVE_ACTOR,
+          payload: { guid: actorState.guid, position: actorState.transformation.position },
+        });
+    });
+
+    return actions;
   }
 
   static mergeStateDelta(state: SimulationStateSave, delta: SimulationStateUpdate): SimulationStateSave {

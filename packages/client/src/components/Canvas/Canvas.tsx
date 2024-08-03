@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
+import type { WS } from '@shared/ws';
 import { useAppSelector } from '../../store/store';
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
@@ -8,7 +9,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const cursor = useRef<[number, number]>([0, 0]);
   const canvas = useRef<HTMLCanvasElement>(null);
 
-  const [cursors, setCursors] = useState<Record<string, number[]>>({});
+  const [cursors, setCursors] = useState<WS.Cursors>({});
   const nickname = useAppSelector(state => state.nickname.nickname);
 
   const init = useCallback(async (): Promise<SimulationRoom> => {

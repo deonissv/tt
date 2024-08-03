@@ -8,8 +8,8 @@ import type { RoomsService } from './rooms.service';
 
 import { URL_PREFIX } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
+import { isObject, isString } from '@shared/guards';
 import { WS } from '@shared/ws';
-import type { Action } from '@shared/ws/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -31,7 +31,7 @@ export class SimulationRoom {
   clients: Map<WebSocket, Client>;
   cursors: Map<WebSocket, number[]>;
   simSave: SimulationStateSave | undefined;
-  actions: Action[];
+  actions: WS.SimAction[];
 
   downloadProgress: WS.DownloadProgress;
 
@@ -75,10 +75,12 @@ export class SimulationRoom {
       () => {
         this.downloadProgress.loaded++;
 
-        this.broadcast({
-          type: WS.DOWNLOAD_PROGRESS,
-          payload: this.downloadProgress,
-        } as WS.MSG);
+        this.broadcast([
+          {
+            type: WS.SimActionType.DOWNLOAD_PROGRESS,
+            payload: this.downloadProgress,
+          },
+        ]);
       },
       _actorState => {
         this.downloadProgress.succeded++;
@@ -107,10 +109,13 @@ export class SimulationRoom {
       };
     }
 
-    this.broadcast({
-      type: WS.STATE,
-      payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType),
-    } as WS.MSG);
+    const patchedState = SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave;
+    this.broadcast([
+      {
+        type: WS.SimActionType.STATE,
+        payload: patchedState,
+      },
+    ]);
 
     this.savingInterval = this.initSaving();
     this.tickInterval = this.initUpdate();
@@ -126,10 +131,12 @@ export class SimulationRoom {
       this.clients.set(ws, client);
 
       if (this.simSave) {
-        WS.send(ws, {
-          type: WS.STATE,
-          payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave,
-        });
+        WS.send(ws, [
+          {
+            type: WS.SimActionType.STATE,
+            payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave,
+          },
+        ]);
       }
 
       ws.onmessage = event => this.onMessage(event);
@@ -139,23 +146,8 @@ export class SimulationRoom {
   }
 
   private onMessage(event: WebSocket.MessageEvent) {
-    const message = WS.read(event);
-
-    switch (message.type) {
-      case WS.UPDATE: {
-        const simStateUpdate = message.payload;
-        this.simulation.update(message.payload);
-        if (simStateUpdate.cursorPositions) {
-          const cursor = Object.values(simStateUpdate.cursorPositions)[0];
-          this.cursors.set(event.target, cursor); // @TODO add typing for position
-        }
-        break;
-      }
-      case WS.ACTIONS.PICK_ITEM: {
-        this.simulation.handleAction(message);
-        this.actions.push(message);
-      }
-    }
+    const actions = WS.read(event);
+    this.simulation.update(actions);
   }
 
   private onClose(event: WebSocket.CloseEvent) {
@@ -182,27 +174,23 @@ export class SimulationRoom {
       return;
     }
 
+    const actions = this.simulation.getSimActions();
     const cursors = Array.from(this.cursors).reduce((acc, [ws, cursor]) => {
       acc[this.clients.get(ws)!.id] = cursor;
       return acc;
     }, {});
 
-    let update: SimulationStateUpdate = {
-      cursorPositions: cursors,
-    };
-
-    const delta = this.getDelta();
-    update = { ...update, ...delta };
+    actions.push({
+      type: WS.SimActionType.CURSORS,
+      payload: cursors,
+    });
 
     if (this.actions.length > 0) {
-      update.actions = this.actions;
+      actions.push(...this.actions);
       this.actions = [];
     }
 
-    this.broadcast({
-      type: WS.UPDATE,
-      payload: update,
-    });
+    this.broadcast(actions);
   }
 
   private initSaving(): NodeJS.Timeout {
@@ -242,18 +230,18 @@ export class SimulationRoom {
   }
 
   static patchStateURLs<T extends RecursiveType>(item: T): T {
-    if (typeof item == 'string' && item.startsWith('http') && !item.startsWith(URL_PREFIX)) {
+    if (isString(item) && item.startsWith('http') && !item.startsWith(URL_PREFIX)) {
       return this.getAssetURL(item) as T;
     } else if (Array.isArray(item)) {
       return item.map(i => this.patchStateURLs(i)) as T;
-    } else if (typeof item === 'object' && item !== null) {
-      const newObj: RecursiveObject = {};
-      for (const key in item) {
-        if (Object.prototype.hasOwnProperty.call(item, key)) {
-          newObj[key] = this.patchStateURLs(item[key]);
-        }
-      }
-      return newObj as T;
+    } else if (isObject(item)) {
+      return Object.keys(item).reduce(
+        (acc, key) => ({
+          ...acc,
+          [key]: this.patchStateURLs(item[key]),
+        }),
+        {},
+      ) as T;
     }
     return item;
   }

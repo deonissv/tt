@@ -12,16 +12,20 @@ export class Client {
 
   static async init(ws: WebSocket): Promise<Client> {
     const id = crypto.randomUUID();
-    WS.send(ws, {
-      type: WS.CLIENT_ID,
-      payload: id,
-    });
+    WS.send(ws, [
+      {
+        type: WS.SimActionType.CLIENT_ID,
+        payload: id,
+      },
+    ]);
 
     return new Promise((resolve, reject) => {
       const handler = (event: WebSocket.MessageEvent) => {
         const message = WS.read(event);
-        if (message.type === WS.NICKNAME) {
-          const client = new Client(id, message.payload);
+
+        const action = message[0];
+        if (action.type === WS.SimActionType.NICKNAME) {
+          const client = new Client(id, action.payload);
 
           ws.removeEventListener('message', handler);
           resolve(client);

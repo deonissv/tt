@@ -5,13 +5,15 @@ import { WS } from '@shared/ws';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 
-const FRAME_RATE = 60;
+const FRAME_RATE = 30;
 
 const onPickItem = (ws: WebSocket, actor: ActorBase) => {
-  WS.send(ws, {
-    type: WS.ACTIONS.PICK_ITEM,
-    payload: actor.guid,
-  });
+  WS.send(ws, [
+    {
+      type: WS.SimActionType.PICK_ITEM,
+      payload: actor.guid,
+    },
+  ]);
 };
 
 export class SimulationRoom {
@@ -44,10 +46,13 @@ export class SimulationRoom {
         return;
       }
 
-      WS.send(this.ws, {
-        type: WS.UPDATE,
-        payload: simStateUpdate,
+      const actions: WS.MSG = this.simulation.getSimActions(simStateUpdate);
+      actions.push({
+        type: WS.SimActionType.CURSOR,
+        payload: { position: cursor.current },
       });
+
+      WS.send(this.ws, actions);
       this.lastUpdate = updateStringified;
     }, 1000 / FRAME_RATE);
   }
@@ -57,7 +62,7 @@ export class SimulationRoom {
     roomId: typeof SimulationRoom.prototype.roomId,
     nickname = '',
     cursor: typeof SimulationRoom.prototype.cursor,
-    setCursors: Dispatch<SetStateAction<Record<string, number[]>>>,
+    setCursors: Dispatch<SetStateAction<WS.Cursors>>,
   ): Promise<SimulationRoom> {
     const [ws, clientId, simState] = await RoomService.connect(roomId, nickname);
     const sim = await Simulation.init(canvas, simState, {
@@ -67,18 +72,24 @@ export class SimulationRoom {
     ws.addEventListener('message', event => {
       const message = WS.read(event);
 
-      switch (message.type) {
-        case WS.UPDATE: {
-          const simStateUpdate = message.payload;
-          sim.update(simStateUpdate);
-          if (simStateUpdate.cursorPositions) {
-            setCursors(prev => ({ ...prev, ...simStateUpdate.cursorPositions }));
+      message.forEach(action => {
+        switch (action.type) {
+          case WS.SimActionType.CURSOR: {
+            cursor.current = action.payload.position;
+            setCursors(prev => ({ ...prev, ...action.payload }));
+
+            break;
           }
-          break;
+          case WS.SimActionType.MOVE_ACTOR: {
+            sim.handleMoveActor(action.payload.guid, action.payload.position);
+            break;
+          }
+          case WS.SimActionType.PICK_ITEM: {
+            sim.handlePickItem(action.payload);
+            break;
+          }
         }
-        default:
-          break;
-      }
+      });
     });
 
     return new SimulationRoom(ws, sim, clientId, roomId, cursor);

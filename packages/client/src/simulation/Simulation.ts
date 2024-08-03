@@ -12,8 +12,7 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
 import type { ArcRotateCamera } from '@babylonjs/core';
 import { FLIP_BIND_KEYS } from '@shared/constants';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
-import type { Actor } from '@shared/playground';
+import type { SimulationStateSave } from '@shared/dto/states';
 import { ActorBase, EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 
@@ -156,16 +155,5 @@ export class Simulation extends SimulationBase {
         action.call(target, target);
       }
     });
-  }
-
-  update(simUpdate: SimulationStateUpdate) {
-    simUpdate?.actorStates?.forEach(actorState => {
-      const actor = this.scene.getNodes().find(node => (node as Actor)?.guid === actorState.guid) as Actor;
-      if (actor && this._pickedActor?.guid !== actor.guid) {
-        actor.update(actorState);
-      }
-    });
-
-    simUpdate?.actions?.forEach(action => this.handleAction(action));
   }
 }
