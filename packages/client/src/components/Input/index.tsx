@@ -37,7 +37,7 @@ export const Input: React.FC<InputProps> = ({
   label,
   placeholder,
   required,
-  type,
+  type = 'text',
   value,
   onChange,
   className,
@@ -62,10 +62,6 @@ export const Input: React.FC<InputProps> = ({
       />
     </>
   );
-};
-
-Input.defaultProps = {
-  type: 'text',
 };
 
 export default Input;
