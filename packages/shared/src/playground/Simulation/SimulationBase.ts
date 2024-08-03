@@ -97,7 +97,7 @@ export abstract class SimulationBase {
         acc.push(actorCandidate);
       }
       return acc;
-    }, [] as Actor[]);
+    }, [] as ActorBase[]);
   }
   static async initEngine(canvas: HTMLCanvasElement | undefined): Promise<AbstractEngine> {
     return await EngineFactory(canvas);
@@ -166,21 +166,24 @@ export abstract class SimulationBase {
       actor?.update(actorState);
     });
 
-    simUpdate?.actions?.forEach(action => this.processAction(action));
+    simUpdate?.actions?.forEach(action => this.handleAction(action));
   }
 
-  processAction(action: Action) {
+  handleAction(action: Action) {
     switch (action.type) {
       case ACTIONS.PICK_ITEM: {
-        const deckGUID = action.payload;
-        const actor = this.actors.find(a => a.guid === deckGUID);
-        if (isContainable(actor)) {
-          try {
-            actor.pickItem();
-          } catch (e) {
-            Logger.error(e);
-          }
-        }
+        this.handlePickItem(action.payload);
+      }
+    }
+  }
+
+  handlePickItem(containerGUID: string) {
+    const actor = this.actors.find(a => a.guid === containerGUID);
+    if (isContainable(actor)) {
+      try {
+        actor.pickItem();
+      } catch (e) {
+        Logger.error(e);
       }
     }
   }

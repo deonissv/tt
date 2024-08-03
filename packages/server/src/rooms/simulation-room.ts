@@ -152,7 +152,7 @@ export class SimulationRoom {
         break;
       }
       case WS.ACTIONS.PICK_ITEM: {
-        this.simulation.processAction(message);
+        this.simulation.handleAction(message);
         this.actions.push(message);
       }
     }

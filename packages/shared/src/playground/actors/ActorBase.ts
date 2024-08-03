@@ -161,16 +161,16 @@ export class ActorBase extends TransformNode {
     }
   }
 
-  // pick() {
-  // this._setMass(0);
-  // this.move(0, LIFH_HIGHT, 0);
-  // this.__model.translate(Axis.Y, LIFH_HIGHT, Space.LOCAL);
-  // this._forceUpdate();
-  // }
+  pick() {
+    // this._setMass(0);
+    // this.move(0, LIFH_HIGHT, 0);
+    // this.__model.translate(Axis.Y, LIFH_HIGHT, Space.LOCAL);
+    // this._forceUpdate();
+  }
 
   release() {
-    this._setMass(this.__mass);
-    this._body.applyImpulse(new Vector3(0, 0, 0), this.getAbsolutePosition());
+    // this._setMass(this.__mass);
+    // this._body.applyImpulse(new Vector3(0, 0, 0), this.getAbsolutePosition());
   }
 
   get transformation(): Transformation {
@@ -182,8 +182,9 @@ export class ActorBase extends TransformNode {
   }
 
   move(dx: number, dy: number, dz: number) {
-    const pos = this.__targetPosition ?? this.position;
-    this.__targetPosition = pos.add(new Vector3(dx, dy, dz));
+    this.position = this.position.add(new Vector3(dx, dy, dz));
+    // const pos = this.__targetPosition ?? this.position;
+    // this.__targetPosition = pos.add(new Vector3(dx, dy, dz));
   }
 
   flip() {

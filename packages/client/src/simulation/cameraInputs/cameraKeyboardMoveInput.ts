@@ -71,6 +71,7 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
       if (this._keys.size === 0) return;
 
       this._keys.forEach(key => {
+        const coef = this._scene.useRightHandedSystem ? 1 : -1;
         switch (key) {
           case 'KeyW':
             {
@@ -92,16 +93,16 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
             {
               const dz = this.moveSensetivity * Math.cos(this.camera!.alpha);
               const dx = this.moveSensetivity * Math.sin(this.camera!.alpha);
-              this.camera!.target.z += dz;
-              this.camera!.target.x -= dx;
+              this.camera!.target.z += coef * dz;
+              this.camera!.target.x -= coef * dx;
             }
             break;
           case 'KeyD':
             {
               const dz = this.moveSensetivity * Math.cos(this.camera!.alpha);
               const dx = this.moveSensetivity * Math.sin(this.camera!.alpha);
-              this.camera!.target.z -= dz;
-              this.camera!.target.x += dx;
+              this.camera!.target.z -= coef * dz;
+              this.camera!.target.x += coef * dx;
             }
             break;
         }

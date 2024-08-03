@@ -10,6 +10,7 @@ import { SimulationScene } from './SimulationScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
+import type { ArcRotateCamera } from '@babylonjs/core';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import type { Actor } from '@shared/playground';
@@ -23,8 +24,8 @@ export interface SimulationCallbacks {
 export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
   private _hoveredMesh: Mesh | null = null;
-  private _pickedActor: Actor | null = null;
-  // private _cursorPos: [number, number] = [0, 0];
+  private _pickedActor: ActorBase | null = null;
+  private _cursorPos: [number, number] = [0, 0];
   cbs: SimulationCallbacks;
 
   private constructor(scene: Scene, cbs: SimulationCallbacks) {
@@ -69,8 +70,7 @@ export class Simulation extends SimulationBase {
       scene.render();
     });
 
-    // pg._handlePick();
-
+    sim._handlePick();
     sim._handleHoverHighlight();
     sim._bindAction(FLIP_BIND_KEYS, actor => {
       if (isContainable(actor)) cbs.onPickItem?.(actor);
@@ -92,6 +92,10 @@ export class Simulation extends SimulationBase {
     return pickedMesh?.parent instanceof ActorBase ? pickedMesh.parent : null;
   }
 
+  private get _camera(): ArcRotateCamera {
+    return this.scene.activeCamera as ArcRotateCamera;
+  }
+
   private _handleHoverHighlight() {
     this.scene.onPointerObservable.add(evt => {
       if (evt.type !== PointerEventTypes.POINTERMOVE) return;
@@ -111,36 +115,37 @@ export class Simulation extends SimulationBase {
     });
   }
 
-  // private _handlePick() {
-  //   this._scene.onPointerObservable.add(async evt => {
-  //     switch (evt.type) {
-  //       case PointerEventTypes.POINTERDOWN: {
-  //         this._cursorPos = [this._scene.pointerX, this._scene.pointerY];
-  //         this._pickedActor = this._pickActor();
-  //         if (!this._pickedActor) return;
-  //         this._pickedActor.pick();
-  //         break;
-  //       }
-  //       case PointerEventTypes.POINTERUP: {
-  //         if (!this._pickedActor) return;
-  //         this._pickedActor.release();
-  //         this._pickedActor = null;
-  //         break;
-  //       }
-  //       case PointerEventTypes.POINTERMOVE: {
-  //         if (!this._pickedActor) return;
-  //         const prevCursorPos = this._cursorPos;
-  //         this._cursorPos = [this._scene.pointerX, this._scene.pointerY];
+  private _handlePick() {
+    this.scene.onPointerObservable.add(evt => {
+      switch (evt.type) {
+        case PointerEventTypes.POINTERDOWN: {
+          this._cursorPos = [this.scene.pointerX, this.scene.pointerY];
+          this._pickedActor = this._pickActor();
+          if (!this._pickedActor) return;
+          this._pickedActor.pick();
+          break;
+        }
+        case PointerEventTypes.POINTERUP: {
+          if (!this._pickedActor) return;
+          this._pickedActor.release();
+          this._pickedActor = null;
+          break;
+        }
+        case PointerEventTypes.POINTERMOVE: {
+          if (!this._pickedActor) return;
+          const prevCursorPos = this._cursorPos;
+          this._cursorPos = [this.scene.pointerX, this.scene.pointerY];
 
-  //         const cursorDX = this._cursorPos[0] - prevCursorPos[0];
-  //         const cursorDY = this._cursorPos[1] - prevCursorPos[1];
-  //         const dx = Math.cos(this._camera.alpha) * cursorDY + Math.sin(this._camera.alpha) * cursorDX;
-  //         const dy = -Math.cos(this._camera.alpha) * cursorDX + Math.sin(this._camera.alpha) * cursorDY;
-  //         this._pickedActor.__move(dx * 0.02, 0, dy * 0.02);
-  //       }
-  //     }
-  //   });
-  // }
+          const cursorDX = this.scene.useRightHandedSystem ? 1 : -1 * (this._cursorPos[0] - prevCursorPos[0]);
+          const cursorDY = this._cursorPos[1] - prevCursorPos[1];
+
+          const dx = Math.cos(this._camera.alpha) * cursorDY + Math.sin(this._camera.alpha) * cursorDX;
+          const dy = -Math.cos(this._camera.alpha) * cursorDX + Math.sin(this._camera.alpha) * cursorDY;
+          this._pickedActor.move(dx * 0.02, 0, dy * 0.02);
+        }
+      }
+    });
+  }
 
   private _bindAction(key: string[], action: (actor: ActorBase) => void) {
     this.scene.onKeyboardObservable.add(kbInfo => {
@@ -161,6 +166,6 @@ export class Simulation extends SimulationBase {
       }
     });
 
-    simUpdate?.actions?.forEach(action => this.processAction(action));
+    simUpdate?.actions?.forEach(action => this.handleAction(action));
   }
 }
