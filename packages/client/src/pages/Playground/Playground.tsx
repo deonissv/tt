@@ -11,6 +11,8 @@ const Playground: React.FC = (): React.ReactNode => {
       {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
         onPickItem: () => {},
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        onMoveActor: () => {},
       },
     );
   }, [canvas]);
