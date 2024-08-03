@@ -26,17 +26,13 @@ export interface MoveActor {
   position: Tuple<number, 3>;
 }
 
-export interface CursorMove {
-  position: Tuple<number, 2>;
-}
-
 export type Cursors = Record<string, Tuple<number, 2>>;
 
 interface ActionPayloads {
   [SimActionType.CLIENT_ID]: string;
   [SimActionType.NICKNAME]: string;
   [SimActionType.STATE]: SimulationStateSave;
-  [SimActionType.CURSOR]: CursorMove;
+  [SimActionType.CURSOR]: Tuple<number, 2>;
   [SimActionType.CURSORS]: Cursors;
   [SimActionType.DOWNLOAD_PROGRESS]: DownloadProgress;
   [SimActionType.MOVE_ACTOR]: MoveActor;

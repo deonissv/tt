@@ -1,28 +1,21 @@
 import { RoomService } from '@services/room.service';
-import type { SimulationStateUpdate } from '@shared/dto/states';
 import type { ActorBase } from '@shared/playground';
+import type { Tuple } from '@shared/types';
 import { WS } from '@shared/ws';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 
 const FRAME_RATE = 30;
 
-const onPickItem = (ws: WebSocket, actor: ActorBase) => {
-  WS.send(ws, [
-    {
-      type: WS.SimActionType.PICK_ITEM,
-      payload: actor.guid,
-    },
-  ]);
-};
-
 export class SimulationRoom {
+  static actions: WS.SimAction[] = [];
+
   readonly ws: WebSocket;
   readonly simulation: Simulation;
   readonly clientId: string;
   readonly roomId: string;
 
-  cursor: MutableRefObject<[number, number]>;
+  cursor: MutableRefObject<Tuple<number, 2>>;
   updateTimeout: NodeJS.Timeout;
   lastUpdate: string;
 
@@ -40,21 +33,27 @@ export class SimulationRoom {
     this.cursor = cursor;
 
     this.updateTimeout = setInterval(() => {
-      const simStateUpdate: SimulationStateUpdate = { cursorPositions: { [this.clientId]: cursor.current } };
-      const updateStringified = JSON.stringify(simStateUpdate);
-      if (this.lastUpdate === updateStringified) {
-        return;
-      }
-
-      const actions: WS.MSG = this.simulation.getSimActions(simStateUpdate);
-      actions.push({
-        type: WS.SimActionType.CURSOR,
-        payload: { position: cursor.current },
-      });
-
-      WS.send(this.ws, actions);
-      this.lastUpdate = updateStringified;
+      this.sendUpdate();
     }, 1000 / FRAME_RATE);
+  }
+
+  sendUpdate() {
+    const simStateUpdate = this.cursor.current;
+    const updateStringified = JSON.stringify(simStateUpdate);
+    if (this.lastUpdate === updateStringified) {
+      return;
+    }
+
+    SimulationRoom.actions.push({
+      type: WS.SimActionType.CURSOR,
+      payload: this.cursor.current,
+    });
+
+    if (SimulationRoom.actions.length > 0) {
+      WS.send(this.ws, SimulationRoom.actions);
+      this.lastUpdate = updateStringified;
+      SimulationRoom.actions = [];
+    }
   }
 
   static async init(
@@ -66,7 +65,8 @@ export class SimulationRoom {
   ): Promise<SimulationRoom> {
     const [ws, clientId, simState] = await RoomService.connect(roomId, nickname);
     const sim = await Simulation.init(canvas, simState, {
-      onPickItem: actor => onPickItem(ws, actor),
+      onPickItem: SimulationRoom.onPickItem,
+      onMoveActor: SimulationRoom.onMoveActor,
     });
 
     ws.addEventListener('message', event => {
@@ -74,10 +74,8 @@ export class SimulationRoom {
 
       message.forEach(action => {
         switch (action.type) {
-          case WS.SimActionType.CURSOR: {
-            cursor.current = action.payload.position;
+          case WS.SimActionType.CURSORS: {
             setCursors(prev => ({ ...prev, ...action.payload }));
-
             break;
           }
           case WS.SimActionType.MOVE_ACTOR: {
@@ -94,6 +92,20 @@ export class SimulationRoom {
 
     return new SimulationRoom(ws, sim, clientId, roomId, cursor);
   }
+
+  static onPickItem = (actor: ActorBase) => {
+    this.actions.push({
+      type: WS.SimActionType.PICK_ITEM,
+      payload: actor.guid,
+    });
+  };
+
+  static onMoveActor = (actor: ActorBase, position: Tuple<number, 3>) => {
+    this.actions.push({
+      type: WS.SimActionType.MOVE_ACTOR,
+      payload: { guid: actor.guid, position },
+    });
+  };
 
   destructor() {
     if (this.updateTimeout) clearInterval(this.updateTimeout);

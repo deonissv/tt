@@ -215,7 +215,7 @@ export abstract class SimulationBase {
     };
   }
 
-  getSimActions(simStateUpdate: SimulationStateUpdate = this.toStateUpdate()): WS.SimAction[] {
+  getSimActions(simStateUpdate: SimulationStateUpdate): WS.SimAction[] {
     const actions: WS.SimAction[] = [];
 
     simStateUpdate.actorStates?.forEach(actorState => {

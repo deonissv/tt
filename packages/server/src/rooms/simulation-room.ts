@@ -10,6 +10,7 @@ import { URL_PREFIX } from '@shared/constants';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { isObject, isString } from '@shared/guards';
 import { WS } from '@shared/ws';
+import type { Cursors } from '@shared/ws/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -29,9 +30,10 @@ export class SimulationRoom {
   simulation: Simulation;
   wss: WebSocket.Server;
   clients: Map<WebSocket, Client>;
-  cursors: Map<WebSocket, number[]>;
+  cursors: Map<WebSocket, Cursors[keyof Cursors]>;
   simSave: SimulationStateSave | undefined;
   actions: WS.SimAction[];
+  prevUpdate: string;
 
   downloadProgress: WS.DownloadProgress;
 
@@ -70,6 +72,7 @@ export class SimulationRoom {
   async init(simSave?: SimulationStateSave) {
     SimulationRoom.logger.log(`Room ${this.id} initializig...`);
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
+    SimulationRoom.logger.log(`Simulation ${this.id} initializig...`);
     this.simulation = await Simulation.init(
       simSave ?? {},
       () => {
@@ -119,12 +122,15 @@ export class SimulationRoom {
 
     this.savingInterval = this.initSaving();
     this.tickInterval = this.initUpdate();
+
+    SimulationRoom.logger.log(`Simulation ${this.id} initialized.`);
   }
 
   private getServer() {
     const wss = new WebSocket.Server({ noServer: true });
 
     wss.on('connection', async (ws: WebSocket) => {
+      SimulationRoom.logger.log(`Client connecting to room ${this.id}`);
       const client = await Client.init(ws); // @TODO send actual state @TODO catch reject
       if (this.closeTimeout) clearTimeout(this.closeTimeout);
 
@@ -146,20 +152,31 @@ export class SimulationRoom {
   }
 
   private onMessage(event: WebSocket.MessageEvent) {
+    SimulationRoom.logger.log(`Received message: ${JSON.stringify(event.data)}`);
     const actions = WS.read(event);
+
+    const cursorAction = actions.find(action => action.type === WS.SimActionType.CURSOR);
+    if (cursorAction) {
+      this.cursors.set(event.target, cursorAction.payload);
+    }
+
     this.simulation.update(actions);
   }
 
   private onClose(event: WebSocket.CloseEvent) {
+    SimulationRoom.logger.log(`Client disconnectingfrom room ${this.id}`);
     this.clients.delete(event.target);
     this.cursors.delete(event.target);
     if (this.clients.size === 0) {
       this.closeTimeout = setTimeout(() => {
         if (this.clients.size === 0) {
-          this.closeRoom().catch(e => SimulationRoom.logger.error(e));
+          this.closeRoom().catch(e => {
+            SimulationRoom.logger.error(e);
+          });
         }
       }, EMPTY_ROOM_PERSIST_DELAY);
     }
+    SimulationRoom.logger.log(`Client disconnected from room ${this.id}`);
   }
 
   private async closeRoom() {
@@ -174,11 +191,17 @@ export class SimulationRoom {
       return;
     }
 
-    const actions = this.simulation.getSimActions();
     const cursors = Array.from(this.cursors).reduce((acc, [ws, cursor]) => {
       acc[this.clients.get(ws)!.id] = cursor;
       return acc;
     }, {});
+
+    const simUpdate = {
+      ...this.simulation.toStateUpdate(this.simSave),
+      cursors,
+    };
+    this.simSave = this.simulation.toState();
+    const actions = this.simulation.getSimActions(simUpdate);
 
     actions.push({
       type: WS.SimActionType.CURSORS,
@@ -190,10 +213,11 @@ export class SimulationRoom {
       this.actions = [];
     }
 
-    this.broadcast(actions);
+    if (actions.length > 0) this.broadcast(actions);
   }
 
   private initSaving(): NodeJS.Timeout {
+    SimulationRoom.logger.log('Saving interval started');
     return setInterval(async () => {
       const simSave = this.simulation.toState();
       const simUpdate = this.simulation.toStateUpdate(this.simSave);
@@ -205,6 +229,7 @@ export class SimulationRoom {
   }
 
   private initUpdate(): NodeJS.Timeout {
+    SimulationRoom.logger.log('Saving update started');
     return setInterval(() => {
       this.tick();
     }, this.stateTickDelay);
