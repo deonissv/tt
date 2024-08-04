@@ -28,7 +28,7 @@ export class AppService {
       const buffer = new Uint8Array(arrayBuffer);
       return new StreamableFile(buffer);
     } catch (e) {
-      this.logger.error(`Proxing ${url} failed - Unknow error: ${e instanceof Error ? e.message : e}`);
+      this.logger.error(`Proxing ${url} failed - Unknow error: ${e instanceof Error ? e.message : String(e)}`);
       return null;
     }
   }

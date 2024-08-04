@@ -35,7 +35,7 @@ export class Simulation extends SimulationBase {
       try {
         await SimulationBase.tableFromState(stateSave.table);
       } catch (e) {
-        sim.logger.error(`Failed to load table: ${e}`);
+        sim.logger.error(`Failed to load table: ${String(e)}`);
       }
     }
 
@@ -51,7 +51,7 @@ export class Simulation extends SimulationBase {
           onModelLoaded?.();
         } catch (e) {
           onFailed?.(actorState);
-          sim.logger.error(`Failed to load actor ${actorState.guid}: ${e}`);
+          sim.logger.error(`Failed to load actor ${actorState.guid}: ${String(e)}`);
         }
       }),
     );

@@ -23,7 +23,7 @@ export class RoomsService {
     try {
       room.init(simSave).catch((e: Error) => this.logger.error(e.message));
     } catch (e) {
-      this.logger.error((e as unknown as Error).message);
+      this.logger.error((e as Error).message);
     }
     RoomsService.setRoom(room);
     return roomCode;

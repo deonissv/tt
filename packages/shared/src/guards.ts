@@ -11,7 +11,7 @@ export const hasProperty = <K extends string>(object: object, key: K): object is
   return key in object;
 };
 
-export const hasOwnProperty = <T, K extends keyof T>(object: T, key: K): object is T & { [P in K]: unknown } => {
+export const hasOwnProperty = <K extends string>(object: object, key: K): object is { [P in K]: unknown } => {
   return Object.prototype.hasOwnProperty.call(object, key);
 };
 

@@ -12,6 +12,7 @@ module.exports = {
     project: [
       './packages/client/tsconfig.json',
       './packages/client/tsconfig.node.json',
+      './packages/client/tsconfig.app.json',
       './packages/server/tsconfig.json',
       './packages/shared/tsconfig.json',
     ],
