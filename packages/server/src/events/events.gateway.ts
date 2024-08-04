@@ -51,7 +51,6 @@ export class EventsGateway implements OnGatewayInit {
     private readonly adapterHost: HttpAdapterHost,
     private readonly authService: AuthService,
     private readonly jwtStrategy: JwtStrategy,
-    private readonly roomsService: RoomsService,
   ) {}
 
   afterInit(_wss: Server) {

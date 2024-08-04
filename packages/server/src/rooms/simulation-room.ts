@@ -1,4 +1,4 @@
-import * as WebSocket from 'ws';
+import WebSocket from 'ws';
 
 import { Simulation } from '../simulation/simulation';
 
@@ -7,7 +7,7 @@ import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
 import { URL_PREFIX } from '@shared/constants';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
+import type { SimulationStateSave } from '@shared/dto/states';
 import { isObject, isString } from '@shared/guards';
 import { WS } from '@shared/ws';
 import type { Cursors } from '@shared/ws/ws';
@@ -235,16 +235,16 @@ export class SimulationRoom {
     }, this.stateTickDelay);
   }
 
-  private getDelta(): SimulationStateUpdate | null {
-    const delta = this.simulation.toStateUpdate(this.simSave);
+  // private getDelta(): SimulationStateUpdate | null {
+  //   const delta = this.simulation.toStateUpdate(this.simSave);
 
-    if (Object.keys(delta).length === 0) {
-      return null;
-    }
-    this.simSave = this.simulation.toState();
+  //   if (Object.keys(delta).length === 0) {
+  //     return null;
+  //   }
+  //   this.simSave = this.simulation.toState();
 
-    return delta;
-  }
+  //   return delta;
+  // }
 
   private broadcast(msg: WS.MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {

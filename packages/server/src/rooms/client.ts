@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common';
 import { WS } from '@shared/ws';
-import type * as WebSocket from 'ws';
+import type WebSocket from 'ws';
 
 const logger = new Logger('Client');
 

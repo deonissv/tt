@@ -1,17 +1,10 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "types": ["vitest/globals"],
     "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
-    "sourceMap": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
@@ -19,7 +12,6 @@
     "outDir": "./dist",
     "baseUrl": "../",
     "rootDir": "../",
-    "composite": true,
     "paths": {
       "@shared/*": ["shared/src/*"],
       "@server/*": ["server/*"]
