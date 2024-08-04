@@ -1,5 +1,7 @@
+import type { Tuple } from '@babylonjs/core/types';
+
 export interface Transformation {
-  scale?: number[]; // default: Vector3.One
-  rotation?: number[]; // default: Vector3.Zero
-  position?: number[]; // default: Vector3.Zero
+  scale?: Tuple<number, 3>; // default: Vector3.One
+  rotation?: Tuple<number, 3>; // default: Vector3.Zero
+  position?: Tuple<number, 3>; // default: Vector3.Zero
 }

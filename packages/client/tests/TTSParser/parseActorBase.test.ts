@@ -1,5 +1,6 @@
 import { CATAN } from '@assets/catan';
 import { MUNCHKIN } from '@assets/munchkin';
+import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
@@ -17,7 +18,7 @@ describe('TTSParser - parseActorBase', () => {
       name: 'Deck',
       transformation: {
         position: [6.120835, 2.00653052, -4.454175],
-        rotation: [8.95195e-9, 179.8918, 180.0].map(degToRad),
+        rotation: [8.95195e-9, 179.8918, 180.0].map(degToRad) as Tuple<number, 3>,
         scale: [1, 1, 1],
       },
     };
@@ -30,7 +31,7 @@ describe('TTSParser - parseActorBase', () => {
       name: 'Deck',
       transformation: {
         position: [-24.4997139, 1.07239747, 8.776062],
-        rotation: [-3.513968e-8, 180.000778, -2.24918551e-7].map(degToRad),
+        rotation: [-3.513968e-8, 180.000778, -2.24918551e-7].map(degToRad) as Tuple<number, 3>,
         scale: [1, 1, 1],
       },
     };

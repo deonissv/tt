@@ -1,4 +1,5 @@
 import { CATAN } from '@assets/catan';
+import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import type { TileState } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
@@ -17,7 +18,7 @@ describe('TTSParser - parseTile', () => {
       name: 'Custom_Tile',
       transformation: {
         position: [-25.60006, 1.01995218, -10.0008192],
-        rotation: [-0.000286009861, 90.01969, -0.000416184164].map(degToRad),
+        rotation: [-0.000286009861, 90.01969, -0.000416184164].map(degToRad) as Tuple<number, 3>,
         scale: [2.11755562, 1.0, 2.11755562],
       },
       type: 5,

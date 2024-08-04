@@ -10,12 +10,12 @@ import { SimulationScene } from './SimulationScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
-import { type ArcRotateCamera } from '@babylonjs/core';
+import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
+import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { SimulationStateSave } from '@shared/dto/states';
 import { ActorBase, EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
-import type { Tuple } from '@shared/types';
 
 export interface SimulationCallbacks {
   onPickItem: (deck: ActorBase) => void;

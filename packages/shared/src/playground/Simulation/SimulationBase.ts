@@ -10,6 +10,7 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
+import type { Tuple } from '@babylonjs/core/types';
 import type {
   ActorState,
   ActorStateUpdate,
@@ -29,7 +30,6 @@ import { ActorType, type ActorBaseState } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
 import { isTuple } from '@shared/guards';
-import type { Tuple } from '@shared/types';
 import { WS } from '@shared/ws';
 import { isContainable } from '../actions/Containable';
 import {

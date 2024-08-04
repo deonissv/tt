@@ -1,5 +1,5 @@
+import type { Tuple } from '@babylonjs/core/types';
 import type { SimulationStateSave } from '@shared/dto/states';
-import type { Tuple } from '@shared/types';
 import type ws from 'ws';
 
 export const enum SimActionType {

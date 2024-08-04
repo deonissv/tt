@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import { Mesh } from '@babylonjs/core';
-import type { ActorBaseState, ActorState } from '@shared/dto/states';
+import type { ActorBaseState, ActorState, ActorStateUpdate } from '@shared/dto/states';
 import { Actor } from '@shared/playground';
 import { useSimulationMock } from './mocks/SimulationMock';
 
@@ -95,7 +95,7 @@ describe('Actor Class', () => {
   });
 
   it('should apply state update correctly with applyStateUpdate', () => {
-    const actorStateUpdate = {
+    const actorStateUpdate: ActorStateUpdate = {
       guid: '1234',
       transformation: {
         scale: [2, 2, 2],

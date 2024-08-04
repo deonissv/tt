@@ -1,4 +1,4 @@
-import type { Tuple } from '@shared/types';
+import type { Tuple } from '@babylonjs/core/types';
 import type { ActorBaseState } from './ActorBaseState';
 import { ActorType } from './ActorType';
 

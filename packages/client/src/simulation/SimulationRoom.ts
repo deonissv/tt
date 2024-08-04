@@ -1,6 +1,6 @@
+import type { Tuple } from '@babylonjs/core/types';
 import { RoomService } from '@services/room.service';
 import type { ActorBase } from '@shared/playground';
-import type { Tuple } from '@shared/types';
 import { WS } from '@shared/ws';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
 import { Simulation } from './Simulation';

@@ -1,5 +1,6 @@
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 
+import type { Tuple } from '@babylonjs/core/types';
 import type {
   ActorBaseState,
   CardState,
@@ -205,7 +206,7 @@ export class TTSParserC extends ParserBase {
     const rotY = this.parseNumber(transform.rotY);
     const rotZ = this.parseNumber(transform.rotZ);
     if (rotX !== null && rotY !== null && rotZ !== null) {
-      transformState.rotation = [rotX, rotY, rotZ].map(degToRad);
+      transformState.rotation = [rotX, rotY, rotZ].map(degToRad) as Tuple<number, 3>;
     }
 
     if (!this.hasProperty(transform, 'scaleX', this.errorsText.TRANSFORM.NO_SCALE_X)) return null;

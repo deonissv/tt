@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/dot-notation */
+import type { Tuple } from '@babylonjs/core';
 import { Logger, Mesh, Scene } from '@babylonjs/core';
 
 import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
@@ -946,7 +947,9 @@ describe('Simulation', () => {
           { type: 0, guid: actorGuid2, name: 'zxc', model: { meshURL: '' }, position: [4, 5, 6] },
         ],
       };
-      const delta = { actorStates: [{ guid: actorGuid1, transformation: { position: [0, 0, 1] } }] };
+      const delta = {
+        actorStates: [{ guid: actorGuid1, transformation: { position: [0, 0, 1] as Tuple<number, 3> } }],
+      };
       const mergedState = Simulation.mergeStateDelta(initialState, delta);
 
       expect(mergedState.actorStates![0].transformation?.position).toEqual([0, 0, 1]);

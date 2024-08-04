@@ -1,4 +1,5 @@
-import type { Tuple, UnknownObject } from './types';
+import type { Tuple } from '@babylonjs/core/types';
+import type { UnknownObject } from './types';
 
 export const isString = (str: unknown): str is string => typeof str === 'string';
 export const isNumber = (num: unknown): num is number => typeof num === 'number';
