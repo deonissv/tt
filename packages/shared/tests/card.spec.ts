@@ -1,7 +1,8 @@
 import { CreateBox, Texture } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { CardState } from '@shared/dto/states';
-import { Card } from '@shared/playground/';
+import { SharedBase } from '@shared/playground';
+import { CardMixin } from '@shared/playground/actors/CardMixin';
 import { useSimulationMock } from './mocks/SimulationMock';
 
 vi.mock('@shared/playground/Loader', async () => {
@@ -13,6 +14,8 @@ vi.mock('@shared/playground/Loader', async () => {
 
 describe('Card', () => {
   const { scene } = useSimulationMock();
+
+  const Card = CardMixin(SharedBase<CardState>);
 
   let mesh: Mesh;
   let texture: Texture;

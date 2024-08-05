@@ -1,8 +1,8 @@
 import { CreateBox } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { ActorBaseState, BagState } from '@shared/dto/states';
-import { Loader } from '@shared/playground';
-import { Bag } from '@shared/playground/actors/Bag';
+import { Loader, SharedBase } from '@shared/playground';
+import { BagMixin } from '@shared/playground/actors/BagMixin';
 import { useSimulationMock } from './mocks/SimulationMock';
 
 vi.mock('@shared/playground/Loader', async () => {
@@ -13,14 +13,15 @@ vi.mock('@shared/playground/Loader', async () => {
 });
 
 describe('Bag', () => {
-  const { scene } = useSimulationMock();
+  useSimulationMock();
 
+  const Bag = BagMixin(SharedBase<BagState>);
   let mesh: Mesh;
   let state: BagState;
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    mesh = CreateBox('testMesh', { size: 1 }, scene);
+    mesh = CreateBox('testMesh', { size: 1 });
 
     state = {
       type: 1,

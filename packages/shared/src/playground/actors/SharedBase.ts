@@ -14,7 +14,7 @@ import { floatCompare } from '@shared/utils';
 import { Loader } from '../Loader';
 import { Logger } from '../Logger';
 
-export abstract class SharedBase<T extends ActorBaseState = ActorBaseState> extends TransformNode {
+export class SharedBase<T extends ActorBaseState = ActorBaseState> extends TransformNode {
   guid: string;
 
   __mass: number;

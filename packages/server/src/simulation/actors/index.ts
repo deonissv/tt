@@ -6,4 +6,4 @@ export * from './die';
 export * from './serverActor';
 export * from './tables';
 export * from './tile';
-export * from './tileStack';
+export { TileStack } from './tileStack';

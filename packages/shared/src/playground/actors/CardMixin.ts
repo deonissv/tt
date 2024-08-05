@@ -20,9 +20,12 @@ const CARD_FACE_INDEX_COUNT = 51;
 const CARD_BACK_INDEX_START = 240;
 const CARD_BACK_INDEX_COUNT = 60;
 
-export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T) => {
+export const CardMixin = (Base: Constructor<SharedBase<CardState>>) => {
   return class Card extends Base {
-    declare __state: CardState;
+    constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+      const cardModel = Card.getCardModel(model, faceTexture, backTexture, state);
+      super(state, cardModel);
+    }
 
     static async loadCardModel(): Promise<Mesh | null> {
       const mesh = await Loader.loadMesh(CARD_MODEL_URL);

@@ -1,7 +1,8 @@
 import { CreateBox } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { ActorType, type Die4State } from '@shared/dto/states';
-import { Die4, Loader } from '@shared/playground';
+import { Loader, SharedBase } from '@shared/playground';
+import { DieMixin } from '@shared/playground/actors/DieMixin';
 import { useSimulationMock } from './mocks/SimulationMock';
 
 vi.mock('@shared/playground/Loader', async () => {
@@ -12,7 +13,9 @@ vi.mock('@shared/playground/Loader', async () => {
 });
 
 describe('Die', () => {
-  const { scene } = useSimulationMock();
+  useSimulationMock();
+
+  const Die4 = DieMixin<4>(SharedBase<Die4State>);
 
   let mesh: Mesh;
   let state: Die4State;
@@ -20,7 +23,7 @@ describe('Die', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
 
-    mesh = CreateBox('testMesh', { size: 1 }, scene);
+    mesh = CreateBox('testMesh', { size: 1 });
     state = {
       guid: '60c5a3',
       name: 'Die_4',
