@@ -1,38 +1,18 @@
-import type { Mesh } from '@babylonjs/core';
 import type { TileState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import type { Containable } from '../actions/Containable';
-import { ActorBase } from './ActorBase';
-import { Tile } from './Tile';
+import { TileStackMixin } from '@shared/playground/actors/TileStackMixin';
+import { ServerActor } from './serverActor';
+import { Tile } from './tile';
 
-const TILE_MASS = 1;
-
-export class TileStack extends ActorBase implements Containable {
-  declare __state: TileStackState;
-  size: number;
-
-  constructor(state: TileStackState, model: Mesh) {
-    super(state.guid, state.name, model, undefined, state.transformation, TILE_MASS * state.size, undefined, state);
-
-    this.size = state.size;
-    model.scaling.y = this.size;
-  }
-
-  static override async fromState(state: TileStackState): Promise<TileStack | null> {
+export class TileStack extends TileStackMixin(ServerActor) {
+  static async fromState(state: TileStackState): Promise<TileStack | null> {
     const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
     if (!tileModel) {
       return null;
     }
 
     return new TileStack(state, tileModel);
-  }
-
-  override toState() {
-    return {
-      ...super.toState(),
-      size: this.size,
-    };
   }
 
   async pickItem(): Promise<Tile | null> {

@@ -13,6 +13,7 @@
     "experimentalDecorators": true,
     "removeComments": true,
     "sourceMap": true,    
+    "declaration": false,
     "noEmit": true,
 
 // client

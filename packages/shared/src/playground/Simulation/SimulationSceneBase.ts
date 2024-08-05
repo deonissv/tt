@@ -1,14 +1,14 @@
 import { Scene } from '@babylonjs/core';
-import { ActorBase } from '../actors';
+import { SharedBase } from '../actors/SharedBase';
 
 export class SimulationSceneBase extends Scene {
   get actors() {
     return this.rootNodes.reduce((acc, node) => {
-      const actorCandidate = node as ActorBase;
-      if (actorCandidate && actorCandidate instanceof ActorBase && !actorCandidate.guid.startsWith('#')) {
+      const actorCandidate = node as SharedBase;
+      if (actorCandidate && actorCandidate instanceof SharedBase && !actorCandidate.guid.startsWith('#')) {
         acc.push(actorCandidate);
       }
       return acc;
-    }, [] as ActorBase[]);
+    }, [] as SharedBase[]);
   }
 }
