@@ -1,7 +1,7 @@
 import type { Tuple } from '@babylonjs/core/types';
 import type { SimulationStateSave } from '@shared/dto/states';
-import type WebSocket from 'ws';
-import type { MessageEvent } from 'ws';
+import type ws from 'ws';
+import { type MessageEvent as me } from 'ws';
 
 export const enum SimActionType {
   CLIENT_ID,
@@ -47,10 +47,10 @@ type MsgMap = {
 export type SimAction = MsgMap[SimActionType];
 export type MSG = SimAction[];
 
-export const send = (ws: WebSocket, msg: MSG) => {
+export const send = (ws: WebSocket | ws, msg: MSG) => {
   if (ws && ws.readyState == ws.OPEN) ws.send(JSON.stringify(msg));
 };
 
-export const read = (event: MessageEvent): MSG => {
+export const read = (event: MessageEvent | me): MSG => {
   return JSON.parse(event.data as string) as MSG;
 };

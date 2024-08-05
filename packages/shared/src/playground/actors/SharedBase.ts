@@ -6,26 +6,21 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
-import { MASS_DEFAULT, MOVEMENT_VELOCITY, PRECISION_EPSILON, ROTATE_STEP, SCALE_COEF } from '@shared/constants';
+import { MASS_DEFAULT, ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
-import {
-  ActorType,
-  type ActorBaseState,
-  type ActorState,
-  type ActorStateUpdate,
-  type Transformation,
-} from '@shared/dto/states';
+import type { ActorState, Transformation } from '@shared/dto/states';
+import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
 import { floatCompare } from '@shared/utils';
 import { Loader } from '../Loader';
 import { Logger } from '../Logger';
 
-export class ActorBase extends TransformNode {
+export class SharedBase<T extends ActorBaseState = ActorBaseState> extends TransformNode {
   guid: string;
 
   __mass: number;
   __model: Mesh;
   __collider: Mesh;
-  __state: ActorBaseState;
+  __state: T;
 
   _body: PhysicsBody;
   __flipTranslate = 1;
@@ -33,76 +28,33 @@ export class ActorBase extends TransformNode {
 
   colorDiffuse: number[] = [];
 
-  constructor(
-    guid: string,
-    name: string,
-    modelMesh: Mesh,
-    colliderMesh?: Mesh,
-    transformation?: Transformation,
-    mass?: number,
-    colorDiffuse?: number[],
-    state?: ActorBaseState,
-  ) {
-    super(name || guid, undefined, true);
+  constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
+    super(state.name || state.guid, undefined, true);
 
-    this.guid = guid;
+    this.guid = state.guid;
 
     this._scene = this.getEngine().scenes[0];
 
-    this.__mass = mass ?? 1;
+    this.__mass = state.mass ?? 1;
     this.__model = modelMesh;
     this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
 
-    this.__state = state ?? { type: ActorType.ACTOR, guid, name, transformation, mass };
+    this.__state = state;
 
     modelMesh.name = `${this.name}: model`;
     modelMesh.setParent(this);
     modelMesh.setEnabled(true);
 
-    this.colorDiffuse = colorDiffuse ?? [];
+    // this.colorDiffuse = state.colorDiffuse ?? [];
 
-    // const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, false, this._scene);
-    // body.shape = new PhysicsShapeMesh(this.__model, this._scene);
-
-    // this._body = body;
-    // this._body.setMassProperties({
-    //   mass: this.__mass,
-    //   // centerOfMass: Vector3.Zero(),
-    //   // inertia: Vector3.Zero(),
-    //   inertia: Vector3.One(),
-    //   inertiaOrientation: Quaternion.Identity(),
-    // });
-
-    this._setTransformations(transformation);
+    this._setTransformations(state.transformation);
     // this._addDragBehavior();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     // this._scene.onBeforeRenderObservable.add(this._beforeRender.bind(this));
     // this._forceUpdate();
 
-    Logger.log(`Actor created. guid: ${guid} type: ${state?.type}`);
-  }
-
-  protected _beforeRender() {
-    if (this.__targetPosition) {
-      // this.__targetPosition._y = this.position.y;
-      const diff = this.__targetPosition.subtract(this.position);
-
-      const len = diff.length();
-      if (len < PRECISION_EPSILON) {
-        this.__targetPosition = null;
-        this._body.setLinearVelocity(Vector3.Zero());
-        this._body.setAngularVelocity(Vector3.Zero());
-        return;
-      }
-      const fps = this._scene.getEngine().getFps();
-      const t = 1 / fps;
-      const scale = Math.min(len / t, MOVEMENT_VELOCITY);
-      diff.normalize().scaleInPlace(scale);
-
-      this._body.setLinearVelocity(diff);
-      this._body.setAngularVelocity(Vector3.Zero());
-    }
+    Logger.log(`Actor created. guid: ${this.guid} type: ${state?.type}`);
   }
 
   protected _getFlipTranslate(): number {
@@ -229,7 +181,7 @@ export class ActorBase extends TransformNode {
     });
   }
 
-  static fromState(_actorState: object): Promise<ActorBase | null> {
+  static fromState(_actorState?: ActorBaseState): Promise<SharedBase | null> {
     throw new Error('Not implemented: fromState');
   }
 
@@ -258,7 +210,7 @@ export class ActorBase extends TransformNode {
 
     let childMeshes: Mesh[] = [];
     if (actorState?.children) {
-      const loadedMeshes = await Promise.all(actorState.children.map(child => ActorBase.modelFromState(child, true)));
+      const loadedMeshes = await Promise.all(actorState.children.map(child => SharedBase.modelFromState(child, true)));
       childMeshes = loadedMeshes.filter(mesh => mesh !== null);
     }
 
@@ -282,7 +234,7 @@ export class ActorBase extends TransformNode {
 
     let childMeshes: Mesh[] = [];
     if (actorState?.children) {
-      const loadedMeshes = await Promise.all(actorState.children.map(child => ActorBase.colliderFromState(child)));
+      const loadedMeshes = await Promise.all(actorState.children.map(child => SharedBase.colliderFromState(child)));
       childMeshes = loadedMeshes.filter(mesh => mesh !== null);
     }
 

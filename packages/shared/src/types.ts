@@ -39,3 +39,9 @@ export type RequireAtLeastOne<T, U extends (keyof T)[]> = Omit<T, U[number]> &
   {
     [K in U[number]]-?: Required<Pick<T, K>>;
   }[U[number]];
+
+export type Constructor<T> = new (...args: any[]) => T;
+
+export type ParammedConstructor<T extends abstract new (...args: any) => any> = new (
+  ...args: ConstructorParameters<T>
+) => T;

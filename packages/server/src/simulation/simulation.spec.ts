@@ -7,7 +7,7 @@ import { type ActorState, type SimulationStateSave, type SimulationStateUpdate }
 import { initHavok } from '@shared/initHavok';
 import { Loader } from '@shared/playground';
 import { omitKeys } from '@shared/utils';
-import Actor from './actor';
+import { Actor } from './actors';
 import { Simulation } from './simulation';
 
 describe('Simulation', () => {

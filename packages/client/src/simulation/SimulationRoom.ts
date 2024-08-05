@@ -1,9 +1,11 @@
 import type { Tuple } from '@babylonjs/core/types';
 import { RoomService } from '@services/room.service';
-import type { ActorBase } from '@shared/playground';
 import { WS } from '@shared/ws';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
+import type WebSocket from 'ws';
+import type { MessageEvent } from 'ws';
 import { Simulation } from './Simulation';
+import type { ClientBase } from './actors';
 
 const FRAME_RATE = 30;
 
@@ -69,7 +71,7 @@ export class SimulationRoom {
       onMoveActor: SimulationRoom.onMoveActor,
     });
 
-    ws.addEventListener('message', event => {
+    ws.addEventListener('message', (event: MessageEvent) => {
       const message = WS.read(event);
 
       message.forEach(action => {
@@ -93,14 +95,14 @@ export class SimulationRoom {
     return new SimulationRoom(ws, sim, clientId, roomId, cursor);
   }
 
-  static onPickItem = (actor: ActorBase) => {
+  static onPickItem = (actor: ClientBase) => {
     this.actions.push({
       type: WS.SimActionType.PICK_ITEM,
       payload: actor.guid,
     });
   };
 
-  static onMoveActor = (actor: ActorBase, position: Tuple<number, 3>) => {
+  static onMoveActor = (actor: ClientBase, position: Tuple<number, 3>) => {
     this.actions.push({
       type: WS.SimActionType.MOVE_ACTOR,
       payload: { guid: actor.guid, position },
