@@ -1,6 +1,16 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+import type { Tuple } from '@babylonjs/core/types';
 import { WebSocket } from 'ws';
 import { PRECISION_EPSILON } from './constants';
+
+/**
+ * Asynchronously waits for the specified delay.
+ * @param delay - The delay in milliseconds.
+ * @returns A promise that resolves after the specified delay.
+ */
+export async function wait(delay: number) {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}
 
 export function floatCompare(a: number, b: number, epsilon = PRECISION_EPSILON): boolean {
   return Math.abs(a - b) < epsilon;
@@ -37,4 +47,16 @@ export const meshSizes = (mesh: Mesh) => {
   const height = Math.abs(vectorsWorld[1].y - vectorsWorld[0].y);
   const depth = Math.abs(vectorsWorld[1].z - vectorsWorld[0].z);
   return { width, height, depth };
+};
+
+export const vecDelta = (curr: Tuple<number, 3>, prev: Tuple<number, 3>): Tuple<number, 3> => {
+  return [curr[0] - prev[0], curr[1] - prev[1], curr[2] - prev[2]];
+};
+
+export const vecFloatCompare = <N extends number>(
+  a: Tuple<number, N>,
+  b: Tuple<number, N>,
+  epsilon = PRECISION_EPSILON,
+): boolean => {
+  return Array.prototype.some.call(a, (v: number, i: number) => !floatCompare(v, b[i] as number, epsilon));
 };

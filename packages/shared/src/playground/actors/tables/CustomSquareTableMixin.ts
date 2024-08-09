@@ -17,9 +17,12 @@ const modelURLs = {
   specularURL: `${STATIC_HOST}/table_square_myMaterial1_Spec_Gloss.png`,
 };
 
-export const CustomSquareTableMixin = (Base: Constructor<SharedBase>) => {
+export const CustomSquareTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class CustomSquareTable extends Base {
-    static async fromState(tableState: TableState): Promise<CustomSquareTable | null> {
+    static async fromState<T extends CustomSquareTable>(
+      this: Constructor<T>,
+      tableState: TableState,
+    ): Promise<T | null> {
       const [tableBox, _tableCollider] = await Loader.loadModel(modelURLs);
       if (!tableBox) return null;
       tableBox.setEnabled(true);
@@ -37,7 +40,7 @@ export const CustomSquareTableMixin = (Base: Constructor<SharedBase>) => {
       wrapper.scaling = new Vector3(SCALE, SCALE, SCALE);
       wrapper.position.y = -51.3;
 
-      const table = new CustomSquareTable(
+      const table = new this(
         {
           guid: '#CustomSquareTable',
           name: '#CustomSquareTable',

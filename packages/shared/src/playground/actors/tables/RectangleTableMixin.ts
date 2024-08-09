@@ -6,9 +6,9 @@ import type { Constructor } from '@shared/types';
 import { Loader } from '../../Loader';
 import type { SharedBase } from '../SharedBase';
 
-export const RectangleTableMixin = (Base: Constructor<SharedBase>) => {
+export const RectangleTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class RectangleTable extends Base {
-    static async fromState(): Promise<RectangleTable | null> {
+    static async fromState<T extends RectangleTable>(this: Constructor<T>): Promise<T | null> {
       const [tableFrame, _] = await Loader.loadModel({
         meshURL: `${STATIC_HOST}/rpg_table_wood2057.obj`,
         ...woodMaterialProps,
@@ -30,7 +30,7 @@ export const RectangleTableMixin = (Base: Constructor<SharedBase>) => {
       wrapper.position.y = -1.4;
       wrapper.scaling = wrapper.scaling.scale(1.01);
 
-      const table = new RectangleTable(
+      const table = new this(
         {
           guid: '#RectangleTable',
           name: '#RectangleTable',

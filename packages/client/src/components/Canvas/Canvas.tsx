@@ -1,7 +1,8 @@
+import { Inspector } from '@babylonjs/inspector';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
-import type { WS } from '@shared/ws';
+import type { CursorsPld } from '@shared/ws/payloads';
 import { useAppSelector } from '../../store/store';
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
@@ -9,11 +10,14 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const cursor = useRef<[number, number]>([0, 0]);
   const canvas = useRef<HTMLCanvasElement>(null);
 
-  const [cursors, setCursors] = useState<WS.Cursors>({});
+  const [cursors, setCursors] = useState<CursorsPld>({});
   const nickname = useAppSelector(state => state.nickname.nickname);
 
   const init = useCallback(async (): Promise<SimulationRoom> => {
-    return await SimulationRoom.init(canvas.current!, roomId, nickname, cursor, setCursors);
+    const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, cursor, setCursors);
+
+    Inspector.Show(sr.simulation.scene, {});
+    return sr;
   }, [cursor, nickname, roomId]);
 
   useEffect(() => {

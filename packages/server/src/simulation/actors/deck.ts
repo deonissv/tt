@@ -1,12 +1,22 @@
-import type { Texture } from '@babylonjs/core';
-import type { DeckState } from '@shared/dto/states';
+import type { Mesh, Texture } from '@babylonjs/core';
+import type { CardState, DeckState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
+import type { Constructor } from '@shared/types';
 import { Card } from './card';
 import { ServerActor } from './serverActor';
 
 export class Deck extends DeckMixin(ServerActor) {
-  static async fromState(state: DeckState): Promise<Deck | null> {
+  constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+    const items = state.cards;
+
+    super(state, model);
+
+    this.items = items;
+    this.renderDeck(faceTexture, backTexture);
+  }
+
+  static async fromState<T extends Deck>(this: Constructor<T>, state: DeckState): Promise<T | null> {
     const model = await Card.loadCardModel();
 
     if (!model) {
@@ -20,10 +30,10 @@ export class Deck extends DeckMixin(ServerActor) {
       return null;
     }
 
-    return new Deck(state, model, faceTexture, backTexture);
+    return new this(state, model, faceTexture, backTexture);
   }
 
-  async pickItem() {
+  override async pickItem(): Promise<ServerActor<CardState> | null> {
     this.model.scaling.x -= 1;
 
     if (this.size < 1) {
@@ -35,7 +45,7 @@ export class Deck extends DeckMixin(ServerActor) {
     cardState.transformation = this.transformation;
     cardState.transformation.position![0] -= 4;
 
-    const newCard = await Card.fromState(cardState);
+    const newCard = await Card.fromState<Card>(cardState);
 
     const faceTexture = await Loader.loadTexture(this.items.at(-1)!.faceURL);
     const backTexture = await Loader.loadTexture(this.items.at(0)!.backURL);

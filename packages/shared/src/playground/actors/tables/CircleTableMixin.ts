@@ -8,7 +8,7 @@ import type { SharedBase } from '../SharedBase';
 
 export const CircleTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class CircleTable extends Base {
-    static async fromState(): Promise<CircleTable | null> {
+    static async fromState<T extends CircleTable>(this: Constructor<T>): Promise<T | null> {
       const glass = await Loader.loadMesh(`${STATIC_HOST}/glass.obj`);
       const legs = await Loader.loadMesh(`${STATIC_HOST}/legs2088.obj`);
       const top = await Loader.loadMesh(`${STATIC_HOST}/table_top2064.obj`);
@@ -33,7 +33,7 @@ export const CircleTableMixin = <T extends Constructor<SharedBase>>(Base: T) => 
       wrapper.addChild(top);
       wrapper.position.y = -18;
 
-      const table = new CircleTable(
+      const table = new this(
         {
           guid: '#CircleTable',
           name: '#CircleTable',

@@ -17,7 +17,10 @@ const model = {
 
 export const CustomRectangleTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class CustomRectangleTable extends Base {
-    static async fromState(tableState: TableState): Promise<CustomRectangleTable | null> {
+    static async fromState<T extends CustomRectangleTable>(
+      this: Constructor<T>,
+      tableState: TableState,
+    ): Promise<T | null> {
       const [tableFrame, _] = await Loader.loadModel(model);
       const grid = await Loader.loadMesh(`${STATIC_HOST}/GreenFelt_Table_Grid.obj`);
       if (!tableFrame || !grid) return null;
@@ -38,7 +41,7 @@ export const CustomRectangleTableMixin = <T extends Constructor<SharedBase>>(Bas
       wrapper.addChild(plane);
       wrapper.scaling = new Vector3(SCALING, SCALING, SCALING);
       wrapper.position.y = -23.2;
-      const table = new CustomRectangleTable(
+      const table = new this(
         {
           guid: '#CustomRectangleTable',
           name: '#CustomRectangleTable',

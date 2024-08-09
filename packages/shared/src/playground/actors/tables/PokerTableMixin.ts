@@ -5,9 +5,9 @@ import type { Constructor } from '@shared/types';
 import { Loader } from '../../Loader';
 import type { SharedBase } from '../SharedBase';
 
-export const PokerTableMixin = (Base: Constructor<SharedBase>) => {
+export const PokerTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class PokerTable extends Base {
-    static async fromState(): Promise<typeof this.prototype | null> {
+    static async fromState<T extends PokerTable>(this: Constructor<T>): Promise<T | null> {
       const [frame, _] = await Loader.loadModel({
         meshURL: `${STATIC_HOST}/table_poker.obj`,
         diffuseURL: `${STATIC_HOST}/table_poker_diff.png`,
@@ -33,7 +33,7 @@ export const PokerTableMixin = (Base: Constructor<SharedBase>) => {
       wrapper.position.y = -9.25;
       wrapper.rotation.x = (3 * Math.PI) / 2;
 
-      const table = new PokerTable(
+      const table = new this(
         {
           guid: '#PokerTable',
           name: '#PokerTable',

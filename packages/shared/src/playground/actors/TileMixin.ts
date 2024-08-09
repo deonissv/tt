@@ -1,5 +1,4 @@
 import type { Texture } from '@babylonjs/core';
-import { type Mesh } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
 import type { TileState } from '@shared/dto/states';
 import { TileType } from '@shared/dto/states';
@@ -13,19 +12,15 @@ const HEX_TILE_URL = `${STATIC_HOST}/hex_tile.obj`;
 const ROUND_TILE_URL = `${STATIC_HOST}/round_tile.obj`;
 const SQUARE_TILE_URL = `${STATIC_HOST}/square_tile.obj`;
 
-export const TileMixin = (Base: Constructor<SharedBase<TileState>>) => {
+export const TileMixin = <T extends Constructor<SharedBase<TileState>>>(Base: T) => {
   return class Tile extends Base {
-    constructor(state: TileState, model: Mesh) {
-      super(state, model);
-    }
-
-    static async fromState(state: TileState): Promise<Tile | null> {
+    static async fromState<T extends Tile>(this: Constructor<T>, state: TileState): Promise<T | null> {
       const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
       if (!tileModel) {
         return null;
       }
 
-      return new Tile(state, tileModel);
+      return new this(state, tileModel);
     }
 
     static async getTileModel(type: TileType, faceURL: string, backURL?: string) {

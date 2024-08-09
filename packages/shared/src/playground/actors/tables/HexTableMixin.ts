@@ -5,9 +5,9 @@ import type { Constructor } from '@shared/types';
 import { Loader } from '../../Loader';
 import type { SharedBase } from '../SharedBase';
 
-export const HexTableMixin = (Base: Constructor<SharedBase>) => {
+export const HexTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class HexTable extends Base {
-    static async fromState(): Promise<HexTable | null> {
+    static async fromState<T extends HexTable>(this: Constructor<T>): Promise<T | null> {
       const [leg, _] = await Loader.loadModel({
         meshURL: `${STATIC_HOST}/Legs.obj`,
         diffuseURL: `${STATIC_HOST}/wood_diff.png`,
@@ -35,7 +35,7 @@ export const HexTableMixin = (Base: Constructor<SharedBase>) => {
       wrapper.scaling = wrapper.scaling.scale(0.94);
       wrapper.position.y = -0.5;
 
-      const table = new HexTable(
+      const table = new this(
         {
           guid: '#HexTable',
           name: '#HexTable',

@@ -1,8 +1,11 @@
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
+import type { Tuple } from '@babylonjs/core';
+import { HavokPlugin, PhysicsEventType, Vector3 } from '@babylonjs/core';
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 import { Logger } from '@nestjs/common';
 import type {
+  ActorBaseState,
   ActorState,
   BagState,
   CardState,
@@ -13,19 +16,18 @@ import type {
   Die4State,
   Die6State,
   Die8State,
+  SimulationStateUpdate,
+  TableState,
   TileState,
 } from '@shared/dto/states';
-import {
-  ActorType,
-  type ActorBaseState,
-  type ActorStateUpdate,
-  type SimulationStateSave,
-  type SimulationStateUpdate,
-  type TableState,
-} from '@shared/dto/states';
+import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
+import { isTuple } from '@shared/guards';
 import { SimulationBase } from '@shared/playground';
 import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+import type { WS } from '@shared/ws';
+import { ClientAction, ServerAction } from '@shared/ws';
+import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
 import type { ServerActor } from './actors';
 import {
   Actor,
@@ -54,13 +56,35 @@ import {
 export class Simulation extends SimulationBase {
   logger: Logger;
 
-  private constructor(initialState: SimulationStateSave) {
+  constructor(initialState: SimulationStateSave) {
     super();
     this.engine = new NullEngine();
     this.scene = new SimulationSceneBase(this.engine);
     this.initialState = initialState;
     this.scene.createDefaultCameraOrLight(false, false, false);
     this.logger = new Logger(Simulation.name);
+  }
+
+  get actors(): ServerActor[] {
+    return this.scene.actors as ServerActor[];
+  }
+
+  initPhysics(gravity?: number) {
+    const hk = new HavokPlugin(true, global.havok);
+    const gravityVec = gravity ? new Vector3(0, -gravity, 0) : undefined;
+
+    this.scene.enablePhysics(gravityVec, hk);
+
+    hk.onTriggerCollisionObservable.add(ev => {
+      if (ev.type === PhysicsEventType.TRIGGER_ENTERED) {
+        const tn1 = ev.collider.transformNode as ServerActor;
+        const tn2 = ev.collidedAgainst.transformNode as ServerActor;
+        if (tn1.name !== 'ground' && tn2.name !== 'ground') {
+          const [actor, c] = tn1.picked ? [tn1, tn2] : [tn2, tn1];
+          actor.preventCollide(c);
+        }
+      }
+    });
   }
 
   static async init(
@@ -71,9 +95,10 @@ export class Simulation extends SimulationBase {
   ): Promise<Simulation> {
     const sim = new Simulation(stateSave);
     sim.logger.log('Simulation instance created');
+    sim.logger.debug('Simulation state:', stateSave);
 
     sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
-    // sim.initPhysics(stateSave?.gravity);
+    sim.initPhysics(stateSave?.gravity);
 
     if (stateSave.table) {
       try {
@@ -99,9 +124,46 @@ export class Simulation extends SimulationBase {
         }
       }),
     );
-    sim.logger.log('Simulation actors created');
-
     return sim;
+  }
+
+  update(msg: ClientActionMsg[]) {
+    msg.map(msg => this.handleAction(msg));
+  }
+
+  handleAction(msg: ClientActionMsg) {
+    switch (msg.type) {
+      case ClientAction.PICK_ACTOR:
+        this.handlePickActor(msg.payload);
+        break;
+      case ClientAction.RELEASE_ACTOR:
+        this.handleReleaseActor(msg.payload);
+        break;
+      case ClientAction.MOVE_ACTOR:
+        this.handleMoveActor(msg.payload.guid, msg.payload.position);
+        break;
+    }
+  }
+
+  handlePickActor(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.pick();
+    }
+  }
+
+  handleReleaseActor(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.release();
+    }
+  }
+
+  handleMoveActor(guid: string, position: Tuple<number, 2>) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.move(...position);
+    }
   }
 
   static async actorFromState(actorState: ActorBaseState): Promise<ServerActor | null> {
@@ -160,23 +222,18 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  toStateUpdate(simState?: SimulationStateSave): SimulationStateUpdate {
-    const actorStates: ActorStateUpdate[] = [];
-    this.actors.forEach(actor => {
-      const actorState = simState?.actorStates?.find(actorState => actorState.guid === actor.guid);
-      const stateUpdate = actor.toStateUpdate(actorState);
-      if (stateUpdate) {
-        actorStates.push(stateUpdate);
-      }
+  getSimActions(simStateUpdate: SimulationStateUpdate): ServerActionMsg[] {
+    const actions: WS.ServerActionMsg[] = [];
+
+    simStateUpdate.actorStates?.forEach(actorState => {
+      if (actorState.transformation?.position && isTuple(actorState.transformation.position, 3))
+        actions.push({
+          type: ServerAction.MOVE_ACTOR,
+          payload: { guid: actorState.guid, position: actorState.transformation.position },
+        });
     });
 
-    if (actorStates.length === 0) {
-      return {};
-    }
-
-    return {
-      actorStates: actorStates,
-    };
+    return actions;
   }
 
   toState(): SimulationStateSave {

@@ -1,5 +1,6 @@
 import { Axis, Space } from '@babylonjs/core/Maths/math.axis';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
+import type { Vector2 } from '@babylonjs/core/Maths/math.vector';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
@@ -10,7 +11,7 @@ import { MASS_DEFAULT, ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import type { ActorState, Transformation } from '@shared/dto/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
-import { floatCompare } from '@shared/utils';
+import { floatCompare, vecDelta } from '@shared/utils';
 import { Loader } from '../Loader';
 import { Logger } from '../Logger';
 
@@ -22,18 +23,18 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
   __collider: Mesh;
   __state: T;
 
-  _body: PhysicsBody;
+  body: PhysicsBody;
   __flipTranslate = 1;
-  __targetPosition: Vector3 | null = null;
+  __targetPosition: Vector2 | null = null;
 
   colorDiffuse: number[] = [];
+  pickable = true;
+  picked = false;
 
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state.name || state.guid, undefined, true);
 
     this.guid = state.guid;
-
-    this._scene = this.getEngine().scenes[0];
 
     this.__mass = state.mass ?? 1;
     this.__model = modelMesh;
@@ -48,12 +49,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     // this.colorDiffuse = state.colorDiffuse ?? [];
 
     this._setTransformations(state.transformation);
-    // this._addDragBehavior();
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    // this._scene.onBeforeRenderObservable.add(this._beforeRender.bind(this));
-    // this._forceUpdate();
-
     Logger.log(`Actor created. guid: ${this.guid} type: ${state?.type}`);
   }
 
@@ -96,9 +91,9 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
   }
 
   protected _setMass(mass: number) {
-    const m = this._body.getMassProperties();
+    const m = this.body.getMassProperties();
     m.mass = mass;
-    this._body.setMassProperties(m);
+    this.body.setMassProperties(m);
   }
 
   protected _setTransformations(transformation?: Transformation) {
@@ -113,18 +108,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     }
   }
 
-  pick() {
-    // this._setMass(0);
-    // this.move(0, LIFH_HIGHT, 0);
-    // this.__model.translate(Axis.Y, LIFH_HIGHT, Space.LOCAL);
-    // this._forceUpdate();
-  }
-
-  release() {
-    // this._setMass(this.__mass);
-    // this._body.applyImpulse(new Vector3(0, 0, 0), this.getAbsolutePosition());
-  }
-
   get transformation(): Transformation {
     return {
       scale: this.scaling.asArray(),
@@ -135,8 +118,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
 
   move(dx: number, dy: number, dz: number) {
     this.position = this.position.add(new Vector3(dx, dy, dz));
-    // const pos = this.__targetPosition ?? this.position;
-    // this.__targetPosition = pos.add(new Vector3(dx, dy, dz));
   }
 
   flip() {
@@ -171,13 +152,13 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
   _scale(step: number) {
     this.scaling.addInPlace(new Vector3(step, step, step));
     const colliderShape = new PhysicsShapeMesh(this.__model, this._scene);
-    this._body.shape = colliderShape;
+    this.body.shape = colliderShape;
   }
 
   _forceUpdate() {
-    this._body.disablePreStep = false;
+    this.body.disablePreStep = false;
     this._scene.onAfterRenderObservable.addOnce(() => {
-      this._body.disablePreStep = true;
+      this.body.disablePreStep = true;
     });
   }
 
@@ -297,6 +278,50 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
         scale: updateScale ? stateTransformation.scale : undefined,
         rotation: updateRotation ? stateTransformation.rotation : undefined,
         position: updatePosition ? stateTransformation.position : undefined,
+      };
+    }
+
+    if (Object.keys(rv).length === 1) {
+      return null;
+    }
+
+    return rv;
+  }
+
+  toStateDelta(actorState?: ActorBaseState): ActorStateUpdate | null {
+    const currentState = this.toState();
+
+    if (!actorState) {
+      return null;
+    }
+
+    const rv: ActorStateUpdate = {
+      guid: this.guid,
+    };
+
+    const stateTransformation = {
+      scale: actorState.transformation?.scale ?? DEFAULT_SCALE,
+      rotation: actorState.transformation?.rotation ?? DEFAULT_ROTATION,
+      position: actorState.transformation?.position ?? DEFAULT_POSITION,
+    };
+
+    const updatePosition = stateTransformation.position.some(
+      (v, i) => !floatCompare(v, currentState.transformation?.position?.[i] ?? 0),
+    );
+
+    const updateRotation = stateTransformation.rotation.some(
+      (v, i) => !floatCompare(v, currentState.transformation?.rotation?.[i] ?? 0),
+    );
+
+    const updateScale = stateTransformation.scale.some(
+      (v, i) => !floatCompare(v, currentState.transformation?.scale?.[i] ?? 1),
+    );
+
+    if (updatePosition || updateRotation || updateScale) {
+      rv.transformation = {
+        scale: vecDelta(currentState.transformation?.scale ?? DEFAULT_SCALE, stateTransformation.scale),
+        rotation: vecDelta(currentState.transformation?.rotation ?? DEFAULT_ROTATION, stateTransformation.rotation),
+        position: vecDelta(currentState.transformation?.position ?? DEFAULT_POSITION, stateTransformation.position),
       };
     }
 

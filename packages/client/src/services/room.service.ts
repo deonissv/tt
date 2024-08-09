@@ -4,8 +4,7 @@ import { getAccessToken } from '../utils';
 
 import type { CreateRoomDto, RoomPreviewDto } from '@shared/dto/rooms';
 import type { SimulationStateSave } from '@shared/dto/states';
-import { WS } from '@shared/ws';
-import { SimActionType } from '@shared/ws/ws';
+import { ClientAction, ServerAction, WS } from '@shared/ws';
 
 export const RoomService = {
   async createRoom(payload: CreateRoomDto): Promise<string> {
@@ -44,12 +43,12 @@ export const RoomService = {
           const message = WS.read(event);
 
           const action = message[0];
-          if (action.type == SimActionType.CLIENT_ID) {
+          if (action.type == ServerAction.CLIENT_ID) {
             const id = action.payload;
 
             WS.send(ws, [
               {
-                type: WS.SimActionType.NICKNAME,
+                type: ClientAction.NICKNAME,
                 payload: nickname,
               },
             ]);
@@ -58,7 +57,7 @@ export const RoomService = {
               const message = WS.read(event);
 
               const action = message[0];
-              if (action.type == WS.SimActionType.STATE) {
+              if (action.type == ServerAction.STATE) {
                 ws.removeEventListener('message', stateListener);
                 const simState = action.payload;
                 resolve([ws, id, simState]);

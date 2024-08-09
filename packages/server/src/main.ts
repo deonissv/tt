@@ -15,7 +15,17 @@ async function bootstrap() {
   await initHavok();
   PGLogger.register(new Logger('Playground'));
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: [
+      'fatal',
+      'error',
+      'warn',
+      'log',
+      'debug',
+      // 'debug',
+      'verbose',
+    ],
+  });
   app.useWebSocketAdapter(new WsAdapter(app));
 
   mainConfig(app);

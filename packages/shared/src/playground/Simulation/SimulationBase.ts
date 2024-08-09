@@ -9,15 +9,10 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
-import type { Tuple } from '@babylonjs/core/types';
 import type { ActorStateUpdate, TableState } from '@shared/dto/states';
 import { type ActorBaseState } from '@shared/dto/states';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
-import { isTuple } from '@shared/guards';
-import { WS } from '@shared/ws';
-import { isContainable } from '../actions/Containable';
 import { SharedBase } from '../actors/SharedBase';
-import { Logger } from '../Logger';
 import { EngineFactory } from './SimulationEngine';
 import type { SimulationSceneBase } from './SimulationSceneBase';
 
@@ -46,13 +41,6 @@ export abstract class SimulationBase {
   scene: SimulationSceneBase;
   initialState: SimulationStateSave;
 
-  // private initPhysics(gravity = GRAVITY) {
-  //   const hp = new HavokPlugin(true, global.havok);
-  //   const gravityVec = new Vector3(0, gravity, 0);
-
-  //   this.scene.enablePhysics(gravityVec, hp);
-  // }
-
   get actors() {
     return this.scene.actors;
   }
@@ -77,41 +65,27 @@ export abstract class SimulationBase {
     });
   }
 
-  update(msg: WS.MSG) {
-    msg.map(msg => this.handleAction(msg));
+  stop() {
+    this.engine.stopRenderLoop();
   }
 
-  handleAction(action: WS.SimAction) {
-    switch (action.type) {
-      case WS.SimActionType.MOVE_ACTOR: {
-        this.handleMoveActor(action.payload.guid, action.payload.position);
-        break;
-      }
-      case WS.SimActionType.PICK_ITEM: {
-        this.handlePickItem(action.payload);
-        break;
-      }
-    }
-  }
+  // handlePickItem(containerGUID: string) {
+  //   const actor = this.actors.find(a => a.guid === containerGUID);
+  //   if (isContainable(actor)) {
+  //     try {
+  //       actor.pickItem();
+  //     } catch (e) {
+  //       Logger.error(e);
+  //     }
+  //   }
+  // }
 
-  handlePickItem(containerGUID: string) {
-    const actor = this.actors.find(a => a.guid === containerGUID);
-    if (isContainable(actor)) {
-      try {
-        actor.pickItem();
-      } catch (e) {
-        Logger.error(e);
-      }
-    }
-  }
-
-  handleMoveActor(guid: string, position: Tuple<number, 3>) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor) {
-      actor.move(...position);
-    }
-  }
-
+  /**
+   * Converts the current simulation state to a state update object.
+   * Update object is an object that contains only the changes in the state. New values are actual values, NOT deltas.
+   * @param simState - Optional simulation state save object.
+   * @returns The simulation state update object.
+   */
   toStateUpdate(simState?: SimulationStateSave): SimulationStateUpdate {
     const actorStates: ActorStateUpdate[] = [];
     this.actors.forEach(actor => {
@@ -131,18 +105,23 @@ export abstract class SimulationBase {
     };
   }
 
-  getSimActions(simStateUpdate: SimulationStateUpdate): WS.SimAction[] {
-    const actions: WS.SimAction[] = [];
-
-    simStateUpdate.actorStates?.forEach(actorState => {
-      if (actorState.transformation?.position && isTuple(actorState.transformation.position, 3))
-        actions.push({
-          type: WS.SimActionType.MOVE_ACTOR,
-          payload: { guid: actorState.guid, position: actorState.transformation.position },
-        });
+  toStateDelta(simState?: SimulationStateSave): SimulationStateUpdate {
+    const actorStates: ActorStateUpdate[] = [];
+    this.actors.forEach(actor => {
+      const actorState = simState?.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const stateUpdate = actor.toStateDelta(actorState);
+      if (stateUpdate) {
+        actorStates.push(stateUpdate);
+      }
     });
 
-    return actions;
+    if (actorStates.length === 0) {
+      return {};
+    }
+
+    return {
+      actorStates: actorStates,
+    };
   }
 
   static mergeStateDelta(state: SimulationStateSave, delta: SimulationStateUpdate): SimulationStateSave {

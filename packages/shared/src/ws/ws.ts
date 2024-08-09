@@ -2,50 +2,46 @@ import type { Tuple } from '@babylonjs/core/types';
 import type { SimulationStateSave } from '@shared/dto/states';
 import type ws from 'ws';
 import { type MessageEvent as me } from 'ws';
-
-export const enum SimActionType {
-  CLIENT_ID,
-  NICKNAME,
-  STATE,
-  CURSOR,
-  CURSORS,
-  DOWNLOAD_PROGRESS,
-
-  MOVE_ACTOR,
-  PICK_ITEM,
-}
-
-export interface DownloadProgress {
-  loaded: number;
-  total: number;
-  succeded: number;
-  failed: number;
-}
-
-export interface MoveActor {
-  guid: string;
-  position: Tuple<number, 3>;
-}
-
-export type Cursors = Record<string, Tuple<number, 2>>;
+import type { ClientAction, ServerAction, SimAction } from './actions';
+import type {
+  CursorsPld,
+  DownloadProgressPld,
+  DropActorPld,
+  MoveClientActorPld,
+  MoveServerActorPld,
+  SpawnActorPld,
+} from './payloads';
 
 interface ActionPayloads {
-  [SimActionType.CLIENT_ID]: string;
-  [SimActionType.NICKNAME]: string;
-  [SimActionType.STATE]: SimulationStateSave;
-  [SimActionType.CURSOR]: Tuple<number, 2>;
-  [SimActionType.CURSORS]: Cursors;
-  [SimActionType.DOWNLOAD_PROGRESS]: DownloadProgress;
-  [SimActionType.MOVE_ACTOR]: MoveActor;
-  [SimActionType.PICK_ITEM]: string;
+  // handshake
+  [ClientAction.NICKNAME]: string;
+  [ServerAction.CLIENT_ID]: string;
+  [ServerAction.STATE]: SimulationStateSave;
+  [ServerAction.DOWNLOAD_PROGRESS]: DownloadProgressPld;
+
+  [ClientAction.MOVE_ACTOR]: MoveServerActorPld;
+  [ServerAction.MOVE_ACTOR]: MoveClientActorPld;
+
+  [ClientAction.PICK_ITEM]: string;
+  [ClientAction.CURSOR]: Tuple<number, 2>;
+  [ClientAction.PICK_ACTOR]: string;
+  [ClientAction.RELEASE_ACTOR]: string;
+
+  [ServerAction.CURSORS]: CursorsPld;
+  [ServerAction.SPAWN_ACTOR]: SpawnActorPld;
+  [ServerAction.DROP_ACTOR]: DropActorPld;
+  [ServerAction.REMOVE_ACTOR]: string;
 }
 
-type MsgMap = {
-  [K in SimActionType]: { type: K; payload: ActionPayloads[K] };
+export type MsgMap = {
+  [K in SimAction]: { type: K; payload: ActionPayloads[K] };
 };
 
-export type SimAction = MsgMap[SimActionType];
-export type MSG = SimAction[];
+export type ServerActionMsg = MsgMap[ServerAction];
+export type ClientActionMsg = MsgMap[ClientAction];
+
+export type ActionMsg = MsgMap[SimAction];
+export type MSG = ActionMsg[];
 
 export const send = (ws: WebSocket | ws, msg: MSG) => {
   if (ws && ws.readyState == ws.OPEN) ws.send(JSON.stringify(msg));

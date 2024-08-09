@@ -1,16 +1,16 @@
 import type { Tuple } from '@babylonjs/core/types';
 import { RoomService } from '@services/room.service';
-import { WS } from '@shared/ws';
+import { ClientAction, ServerAction, WS } from '@shared/ws';
+import type { CursorsPld } from '@shared/ws/payloads';
+import type { ClientActionMsg } from '@shared/ws/ws';
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
-import type WebSocket from 'ws';
-import type { MessageEvent } from 'ws';
 import { Simulation } from './Simulation';
 import type { ClientBase } from './actors';
 
 const FRAME_RATE = 30;
 
 export class SimulationRoom {
-  static actions: WS.SimAction[] = [];
+  static actions: ClientActionMsg[] = [];
 
   readonly ws: WebSocket;
   readonly simulation: Simulation;
@@ -47,7 +47,7 @@ export class SimulationRoom {
     }
 
     SimulationRoom.actions.push({
-      type: WS.SimActionType.CURSOR,
+      type: ClientAction.CURSOR,
       payload: this.cursor.current,
     });
 
@@ -63,29 +63,22 @@ export class SimulationRoom {
     roomId: typeof SimulationRoom.prototype.roomId,
     nickname = '',
     cursor: typeof SimulationRoom.prototype.cursor,
-    setCursors: Dispatch<SetStateAction<WS.Cursors>>,
+    setCursors: Dispatch<SetStateAction<CursorsPld>>,
   ): Promise<SimulationRoom> {
     const [ws, clientId, simState] = await RoomService.connect(roomId, nickname);
-    const sim = await Simulation.init(canvas, simState, {
-      onPickItem: SimulationRoom.onPickItem,
-      onMoveActor: SimulationRoom.onMoveActor,
-    });
+    const sim = await Simulation.init(canvas, simState, SimulationRoom);
 
-    ws.addEventListener('message', (event: MessageEvent) => {
+    ws.addEventListener('message', event => {
       const message = WS.read(event);
 
       message.forEach(action => {
         switch (action.type) {
-          case WS.SimActionType.CURSORS: {
+          case ServerAction.CURSORS: {
             setCursors(prev => ({ ...prev, ...action.payload }));
             break;
           }
-          case WS.SimActionType.MOVE_ACTOR: {
+          case ServerAction.MOVE_ACTOR: {
             sim.handleMoveActor(action.payload.guid, action.payload.position);
-            break;
-          }
-          case WS.SimActionType.PICK_ITEM: {
-            sim.handlePickItem(action.payload);
             break;
           }
         }
@@ -97,15 +90,29 @@ export class SimulationRoom {
 
   static onPickItem = (actor: ClientBase) => {
     this.actions.push({
-      type: WS.SimActionType.PICK_ITEM,
+      type: ClientAction.PICK_ITEM,
       payload: actor.guid,
     });
   };
 
-  static onMoveActor = (actor: ClientBase, position: Tuple<number, 3>) => {
+  static onMoveActor = (actor: ClientBase, position: Tuple<number, 2>) => {
     this.actions.push({
-      type: WS.SimActionType.MOVE_ACTOR,
+      type: ClientAction.MOVE_ACTOR,
       payload: { guid: actor.guid, position },
+    });
+  };
+
+  static onPickActor = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.PICK_ACTOR,
+      payload: actor.guid,
+    });
+  };
+
+  static onReleaseActor = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.RELEASE_ACTOR,
+      payload: actor.guid,
     });
   };
 

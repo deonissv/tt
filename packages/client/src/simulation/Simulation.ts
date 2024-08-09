@@ -3,12 +3,11 @@ import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
-import { Inspector } from '@babylonjs/inspector';
-
 import { SimulationScene } from './SimulationScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
+import { Matrix, Vector3 } from '@babylonjs/core';
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
@@ -29,15 +28,15 @@ import type {
 } from '@shared/dto/states';
 import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
+import { EngineFactory, Logger, SharedBase, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+import type { ClientBase } from './actors';
 import {
   Actor,
   Bag,
   Card,
   CircleTable,
-  ClientBase,
   CustomRectangleTable,
   CustomSquareTable,
   Deck,
@@ -59,7 +58,9 @@ import {
 
 export interface SimulationCallbacks {
   onPickItem: (deck: Deck) => void;
-  onMoveActor: (actor: ClientBase, position: Tuple<number, 3>) => void;
+  onMoveActor: (actor: ClientBase, position: Tuple<number, 2>) => void;
+  onPickActor: (actor: ClientBase) => void;
+  onReleaseActor: (actor: ClientBase) => void;
 }
 
 export class Simulation extends SimulationBase {
@@ -69,14 +70,12 @@ export class Simulation extends SimulationBase {
   private _cursorPos: [number, number] = [0, 0];
   cbs: SimulationCallbacks;
 
-  private constructor(scene: SimulationSceneBase, cbs: SimulationCallbacks) {
+  constructor(scene: SimulationSceneBase, cbs: SimulationCallbacks) {
     super();
     this.scene = scene;
     this.engine = scene.getEngine();
     this._hll = new HighlightLayer('hll', this.scene); // @TODO change glow to thin solid line
     this.cbs = cbs;
-
-    Inspector.Show(this.scene, {});
   }
 
   static async init(
@@ -85,7 +84,7 @@ export class Simulation extends SimulationBase {
     cbs: SimulationCallbacks,
   ): Promise<Simulation> {
     const engine = await EngineFactory(canvas);
-    const scene = await SimulationScene.init(engine, stateSave?.gravity, stateSave?.leftHandedSystem);
+    const scene = new SimulationScene(engine, stateSave?.leftHandedSystem);
     const sim = new Simulation(scene, cbs);
 
     if (stateSave.table) {
@@ -186,11 +185,47 @@ export class Simulation extends SimulationBase {
 
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
-    return pickedMesh?.parent instanceof ClientBase ? pickedMesh.parent : null;
+    const actorCandidate = pickedMesh?.parent;
+    if (!(actorCandidate instanceof SharedBase)) return null;
+
+    return actorCandidate.pickable ? actorCandidate : null;
   }
 
   private get _camera(): ArcRotateCamera {
     return this.scene.activeCamera as ArcRotateCamera;
+  }
+
+  get gCursor(): [number, number] {
+    const engine = this.scene.getEngine();
+    const viewport = this._camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
+    const screenVector = new Vector3(this.scene.pointerX, this.scene.pointerY, 0);
+
+    const viewMatrix = this._camera.getViewMatrix();
+    const projectionMatrix = this._camera.getProjectionMatrix();
+
+    const nearWorld = Vector3.Unproject(
+      screenVector,
+      viewport.width,
+      viewport.height,
+      Matrix.IdentityReadOnly,
+      viewMatrix,
+      projectionMatrix,
+    );
+
+    screenVector.z = 1;
+    const farWorld = Vector3.Unproject(
+      screenVector,
+      viewport.width,
+      viewport.height,
+      Matrix.IdentityReadOnly,
+      viewMatrix,
+      projectionMatrix,
+    );
+
+    const direction = farWorld.subtract(nearWorld).normalize();
+    const t = (-1 * nearWorld.y) / direction.y;
+    const groundPoint = nearWorld.add(direction.scale(t));
+    return [groundPoint._x, groundPoint._z];
   }
 
   private _handleHoverHighlight() {
@@ -216,29 +251,28 @@ export class Simulation extends SimulationBase {
     this.scene.onPointerObservable.add(evt => {
       switch (evt.type) {
         case PointerEventTypes.POINTERDOWN: {
-          this._cursorPos = [this.scene.pointerX, this.scene.pointerY];
+          this._cursorPos = this.gCursor;
           this._pickedActor = this._pickActor();
           if (!this._pickedActor) return;
-          this._pickedActor.pick();
+          // this._pickedActor.pick();
+          this.cbs.onPickActor(this._pickedActor);
           break;
         }
         case PointerEventTypes.POINTERUP: {
           if (!this._pickedActor) return;
-          this._pickedActor.release();
+          // this._pickedActor.release();
+          this.cbs.onReleaseActor(this._pickedActor);
           this._pickedActor = null;
           break;
         }
         case PointerEventTypes.POINTERMOVE: {
           if (!this._pickedActor) return;
           const prevCursorPos = this._cursorPos;
-          this._cursorPos = [this.scene.pointerX, this.scene.pointerY];
+          this._cursorPos = this.gCursor;
 
-          const cursorDX = this.scene.useRightHandedSystem ? 1 : -1 * (this._cursorPos[0] - prevCursorPos[0]);
+          const cursorDX = this._cursorPos[0] - prevCursorPos[0];
           const cursorDY = this._cursorPos[1] - prevCursorPos[1];
-
-          const dx = Math.cos(this._camera.alpha) * cursorDY + Math.sin(this._camera.alpha) * cursorDX;
-          const dy = -Math.cos(this._camera.alpha) * cursorDX + Math.sin(this._camera.alpha) * cursorDY;
-          this._pickedActor.move(dx * 0.02, 0, dy * 0.02);
+          this.cbs.onMoveActor(this._pickedActor, [cursorDX, cursorDY]);
         }
       }
     });
@@ -253,5 +287,12 @@ export class Simulation extends SimulationBase {
         action.call(target, target);
       }
     });
+  }
+
+  handleMoveActor(guid: string, position: Tuple<number, 3>) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.move(...position);
+    }
   }
 }
