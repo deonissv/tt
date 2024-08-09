@@ -1,0 +1,52 @@
+{
+  "name": "@tt/playgound",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config webpack.config.js",
+    "build:v": "vite build",
+    "start": "vite preview",
+    "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite"
+  },
+  "devDependencies": {
+    "@babylonjs/inspector": "^7.18.0",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.19",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.0",
+    "mini-css-extract-plugin": "^2.9.0",
+    "postcss": "^8.4.40",
+    "postcss-loader": "^8.1.1",
+    "react-router-dom": "^6.25.1",
+    "tailwindcss": "^3.4.7",
+    "terser-webpack-plugin": "^5.3.10",
+    "typescript": "^5.5.4",
+    "vite": "^5.3.5",
+    "vite-tsconfig-paths": "^4.3.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "@babylonjs/core": "^7.18.0",
+    "@babylonjs/havok": "^1.3.7",
+    "@babylonjs/loaders": "^7.18.0",
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^5.16.6",
+    "@mui/material": "^5.16.6",
+    "@reduxjs/toolkit": "^2.2.7",
+    "axios": "^1.7.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.1.2"
+  },
+  "browserslist": [
+    "last 1 version",
+    "> 1%",
+    "not dead"
+  ]
+}
