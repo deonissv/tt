@@ -42,7 +42,7 @@ export class SimulationRoom {
   sendUpdate() {
     const simStateUpdate = this.cursor.current;
     const updateStringified = JSON.stringify(simStateUpdate);
-    if (this.lastUpdate === updateStringified) {
+    if (this.lastUpdate === updateStringified && SimulationRoom.actions.length === 0) {
       return;
     }
 
