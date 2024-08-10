@@ -1,4 +1,4 @@
-import { HavokPlugin, PhysicsEventType, Vector3 } from '@babylonjs/core';
+import { HavokPlugin, Vector3 } from '@babylonjs/core';
 import HavokPhysics from '@babylonjs/havok';
 import { Simulation as ClientSimulation } from '@client/src/simulation';
 import type { ClientBase } from '@client/src/simulation/actors';
@@ -49,16 +49,6 @@ export class Simulation extends ClientSimulation {
     const hk = new HavokPlugin(true, await HavokPhysics());
     const gravityVector = gravity ? new Vector3(0, -gravity, 0) : undefined;
     this.scene.enablePhysics(gravityVector, hk);
-    hk.onTriggerCollisionObservable.add(ev => {
-      if (ev.type === PhysicsEventType.TRIGGER_ENTERED) {
-        const tn1 = ev.collider.transformNode;
-        const tn2 = ev.collidedAgainst.transformNode;
-        if (tn1.name !== 'ground' && tn2.name !== 'ground') {
-          const [actor, c] = tn1.picked ? [tn1, tn2] : [tn2, tn1];
-          actor.preventCollide(c);
-        }
-      }
-    });
   }
 
   static override async actorFromState(actorState: ActorBaseState): Promise<ServerActor | null> {

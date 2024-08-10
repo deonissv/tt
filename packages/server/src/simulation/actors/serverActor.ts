@@ -62,16 +62,11 @@ export class ServerActor<T extends ActorBaseState = ActorBaseState> extends Shar
         shapeLocalResult,
         hitWorldResult,
       );
-      if (shapeLocalResult.hasHit && hitWorldResult.hasHit && hitWorldResult.body?.transformNode.name !== 'ground') {
-        const body = hitWorldResult.body!;
-        const maxBody = body.getBoundingBox().maximumWorld.y;
-        upHeight += maxBody;
+
+      if (shapeLocalResult.hasHit && hitWorldResult.hasHit) {
+        upHeight += hitWorldResult.hitPoint.y;
       } else {
         this.obstacleHeight = null;
-      }
-
-      if (this.obstacleHeight) {
-        upHeight += this.obstacleHeight;
       }
       const pos = new Vector3(this.__targetPosition.x, upHeight, this.__targetPosition.y);
       this.body.setTargetTransform(pos, Quaternion.Identity());
@@ -86,11 +81,9 @@ export class ServerActor<T extends ActorBaseState = ActorBaseState> extends Shar
     return this._scene;
   }
 
-  preventCollide(actor: ServerActor) {
-    this.obstacleHeight = actor.body.getBoundingBox().maximumWorld.y;
-  }
-
   pick() {
+    if (this.picked) return;
+
     this.__targetPosition = new Vector2(this.position.x, this.position.z);
     this.picked = true;
     this.body.setCollisionCallbackEnabled(false);
@@ -105,7 +98,6 @@ export class ServerActor<T extends ActorBaseState = ActorBaseState> extends Shar
   }
 
   move(dx: number, dy: number) {
-    const curr = this.__targetPosition ?? new Vector2(this.position.x, this.position.z);
-    this.__targetPosition = curr.add(new Vector2(dx, dy));
+    this.__targetPosition?.addInPlaceFromFloats(dx, dy);
   }
 }

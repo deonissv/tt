@@ -16,8 +16,6 @@ export const MOVE_SENSETIVITY = 0.1;
 export const WHEEL_SENSETIVITY = 0.5;
 export const MOUSE_MOVE_SENSETIVITY = 20;
 
-export const GRAVITY = 9.81;
-
 export const PICK_HIGHT = 1;
 export const MOVEMENT_VELOCITY = 500;
 

@@ -1,4 +1,5 @@
 import { CreateBox } from '@babylonjs/core';
+import { Inspector } from '@babylonjs/inspector';
 import { ServerActor } from '@server/src/simulation/actors';
 import { ActorType } from '@shared/dto/states';
 import { Logger } from '@shared/playground';
@@ -68,6 +69,8 @@ const App = () => {
       { type: ActorType.ACTOR, guid: 'box5', name: 'box5', transformation: { position: [-10, 5, -10] } },
       CreateBox('box', { size: 1 }),
     );
+
+    Inspector.Show(sim.scene, {});
 
     return sim;
   }, [canvas]);

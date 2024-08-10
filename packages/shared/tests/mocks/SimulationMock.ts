@@ -1,5 +1,4 @@
-import { HavokPlugin, Logger, NullEngine, Scene, Vector3 } from '@babylonjs/core';
-import { GRAVITY } from '@shared/constants';
+import { HavokPlugin, Logger, NullEngine, Scene } from '@babylonjs/core';
 import { initHavok } from '@shared/initHavok';
 
 export const SimulationMock = (): (() => { scene: Scene; engine: NullEngine }) => {
@@ -16,8 +15,7 @@ export const SimulationMock = (): (() => { scene: Scene; engine: NullEngine }) =
     engine = new NullEngine();
     scene = new Scene(engine);
     const hp = new HavokPlugin(true, global.havok);
-    const gravityVec = new Vector3(0, GRAVITY, 0);
-    scene.enablePhysics(gravityVec, hp);
+    scene.enablePhysics(undefined, hp);
   });
 
   return () => ({

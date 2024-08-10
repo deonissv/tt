@@ -1029,7 +1029,7 @@ describe('Simulation', () => {
         const state = sim.toState();
         const box = state.actorStates!.find(actor => actor.guid === 'box');
         expect(box!.transformation!.position![0]).toBeCloseTo(1);
-        expect(box!.transformation!.position![1]).toBeCloseTo(0.498 + PICK_HIGHT);
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
         expect(box!.transformation!.position![2]).toBeCloseTo(0);
       });
     });
