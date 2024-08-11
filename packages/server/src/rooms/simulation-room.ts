@@ -218,7 +218,7 @@ export class SimulationRoom {
 
     if (JSON.stringify(simState) === JSON.stringify(this.prevSimState)) return null;
 
-    const simUpdate = this.simulation.toStateDelta(this.prevSimState);
+    const simUpdate = this.simulation.toStateUpdate(this.prevSimState);
     const actions = this.simulation.getSimActions(simUpdate);
     this.prevSimState = simState;
 

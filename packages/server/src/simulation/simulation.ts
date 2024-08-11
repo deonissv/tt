@@ -225,19 +225,9 @@ export class Simulation extends SimulationBase {
   }
 
   toState(): SimulationStateSave {
-    const actorStates = this.actors.map(actor => actor.toState());
-
     return {
       ...this.initialState,
-      actorStates: actorStates
-        .filter(actorState => actorState.guid != '')
-        .map(state => {
-          const initActorState = this.initialState.actorStates!.find(actorState => actorState.guid === state.guid);
-          return {
-            ...initActorState,
-            ...state,
-          };
-        }),
+      actorStates: this.actors.map(actor => actor.toState()),
     };
   }
 }

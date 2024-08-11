@@ -7,7 +7,7 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
-import { MASS_DEFAULT, ROTATE_STEP, SCALE_COEF } from '@shared/constants';
+import { ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import type { ActorState, Transformation } from '@shared/dto/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
@@ -114,10 +114,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
       rotation: this.rotation.asArray(),
       position: this.position.asArray(),
     };
-  }
-
-  move(dx: number, dy: number, dz: number) {
-    this.position = this.position.add(new Vector3(dx, dy, dz));
   }
 
   flip() {
@@ -247,14 +243,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
       guid: this.guid,
     };
 
-    if (actorState.name !== this.name) {
-      rv.name = this.name;
-    }
-
-    if (!floatCompare(actorState.mass ?? MASS_DEFAULT, this.mass)) {
-      rv.mass = this.__mass;
-    }
-
     const stateTransformation = {
       scale: actorState.transformation?.scale ?? DEFAULT_SCALE,
       rotation: actorState.transformation?.rotation ?? DEFAULT_ROTATION,
@@ -275,9 +263,9 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
 
     if (updatePosition || updateRotation || updateScale) {
       rv.transformation = {
-        scale: updateScale ? stateTransformation.scale : undefined,
-        rotation: updateRotation ? stateTransformation.rotation : undefined,
-        position: updatePosition ? stateTransformation.position : undefined,
+        scale: updateScale ? this.transformation.scale : undefined,
+        rotation: updateRotation ? this.transformation.rotation : undefined,
+        position: updatePosition ? this.transformation.position : undefined,
       };
     }
 
