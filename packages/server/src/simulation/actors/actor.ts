@@ -1,9 +1,9 @@
 import type { ActorState } from '@shared/dto/states';
 import { Logger, SharedBase } from '@shared/playground';
 import { ActorMixin } from '@shared/playground/actors/ActorMixin';
-import { ServerActor } from './serverActor';
+import { ServerBase } from './serverBase';
 
-export class Actor extends ActorMixin(ServerActor<ActorState>) {
+export class Actor extends ActorMixin(ServerBase<ActorState>) {
   static async fromState(actorState: ActorState): Promise<Actor | null> {
     const modelMesh = await SharedBase.modelFromState(actorState);
     if (!modelMesh) {

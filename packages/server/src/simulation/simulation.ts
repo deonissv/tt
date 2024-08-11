@@ -28,7 +28,7 @@ import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSce
 import type { WS } from '@shared/ws';
 import { ClientAction, ServerAction } from '@shared/ws';
 import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
-import type { ServerActor } from './actors';
+import type { ServerBase } from './actors';
 import {
   Actor,
   Bag,
@@ -65,8 +65,8 @@ export class Simulation extends SimulationBase {
     this.logger = new Logger(Simulation.name);
   }
 
-  get actors(): ServerActor[] {
-    return this.scene.actors as ServerActor[];
+  get actors(): ServerBase[] {
+    return this.scene.actors as ServerBase[];
   }
 
   initPhysics(gravity?: number) {
@@ -154,7 +154,7 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  static async actorFromState(actorState: ActorBaseState): Promise<ServerActor | null> {
+  static async actorFromState(actorState: ActorBaseState): Promise<ServerBase | null> {
     switch (actorState.type) {
       case ActorType.TILE:
         return await Tile.fromState(actorState as TileState);
@@ -185,7 +185,7 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  static async tableFromState(tableState: TableState): Promise<ServerActor | null> {
+  static async tableFromState(tableState: TableState): Promise<ServerBase | null> {
     switch (tableState.type) {
       case 'Hexagon':
         return await HexTable.fromState();

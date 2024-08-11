@@ -1,5 +1,5 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
-import { ServerActor } from './serverActor';
+import { ServerBase } from './serverBase';
 
 import type { Tuple } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
@@ -18,17 +18,17 @@ import {
 import type { Constructor } from '@shared/types';
 import { degToRad } from '@shared/utils';
 
-type TableCtor = Constructor<ServerActor>;
+type TableCtor = Constructor<ServerBase>;
 
-export class HexTable extends HexTableMixin<TableCtor>(ServerActor) {}
-export class CircleTable extends CircleTableMixin<TableCtor>(ServerActor) {}
-export class GlassTable extends GlassTableMixin<TableCtor>(ServerActor) {}
-export class SquareTable extends SquareTableMixin<TableCtor>(ServerActor) {}
-export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerActor) {}
+export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {}
+export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {}
+export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {}
+export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {}
+export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerBase) {}
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerActor) {
+export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
   static override async fromState(): Promise<OctagonTable | null> {
     const tableFrame = await Loader.loadMesh(`${STATIC_HOST}/OctagonTable_wood1992.obj`);
     if (!tableFrame) return null;
@@ -54,6 +54,6 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerActor) {
     return table;
   }
 }
-export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerActor) {}
-export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerActor) {}
-export class PokerTable extends PokerTableMixin<TableCtor>(ServerActor) {}
+export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {}
+export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {}
+export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {}

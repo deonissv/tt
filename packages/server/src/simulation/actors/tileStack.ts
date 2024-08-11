@@ -3,10 +3,10 @@ import type { TileState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import { TileStackMixin } from '@shared/playground/actors/TileStackMixin';
-import { ServerActor } from './serverActor';
+import { ServerBase } from './serverBase';
 import { Tile } from './tile';
 
-export class TileStackBase extends ServerActor<TileStackState> {
+export class TileStackBase extends ServerBase<TileStackState> {
   size: number;
 
   constructor(state: TileStackState, modelMesh: Mesh, colliderMesh?: Mesh) {

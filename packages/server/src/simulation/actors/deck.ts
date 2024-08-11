@@ -4,9 +4,9 @@ import { Loader } from '@shared/playground';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
 import type { Constructor } from '@shared/types';
 import { Card } from './card';
-import { ServerActor } from './serverActor';
+import { ServerBase } from './serverBase';
 
-export class Deck extends DeckMixin(ServerActor) {
+export class Deck extends DeckMixin(ServerBase) {
   constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
     const items = state.cards;
 
@@ -33,7 +33,7 @@ export class Deck extends DeckMixin(ServerActor) {
     return new this(state, model, faceTexture, backTexture);
   }
 
-  override async pickItem(): Promise<ServerActor<CardState> | null> {
+  override async pickItem(): Promise<ServerBase<CardState> | null> {
     this.model.scaling.x -= 1;
 
     if (this.size < 1) {

@@ -10,7 +10,7 @@ import { Loader } from '@shared/playground';
 import { wait } from '@shared/utils';
 import { ServerAction } from '@shared/ws';
 import type { MsgMap } from '@shared/ws/ws';
-import { Actor, ServerActor } from './actors';
+import { Actor, ServerBase } from './actors';
 import { Simulation } from './simulation';
 
 function getPhSim() {
@@ -19,7 +19,7 @@ function getPhSim() {
   });
   sim.initPhysics();
 
-  const ground = new ServerActor(
+  const ground = new ServerBase(
     { type: ActorType.ACTOR, guid: '#ground', name: '#ground' },
     CreateBox('ground', { width: 200, height: 0.1, depth: 200 }),
   );
@@ -994,7 +994,7 @@ describe('Simulation', () => {
     describe('PICK_ACTOR', () => {
       it('should picked actor raise actor on pick', async () => {
         const sim = getPhSim();
-        new ServerActor(
+        new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
           CreateBox('box', { size: 1 }),
         );
@@ -1011,7 +1011,7 @@ describe('Simulation', () => {
 
       it('should picked actor raise once on several picks', async () => {
         const sim = getPhSim();
-        new ServerActor(
+        new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
           CreateBox('box', { size: 1 }),
         );
@@ -1034,7 +1034,7 @@ describe('Simulation', () => {
     describe('RELEASE_ACTOR', () => {
       it('should do nothing on release of non picked actor', async () => {
         const sim = getPhSim();
-        new ServerActor(
+        new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
           CreateBox('box', { size: 1 }),
         );
@@ -1051,7 +1051,7 @@ describe('Simulation', () => {
 
       it('should return to previous state after pick - release', async () => {
         const sim = getPhSim();
-        new ServerActor(
+        new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
           CreateBox('box', { size: 1 }),
         );
@@ -1072,7 +1072,7 @@ describe('Simulation', () => {
     describe('MOVE_ACTOR', () => {
       it('should not move non picked actor', async () => {
         const sim = getPhSim();
-        new ServerActor(
+        new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
           CreateBox('box', { size: 1 }),
         );
@@ -1092,7 +1092,7 @@ describe('Simulation', () => {
 
       it('should move picked actor', async () => {
         const sim = getPhSim();
-        new ServerActor(
+        new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
           CreateBox('box', { size: 1 }),
         );
@@ -1116,7 +1116,7 @@ describe('Simulation', () => {
   describe('getSimActions', () => {
     it('returns ACTOR_MOVE actions', async () => {
       const sim = getPhSim();
-      new ServerActor(
+      new ServerBase(
         {
           type: ActorType.ACTOR,
           guid: 'box',
