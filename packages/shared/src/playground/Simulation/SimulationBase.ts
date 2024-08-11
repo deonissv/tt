@@ -10,9 +10,10 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
 import type { ActorStateUpdate, TableState } from '@shared/dto/states';
-import { type ActorBaseState } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
 import { SharedBase } from '../actors/SharedBase';
+import type { ActorBuilder } from './ActorBuilder';
 import { EngineFactory } from './SimulationEngine';
 import type { SimulationSceneBase } from './SimulationSceneBase';
 
@@ -37,6 +38,7 @@ import type { SimulationSceneBase } from './SimulationSceneBase';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
 export abstract class SimulationBase {
+  static actorBuilder: ActorBuilder;
   engine: AbstractEngine;
   scene: SimulationSceneBase;
   initialState: SimulationStateSave;
@@ -49,12 +51,12 @@ export abstract class SimulationBase {
     return await EngineFactory(canvas);
   }
 
-  static actorFromState(_actorState: ActorBaseState): Promise<SharedBase | null> {
-    throw new Error('Method not implemented.');
+  static async actorFromState(actorState: UnknownActorState): Promise<SharedBase | null> {
+    return await this.actorBuilder.build(actorState);
   }
 
-  static tableFromState(_tableState: TableState): Promise<SharedBase | null> {
-    throw new Error('Method not implemented.');
+  static async tableFromState(tableState: TableState): Promise<SharedBase | null> {
+    return await this.actorBuilder.buildTable(tableState);
   }
 
   start() {
@@ -68,17 +70,6 @@ export abstract class SimulationBase {
   stop() {
     this.engine.stopRenderLoop();
   }
-
-  // handlePickItem(containerGUID: string) {
-  //   const actor = this.actors.find(a => a.guid === containerGUID);
-  //   if (isContainable(actor)) {
-  //     try {
-  //       actor.pickItem();
-  //     } catch (e) {
-  //       Logger.error(e);
-  //     }
-  //   }
-  // }
 
   /**
    * Converts the current simulation state to a state update object.

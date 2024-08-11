@@ -35,7 +35,7 @@ export const SquareTableMixin = <T extends Constructor<SharedBase>>(Base: T) => 
         {
           guid: '#SquareTable',
           name: '#SquareTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         model,
       );

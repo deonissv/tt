@@ -39,9 +39,9 @@ describe('RoomsService', () => {
               position: [0, 50, 0],
             },
             mass: 1,
-            // model: {
-            //   meshURL: 'http://localhost:5500/munch.obj',
-            // },
+            model: {
+              meshURL: 'http://localhost:5500/munch.obj',
+            },
           },
         ],
       };
@@ -156,9 +156,9 @@ describe('RoomsService', () => {
               position: [0, 50, 0],
             },
             mass: 1,
-            // model: {
-            //   meshURL: 'http://localhost:5500/munch.obj',
-            // },
+            model: {
+              meshURL: 'http://localhost:5500/munch.obj',
+            },
           },
         ],
       };
@@ -173,9 +173,9 @@ describe('RoomsService', () => {
               position: [0, 50, 0],
             },
             mass: 1,
-            // model: {
-            //   meshURL: 'http://localhost:5500/munch.obj',
-            // },
+            model: {
+              meshURL: 'http://localhost:5500/munch.obj',
+            },
           },
         ],
       };

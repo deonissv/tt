@@ -11,6 +11,7 @@ import { ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import type { ActorState, Transformation } from '@shared/dto/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { floatCompare, vecDelta, vecFloatCompare } from '@shared/utils';
 import { Loader } from '../Loader';
 import { Logger } from '../Logger';
@@ -368,7 +369,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     }
   }
 
-  static applyStateUpdate(actorState: ActorBaseState, actorStateUpdate: ActorStateUpdate): ActorBaseState {
+  static applyStateUpdate(actorState: UnknownActorState, actorStateUpdate: ActorStateUpdate): UnknownActorState {
     const mergedScale = actorStateUpdate.transformation?.scale ?? actorState.transformation?.scale;
     const mergedPosition = actorStateUpdate.transformation?.position ?? actorState.transformation?.position;
     const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
@@ -390,6 +391,8 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
       };
     }
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore @todo fix
     return rv;
   }
 }

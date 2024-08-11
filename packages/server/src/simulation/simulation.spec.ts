@@ -20,7 +20,7 @@ function getPhSim() {
   sim.initPhysics();
 
   const ground = new ServerBase(
-    { type: ActorType.ACTOR, guid: '#ground', name: '#ground' },
+    { type: ActorType.ACTOR, guid: '#ground', name: '#ground', model: { meshURL: '' } },
     CreateBox('ground', { width: 200, height: 0.1, depth: 200 }),
   );
   ground.physicsBody?.setMotionType(PhysicsMotionType.ANIMATED);
@@ -102,6 +102,7 @@ describe('Simulation', () => {
       vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
         return Promise.resolve(new Actor(state, new Mesh('testMesh')));
       });
+
       await Simulation.init(initialState, vi.fn(), mockOnSucceed);
 
       expect(mockOnSucceed).toHaveBeenCalledTimes(1);
@@ -183,7 +184,7 @@ describe('Simulation', () => {
             type: 0,
             guid: 'actor1',
             name: 'actor1',
-            // model: { meshURL: '' },
+            model: { meshURL: '' },
             transformation: { position: [0, 0, 0] },
           },
         ],
@@ -995,7 +996,13 @@ describe('Simulation', () => {
       it('should picked actor raise actor on pick', async () => {
         const sim = getPhSim();
         new ServerBase(
-          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          {
+            type: ActorType.ACTOR,
+            guid: 'box',
+            name: 'box',
+            transformation: { position: [0, 0.6, 0] },
+            model: { meshURL: '' },
+          },
           CreateBox('box', { size: 1 }),
         );
         sim.start();
@@ -1012,7 +1019,13 @@ describe('Simulation', () => {
       it('should raise picked actor once on several picks', async () => {
         const sim = getPhSim();
         new ServerBase(
-          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          {
+            type: ActorType.ACTOR,
+            guid: 'box',
+            name: 'box',
+            transformation: { position: [0, 0.6, 0] },
+            model: { meshURL: '' },
+          },
           CreateBox('box', { size: 1 }),
         );
         sim.start();
@@ -1035,7 +1048,13 @@ describe('Simulation', () => {
       it('should do nothing on release of non picked actor', async () => {
         const sim = getPhSim();
         new ServerBase(
-          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          {
+            type: ActorType.ACTOR,
+            guid: 'box',
+            name: 'box',
+            transformation: { position: [0, 0.6, 0] },
+            model: { meshURL: '' },
+          },
           CreateBox('box', { size: 1 }),
         );
         sim.start();
@@ -1052,7 +1071,13 @@ describe('Simulation', () => {
       it('should return to previous state after pick - release', async () => {
         const sim = getPhSim();
         new ServerBase(
-          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          {
+            type: ActorType.ACTOR,
+            guid: 'box',
+            name: 'box',
+            transformation: { position: [0, 0.6, 0] },
+            model: { meshURL: '' },
+          },
           CreateBox('box', { size: 1 }),
         );
         sim.start();
@@ -1073,7 +1098,13 @@ describe('Simulation', () => {
       it('should not move non picked actor', async () => {
         const sim = getPhSim();
         new ServerBase(
-          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          {
+            type: ActorType.ACTOR,
+            guid: 'box',
+            name: 'box',
+            transformation: { position: [0, 0.6, 0] },
+            model: { meshURL: '' },
+          },
           CreateBox('box', { size: 1 }),
         );
         sim.start();
@@ -1093,7 +1124,13 @@ describe('Simulation', () => {
       it('should move picked actor', async () => {
         const sim = getPhSim();
         new ServerBase(
-          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          {
+            type: ActorType.ACTOR,
+            guid: 'box',
+            name: 'box',
+            transformation: { position: [0, 0.6, 0] },
+            model: { meshURL: '' },
+          },
           CreateBox('box', { size: 1 }),
         );
         sim.start();
@@ -1122,6 +1159,7 @@ describe('Simulation', () => {
           guid: 'box',
           name: 'box',
           transformation: { position: [0, 1, 0] },
+          model: { meshURL: '' },
         },
         CreateBox('box', { size: 1 }),
       );

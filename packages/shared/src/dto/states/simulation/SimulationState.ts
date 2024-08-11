@@ -1,4 +1,5 @@
-import type { ActorBaseState, ActorStateUpdate, TableState } from '../actor';
+import type { ActorStateUpdate, TableState } from '../actor';
+import type { UnknownActorState } from '../actor/ActorUnion';
 
 export interface SimulationStateBase {
   leftHandedSystem?: boolean; // default: false | If true, the Y axis will be inverted, and the Z axis will be inverted
@@ -7,12 +8,12 @@ export interface SimulationStateBase {
 }
 
 export interface SimulationState extends SimulationStateBase {
-  actorStates: ActorBaseState[];
+  actorStates: UnknownActorState[];
   cursorPositions: CursorPositions;
 }
 
 export interface SimulationStateSave extends SimulationStateBase {
-  actorStates?: ActorBaseState[]; // Objects on the table
+  actorStates?: UnknownActorState[]; // Objects on the table
 }
 
 export interface SimulationStateUpdate extends Omit<Partial<SimulationState>, 'actorStates'> {

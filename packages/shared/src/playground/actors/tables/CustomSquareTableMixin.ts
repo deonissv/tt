@@ -44,7 +44,7 @@ export const CustomSquareTableMixin = <T extends Constructor<SharedBase>>(Base: 
         {
           guid: '#CustomSquareTable',
           name: '#CustomSquareTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

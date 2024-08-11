@@ -1,5 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import type { ActorUnion } from '@shared/dto/states/actor/ActorUnion';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 
 export interface DownloadProgressPld {
   loaded: number;
@@ -26,5 +26,5 @@ export interface DropActorPld {
 }
 
 export interface SpawnActorPld {
-  state: ActorUnion;
+  state: UnknownActorState;
 }
