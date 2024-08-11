@@ -1,9 +1,8 @@
-import type { Mesh } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
 import { ActorType, type DieNState, type DieType, type Model } from '@shared/dto/states';
 import type { Constructor } from '@shared/types';
 import { Loader } from '../Loader';
-import { SharedBase } from './SharedBase';
+import type { SharedBase } from './SharedBase';
 
 const DIE_TEXTURES = {
   normalURL: `${STATIC_HOST}/NEW-Dice_nrm strong.png`,
@@ -46,9 +45,9 @@ const DIE20_MODEL: Model = {
   colliderURL: `${STATIC_HOST}/icosahedron23294.obj`,
 };
 
-export abstract class Die<N extends DieType> extends SharedBase<DieNState<N>> {}
+type Die<N extends DieType> = SharedBase<DieNState<N>>;
 
-export const DieMixin = <N extends DieType>(Base: Constructor<Die<N>>) => {
+export const DieMixin = <T extends Constructor<Die<N>>, N extends DieType>(Base: T) => {
   const getDieModel = (state: DieNState<N>) => {
     switch (state.type) {
       case ActorType.DIE4:
@@ -69,11 +68,7 @@ export const DieMixin = <N extends DieType>(Base: Constructor<Die<N>>) => {
   };
 
   return class Die extends Base {
-    constructor(state: DieNState<N>, model: Mesh, collider?: Mesh) {
-      super(state, model, collider);
-    }
-
-    static async fromState<T extends Die>(this: Constructor<T>, state: DieNState<N>) {
+    static async fromState<T extends Die>(this: Constructor<T>, state: DieNState<N>): Promise<T | null> {
       const modelProps = getDieModel(state);
       const [model, collider] = await Loader.loadModel(modelProps);
 

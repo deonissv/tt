@@ -1,8 +1,11 @@
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
+import type { Tuple } from '@babylonjs/core';
+import { HavokPlugin, Vector3 } from '@babylonjs/core';
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 import { Logger } from '@nestjs/common';
 import type {
+  ActorBaseState,
   ActorState,
   BagState,
   CardState,
@@ -13,20 +16,17 @@ import type {
   Die4State,
   Die6State,
   Die8State,
+  TableState,
   TileState,
 } from '@shared/dto/states';
-import {
-  ActorType,
-  type ActorBaseState,
-  type ActorStateUpdate,
-  type SimulationStateSave,
-  type SimulationStateUpdate,
-  type TableState,
-} from '@shared/dto/states';
+import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import { SimulationBase } from '@shared/playground';
 import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { ServerActor } from './actors';
+import type { WS } from '@shared/ws';
+import { ClientAction, ServerAction } from '@shared/ws';
+import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
+import type { ServerBase } from './actors';
 import {
   Actor,
   Bag,
@@ -54,13 +54,24 @@ import {
 export class Simulation extends SimulationBase {
   logger: Logger;
 
-  private constructor(initialState: SimulationStateSave) {
+  constructor(initialState: SimulationStateSave) {
     super();
     this.engine = new NullEngine();
     this.scene = new SimulationSceneBase(this.engine);
     this.initialState = initialState;
     this.scene.createDefaultCameraOrLight(false, false, false);
     this.logger = new Logger(Simulation.name);
+  }
+
+  get actors(): ServerBase[] {
+    return this.scene.actors as ServerBase[];
+  }
+
+  initPhysics(gravity?: number) {
+    const hk = new HavokPlugin(true, global.havok);
+    const gravityVec = gravity ? new Vector3(0, -gravity, 0) : undefined;
+
+    this.scene.enablePhysics(gravityVec, hk);
   }
 
   static async init(
@@ -73,7 +84,7 @@ export class Simulation extends SimulationBase {
     sim.logger.log('Simulation instance created');
 
     sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
-    // sim.initPhysics(stateSave?.gravity);
+    sim.initPhysics(stateSave?.gravity);
 
     if (stateSave.table) {
       try {
@@ -99,12 +110,49 @@ export class Simulation extends SimulationBase {
         }
       }),
     );
-    sim.logger.log('Simulation actors created');
-
     return sim;
   }
 
-  static async actorFromState(actorState: ActorBaseState): Promise<ServerActor | null> {
+  update(msg: ClientActionMsg[]) {
+    msg.map(msg => this.handleAction(msg));
+  }
+
+  handleAction(msg: ClientActionMsg) {
+    switch (msg.type) {
+      case ClientAction.PICK_ACTOR:
+        this.handlePickActor(msg.payload);
+        break;
+      case ClientAction.RELEASE_ACTOR:
+        this.handleReleaseActor(msg.payload);
+        break;
+      case ClientAction.MOVE_ACTOR:
+        this.handleMoveActor(msg.payload.guid, msg.payload.position);
+        break;
+    }
+  }
+
+  handlePickActor(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.pick();
+    }
+  }
+
+  handleReleaseActor(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.release();
+    }
+  }
+
+  handleMoveActor(guid: string, position: Tuple<number, 2>) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.move(...position);
+    }
+  }
+
+  static async actorFromState(actorState: ActorBaseState): Promise<ServerBase | null> {
     switch (actorState.type) {
       case ActorType.TILE:
         return await Tile.fromState(actorState as TileState);
@@ -135,7 +183,7 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  static async tableFromState(tableState: TableState): Promise<ServerActor | null> {
+  static async tableFromState(tableState: TableState): Promise<ServerBase | null> {
     switch (tableState.type) {
       case 'Hexagon':
         return await HexTable.fromState();
@@ -160,39 +208,36 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  toStateUpdate(simState?: SimulationStateSave): SimulationStateUpdate {
-    const actorStates: ActorStateUpdate[] = [];
+  getSimActions(prevState: SimulationStateSave, state: SimulationStateSave): ServerActionMsg[] {
+    const actions: WS.ServerActionMsg[] = [];
+
     this.actors.forEach(actor => {
-      const actorState = simState?.actorStates?.find(actorState => actorState.guid === actor.guid);
-      const stateUpdate = actor.toStateUpdate(actorState);
-      if (stateUpdate) {
-        actorStates.push(stateUpdate);
+      const actorState = state.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const prevActorState = prevState.actorStates?.find(actorState => actorState.guid === actor.guid);
+      if (!actorState) {
+        // handle remove actor
+        return;
+      }
+      if (!prevActorState) {
+        // handle add actor
+        return;
+      }
+      const positionUpdate = actor.getPositionUpdate(prevActorState, actorState);
+      if (positionUpdate) {
+        actions.push({
+          type: ServerAction.MOVE_ACTOR,
+          payload: { guid: actor.guid, position: positionUpdate },
+        });
       }
     });
 
-    if (actorStates.length === 0) {
-      return {};
-    }
-
-    return {
-      actorStates: actorStates,
-    };
+    return actions;
   }
 
   toState(): SimulationStateSave {
-    const actorStates = this.actors.map(actor => actor.toState());
-
     return {
       ...this.initialState,
-      actorStates: actorStates
-        .filter(actorState => actorState.guid != '')
-        .map(state => {
-          const initActorState = this.initialState.actorStates!.find(actorState => actorState.guid === state.guid);
-          return {
-            ...initActorState,
-            ...state,
-          };
-        }),
+      actorStates: this.actors.map(actor => actor.toState()),
     };
   }
 }

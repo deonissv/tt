@@ -20,12 +20,12 @@ const CARD_FACE_INDEX_COUNT = 51;
 const CARD_BACK_INDEX_START = 240;
 const CARD_BACK_INDEX_COUNT = 60;
 
-export const CardMixin = (Base: Constructor<SharedBase<CardState>>) => {
+export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T) => {
   return class Card extends Base {
-    constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
-      const cardModel = Card.getCardModel(model, faceTexture, backTexture, state);
-      super(state, cardModel);
-    }
+    // constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+    //   const cardModel = Card.getCardModel(model, faceTexture, backTexture, state);
+    //   super(state, cardModel);
+    // }
 
     static async loadCardModel(): Promise<Mesh | null> {
       const mesh = await Loader.loadMesh(CARD_MODEL_URL);
@@ -39,7 +39,7 @@ export const CardMixin = (Base: Constructor<SharedBase<CardState>>) => {
       return mesh;
     }
 
-    static async fromState(state: CardState): Promise<Card | null> {
+    static async fromState<T extends Card>(this: Constructor<T>, state: CardState): Promise<T | null> {
       const model = await Card.loadCardModel();
 
       if (!model) {
@@ -53,7 +53,7 @@ export const CardMixin = (Base: Constructor<SharedBase<CardState>>) => {
         return null;
       }
 
-      return new Card(state, model, faceTexture, backTexture);
+      return new this(state, model, faceTexture, backTexture);
     }
 
     static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid: CardGrid) {

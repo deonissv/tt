@@ -21,7 +21,7 @@ export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) =
       return this.items.length;
     }
 
-    static async fromState(state: BagState) {
+    static async fromState<T extends Bag>(this: Constructor<T>, state: BagState): Promise<T | null> {
       const modelState: Model = state.model ?? BAG_MODEL;
       const [model, collider] = await Loader.loadModel(modelState);
 
@@ -29,7 +29,7 @@ export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) =
         return null;
       }
 
-      return new Bag(state, model, collider ?? undefined);
+      return new this(state, model, collider ?? undefined);
     }
 
     async pickItem() {

@@ -1,5 +1,15 @@
+import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { CardState } from '@shared/dto/states';
 import { CardMixin } from '@shared/playground/actors/CardMixin';
-import { ServerActor } from './serverActor';
+import type { Constructor } from '@shared/types';
+import { ServerBase } from './serverBase';
 
-export class Card extends CardMixin(ServerActor<CardState>) {}
+class CardBase extends ServerBase<CardState> {
+  constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+    const cardModel = Card.getCardModel(model, faceTexture, backTexture, state);
+    super(state, cardModel);
+  }
+}
+
+export class Card extends CardMixin<Constructor<ServerBase<CardState>>>(CardBase) {}

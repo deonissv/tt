@@ -9,33 +9,26 @@ import type { RoomsService } from './rooms.service';
 import { URL_PREFIX } from '@shared/constants';
 import type { SimulationStateSave } from '@shared/dto/states';
 import { isObject, isString } from '@shared/guards';
-import { WS } from '@shared/ws';
-import type { Cursors } from '@shared/ws/ws';
+import type { RecursiveType } from '@shared/types';
+import { ClientAction, ServerAction, WS } from '@shared/ws';
+import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
+import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
-
-type Primitive = string | number | boolean | null | undefined;
-
-// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-interface RecursiveObject {
-  [key: string]: RecursiveType;
-}
-
-type RecursiveArray = RecursiveType[];
-
-type RecursiveType = Primitive | RecursiveObject | RecursiveArray;
 
 export class SimulationRoom {
   id: string;
   simulation: Simulation;
   wss: WebSocket.Server;
   clients: Map<WebSocket, Client>;
-  cursors: Map<WebSocket, Cursors[keyof Cursors]>;
-  simSave: SimulationStateSave | undefined;
-  actions: WS.SimAction[];
-  prevUpdate: string;
 
-  downloadProgress: WS.DownloadProgress;
+  cursors: Map<WebSocket, CursorsPld[keyof CursorsPld]>;
+  simSave: SimulationStateSave | undefined;
+
+  prevCursors: string;
+  prevSimState: SimulationStateSave;
+
+  downloadProgress: DownloadProgressPld;
 
   savingDelay: number;
   stateTickDelay: number;
@@ -59,7 +52,6 @@ export class SimulationRoom {
     this.savingDelay = savingDelay;
     this.stateTickDelay = stateTickDelay;
     this.simSave = undefined;
-    this.actions = [];
 
     this.downloadProgress = {
       total: 0,
@@ -80,7 +72,7 @@ export class SimulationRoom {
 
         this.broadcast([
           {
-            type: WS.SimActionType.DOWNLOAD_PROGRESS,
+            type: ServerAction.DOWNLOAD_PROGRESS,
             payload: this.downloadProgress,
           },
         ]);
@@ -115,7 +107,7 @@ export class SimulationRoom {
     const patchedState = SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave;
     this.broadcast([
       {
-        type: WS.SimActionType.STATE,
+        type: ServerAction.STATE,
         payload: patchedState,
       },
     ]);
@@ -139,7 +131,7 @@ export class SimulationRoom {
       if (this.simSave) {
         WS.send(ws, [
           {
-            type: WS.SimActionType.STATE,
+            type: ServerAction.STATE,
             payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave,
           },
         ]);
@@ -152,10 +144,10 @@ export class SimulationRoom {
   }
 
   private onMessage(event: WebSocket.MessageEvent) {
-    SimulationRoom.logger.log(`Received message: ${JSON.stringify(event.data)}`);
-    const actions = WS.read(event);
+    SimulationRoom.logger.debug(`Received message: ${JSON.stringify(event.data)}`);
+    const actions = WS.read(event) as ClientActionMsg[];
 
-    const cursorAction = actions.find(action => action.type === WS.SimActionType.CURSOR);
+    const cursorAction = actions.find(action => action.type === ClientAction.CURSOR);
     if (cursorAction) {
       this.cursors.set(event.target, cursorAction.payload);
     }
@@ -191,29 +183,50 @@ export class SimulationRoom {
       return;
     }
 
+    const actions: ServerActionMsg[] = [];
+
+    const cursorsAction = this.getCursorsAction();
+    if (cursorsAction) actions.push(cursorsAction);
+
+    const simActions = this.getSimActions();
+    if (simActions) actions.push(...simActions);
+
+    if (actions.length > 0) {
+      SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify(actions)}`);
+      this.broadcast(actions);
+    }
+  }
+
+  private getCursorsAction(): ServerActionMsg | null {
     const cursors = Array.from(this.cursors).reduce((acc, [ws, cursor]) => {
       acc[this.clients.get(ws)!.id] = cursor;
       return acc;
     }, {});
 
-    const simUpdate = {
-      ...this.simulation.toStateUpdate(this.simSave),
-      cursors,
-    };
-    this.simSave = this.simulation.toState();
-    const actions = this.simulation.getSimActions(simUpdate);
+    const cursorsUpdate = JSON.stringify(cursors);
+    if (cursorsUpdate === this.prevCursors) return null;
 
-    actions.push({
-      type: WS.SimActionType.CURSORS,
+    this.prevCursors = cursorsUpdate;
+    return {
+      type: ServerAction.CURSORS,
       payload: cursors,
-    });
+    };
+  }
 
-    if (this.actions.length > 0) {
-      actions.push(...this.actions);
-      this.actions = [];
+  private getSimActions(): ServerActionMsg[] | null {
+    const simState = this.simulation.toState();
+
+    if (JSON.stringify(simState) === JSON.stringify(this.prevSimState)) return null;
+
+    if (!this.prevSimState) {
+      this.prevSimState = simState;
+      return null;
     }
+    const actions = this.simulation.getSimActions(this.prevSimState, simState);
+    this.prevSimState = simState;
 
-    if (actions.length > 0) this.broadcast(actions);
+    if (actions.length === 0) return null;
+    return actions;
   }
 
   private initSaving(): NodeJS.Timeout {
@@ -234,17 +247,6 @@ export class SimulationRoom {
       this.tick();
     }, this.stateTickDelay);
   }
-
-  // private getDelta(): SimulationStateUpdate | null {
-  //   const delta = this.simulation.toStateUpdate(this.simSave);
-
-  //   if (Object.keys(delta).length === 0) {
-  //     return null;
-  //   }
-  //   this.simSave = this.simulation.toState();
-
-  //   return delta;
-  // }
 
   private broadcast(msg: WS.MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {

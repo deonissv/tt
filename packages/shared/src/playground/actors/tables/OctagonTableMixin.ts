@@ -6,9 +6,9 @@ import { degToRad } from '@shared/utils';
 import { Loader } from '../../Loader';
 import type { SharedBase } from '../SharedBase';
 
-export const OctagonTableMixin = (Base: Constructor<SharedBase>) => {
+export const OctagonTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class OctagonTable extends Base {
-    static async fromState(): Promise<OctagonTable | null> {
+    static async fromState<T extends OctagonTable>(this: Constructor<T>): Promise<T | null> {
       const [leg, _] = await Loader.loadModel({
         meshURL: `${STATIC_HOST}/Legs.obj`,
         diffuseURL: `${STATIC_HOST}/wood_diff.png`,
@@ -37,7 +37,7 @@ export const OctagonTableMixin = (Base: Constructor<SharedBase>) => {
       wrapper.scaling = wrapper.scaling.scale(1.04);
       wrapper.position.y = -0.65;
 
-      const table = new OctagonTable(
+      const table = new this(
         {
           guid: '#OctagonTable',
           name: '#OctagonTable',

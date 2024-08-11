@@ -1,21 +1,21 @@
-import type { Mesh, Texture } from '@babylonjs/core';
+import type { Texture } from '@babylonjs/core';
 import type { CardState, DeckState } from '@shared/dto/states';
 import type { Constructor } from '@shared/types';
 import type { Containable } from '../actions/Containable';
 import type { SharedBase } from './SharedBase';
 
-export const DeckMixin = (Base: Constructor<SharedBase<DeckState>>) => {
+export const DeckMixin = <T extends Constructor<SharedBase<DeckState>>>(Base: T) => {
   return class Deck extends Base implements Containable {
     items: CardState[];
 
-    constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
-      const items = state.cards;
+    // constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+    //   const items = state.cards;
 
-      super(state, model);
+    //   super(state, model);
 
-      this.items = items;
-      this.renderDeck(faceTexture, backTexture);
-    }
+    //   this.items = items;
+    //   this.renderDeck(faceTexture, backTexture);
+    // }
 
     get size() {
       return this.items.length;

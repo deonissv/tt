@@ -1,0 +1,41 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noImplicitReturns": true,
+    "skipDefaultLibCheck": true,
+
+    "outDir": "./dist",
+    "baseUrl": "../",
+    "rootDir": "../",
+    "paths": {
+      "@components/*": [ "client/src/components/*" ],
+      "@services/*": [ "client/src/services/*" ],
+      "@shared/*": [ "shared/src/*" ],
+      "@client/*": [ "client/*" ],
+      "@server/*": [ "server/*" ],
+      "@assets/*": [ "shared/tests/assets/*" ],
+    }
+  },
+  "include": ["./src/**/*", "../shared/src/**/*", "../shared/tests/assets/**/*"],
+  "exclude": ["node_modules", "dist"],
+}

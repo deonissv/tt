@@ -45,3 +45,14 @@ export type Constructor<T> = new (...args: any[]) => T;
 export type ParammedConstructor<T extends abstract new (...args: any) => any> = new (
   ...args: ConstructorParameters<T>
 ) => T;
+
+type Primitive = string | number | boolean | null | undefined;
+
+// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
+export interface RecursiveObject {
+  [key: string]: RecursiveType;
+}
+
+export type RecursiveArray = RecursiveType[];
+
+export type RecursiveType = Primitive | RecursiveObject | RecursiveArray;

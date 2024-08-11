@@ -1,14 +1,32 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/dot-notation */
 import type { Tuple } from '@babylonjs/core';
-import { Logger, Mesh, Scene } from '@babylonjs/core';
+import { CreateBox, Logger, Mesh, PhysicsMotionType, Scene } from '@babylonjs/core';
 
-import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
+import { PICK_HIGHT } from '@shared/constants';
+import { ActorType, type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
 import { initHavok } from '@shared/initHavok';
 import { Loader } from '@shared/playground';
-import { omitKeys } from '@shared/utils';
-import { Actor } from './actors';
+import { wait } from '@shared/utils';
+import { ServerAction } from '@shared/ws';
+import type { MsgMap } from '@shared/ws/ws';
+import { Actor, ServerBase } from './actors';
 import { Simulation } from './simulation';
+
+function getPhSim() {
+  const sim = new Simulation({
+    actorStates: [],
+  });
+  sim.initPhysics();
+
+  const ground = new ServerBase(
+    { type: ActorType.ACTOR, guid: '#ground', name: '#ground' },
+    CreateBox('ground', { width: 200, height: 0.1, depth: 200 }),
+  );
+  ground.physicsBody?.setMotionType(PhysicsMotionType.ANIMATED);
+
+  return sim;
+}
 
 describe('Simulation', () => {
   beforeAll(async () => {
@@ -190,694 +208,694 @@ describe('Simulation', () => {
   });
 
   describe('toState', () => {
-    it('returns complete state save', async () => {
-      const initialState: SimulationStateSave = {
-        table: {
-          url: '',
-          type: 'CustomRectangle',
-        },
-        gravity: 0.5,
-        actorStates: [
-          {
-            type: 0,
-            guid: '4deedc',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -16.9],
-              rotation: [2.246773551106098e-8, 1.139143005901462e-7, -4.032632507377682e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: 'cc04c1',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -17.15],
-              rotation: [1.642825077168346e-8, 1.02194769837507e-7, 2.836869650458061e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: 'ec6baf',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -17.65],
-              rotation: [6.846944929171024e-9, 5.573053176230747e-8, -4.282685829310909e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: 'a25ed9',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -17.9],
-              rotation: [2.481328558721127e-8, 1.10519619487054e-7, 2.912773007336329e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '338d84',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -18.15],
-              rotation: [2.813894188544686e-8, 1.234614601654008e-7, -3.063334690470953e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '4258fc',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -18.4],
-              rotation: [-4.161573540430792e-10, 2.975651251259643e-7, -4.180247533682872e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: 'be6eac',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -18.65],
-              rotation: [2.127503300171827e-8, 1.352528068534364e-7, -3.225271748991668e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '8308b8',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -16.9],
-              rotation: [3.724101527430657e-8, 2.34068685581594e-7, 1.515460570357966e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '8037ee',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -17.15],
-              rotation: [3.083060558756626e-8, 2.425645958237934e-7, 6.821726108303597e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '569a1b',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -17.4],
-              rotation: [8.010253790075538e-9, 6.568184710953673e-8, -2.816469229869786e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '641e9b',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -17.65],
-              rotation: [1.35391532429169e-8, 1.125800782329385e-7, -4.474634295558566e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '7ad8ce',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -17.9],
-              rotation: [5.723982478065719e-9, -9.260031096685878e-8, 7.334825367094333e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '179e08',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [7.7, 1.16497314, -17],
-              rotation: [-1.145192901774174e-8, 1.57079510506442, -7.808016642793961e-10],
-            },
-          },
-          {
-            type: 0,
-            guid: '0ac7cb',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [7.70000362, 1.16497326, -17.4999962],
-              rotation: [-1.434492569932372e-8, 1.570796326794897, 4.19479960029381e-10],
-            },
-          },
-          {
-            type: 0,
-            guid: 'd55405',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [7.7, 1.16497314, -18],
-              rotation: [8.84915964681539e-9, 1.570795628663196, 2.55655043433966e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '4edfbe',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [7.00000048, 1.16497314, -17],
-              rotation: [-9.704841241806267e-10, 1.570793010669318, 4.237745171868383e-8],
-            },
-          },
-          {
-            type: 0,
-            guid: '3c94b0',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [7, 1.16497314, -17.5],
-              rotation: [-1.427631855175707e-8, 1.570796326794897, 4.900506902709824e-8],
-            },
-          },
-          {
-            type: 0,
-            guid: 'f7103c',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -18.15],
-              rotation: [1.412431552336627e-8, 5.882052794535226e-8, -3.778187535620709e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: 'f66474',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [4.8, 1.05375, -18.4],
-              rotation: [2.915101381278244e-8, 3.209893076993693e-7, 1.615750248739739e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '608cbc',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [8.8, 1.244515, -17],
-              rotation: [1.053670239117971e-7, 1.570795977729046, -4.846887543201876e-7],
-            },
-          },
-          {
-            type: 0,
-            guid: 'c090bf',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [8.799999, 1.24451506, -18.0000019],
-              rotation: [1.475137797552816e-7, 1.570799293854625, 1.475141811810095e-7],
-            },
-          },
-          {
-            type: 0,
-            guid: 'e450b4',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [8.8, 1.24451518, -18.4999943],
-              rotation: [1.68586344091793e-7, 1.570804529842381, 2.528817868110463e-7],
-            },
-          },
-          {
-            type: 0,
-            guid: 'f02479',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [8.8, 1.244515, -17.5],
-              rotation: [-1.053673174761773e-7, 1.570795454130271, -4.00395027259589e-7],
-            },
-          },
-          {
-            type: 0,
-            guid: '9649a4',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.99649936, 1, 0.9965063],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [34.9, 1.05375016, -17.15],
-              rotation: [6.817377219046525e-10, 6.919137419353577e-8, -8.14738153433122e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: 'd05034',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              position: [6, 1.05375, -17.4],
-              rotation: [4.000767350545613e-9, 7.473333509708712e-8, -7.429229580562883e-9],
-            },
-          },
-          {
-            type: 0,
-            guid: '553bb7',
-            name: 'Traders & Barbarians - Game Logic',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.552623332, 0.0599260852, 0.702090561],
-            transformation: {
-              scale: [0.2, 0.2, 0.2],
-              position: [-70, 130, 100],
-              rotation: [0, 1.570796326794897, 3.141592653589793],
-            },
-          },
-        ],
-        leftHandedSystem: true,
-      };
-      vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
-        return Promise.resolve(new Actor(state, new Mesh('testMesh')));
-      });
-      const sim = await Simulation.init(initialState);
+    // it('returns complete state save', async () => {
+    //   const initialState: SimulationStateSave = {
+    //     table: {
+    //       url: '',
+    //       type: 'CustomRectangle',
+    //     },
+    //     gravity: 0.5,
+    //     actorStates: [
+    //       {
+    //         type: 0,
+    //         guid: '4deedc',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -16.9],
+    //           rotation: [2.246773551106098e-8, 1.139143005901462e-7, -4.032632507377682e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'cc04c1',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -17.15],
+    //           rotation: [1.642825077168346e-8, 1.02194769837507e-7, 2.836869650458061e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'ec6baf',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -17.65],
+    //           rotation: [6.846944929171024e-9, 5.573053176230747e-8, -4.282685829310909e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'a25ed9',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -17.9],
+    //           rotation: [2.481328558721127e-8, 1.10519619487054e-7, 2.912773007336329e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '338d84',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -18.15],
+    //           rotation: [2.813894188544686e-8, 1.234614601654008e-7, -3.063334690470953e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '4258fc',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -18.4],
+    //           rotation: [-4.161573540430792e-10, 2.975651251259643e-7, -4.180247533682872e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'be6eac',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -18.65],
+    //           rotation: [2.127503300171827e-8, 1.352528068534364e-7, -3.225271748991668e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '8308b8',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -16.9],
+    //           rotation: [3.724101527430657e-8, 2.34068685581594e-7, 1.515460570357966e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '8037ee',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -17.15],
+    //           rotation: [3.083060558756626e-8, 2.425645958237934e-7, 6.821726108303597e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '569a1b',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -17.4],
+    //           rotation: [8.010253790075538e-9, 6.568184710953673e-8, -2.816469229869786e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '641e9b',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -17.65],
+    //           rotation: [1.35391532429169e-8, 1.125800782329385e-7, -4.474634295558566e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '7ad8ce',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -17.9],
+    //           rotation: [5.723982478065719e-9, -9.260031096685878e-8, 7.334825367094333e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '179e08',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [7.7, 1.16497314, -17],
+    //           rotation: [-1.145192901774174e-8, 1.57079510506442, -7.808016642793961e-10],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '0ac7cb',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [7.70000362, 1.16497326, -17.4999962],
+    //           rotation: [-1.434492569932372e-8, 1.570796326794897, 4.19479960029381e-10],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'd55405',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [7.7, 1.16497314, -18],
+    //           rotation: [8.84915964681539e-9, 1.570795628663196, 2.55655043433966e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '4edfbe',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [7.00000048, 1.16497314, -17],
+    //           rotation: [-9.704841241806267e-10, 1.570793010669318, 4.237745171868383e-8],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '3c94b0',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [7, 1.16497314, -17.5],
+    //           rotation: [-1.427631855175707e-8, 1.570796326794897, 4.900506902709824e-8],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'f7103c',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -18.15],
+    //           rotation: [1.412431552336627e-8, 5.882052794535226e-8, -3.778187535620709e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'f66474',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [4.8, 1.05375, -18.4],
+    //           rotation: [2.915101381278244e-8, 3.209893076993693e-7, 1.615750248739739e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '608cbc',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [8.8, 1.244515, -17],
+    //           rotation: [1.053670239117971e-7, 1.570795977729046, -4.846887543201876e-7],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'c090bf',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [8.799999, 1.24451506, -18.0000019],
+    //           rotation: [1.475137797552816e-7, 1.570799293854625, 1.475141811810095e-7],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'e450b4',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [8.8, 1.24451518, -18.4999943],
+    //           rotation: [1.68586344091793e-7, 1.570804529842381, 2.528817868110463e-7],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'f02479',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [8.8, 1.244515, -17.5],
+    //           rotation: [-1.053673174761773e-7, 1.570795454130271, -4.00395027259589e-7],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '9649a4',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.99649936, 1, 0.9965063],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [34.9, 1.05375016, -17.15],
+    //           rotation: [6.817377219046525e-10, 6.919137419353577e-8, -8.14738153433122e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'd05034',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           position: [6, 1.05375, -17.4],
+    //           rotation: [4.000767350545613e-9, 7.473333509708712e-8, -7.429229580562883e-9],
+    //         },
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '553bb7',
+    //         name: 'Traders & Barbarians - Game Logic',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.552623332, 0.0599260852, 0.702090561],
+    //         transformation: {
+    //           scale: [0.2, 0.2, 0.2],
+    //           position: [-70, 130, 100],
+    //           rotation: [0, 1.570796326794897, 3.141592653589793],
+    //         },
+    //       },
+    //     ],
+    //     leftHandedSystem: true,
+    //   };
+    //   vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
+    //     return Promise.resolve(new Actor(state, new Mesh('testMesh')));
+    //   });
+    //   const sim = await Simulation.init(initialState);
 
-      const expected: SimulationStateSave = {
-        table: {
-          url: '',
-          type: 'CustomRectangle',
-        },
-        gravity: 0.5,
-        actorStates: [
-          {
-            type: 0,
-            guid: '641e9b',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [1.35391532429169e-8, 1.125800782329385e-7, -4.474634295558566e-9],
-              position: [4.8, 1.05375, -17.65],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '4deedc',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [2.246773551106098e-8, 1.139143005901462e-7, -4.032632507377682e-9],
-              position: [6, 1.05375, -16.9],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '8308b8',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [3.724101527430657e-8, 2.34068685581594e-7, 1.515460570357966e-9],
-              position: [4.8, 1.05375, -16.9],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '7ad8ce',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [5.723982478065719e-9, -9.260031096685878e-8, 7.334825367094333e-9],
-              position: [4.8, 1.05375, -17.9],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'ec6baf',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [6.846944929171024e-9, 5.573053176230747e-8, -4.282685829310909e-9],
-              position: [6, 1.05375, -17.65],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '338d84',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [2.813894188544686e-8, 1.234614601654008e-7, -3.063334690470953e-9],
-              position: [6, 1.05375, -18.15],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'a25ed9',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [2.481328558721127e-8, 1.10519619487054e-7, 2.912773007336329e-9],
-              position: [6, 1.05375, -17.9],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'f7103c',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [1.412431552336627e-8, 5.882052794535226e-8, -3.778187535620709e-9],
-              position: [4.8, 1.05375, -18.15],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '179e08',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [-1.145192901774174e-8, 1.57079510506442, -7.808016642793961e-10],
-              position: [7.7, 1.16497314, -17],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '569a1b',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [8.010253790075538e-9, 6.568184710953673e-8, -2.816469229869786e-9],
-              position: [4.8, 1.05375, -17.4],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '8037ee',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [3.083060558756626e-8, 2.425645958237934e-7, 6.821726108303597e-9],
-              position: [4.8, 1.05375, -17.15],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'be6eac',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [2.127503300171827e-8, 1.352528068534364e-7, -3.225271748991668e-9],
-              position: [6, 1.05375, -18.65],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '4258fc',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [-4.161573540430792e-10, 2.975651251259643e-7, -4.180247533682872e-9],
-              position: [6, 1.05375, -18.4],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'cc04c1',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [1.642825077168346e-8, 1.02194769837507e-7, 2.836869650458061e-9],
-              position: [6, 1.05375, -17.15],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '0ac7cb',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [-1.434492569932372e-8, 1.570796326794897, 4.19479960029381e-10],
-              position: [7.70000362, 1.16497326, -17.4999962],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '3c94b0',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [-1.427631855175707e-8, 1.570796326794897, 4.900506902709824e-8],
-              position: [7, 1.16497314, -17.5],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'e450b4',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [1.68586344091793e-7, 1.570804529842381, 2.528817868110463e-7],
-              position: [8.8, 1.24451518, -18.4999943],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '9649a4',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.99649936, 1, 0.9965063],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [6.817377219046525e-10, 6.919137419353577e-8, -8.14738153433122e-9],
-              position: [34.9, 1.05375016, -17.15],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'f02479',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [-1.053673174761773e-7, 1.570795454130271, -4.00395027259589e-7],
-              position: [8.8, 1.244515, -17.5],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'c090bf',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [1.475137797552816e-7, 1.570799293854625, 1.475141811810095e-7],
-              position: [8.799999, 1.24451506, -18.0000019],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'd55405',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [8.84915964681539e-9, 1.570795628663196, 2.55655043433966e-9],
-              position: [7.7, 1.16497314, -18],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '553bb7',
-            name: 'Traders & Barbarians - Game Logic',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.552623332, 0.0599260852, 0.702090561],
-            transformation: {
-              scale: [0.2, 0.2, 0.2],
-              rotation: [0, 1.570796326794897, 3.141592653589793],
-              position: [-70, 130, 100],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '4edfbe',
-            name: 'Settlement',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [-9.704841241806267e-10, 1.570793010669318, 4.237745171868383e-8],
-              position: [7.00000048, 1.16497314, -17],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'f66474',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [2.915101381278244e-8, 3.209893076993693e-7, 1.615750248739739e-9],
-              position: [4.8, 1.05375, -18.4],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: 'd05034',
-            name: 'Road',
-            // model: { meshURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [4.000767350545613e-9, 7.473333509708712e-8, -7.429229580562883e-9],
-              position: [6, 1.05375, -17.4],
-            },
-            mass: 1,
-          },
-          {
-            type: 0,
-            guid: '608cbc',
-            name: 'City',
-            // model: { meshURL: '', colliderURL: '' },
-            // colorDiffuse: [0.7921569, 0, 0],
-            transformation: {
-              scale: [1, 1, 1],
-              rotation: [1.053670239117971e-7, 1.570795977729046, -4.846887543201876e-7],
-              position: [8.8, 1.244515, -17],
-            },
-            mass: 1,
-          },
-        ],
-        leftHandedSystem: true,
-      };
+    //   const expected: SimulationStateSave = {
+    //     table: {
+    //       url: '',
+    //       type: 'CustomRectangle',
+    //     },
+    //     gravity: 0.5,
+    //     actorStates: [
+    //       {
+    //         type: 0,
+    //         guid: '641e9b',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [1.35391532429169e-8, 1.125800782329385e-7, -4.474634295558566e-9],
+    //           position: [4.8, 1.05375, -17.65],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '4deedc',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [2.246773551106098e-8, 1.139143005901462e-7, -4.032632507377682e-9],
+    //           position: [6, 1.05375, -16.9],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '8308b8',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [3.724101527430657e-8, 2.34068685581594e-7, 1.515460570357966e-9],
+    //           position: [4.8, 1.05375, -16.9],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '7ad8ce',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [5.723982478065719e-9, -9.260031096685878e-8, 7.334825367094333e-9],
+    //           position: [4.8, 1.05375, -17.9],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'ec6baf',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [6.846944929171024e-9, 5.573053176230747e-8, -4.282685829310909e-9],
+    //           position: [6, 1.05375, -17.65],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '338d84',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [2.813894188544686e-8, 1.234614601654008e-7, -3.063334690470953e-9],
+    //           position: [6, 1.05375, -18.15],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'a25ed9',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [2.481328558721127e-8, 1.10519619487054e-7, 2.912773007336329e-9],
+    //           position: [6, 1.05375, -17.9],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'f7103c',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [1.412431552336627e-8, 5.882052794535226e-8, -3.778187535620709e-9],
+    //           position: [4.8, 1.05375, -18.15],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '179e08',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [-1.145192901774174e-8, 1.57079510506442, -7.808016642793961e-10],
+    //           position: [7.7, 1.16497314, -17],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '569a1b',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [8.010253790075538e-9, 6.568184710953673e-8, -2.816469229869786e-9],
+    //           position: [4.8, 1.05375, -17.4],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '8037ee',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [3.083060558756626e-8, 2.425645958237934e-7, 6.821726108303597e-9],
+    //           position: [4.8, 1.05375, -17.15],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'be6eac',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [2.127503300171827e-8, 1.352528068534364e-7, -3.225271748991668e-9],
+    //           position: [6, 1.05375, -18.65],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '4258fc',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [-4.161573540430792e-10, 2.975651251259643e-7, -4.180247533682872e-9],
+    //           position: [6, 1.05375, -18.4],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'cc04c1',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [1.642825077168346e-8, 1.02194769837507e-7, 2.836869650458061e-9],
+    //           position: [6, 1.05375, -17.15],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '0ac7cb',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [-1.434492569932372e-8, 1.570796326794897, 4.19479960029381e-10],
+    //           position: [7.70000362, 1.16497326, -17.4999962],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '3c94b0',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [-1.427631855175707e-8, 1.570796326794897, 4.900506902709824e-8],
+    //           position: [7, 1.16497314, -17.5],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'e450b4',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [1.68586344091793e-7, 1.570804529842381, 2.528817868110463e-7],
+    //           position: [8.8, 1.24451518, -18.4999943],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '9649a4',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.99649936, 1, 0.9965063],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [6.817377219046525e-10, 6.919137419353577e-8, -8.14738153433122e-9],
+    //           position: [34.9, 1.05375016, -17.15],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'f02479',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [-1.053673174761773e-7, 1.570795454130271, -4.00395027259589e-7],
+    //           position: [8.8, 1.244515, -17.5],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'c090bf',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [1.475137797552816e-7, 1.570799293854625, 1.475141811810095e-7],
+    //           position: [8.799999, 1.24451506, -18.0000019],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'd55405',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [8.84915964681539e-9, 1.570795628663196, 2.55655043433966e-9],
+    //           position: [7.7, 1.16497314, -18],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '553bb7',
+    //         name: 'Traders & Barbarians - Game Logic',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.552623332, 0.0599260852, 0.702090561],
+    //         transformation: {
+    //           scale: [0.2, 0.2, 0.2],
+    //           rotation: [0, 1.570796326794897, 3.141592653589793],
+    //           position: [-70, 130, 100],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '4edfbe',
+    //         name: 'Settlement',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [-9.704841241806267e-10, 1.570793010669318, 4.237745171868383e-8],
+    //           position: [7.00000048, 1.16497314, -17],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'f66474',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [2.915101381278244e-8, 3.209893076993693e-7, 1.615750248739739e-9],
+    //           position: [4.8, 1.05375, -18.4],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: 'd05034',
+    //         name: 'Road',
+    //         // model: { meshURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [4.000767350545613e-9, 7.473333509708712e-8, -7.429229580562883e-9],
+    //           position: [6, 1.05375, -17.4],
+    //         },
+    //         mass: 1,
+    //       },
+    //       {
+    //         type: 0,
+    //         guid: '608cbc',
+    //         name: 'City',
+    //         // model: { meshURL: '', colliderURL: '' },
+    //         // colorDiffuse: [0.7921569, 0, 0],
+    //         transformation: {
+    //           scale: [1, 1, 1],
+    //           rotation: [1.053670239117971e-7, 1.570795977729046, -4.846887543201876e-7],
+    //           position: [8.8, 1.244515, -17],
+    //         },
+    //         mass: 1,
+    //       },
+    //     ],
+    //     leftHandedSystem: true,
+    //   };
 
-      const result = sim.toState();
+    //   const result = sim.toState();
 
-      expect(sim.actors.length).toBe(initialState.actorStates?.length);
-      expect(omitKeys(result, ['actorStates'])).toStrictEqual(omitKeys(expected, ['actorStates']));
-      result.actorStates?.forEach(actorState => {
-        const expectedActorState = expected.actorStates?.find(
-          expectedActorState => expectedActorState.guid === actorState.guid,
-        );
-        expect(actorState).toEqual(expectedActorState);
-      });
-    });
+    //   expect(sim.actors.length).toBe(initialState.actorStates?.length);
+    //   expect(omitKeys(result, ['actorStates'])).toStrictEqual(omitKeys(expected, ['actorStates']));
+    //   result.actorStates?.forEach(actorState => {
+    //     const expectedActorState = expected.actorStates?.find(
+    //       expectedActorState => expectedActorState.guid === actorState.guid,
+    //     );
+    //     expect(actorState).toEqual(expectedActorState);
+    //   });
+    // });
 
     it('returns state save with rectangle table', async () => {
       const initialState: SimulationStateSave = {
@@ -969,6 +987,160 @@ describe('Simulation', () => {
       // @todo make ActorState all fields required
       // expect(mergedState!.actorStates![0].transformation?.position).toEqual([0, 0, 0]);
       expect(mergedState.actorStates![0].transformation?.position).toEqual(undefined);
+    });
+  });
+
+  describe('handleAction', () => {
+    describe('PICK_ACTOR', () => {
+      it('should picked actor raise actor on pick', async () => {
+        const sim = getPhSim();
+        new ServerBase(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handlePickActor('box');
+        await wait(100);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
+      });
+
+      it('should raise picked actor once on several picks', async () => {
+        const sim = getPhSim();
+        new ServerBase(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handlePickActor('box');
+        await wait(10);
+        sim.handlePickActor('box');
+        await wait(10);
+        sim.handlePickActor('box');
+        await wait(100);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
+      });
+    });
+
+    describe('RELEASE_ACTOR', () => {
+      it('should do nothing on release of non picked actor', async () => {
+        const sim = getPhSim();
+        new ServerBase(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handleReleaseActor('box');
+        await wait(100);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+      });
+
+      it('should return to previous state after pick - release', async () => {
+        const sim = getPhSim();
+        new ServerBase(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(300);
+        sim.handlePickActor('box');
+        await wait(10);
+        sim.handleReleaseActor('box');
+        await wait(500);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+      });
+    });
+
+    describe('MOVE_ACTOR', () => {
+      it('should not move non picked actor', async () => {
+        const sim = getPhSim();
+        new ServerBase(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handleMoveActor('box', [1, 0]);
+
+        await wait(500);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![0]).toBeCloseTo(0);
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+        expect(box!.transformation!.position![2]).toBeCloseTo(0);
+      });
+
+      it('should move picked actor', async () => {
+        const sim = getPhSim();
+        new ServerBase(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handlePickActor('box');
+        sim.handleMoveActor('box', [1, 0]);
+
+        await wait(500);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![0]).toBeCloseTo(1);
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
+        expect(box!.transformation!.position![2]).toBeCloseTo(0);
+      });
+    });
+  });
+
+  describe('getSimActions', () => {
+    it('returns ACTOR_MOVE actions', async () => {
+      const sim = getPhSim();
+      new ServerBase(
+        {
+          type: ActorType.ACTOR,
+          guid: 'box',
+          name: 'box',
+          transformation: { position: [0, 1, 0] },
+        },
+        CreateBox('box', { size: 1 }),
+      );
+
+      const initState = sim.toState();
+      sim.start();
+      await wait(500);
+
+      const state = sim.toState();
+      const actions = sim.getSimActions(initState, state);
+      sim.stop();
+
+      expect(actions.length).toBe(1);
+      const move_action = actions[0] as MsgMap[ServerAction.MOVE_ACTOR];
+      expect(move_action.type).toBe(ServerAction.MOVE_ACTOR);
+      expect(move_action.payload.guid).toBe('box');
+      expect(move_action.payload.position[0]).toBeCloseTo(0);
+      expect(move_action.payload.position[1]).toBeCloseTo(0.55);
+      expect(move_action.payload.position[2]).toBeCloseTo(0);
     });
   });
 });

@@ -1,5 +1,5 @@
 import { Logger } from '@nestjs/common';
-import { WS } from '@shared/ws';
+import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type WebSocket from 'ws';
 
 const logger = new Logger('Client');
@@ -21,7 +21,7 @@ export class Client {
 
     WS.send(ws, [
       {
-        type: WS.SimActionType.CLIENT_ID,
+        type: ServerAction.CLIENT_ID,
         payload: id,
       },
     ]);
@@ -33,7 +33,7 @@ export class Client {
         const message = WS.read(event);
 
         const action = message[0];
-        if (action.type === WS.SimActionType.NICKNAME) {
+        if (action.type === ClientAction.NICKNAME) {
           const client = new Client(id, action.payload);
 
           ws.removeEventListener('message', handler);

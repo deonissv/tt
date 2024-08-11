@@ -1,2 +1,3 @@
 export { SimulationBase } from './SimulationBase';
-export * from './SimulationEngine';
+export { EngineFactory } from './SimulationEngine';
+export { SimulationSceneBase } from './SimulationSceneBase';

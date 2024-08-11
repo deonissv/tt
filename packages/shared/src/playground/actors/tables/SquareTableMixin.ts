@@ -19,7 +19,7 @@ const SQUARE_TABLE_MODEL = {
 // export const SquareTableMixin = (Base: Constructor<SharedActor>) => {
 export const SquareTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class SquareTable extends Base {
-    static async fromState(): Promise<SquareTable | null> {
+    static async fromState<T extends SquareTable>(this: Constructor<T>): Promise<T | null> {
       const [model, _] = await Loader.loadModel(SQUARE_TABLE_MODEL);
 
       if (!model) {
@@ -31,7 +31,7 @@ export const SquareTableMixin = <T extends Constructor<SharedBase>>(Base: T) => 
       model.position.y = -wrapperHeight;
       (model.material as StandardMaterial).diffuseColor = new Color3(0.5, 0, 0);
 
-      const table = new SquareTable(
+      const table = new this(
         {
           guid: '#SquareTable',
           name: '#SquareTable',

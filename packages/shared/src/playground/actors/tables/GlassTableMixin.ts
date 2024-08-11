@@ -6,9 +6,9 @@ import type { Constructor } from '@shared/types';
 import { Loader } from '../../Loader';
 import type { SharedBase } from '../SharedBase';
 
-export const GlassTableMixin = (Base: Constructor<SharedBase>) => {
+export const GlassTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
   return class GlassTable extends Base {
-    static async fromState(): Promise<GlassTable | null> {
+    static async fromState<T extends GlassTable>(this: Constructor<T>): Promise<T | null> {
       const [metal, _mCollider] = await Loader.loadModel({
         meshURL: `${STATIC_HOST}/glass_table_metal.obj`,
         diffuseURL: `${STATIC_HOST}/metal_diff.png`,
@@ -51,7 +51,7 @@ export const GlassTableMixin = (Base: Constructor<SharedBase>) => {
       wrapper.rotation.x = Math.PI / 2;
       wrapper.scaling = new Vector3(38, 38, 38);
 
-      const table = new GlassTable(
+      const table = new this(
         {
           guid: '#CustomSquareTable',
           name: '#CustomSquareTable',
