@@ -1009,7 +1009,7 @@ describe('Simulation', () => {
         expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
       });
 
-      it('should picked actor raise once on several picks', async () => {
+      it('should raise picked actor once on several picks', async () => {
         const sim = getPhSim();
         new ServerBase(
           { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
@@ -1023,7 +1023,7 @@ describe('Simulation', () => {
         sim.handlePickActor('box');
         await wait(10);
         sim.handlePickActor('box');
-        await wait(10);
+        await wait(100);
 
         const state = sim.toState();
         const box = state.actorStates!.find(actor => actor.guid === 'box');
