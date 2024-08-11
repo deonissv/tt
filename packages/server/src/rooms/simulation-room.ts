@@ -218,8 +218,11 @@ export class SimulationRoom {
 
     if (JSON.stringify(simState) === JSON.stringify(this.prevSimState)) return null;
 
-    const simUpdate = this.simulation.toStateUpdate(this.prevSimState);
-    const actions = this.simulation.getSimActions(simUpdate);
+    if (!this.prevSimState) {
+      this.prevSimState = simState;
+      return null;
+    }
+    const actions = this.simulation.getSimActions(this.prevSimState, simState);
     this.prevSimState = simState;
 
     if (actions.length === 0) return null;

@@ -51,7 +51,7 @@ describe('Simulation', () => {
       sim.handleMoveActor('box', [1, 2, 3]);
 
       const state = actor.toState();
-      expect(state.transformation.position).toEqual([1, 3, 3]);
+      expect(state.transformation.position).toEqual([1, 2, 3]);
     });
   });
 });

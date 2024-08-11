@@ -1130,8 +1130,8 @@ describe('Simulation', () => {
       sim.start();
       await wait(500);
 
-      const delta = sim.toStateDelta(initState);
-      const actions = sim.getSimActions(delta);
+      const state = sim.toState();
+      const actions = sim.getSimActions(initState, state);
       sim.stop();
 
       expect(actions.length).toBe(1);
@@ -1139,7 +1139,7 @@ describe('Simulation', () => {
       expect(move_action.type).toBe(ServerAction.MOVE_ACTOR);
       expect(move_action.payload.guid).toBe('box');
       expect(move_action.payload.position[0]).toBeCloseTo(0);
-      expect(move_action.payload.position[1]).toBeCloseTo(-0.449);
+      expect(move_action.payload.position[1]).toBeCloseTo(0.55);
       expect(move_action.payload.position[2]).toBeCloseTo(0);
     });
   });

@@ -16,13 +16,11 @@ import type {
   Die4State,
   Die6State,
   Die8State,
-  SimulationStateUpdate,
   TableState,
   TileState,
 } from '@shared/dto/states';
 import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { isTuple } from '@shared/guards';
 import { SimulationBase } from '@shared/playground';
 import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
 import type { WS } from '@shared/ws';
@@ -210,15 +208,27 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  getSimActions(simStateUpdate: SimulationStateUpdate): ServerActionMsg[] {
+  getSimActions(prevState: SimulationStateSave, state: SimulationStateSave): ServerActionMsg[] {
     const actions: WS.ServerActionMsg[] = [];
 
-    simStateUpdate.actorStates?.forEach(actorState => {
-      if (actorState.transformation?.position && isTuple(actorState.transformation.position, 3))
+    this.actors.forEach(actor => {
+      const actorState = state.actorStates?.find(actorState => actorState.guid === actor.guid);
+      const prevActorState = prevState.actorStates?.find(actorState => actorState.guid === actor.guid);
+      if (!actorState) {
+        // handle remove actor
+        return;
+      }
+      if (!prevActorState) {
+        // handle add actor
+        return;
+      }
+      const positionUpdate = actor.getPositionUpdate(prevActorState, actorState);
+      if (positionUpdate) {
         actions.push({
           type: ServerAction.MOVE_ACTOR,
-          payload: { guid: actorState.guid, position: actorState.transformation.position },
+          payload: { guid: actor.guid, position: positionUpdate },
         });
+      }
     });
 
     return actions;

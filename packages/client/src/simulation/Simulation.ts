@@ -28,15 +28,15 @@ import type {
 } from '@shared/dto/states';
 import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { EngineFactory, Logger, SharedBase, SimulationBase } from '@shared/playground';
+import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { ClientBase } from './actors';
 import {
   Actor,
   Bag,
   Card,
   CircleTable,
+  ClientBase,
   CustomRectangleTable,
   CustomSquareTable,
   Deck,
@@ -126,13 +126,13 @@ export class Simulation extends SimulationBase {
   static override async actorFromState(actorState: ActorBaseState): Promise<ClientBase | null> {
     switch (actorState.type) {
       case ActorType.TILE:
-        return await Tile.fromState(actorState as TileState);
+        return await Tile.fromState<Tile>(actorState as TileState);
       case ActorType.TILE_STACK:
         return await TileStack.fromState(actorState as TileStackState);
       case ActorType.BAG:
-        return await Bag.fromState(actorState as BagState);
+        return await Bag.fromState<Bag>(actorState as BagState);
       case ActorType.CARD:
-        return await Card.fromState(actorState as CardState);
+        return await Card.fromState<Card>(actorState as CardState);
       case ActorType.DECK:
         return await Deck.fromState(actorState as DeckState);
       case ActorType.ACTOR:
@@ -157,23 +157,23 @@ export class Simulation extends SimulationBase {
   static override async tableFromState(tableState: TableState): Promise<ClientBase | null> {
     switch (tableState.type) {
       case 'Hexagon':
-        return await HexTable.fromState();
+        return await HexTable.fromState<HexTable>();
       case 'Circle':
-        return await CircleTable.fromState();
+        return await CircleTable.fromState<CircleTable>();
       case 'CircleGlass':
-        return await GlassTable.fromState();
+        return await GlassTable.fromState<GlassTable>();
       case 'Square':
-        return await SquareTable.fromState();
+        return await SquareTable.fromState<SquareTable>();
       case 'CustomRectangle':
-        return await CustomRectangleTable.fromState(tableState);
+        return await CustomRectangleTable.fromState<CustomRectangleTable>(tableState);
       case 'Octagon':
-        return await OctagonTable.fromState();
+        return await OctagonTable.fromState<OctagonTable>();
       case 'CustomSquare':
-        return await CustomSquareTable.fromState(tableState);
+        return await CustomSquareTable.fromState<CustomSquareTable>(tableState);
       case 'Rectangle':
-        return await RectangleTable.fromState();
+        return await RectangleTable.fromState<RectangleTable>();
       case 'Poker':
-        return await PokerTable.fromState();
+        return await PokerTable.fromState<PokerTable>();
       case null:
         return null;
     }
@@ -186,7 +186,7 @@ export class Simulation extends SimulationBase {
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
     const actorCandidate = pickedMesh?.parent;
-    if (!(actorCandidate instanceof SharedBase)) return null;
+    if (!(actorCandidate instanceof ClientBase)) return null;
 
     return actorCandidate.pickable ? actorCandidate : null;
   }
@@ -292,7 +292,7 @@ export class Simulation extends SimulationBase {
   handleMoveActor(guid: string, position: Tuple<number, 3>) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor) {
-      actor.move(...position);
+      (actor as ClientBase).move(...position);
     }
   }
 }
