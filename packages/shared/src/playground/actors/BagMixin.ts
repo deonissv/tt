@@ -1,5 +1,6 @@
 import { STATIC_HOST } from '@shared/constants';
-import type { ActorBaseState, BagState, Model } from '@shared/dto/states';
+import type { BagState, Model } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type { Constructor } from '@shared/types';
 import type { Containable } from '../actions/Containable';
 import { Loader } from '../Loader';
@@ -15,7 +16,7 @@ const BAG_MODEL: Model = {
 
 export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) => {
   return class Bag extends Base implements Containable {
-    items: ActorBaseState[];
+    items: UnknownActorState[];
 
     get size() {
       return this.items.length;

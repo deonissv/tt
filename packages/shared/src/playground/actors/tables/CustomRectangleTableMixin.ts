@@ -45,7 +45,7 @@ export const CustomRectangleTableMixin = <T extends Constructor<SharedBase>>(Bas
         {
           guid: '#CustomRectangleTable',
           name: '#CustomRectangleTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

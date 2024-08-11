@@ -13,14 +13,14 @@ export interface DieBaseState extends ActorBaseState {
 
 export type DieType = 4 | 6 | 8 | 10 | 12 | 20;
 
-export const DieMapper: Record<DieType, ActorType> = {
+export const DieMapper = {
   4: ActorType.DIE4,
   6: ActorType.DIE6,
   8: ActorType.DIE8,
   10: ActorType.DIE10,
   12: ActorType.DIE12,
   20: ActorType.DIE20,
-};
+} as const satisfies Record<DieType, ActorType>;
 
 type DieMapperT = typeof DieMapper;
 export const ActorMapper: Record<DieMapperT[keyof DieMapperT], keyof DieMapperT> = Object.entries(DieMapper).reduce(

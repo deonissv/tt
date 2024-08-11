@@ -39,7 +39,7 @@ export const HexTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
         {
           guid: '#HexTable',
           name: '#HexTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

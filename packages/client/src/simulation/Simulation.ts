@@ -11,50 +11,13 @@ import { Matrix, Vector3 } from '@babylonjs/core';
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
-import type {
-  ActorBaseState,
-  ActorState,
-  BagState,
-  CardState,
-  DeckState,
-  Die10State,
-  Die12State,
-  Die20State,
-  Die4State,
-  Die6State,
-  Die8State,
-  TableState,
-  TileState,
-} from '@shared/dto/states';
-import { ActorType, type SimulationStateSave } from '@shared/dto/states';
-import type { TileStackState } from '@shared/dto/states/actor/Stack';
+import { type SimulationStateSave } from '@shared/dto/states';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import {
-  Actor,
-  Bag,
-  Card,
-  CircleTable,
-  ClientBase,
-  CustomRectangleTable,
-  CustomSquareTable,
-  Deck,
-  Die10,
-  Die12,
-  Die20,
-  Die4,
-  Die6,
-  Die8,
-  GlassTable,
-  HexTable,
-  OctagonTable,
-  PokerTable,
-  RectangleTable,
-  SquareTable,
-  Tile,
-  TileStack,
-} from './actors';
+import type { Deck } from './actors';
+import { ClientBase } from './actors';
+import { ClientActorBuilder } from './ClientActorBuilder';
 
 export interface SimulationCallbacks {
   onPickItem: (deck: Deck) => void;
@@ -64,6 +27,8 @@ export interface SimulationCallbacks {
 }
 
 export class Simulation extends SimulationBase {
+  static actorBuilder = ClientActorBuilder;
+
   private _hll: HighlightLayer;
   private _hoveredMesh: Mesh | null = null;
   private _pickedActor: ClientBase | null = null;
@@ -88,13 +53,13 @@ export class Simulation extends SimulationBase {
     const sim = new Simulation(scene, cbs);
 
     if (stateSave.table) {
-      await Simulation.tableFromState(stateSave.table);
+      await this.tableFromState(stateSave.table);
     }
 
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
         try {
-          const actor = await Simulation.actorFromState(actorState);
+          const actor = await this.actorFromState(actorState);
           if (actor) {
             return actor;
           } else {
@@ -121,62 +86,6 @@ export class Simulation extends SimulationBase {
     // pg._bindAction(SCALE_UP_KEYS, Actor.prototype.scaleUp);
     // pg._bindAction(SCALE_DOWN_KEYS, Actor.prototype.scaleDown);
     return sim;
-  }
-
-  static override async actorFromState(actorState: ActorBaseState): Promise<ClientBase | null> {
-    switch (actorState.type) {
-      case ActorType.TILE:
-        return await Tile.fromState<Tile>(actorState as TileState);
-      case ActorType.TILE_STACK:
-        return await TileStack.fromState(actorState as TileStackState);
-      case ActorType.BAG:
-        return await Bag.fromState<Bag>(actorState as BagState);
-      case ActorType.CARD:
-        return await Card.fromState<Card>(actorState as CardState);
-      case ActorType.DECK:
-        return await Deck.fromState(actorState as DeckState);
-      case ActorType.ACTOR:
-        return await Actor.fromState(actorState as ActorState);
-      case ActorType.DIE4:
-        return await Die4.fromState(actorState as Die4State);
-      case ActorType.DIE6:
-        return await Die6.fromState(actorState as Die6State);
-      case ActorType.DIE8:
-        return await Die8.fromState(actorState as Die8State);
-      case ActorType.DIE10:
-        return await Die10.fromState(actorState as Die10State);
-      case ActorType.DIE12:
-        return await Die12.fromState(actorState as Die12State);
-      case ActorType.DIE20:
-        return await Die20.fromState(actorState as Die20State);
-      case ActorType.TABLE:
-        return null;
-    }
-  }
-
-  static override async tableFromState(tableState: TableState): Promise<ClientBase | null> {
-    switch (tableState.type) {
-      case 'Hexagon':
-        return await HexTable.fromState<HexTable>();
-      case 'Circle':
-        return await CircleTable.fromState<CircleTable>();
-      case 'CircleGlass':
-        return await GlassTable.fromState<GlassTable>();
-      case 'Square':
-        return await SquareTable.fromState<SquareTable>();
-      case 'CustomRectangle':
-        return await CustomRectangleTable.fromState<CustomRectangleTable>(tableState);
-      case 'Octagon':
-        return await OctagonTable.fromState<OctagonTable>();
-      case 'CustomSquare':
-        return await CustomSquareTable.fromState<CustomSquareTable>(tableState);
-      case 'Rectangle':
-        return await RectangleTable.fromState<RectangleTable>();
-      case 'Poker':
-        return await PokerTable.fromState<PokerTable>();
-      case null:
-        return null;
-    }
   }
 
   private _pickMesh(): Mesh | null {

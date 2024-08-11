@@ -37,7 +37,7 @@ export const PokerTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
         {
           guid: '#PokerTable',
           name: '#PokerTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

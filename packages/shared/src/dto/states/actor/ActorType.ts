@@ -3,7 +3,6 @@ export const enum ActorType {
   BAG,
   CARD,
   DECK,
-  TABLE,
   TILE,
   DIE4,
   DIE6,

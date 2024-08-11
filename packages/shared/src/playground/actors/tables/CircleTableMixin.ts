@@ -37,7 +37,7 @@ export const CircleTableMixin = <T extends Constructor<SharedBase>>(Base: T) => 
         {
           guid: '#CircleTable',
           name: '#CircleTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

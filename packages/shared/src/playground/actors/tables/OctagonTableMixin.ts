@@ -41,7 +41,7 @@ export const OctagonTableMixin = <T extends Constructor<SharedBase>>(Base: T) =>
         {
           guid: '#OctagonTable',
           name: '#OctagonTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

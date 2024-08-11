@@ -55,7 +55,7 @@ export const GlassTableMixin = <T extends Constructor<SharedBase>>(Base: T) => {
         {
           guid: '#CustomSquareTable',
           name: '#CustomSquareTable',
-          type: ActorType.TABLE,
+          type: ActorType.ACTOR,
         },
         wrapper,
       );

@@ -3,6 +3,7 @@ import { TTSParserC } from '@client/src/TTSParser';
 import type { BagState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
+import type { DeepPartial } from '@shared/types';
 
 describe('TTSParser - parseBag', () => {
   let parser: TTSParserC;
@@ -12,7 +13,7 @@ describe('TTSParser - parseBag', () => {
   });
 
   it('should correctly parse demo bag', () => {
-    const expected: BagState = {
+    const expected: DeepPartial<BagState> = {
       guid: '7a0b0b',
       name: 'Bag',
       type: ActorType.BAG,
@@ -35,7 +36,7 @@ describe('TTSParser - parseBag', () => {
   });
 
   it('should correctly parse custom bag', () => {
-    const expected: BagState = {
+    const expected: DeepPartial<BagState> = {
       guid: '0d3e33',
       name: 'Custom_Model_Bag',
       type: ActorType.BAG,

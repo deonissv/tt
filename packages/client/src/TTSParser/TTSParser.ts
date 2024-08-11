@@ -24,6 +24,7 @@ import {
   type TileState,
   type TileType,
 } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type { CustomImage } from '@shared/dto/states/actor/FlatActorState';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import { hasProperty, isObject, isTuple } from '@shared/guards';
@@ -71,7 +72,7 @@ export class TTSParserC extends ParserBase {
     }
   }
 
-  parseObject = (objectState: unknown): ActorBaseState | null => {
+  parseObject = (objectState: unknown): UnknownActorState | null => {
     if (!this.isObject(objectState, 'ERROR 4')) return null;
     if (!this.hasProperty(objectState, 'GUID', 'ERROR 5')) return null;
     if (!this.isPropertyString(objectState, 'GUID', 'ERROR 6')) return null;
@@ -83,13 +84,13 @@ export class TTSParserC extends ParserBase {
     const type = this.mapType(objectState.Name);
     this.assert(type !== null, `Failed to parse object type ${this.guid}`);
 
-    const parsedObject = this.parseMinimalObject(objectState);
+    const parsedObject = this.parseUnknownActorState(objectState);
 
     this.guids.pop();
     return parsedObject;
   };
 
-  parseMinimalObject(objectState: MinimalObjectState): ActorBaseState | null {
+  parseUnknownActorState(objectState: MinimalObjectState): UnknownActorState | null {
     const type = this.mapType(objectState.Name);
     if (type === null) {
       this.errors.push(objectState.GUID);
