@@ -9,22 +9,12 @@ import type { RoomsService } from './rooms.service';
 import { URL_PREFIX } from '@shared/constants';
 import type { SimulationStateSave } from '@shared/dto/states';
 import { isObject, isString } from '@shared/guards';
+import type { RecursiveType } from '@shared/types';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
 import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
-
-type Primitive = string | number | boolean | null | undefined;
-
-// eslint-disable-next-line @typescript-eslint/consistent-indexed-object-style
-interface RecursiveObject {
-  [key: string]: RecursiveType;
-}
-
-type RecursiveArray = RecursiveType[];
-
-type RecursiveType = Primitive | RecursiveObject | RecursiveArray;
 
 export class SimulationRoom {
   id: string;
