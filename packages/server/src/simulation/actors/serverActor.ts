@@ -22,13 +22,14 @@ export class ServerActor<T extends ActorBaseState = ActorBaseState> extends Shar
 
     const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, false, this._scene);
     body.shape = new PhysicsShapeMesh(this.__model, this._scene);
+    body.shape.material.restitution = 0;
 
     this.body = body;
     this.body.setMassProperties({
       mass: this.__mass,
       // centerOfMass: Vector3.Zero(),
-      // inertia: Vector3.Zero(),
-      inertia: Vector3.One(),
+      inertia: Vector3.Zero(),
+      // inertia: Vector3.One(),
       inertiaOrientation: Quaternion.Identity(),
     });
 

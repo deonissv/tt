@@ -20,7 +20,7 @@ function getPhSim() {
   sim.initPhysics();
 
   const ground = new ServerActor(
-    { type: ActorType.ACTOR, guid: 'ground', name: 'ground' },
+    { type: ActorType.ACTOR, guid: '#ground', name: '#ground' },
     CreateBox('ground', { width: 200, height: 0.1, depth: 200 }),
   );
   ground.physicsBody?.setMotionType(PhysicsMotionType.ANIMATED);
@@ -991,6 +991,84 @@ describe('Simulation', () => {
   });
 
   describe('handleAction', () => {
+    describe('PICK_ACTOR', () => {
+      it('should picked actor raise actor on pick', async () => {
+        const sim = getPhSim();
+        new ServerActor(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handlePickActor('box');
+        await wait(100);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
+      });
+
+      it('should picked actor raise once on several picks', async () => {
+        const sim = getPhSim();
+        new ServerActor(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handlePickActor('box');
+        await wait(10);
+        sim.handlePickActor('box');
+        await wait(10);
+        sim.handlePickActor('box');
+        await wait(10);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55 + PICK_HIGHT);
+      });
+    });
+
+    describe('RELEASE_ACTOR', () => {
+      it('should do nothing on release of non picked actor', async () => {
+        const sim = getPhSim();
+        new ServerActor(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(100);
+        sim.handleReleaseActor('box');
+        await wait(100);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+      });
+
+      it('should return to previous state after pick - release', async () => {
+        const sim = getPhSim();
+        new ServerActor(
+          { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 0.6, 0] } },
+          CreateBox('box', { size: 1 }),
+        );
+        sim.start();
+
+        await wait(300);
+        sim.handlePickActor('box');
+        await wait(10);
+        sim.handleReleaseActor('box');
+        await wait(500);
+
+        const state = sim.toState();
+        const box = state.actorStates!.find(actor => actor.guid === 'box');
+        expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+      });
+    });
+
     describe('MOVE_ACTOR', () => {
       it('should not move non picked actor', async () => {
         const sim = getPhSim();
