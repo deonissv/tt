@@ -192,7 +192,7 @@ export class SimulationRoom {
     if (simActions) actions.push(...simActions);
 
     if (actions.length > 0) {
-      SimulationRoom.logger.debug(`Broadcasting actions: ${JSON.stringify(actions)}`);
+      SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify(actions)}`);
       this.broadcast(actions);
     }
   }
