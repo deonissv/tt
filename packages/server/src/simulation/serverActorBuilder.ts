@@ -88,7 +88,7 @@ export class ServerActorBuilderFactory extends ActorBuilder {
       case 'CustomSquare':
         return await CustomSquareTable.fromState<CustomSquareTable>(tableState);
       case 'Rectangle':
-        return await RectangleTable.fromState<RectangleTable>();
+        return await RectangleTable.fromState();
       case 'Poker':
         return await PokerTable.fromState<PokerTable>();
     }

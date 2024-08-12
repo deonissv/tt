@@ -12,7 +12,7 @@ export const woodMaterialProps: Material = {
   specularURL: `${STATIC_HOST}/wood_spec.png`,
 };
 
-export const RECTANGLE_TABLE = {
+export const CUSTOM_RECTANGLE_TABLE = {
   scaling: [79, 79, 79],
   frame: {
     meshURL: `${STATIC_HOST}/GreenFelt_Table.obj`,
@@ -22,5 +22,20 @@ export const RECTANGLE_TABLE = {
   },
   grid: {
     meshURL: `${STATIC_HOST}/GreenFelt_Table_Grid.obj`,
+  },
+};
+
+export const RECTANGLE_TABLE = {
+  scaling: [1.01, 1.01, 1.01],
+  frame: {
+    meshURL: `${STATIC_HOST}/rpg_table_wood2057.obj`,
+    ...woodMaterialProps,
+  },
+  felt: {
+    meshURL: `${STATIC_HOST}/rpg_table_felt.obj`,
+    ...feltMaterialProps,
+  },
+  handles: {
+    meshURL: `${STATIC_HOST}/rpg_table_handles.obj`,
   },
 };

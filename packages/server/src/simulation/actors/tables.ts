@@ -1,7 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh, type Tuple } from '@babylonjs/core';
-import { RECTANGLE_TABLE } from '@shared/assets';
+import { CUSTOM_RECTANGLE_TABLE, RECTANGLE_TABLE } from '@shared/assets';
 import { STATIC_HOST } from '@shared/constants';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
@@ -29,7 +29,7 @@ export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {}
 
 export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerBase) {
   static async fromState(_tableState: TableState): Promise<CustomRectangleTable | null> {
-    const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
+    const tableFrame = await Loader.loadMesh(CUSTOM_RECTANGLE_TABLE.frame.meshURL);
     if (!tableFrame) return null;
 
     const plane = CreatePlane('plane', { width: 1.108891, height: 0.66187126 });
@@ -47,7 +47,7 @@ export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(S
         transformation: {
           position: [0, -23.2, 0],
           rotation: [0, 0, 0],
-          scale: RECTANGLE_TABLE.scaling,
+          scale: CUSTOM_RECTANGLE_TABLE.scaling,
         },
       },
       collider,
@@ -88,5 +88,34 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
   }
 }
 export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {}
-export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {}
+
+export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<RectangleTable | null> {
+    const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
+    const felt = await Loader.loadMesh(RECTANGLE_TABLE.felt.meshURL);
+
+    if (!tableFrame || !felt) return null;
+    const wrapper = Mesh.MergeMeshes([tableFrame, felt], true, false, undefined, false, true)!;
+
+    const table = new this(
+      {
+        guid: '#RectangleTable',
+        name: '#RectangleTable',
+        type: ActorType.ACTOR,
+        transformation: {
+          position: [0, -1.4, 0],
+          rotation: [(3 * Math.PI) / 2, 0, 0],
+          scale: RECTANGLE_TABLE.scaling,
+        },
+      },
+      wrapper,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+
+    return table;
+  }
+}
+
 export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {}
