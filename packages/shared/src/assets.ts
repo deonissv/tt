@@ -54,3 +54,19 @@ export const POKER_TABLE = {
     normalURL: `${STATIC_HOST}/table_poker_legs_nrm.png`,
   },
 };
+
+export const OCTAGON_TABLE = {
+  leg: {
+    meshURL: `${STATIC_HOST}/Legs.obj`,
+    diffuseURL: `${STATIC_HOST}/wood_diff.png`,
+    specularURL: `${STATIC_HOST}/wood_spec.png`,
+  },
+  top: {
+    meshURL: `${STATIC_HOST}/OctagonTable_wood1992.obj`,
+    diffuseURL: `${STATIC_HOST}/wood_diff.png`,
+    specularURL: `${STATIC_HOST}/wood_spec.png`,
+    // diffuseURL: `${STATIC_HOST}/OctagonTable_diff.png`,
+    // normalURL: `${STATIC_HOST}/OctagonTable_nrm.png`,
+    // specularURL: `${STATIC_HOST}/OctagonTable_spec.png`,
+  },
+};

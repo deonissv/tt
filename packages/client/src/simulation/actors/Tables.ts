@@ -1,7 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
-import { CUSTOM_RECTANGLE_TABLE, feltMaterialProps, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
+import { CUSTOM_RECTANGLE_TABLE, feltMaterialProps, OCTAGON_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
@@ -15,6 +15,7 @@ import {
   RectangleTableMixin,
   SquareTableMixin,
 } from '@shared/playground';
+import { degToRad } from '@shared/utils';
 import { ClientBase } from './ClientBase';
 
 export class HexTable extends HexTableMixin(ClientBase) {}
@@ -56,7 +57,39 @@ export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) 
     return table;
   }
 }
-export class OctagonTable extends OctagonTableMixin(ClientBase) {}
+export class OctagonTable extends OctagonTableMixin(ClientBase) {
+  static async fromState(): Promise<OctagonTable | null> {
+    const [leg, _] = await Loader.loadModel(OCTAGON_TABLE.leg);
+    const [top, __] = await Loader.loadModel(OCTAGON_TABLE.top);
+
+    if (!top || !leg) return null;
+    [leg, top].forEach(mesh => mesh.setEnabled(true));
+
+    leg.position.z = -14;
+    const wrapper = new Mesh('octagon_table_wrapper');
+    wrapper.addChild(top);
+    wrapper.addChild(leg);
+
+    wrapper.rotation.x = (6 * Math.PI) / 4;
+    wrapper.rotation.y = degToRad(22.5);
+    wrapper.scaling = wrapper.scaling.scale(1.04);
+    wrapper.position.y = -0.65;
+
+    const table = new this(
+      {
+        guid: '#OctagonTable',
+        name: '#OctagonTable',
+        type: ActorType.ACTOR,
+      },
+      wrapper,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+
+    return table;
+  }
+}
 export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {}
 export class RectangleTable extends RectangleTableMixin(ClientBase) {
   static async fromState(): Promise<RectangleTable | null> {

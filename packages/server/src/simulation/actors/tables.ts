@@ -1,8 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh, type Tuple } from '@babylonjs/core';
-import { CUSTOM_RECTANGLE_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
-import { STATIC_HOST } from '@shared/constants';
+import { CUSTOM_RECTANGLE_TABLE, OCTAGON_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
@@ -59,11 +58,9 @@ export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(S
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<OctagonTable | null> {
-    const tableFrame = await Loader.loadMesh(`${STATIC_HOST}/OctagonTable_wood1992.obj`);
+    const tableFrame = await Loader.loadMesh(OCTAGON_TABLE.leg.meshURL);
     if (!tableFrame) return null;
     const table = new this(
       {
