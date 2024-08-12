@@ -1,6 +1,6 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
-import { CreatePlane, Mesh, type Tuple } from '@babylonjs/core';
+import { CreatePlane, Mesh } from '@babylonjs/core';
 import { CUSTOM_RECTANGLE_TABLE, OCTAGON_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
@@ -16,7 +16,6 @@ import {
   SquareTableMixin,
 } from '@shared/playground';
 import type { Constructor } from '@shared/types';
-import { degToRad } from '@shared/utils';
 import { ServerBase } from './serverBase';
 
 type TableCtor = Constructor<ServerBase>;
@@ -43,11 +42,7 @@ export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(S
         guid: '#CustomRectangleTable',
         name: '#CustomRectangleTable',
         type: ActorType.ACTOR,
-        transformation: {
-          position: [0, -23.2, 0],
-          rotation: [0, 0, 0],
-          scale: CUSTOM_RECTANGLE_TABLE.scaling,
-        },
+        transformation: CUSTOM_RECTANGLE_TABLE.transformation,
       },
       collider,
     );
@@ -67,11 +62,7 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
         guid: '#OctagonTable',
         name: '#OctagonTable',
         type: ActorType.ACTOR,
-        transformation: {
-          position: [0, -0.65, 0],
-          rotation: [(6 * Math.PI) / 4, degToRad(22.5), 0],
-          scale: Array(3).fill(1.04) as Tuple<number, 3>,
-        },
+        transformation: OCTAGON_TABLE.transformation,
       },
       tableFrame,
     );
@@ -96,11 +87,7 @@ export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
         guid: '#RectangleTable',
         name: '#RectangleTable',
         type: ActorType.ACTOR,
-        transformation: {
-          position: [0, -1.4, 0],
-          rotation: [(3 * Math.PI) / 2, 0, 0],
-          scale: RECTANGLE_TABLE.scaling,
-        },
+        transformation: RECTANGLE_TABLE.transformation,
       },
       wrapper,
     );
@@ -121,11 +108,7 @@ export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {
         guid: '#PokerTable',
         name: '#PokerTable',
         type: ActorType.ACTOR,
-        transformation: {
-          scale: POKER_TABLE.scaling,
-          position: [0, -9.25, 0],
-          rotation: [(3 * Math.PI) / 2, 0, 0],
-        },
+        transformation: POKER_TABLE.transformation,
       },
       frame,
     );

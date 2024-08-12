@@ -1,5 +1,7 @@
+import type { Tuple } from '@babylonjs/core';
 import { STATIC_HOST } from './constants';
-import type { Material } from './dto/states';
+import type { Material, Transformation } from './dto/states';
+import { degToRad } from './utils';
 
 export const feltMaterialProps: Material = {
   diffuseURL: `${STATIC_HOST}/felt_diff.png`,
@@ -13,7 +15,11 @@ export const woodMaterialProps: Material = {
 };
 
 export const CUSTOM_RECTANGLE_TABLE = {
-  scaling: [79, 79, 79],
+  transformation: {
+    position: [0, -23.2, 0],
+    rotation: [0, 0, 0],
+    scale: [79, 79, 79],
+  } satisfies Transformation,
   frame: {
     meshURL: `${STATIC_HOST}/GreenFelt_Table.obj`,
     diffuseURL: `${STATIC_HOST}/GreenFeltTable_D.png`,
@@ -26,7 +32,11 @@ export const CUSTOM_RECTANGLE_TABLE = {
 };
 
 export const RECTANGLE_TABLE = {
-  scaling: [1.01, 1.01, 1.01],
+  transformation: {
+    position: [0, -1.4, 0],
+    rotation: [(3 * Math.PI) / 2, 0, 0],
+    scale: [1.01, 1.01, 1.01],
+  },
   frame: {
     meshURL: `${STATIC_HOST}/rpg_table_wood2057.obj`,
     ...woodMaterialProps,
@@ -41,7 +51,11 @@ export const RECTANGLE_TABLE = {
 };
 
 export const POKER_TABLE = {
-  scaling: [40.5, 40.5, 40.5],
+  transformation: {
+    scale: [40.5, 40.5, 40.5],
+    position: [0, -9.25, 0],
+    rotation: [(3 * Math.PI) / 2, 0, 0],
+  },
   frame: {
     meshURL: `${STATIC_HOST}/table_poker.obj`,
     diffuseURL: `${STATIC_HOST}/table_poker_diff.png`,
@@ -56,6 +70,11 @@ export const POKER_TABLE = {
 };
 
 export const OCTAGON_TABLE = {
+  transformation: {
+    position: [0, -0.65, 0],
+    rotation: [(6 * Math.PI) / 4, degToRad(22.5), 0],
+    scale: Array(3).fill(1.04) as Tuple<number, 3>,
+  } satisfies Transformation,
   leg: {
     meshURL: `${STATIC_HOST}/Legs.obj`,
     diffuseURL: `${STATIC_HOST}/wood_diff.png`,
