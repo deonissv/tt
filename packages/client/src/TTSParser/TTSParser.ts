@@ -289,9 +289,10 @@ export class TTSParserC extends ParserBase {
         return 'CustomRectangle';
       case 'Table_Custom_Square':
         return 'CustomSquare';
-      default:
-        return null;
+      case 'Table_Square':
+        return 'Square';
     }
+    return null;
   }
 
   mapType(type: string): ActorType | null {

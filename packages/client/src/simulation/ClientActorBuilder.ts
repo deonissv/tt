@@ -71,7 +71,7 @@ export class ClientActorBuilderFactory extends ActorBuilder {
     }
   }
 
-  async buildTable(tableState: TableState): Promise<Actor | null> {
+  async buildTable(tableState: TableState): Promise<ClientBase | null> {
     switch (tableState.type) {
       case 'Hexagon':
         return await HexTable.fromState();

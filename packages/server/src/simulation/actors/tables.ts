@@ -1,8 +1,19 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
-import type { Tuple } from '@babylonjs/core';
-import { STATIC_HOST } from '@shared/constants';
-import { ActorType, type ActorBaseState } from '@shared/dto/states';
+import type { StandardMaterial } from '@babylonjs/core';
+import { Color3, CreatePlane, Mesh } from '@babylonjs/core';
+import {
+  CIRCLE_TABLE_MODEL,
+  CUSTOM_RECTANGLE_TABLE,
+  CUSTOM_SQUARE_TABLE,
+  GLASS_TABLE_MODEL,
+  HEX_TABLE_MODEL,
+  OCTAGON_TABLE,
+  POKER_TABLE,
+  RECTANGLE_TABLE,
+  SQUARE_TABLE_MODEL,
+} from '@shared/assets';
+import { ActorType } from '@shared/dto/states';
 import {
   CustomRectangleTableMixin,
   CustomSquareTableMixin,
@@ -15,45 +26,223 @@ import {
   SquareTableMixin,
 } from '@shared/playground';
 import type { Constructor } from '@shared/types';
-import { degToRad } from '@shared/utils';
-import { Actor } from './actor';
+import { ServerBase } from './serverBase';
 
-type TableCtor = Constructor<Actor>;
+type TableCtor = Constructor<ServerBase>;
 
-export class HexTable extends HexTableMixin<TableCtor>(Actor) {}
-export class CircleTable extends CircleTableMixin<TableCtor>(Actor) {}
-export class GlassTable extends GlassTableMixin<TableCtor>(Actor) {}
-export class SquareTable extends SquareTableMixin<TableCtor>(Actor) {}
-export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(Actor) {}
+export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<HexTable | null> {
+    const top = await Loader.loadMesh(HEX_TABLE_MODEL.top.meshURL);
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export class OctagonTable extends OctagonTableMixin<TableCtor>(Actor) {
-  static override async fromState(): Promise<OctagonTable | null> {
-    const tableFrame = await Loader.loadMesh(`${STATIC_HOST}/OctagonTable_wood1992.obj`);
-    if (!tableFrame) return null;
-    // tableFrame.rotation.x = (6 * Math.PI) / 4;
-    // tableFrame.rotation.y = degToRad(22.5);
-    // tableFrame.scaling = tableFrame.scaling.scale(1.04);
-    // tableFrame.position.y = -0.65;
-    const state: ActorBaseState = {
-      guid: '#OctagonTable',
-      name: '#OctagonTable',
-      type: ActorType.ACTOR,
-      transformation: {
-        position: [0, -0.65, 0],
-        rotation: [(6 * Math.PI) / 4, degToRad(22.5), 0],
-        scale: Array(3).fill(1.04) as Tuple<number, 3>,
+    const table = new this(
+      {
+        guid: '#HexTable',
+        name: '#HexTable',
+        type: ActorType.ACTOR,
+        transformation: HEX_TABLE_MODEL.transformation,
       },
-    };
-    const table = new OctagonTable(state, tableFrame);
-    if (table) {
-      table.model.isPickable = false;
-    }
+      top,
+    );
+
+    table.model.isPickable = false;
     table.body.setMotionType(0);
     return table;
   }
 }
-export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(Actor) {}
-export class RectangleTable extends RectangleTableMixin<TableCtor>(Actor) {}
-export class PokerTable extends PokerTableMixin<TableCtor>(Actor) {}
+
+export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<CircleTable | null> {
+    const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);
+    const top = await Loader.loadMesh(CIRCLE_TABLE_MODEL.top.meshURL);
+
+    if (!glass || !top) return null;
+    [glass, top].forEach(mesh => mesh.setEnabled(true));
+
+    const wrapper = Mesh.MergeMeshes([glass, top], true, false, undefined, false, true)!;
+    const table = new this(
+      {
+        guid: '#CircleTable',
+        name: '#CircleTable',
+        type: ActorType.ACTOR,
+        transformation: CIRCLE_TABLE_MODEL.transformation,
+      },
+      wrapper,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
+export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<GlassTable | null> {
+    const glassTop = await Loader.loadMesh(GLASS_TABLE_MODEL.glassTop.meshURL);
+    if (!glassTop) return null;
+
+    const table = new this(
+      {
+        guid: '#CustomSquareTable',
+        name: '#CustomSquareTable',
+        type: ActorType.ACTOR,
+        transformation: {
+          position: [
+            GLASS_TABLE_MODEL.transformation.position[0],
+            GLASS_TABLE_MODEL.transformation.position[1] - 0.134,
+            GLASS_TABLE_MODEL.transformation.position[2],
+          ],
+          rotation: GLASS_TABLE_MODEL.transformation.rotation,
+          scale: GLASS_TABLE_MODEL.transformation.scale,
+        },
+      },
+      glassTop,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<SquareTable | null> {
+    const model = await Loader.loadMesh(SQUARE_TABLE_MODEL.frame.meshURL);
+    if (!model) return null;
+
+    (model.material as StandardMaterial).diffuseColor = new Color3(0.5, 0, 0);
+    model.setEnabled(true);
+
+    const table = new this(
+      {
+        guid: '#SquareTable',
+        name: '#SquareTable',
+        type: ActorType.ACTOR,
+        transformation: SQUARE_TABLE_MODEL.transformation,
+      },
+      model,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
+export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<CustomRectangleTable | null> {
+    const tableFrame = await Loader.loadMesh(CUSTOM_RECTANGLE_TABLE.frame.meshURL);
+    if (!tableFrame) return null;
+
+    const plane = CreatePlane('plane', { width: 1.108891, height: 0.66187126 });
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = 0.3;
+
+    tableFrame.setEnabled(true);
+    const collider = Mesh.MergeMeshes([tableFrame, plane], true, false, undefined, false, true)!;
+
+    const table = new this(
+      {
+        guid: '#CustomRectangleTable',
+        name: '#CustomRectangleTable',
+        type: ActorType.ACTOR,
+        transformation: CUSTOM_RECTANGLE_TABLE.transformation,
+      },
+      collider,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
+export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<OctagonTable | null> {
+    const tableFrame = await Loader.loadMesh(OCTAGON_TABLE.leg.meshURL);
+    if (!tableFrame) return null;
+    const table = new this(
+      {
+        guid: '#OctagonTable',
+        name: '#OctagonTable',
+        type: ActorType.ACTOR,
+        transformation: OCTAGON_TABLE.transformation,
+      },
+      tableFrame,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<CustomSquareTable | null> {
+    const tableBox = await Loader.loadMesh(CUSTOM_SQUARE_TABLE.frame.meshURL);
+    if (!tableBox) return null;
+
+    const plane = CreatePlane('CustomSquareTablePlane', { size: 0.8554 });
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = 0.85;
+
+    tableBox.setEnabled(true);
+
+    const wrapper = Mesh.MergeMeshes([tableBox, plane], true, false, undefined, false, true)!;
+    const table = new this(
+      {
+        guid: '#CustomSquareTable',
+        name: '#CustomSquareTable',
+        type: ActorType.ACTOR,
+        transformation: CUSTOM_SQUARE_TABLE.transformation,
+      },
+      wrapper,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
+export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<RectangleTable | null> {
+    const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
+    const felt = await Loader.loadMesh(RECTANGLE_TABLE.felt.meshURL);
+
+    if (!tableFrame || !felt) return null;
+    const wrapper = Mesh.MergeMeshes([tableFrame, felt], true, false, undefined, false, true)!;
+
+    const table = new this(
+      {
+        guid: '#RectangleTable',
+        name: '#RectangleTable',
+        type: ActorType.ACTOR,
+        transformation: RECTANGLE_TABLE.transformation,
+      },
+      wrapper,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
+export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {
+  static async fromState<T extends PokerTable>(this: Constructor<T>): Promise<T | null> {
+    const frame = await Loader.loadMesh(POKER_TABLE.frame.meshURL);
+    if (!frame) return null;
+
+    const table = new this(
+      {
+        guid: '#PokerTable',
+        name: '#PokerTable',
+        type: ActorType.ACTOR,
+        transformation: POKER_TABLE.transformation,
+      },
+      frame,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
