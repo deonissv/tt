@@ -103,3 +103,20 @@ export const CUSTOM_SQUARE_TABLE = {
     specularURL: `${STATIC_HOST}/table_square_myMaterial1_Spec_Gloss.png`,
   },
 };
+
+export const SQUARE_TABLE_MODEL = {
+  transformation: {
+    position: [0, -34.8, 0],
+    rotation: [(6 * Math.PI) / 4, 0, 0],
+    scale: [1, 1, 1],
+  } satisfies Transformation,
+  frame: {
+    meshURL: `${STATIC_HOST}/TableSquare.obj`,
+    //   diffuseURL: `${STATIC_HOST}/table_square_myMaterial1_Diffuse.png`,
+    //   normalURL: `${STATIC_HOST}/table_square_myMaterial1_Normal.png`,
+    //   specularURL: `${STATIC_HOST}/table_square_myMaterial1_Spec_Gloss.png`,
+    diffuseURL: `${STATIC_HOST}/Table02_diff.png`,
+    specularURL: `${STATIC_HOST}/Table02_spec.png`,
+    normalURL: `${STATIC_HOST}/Table02_nrm.png`,
+  },
+};

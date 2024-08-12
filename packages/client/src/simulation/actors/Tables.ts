@@ -1,6 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
-import { CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
+import type { StandardMaterial } from '@babylonjs/core';
+import { Color3, CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
 import {
   CUSTOM_RECTANGLE_TABLE,
   CUSTOM_SQUARE_TABLE,
@@ -8,6 +9,7 @@ import {
   OCTAGON_TABLE,
   POKER_TABLE,
   RECTANGLE_TABLE,
+  SQUARE_TABLE_MODEL,
 } from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
@@ -28,7 +30,29 @@ import { ClientBase } from './ClientBase';
 export class HexTable extends HexTableMixin(ClientBase) {}
 export class CircleTable extends CircleTableMixin(ClientBase) {}
 export class GlassTable extends GlassTableMixin(ClientBase) {}
-export class SquareTable extends SquareTableMixin(ClientBase) {}
+export class SquareTable extends SquareTableMixin(ClientBase) {
+  static async fromState(): Promise<SquareTable | null> {
+    const [model, _] = await Loader.loadModel(SQUARE_TABLE_MODEL.frame);
+    if (!model) return null;
+
+    (model.material as StandardMaterial).diffuseColor = new Color3(0.5, 0, 0);
+
+    const table = new this(
+      {
+        guid: '#SquareTable',
+        name: '#SquareTable',
+        type: ActorType.ACTOR,
+        transformation: SQUARE_TABLE_MODEL.transformation,
+      },
+      model,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+    return table;
+  }
+}
+
 export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) {
   static async fromState(tableState: TableState): Promise<CustomRectangleTable | null> {
     const [tableFrame, _] = await Loader.loadModel(CUSTOM_RECTANGLE_TABLE.frame);
