@@ -89,3 +89,17 @@ export const OCTAGON_TABLE = {
     // specularURL: `${STATIC_HOST}/OctagonTable_spec.png`,
   },
 };
+
+export const CUSTOM_SQUARE_TABLE = {
+  transformation: {
+    position: [0, -51.3, 0],
+    rotation: [0, 0, 0],
+    scale: [60.5, 60.5, 60.5],
+  } satisfies Transformation,
+  frame: {
+    meshURL: `${STATIC_HOST}/table_square.obj`,
+    diffuseURL: `${STATIC_HOST}/table_square_myMaterial1_Diffuse.png`,
+    normalURL: `${STATIC_HOST}/table_square_myMaterial1_Normal.png`,
+    specularURL: `${STATIC_HOST}/table_square_myMaterial1_Spec_Gloss.png`,
+  },
+};

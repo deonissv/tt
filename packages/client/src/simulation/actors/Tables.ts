@@ -1,7 +1,14 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
-import { CUSTOM_RECTANGLE_TABLE, feltMaterialProps, OCTAGON_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
+import {
+  CUSTOM_RECTANGLE_TABLE,
+  CUSTOM_SQUARE_TABLE,
+  feltMaterialProps,
+  OCTAGON_TABLE,
+  POKER_TABLE,
+  RECTANGLE_TABLE,
+} from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
@@ -42,7 +49,7 @@ export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) 
     const planeMatetial = await Loader.loadModelMaterial(planeMatetialProps);
     plane.material = planeMatetial;
     wrapper.addChild(plane);
-    wrapper.scaling = Vector3.FromArray(CUSTOM_RECTANGLE_TABLE.scaling);
+    wrapper.scaling = Vector3.FromArray(CUSTOM_RECTANGLE_TABLE.transformation.scale);
     wrapper.position.y = -23.2;
     const table = new this(
       {
@@ -90,7 +97,41 @@ export class OctagonTable extends OctagonTableMixin(ClientBase) {
     return table;
   }
 }
-export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {}
+export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {
+  static async fromState(tableState: TableState): Promise<CustomSquareTable | null> {
+    const [tableBox, _tableCollider] = await Loader.loadModel(CUSTOM_SQUARE_TABLE.frame);
+    if (!tableBox) return null;
+
+    const plane = CreatePlane('CustomSquareTablePlane', { size: 0.8554 });
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = 0.85;
+
+    const planeMatetial = await Loader.loadModelMaterial({ diffuseURL: tableState.url! });
+    plane.material = planeMatetial;
+
+    const wrapper = new Mesh('CustomSquareTable');
+    wrapper.addChild(tableBox);
+    wrapper.addChild(plane);
+
+    tableBox.setEnabled(true);
+
+    const table = new this(
+      {
+        guid: '#CustomSquareTable',
+        name: '#CustomSquareTable',
+        type: ActorType.ACTOR,
+        transformation: CUSTOM_SQUARE_TABLE.transformation,
+      },
+      wrapper,
+    );
+    if (tableBox) {
+      table.model.isPickable = false;
+    }
+
+    return table;
+  }
+}
+
 export class RectangleTable extends RectangleTableMixin(ClientBase) {
   static async fromState(): Promise<RectangleTable | null> {
     const [tableFrame, _] = await Loader.loadModel(RECTANGLE_TABLE.frame);

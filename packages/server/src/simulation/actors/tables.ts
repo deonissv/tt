@@ -1,7 +1,13 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh } from '@babylonjs/core';
-import { CUSTOM_RECTANGLE_TABLE, OCTAGON_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
+import {
+  CUSTOM_RECTANGLE_TABLE,
+  CUSTOM_SQUARE_TABLE,
+  OCTAGON_TABLE,
+  POKER_TABLE,
+  RECTANGLE_TABLE,
+} from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
@@ -72,7 +78,33 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
     return table;
   }
 }
-export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {}
+export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<CustomSquareTable | null> {
+    const tableBox = await Loader.loadMesh(CUSTOM_SQUARE_TABLE.frame.meshURL);
+    if (!tableBox) return null;
+
+    const plane = CreatePlane('CustomSquareTablePlane', { size: 0.8554 });
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = 0.85;
+
+    tableBox.setEnabled(true);
+
+    const wrapper = Mesh.MergeMeshes([tableBox, plane], true, false, undefined, false, true)!;
+    const table = new this(
+      {
+        guid: '#CustomSquareTable',
+        name: '#CustomSquareTable',
+        type: ActorType.ACTOR,
+        transformation: CUSTOM_SQUARE_TABLE.transformation,
+      },
+      wrapper,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
 
 export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<RectangleTable | null> {
