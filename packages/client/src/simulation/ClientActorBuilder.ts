@@ -74,23 +74,23 @@ export class ClientActorBuilderFactory extends ActorBuilder {
   async buildTable(tableState: TableState): Promise<ClientBase | null> {
     switch (tableState.type) {
       case 'Hexagon':
-        return await HexTable.fromState<ClientBase>();
+        return await HexTable.fromState();
       case 'Circle':
-        return await CircleTable.fromState<ClientBase>();
+        return await CircleTable.fromState();
       case 'CircleGlass':
-        return await GlassTable.fromState<ClientBase>();
+        return await GlassTable.fromState();
       case 'Square':
-        return await SquareTable.fromState<ClientBase>();
+        return await SquareTable.fromState();
       case 'CustomRectangle':
         return await CustomRectangleTable.fromState(tableState);
       case 'Octagon':
-        return await OctagonTable.fromState<ClientBase>();
+        return await OctagonTable.fromState();
       case 'CustomSquare':
-        return await CustomSquareTable.fromState<ClientBase>(tableState);
+        return await CustomSquareTable.fromState(tableState);
       case 'Rectangle':
-        return await RectangleTable.fromState<ClientBase>();
+        return await RectangleTable.fromState();
       case 'Poker':
-        return await PokerTable.fromState<ClientBase>();
+        return await PokerTable.fromState();
     }
   }
 

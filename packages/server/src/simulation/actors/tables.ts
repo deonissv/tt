@@ -13,7 +13,6 @@ import {
   RECTANGLE_TABLE,
   SQUARE_TABLE_MODEL,
 } from '@shared/assets';
-import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
   CustomRectangleTableMixin,
@@ -129,7 +128,7 @@ export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
 }
 
 export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerBase) {
-  static async fromState(_tableState: TableState): Promise<CustomRectangleTable | null> {
+  static async fromState(): Promise<CustomRectangleTable | null> {
     const tableFrame = await Loader.loadMesh(CUSTOM_RECTANGLE_TABLE.frame.meshURL);
     if (!tableFrame) return null;
 
