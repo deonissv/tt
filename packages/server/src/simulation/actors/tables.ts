@@ -1,7 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh, type Tuple } from '@babylonjs/core';
-import { CUSTOM_RECTANGLE_TABLE, RECTANGLE_TABLE } from '@shared/assets';
+import { CUSTOM_RECTANGLE_TABLE, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
 import { STATIC_HOST } from '@shared/constants';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
@@ -52,11 +52,9 @@ export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(S
       },
       collider,
     );
-    if (table) {
-      table.model.isPickable = false;
-    }
-    table.body.setMotionType(0);
 
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
     return table;
   }
 }
@@ -80,9 +78,8 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
       },
       tableFrame,
     );
-    if (table) {
-      table.model.isPickable = false;
-    }
+
+    table.model.isPickable = false;
     table.body.setMotionType(0);
     return table;
   }
@@ -110,12 +107,34 @@ export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
       },
       wrapper,
     );
-    if (table) {
-      table.model.isPickable = false;
-    }
 
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
     return table;
   }
 }
 
-export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {}
+export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {
+  static async fromState<T extends PokerTable>(this: Constructor<T>): Promise<T | null> {
+    const frame = await Loader.loadMesh(POKER_TABLE.frame.meshURL);
+    if (!frame) return null;
+
+    const table = new this(
+      {
+        guid: '#PokerTable',
+        name: '#PokerTable',
+        type: ActorType.ACTOR,
+        transformation: {
+          scale: POKER_TABLE.scaling,
+          position: [0, -9.25, 0],
+          rotation: [(3 * Math.PI) / 2, 0, 0],
+        },
+      },
+      frame,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}

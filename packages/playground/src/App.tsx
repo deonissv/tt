@@ -45,7 +45,7 @@ const App = () => {
     // ground.__model.isVisible = true;
 
     await ServerActorBuilder.buildTable({
-      type: 'CustomRectangle',
+      type: 'Poker',
     });
 
     new ServerBase(

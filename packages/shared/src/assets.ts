@@ -39,3 +39,18 @@ export const RECTANGLE_TABLE = {
     meshURL: `${STATIC_HOST}/rpg_table_handles.obj`,
   },
 };
+
+export const POKER_TABLE = {
+  scaling: [40.5, 40.5, 40.5],
+  frame: {
+    meshURL: `${STATIC_HOST}/table_poker.obj`,
+    diffuseURL: `${STATIC_HOST}/table_poker_diff.png`,
+    specularURL: `${STATIC_HOST}/table_poker_spec.png`,
+    normalURL: `${STATIC_HOST}/table_poker_nrm.png`,
+  },
+  legs: {
+    meshURL: `${STATIC_HOST}/table_poker_legs.obj`,
+    diffuseURL: `${STATIC_HOST}/table_poker_legs_diff.png`,
+    normalURL: `${STATIC_HOST}/table_poker_legs_nrm.png`,
+  },
+};

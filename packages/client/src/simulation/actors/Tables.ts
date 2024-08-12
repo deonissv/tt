@@ -1,7 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
-import { CUSTOM_RECTANGLE_TABLE, feltMaterialProps, RECTANGLE_TABLE } from '@shared/assets';
+import { CUSTOM_RECTANGLE_TABLE, feltMaterialProps, POKER_TABLE, RECTANGLE_TABLE } from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
@@ -51,9 +51,8 @@ export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) 
       },
       wrapper,
     );
-    if (table) {
-      table.model.isPickable = false;
-    }
+
+    table.model.isPickable = false;
     return table;
   }
 }
@@ -84,11 +83,38 @@ export class RectangleTable extends RectangleTableMixin(ClientBase) {
       },
       wrapper,
     );
-    if (table) {
-      table.model.isPickable = false;
-    }
 
+    table.model.isPickable = false;
     return table;
   }
 }
-export class PokerTable extends PokerTableMixin(ClientBase) {}
+export class PokerTable extends PokerTableMixin(ClientBase) {
+  static async fromState(): Promise<PokerTable | null> {
+    const [frame, _] = await Loader.loadModel(POKER_TABLE.frame);
+    const [legs, __] = await Loader.loadModel(POKER_TABLE.legs);
+
+    if (!frame || !legs) return null;
+
+    const wrapper = new Mesh('poker_table_wrapper');
+    [frame, legs].forEach(mesh => mesh.setEnabled(true));
+    [frame, legs].forEach(mesh => wrapper.addChild(mesh));
+
+    legs.position.z = -0.223;
+
+    wrapper.scaling = wrapper.scaling.scale(40.5);
+    wrapper.position.y = -9.25;
+    wrapper.rotation.x = (3 * Math.PI) / 2;
+
+    const table = new this(
+      {
+        guid: '#PokerTable',
+        name: '#PokerTable',
+        type: ActorType.ACTOR,
+      },
+      wrapper,
+    );
+
+    table.model.isPickable = false;
+    return table;
+  }
+}
