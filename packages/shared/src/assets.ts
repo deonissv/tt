@@ -158,3 +158,24 @@ export const CIRCLE_TABLE_MODEL = {
     ...woodMaterialProps,
   },
 };
+
+export const HEX_TABLE_MODEL = {
+  transformation: {
+    position: [0, -0.5, 0],
+    rotation: [(6 * Math.PI) / 4, Math.PI / 6, 0],
+    scale: [0.94, 0.94, 0.94],
+  } satisfies Transformation,
+  leg: {
+    meshURL: `${STATIC_HOST}/Legs.obj`,
+    diffuseURL: `${STATIC_HOST}/wood_diff.png`,
+    specularURL: `${STATIC_HOST}/wood_spec.png`,
+  },
+  top: {
+    meshURL: `${STATIC_HOST}/HexagonTable_wood.obj`,
+    diffuseURL: `${STATIC_HOST}/wood_diff.png`,
+    specularURL: `${STATIC_HOST}/wood_spec.png`,
+    // diffuseURL: `${STATIC_HOST}/HexagonTable_diff.png`,
+    // normalURL: `${STATIC_HOST}/HexagonTable_nrm.png`,
+    // specularURL: `${STATIC_HOST}/HexagonTable_spec.png`,
+  },
+};

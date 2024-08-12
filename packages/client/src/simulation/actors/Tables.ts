@@ -8,6 +8,7 @@ import {
   CUSTOM_SQUARE_TABLE,
   feltMaterialProps,
   GLASS_TABLE_MODEL,
+  HEX_TABLE_MODEL,
   OCTAGON_TABLE,
   POKER_TABLE,
   RECTANGLE_TABLE,
@@ -30,7 +31,38 @@ import { getGlassMaterial } from '@shared/playground/materials/glassMaterial';
 import { degToRad } from '@shared/utils';
 import { ClientBase } from './ClientBase';
 
-export class HexTable extends HexTableMixin(ClientBase) {}
+export class HexTable extends HexTableMixin(ClientBase) {
+  static async fromState(): Promise<HexTable | null> {
+    const [leg, _] = await Loader.loadModel(HEX_TABLE_MODEL.leg);
+    const [top, __] = await Loader.loadModel(HEX_TABLE_MODEL.top);
+
+    if (!top || !leg) return null;
+
+    [leg, top].forEach(mesh => mesh.setEnabled(true));
+
+    leg.position.z = -14;
+
+    const wrapper = new Mesh('hex_table_wrapper');
+    wrapper.addChild(top);
+    wrapper.addChild(leg);
+
+    const table = new this(
+      {
+        guid: '#HexTable',
+        name: '#HexTable',
+        type: ActorType.ACTOR,
+        transformation: HEX_TABLE_MODEL.transformation,
+      },
+      wrapper,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+
+    return table;
+  }
+}
+
 export class CircleTable extends CircleTableMixin(ClientBase) {
   static async fromState(): Promise<CircleTable | null> {
     const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);

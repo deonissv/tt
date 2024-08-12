@@ -7,6 +7,7 @@ import {
   CUSTOM_RECTANGLE_TABLE,
   CUSTOM_SQUARE_TABLE,
   GLASS_TABLE_MODEL,
+  HEX_TABLE_MODEL,
   OCTAGON_TABLE,
   POKER_TABLE,
   RECTANGLE_TABLE,
@@ -30,7 +31,26 @@ import { ServerBase } from './serverBase';
 
 type TableCtor = Constructor<ServerBase>;
 
-export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {}
+export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<HexTable | null> {
+    const top = await Loader.loadMesh(HEX_TABLE_MODEL.top.meshURL);
+
+    const table = new this(
+      {
+        guid: '#HexTable',
+        name: '#HexTable',
+        type: ActorType.ACTOR,
+        transformation: HEX_TABLE_MODEL.transformation,
+      },
+      top,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
 export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<CircleTable | null> {
     const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);
