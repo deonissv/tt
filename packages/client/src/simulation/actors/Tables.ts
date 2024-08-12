@@ -6,6 +6,7 @@ import {
   CUSTOM_RECTANGLE_TABLE,
   CUSTOM_SQUARE_TABLE,
   feltMaterialProps,
+  GLASS_TABLE_MODEL,
   OCTAGON_TABLE,
   POKER_TABLE,
   RECTANGLE_TABLE,
@@ -29,7 +30,54 @@ import { ClientBase } from './ClientBase';
 
 export class HexTable extends HexTableMixin(ClientBase) {}
 export class CircleTable extends CircleTableMixin(ClientBase) {}
-export class GlassTable extends GlassTableMixin(ClientBase) {}
+export class GlassTable extends GlassTableMixin(ClientBase) {
+  static async fromState(): Promise<GlassTable | null> {
+    const [metal] = await Loader.loadModel(GLASS_TABLE_MODEL.metal);
+    const [glassMid, _gCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassMid);
+    const [glassBottom, _gTopCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassTop);
+
+    if (!metal || !glassMid || !glassBottom) {
+      return null;
+    }
+
+    const glassMaterial = glassBottom.material as StandardMaterial;
+    glassMaterial.alpha = 0.5;
+    glassMaterial.diffuseColor = new Color3(0, 0, 0.1);
+
+    const glassTop = glassBottom.clone();
+    [metal, glassMid, glassTop, glassBottom].forEach(mesh => mesh.setEnabled(true));
+
+    const wrapper = new Mesh('glass_table_wrapper');
+    glassBottom.position.z = 0.633;
+    glassBottom.scaling.x = 0.45;
+    glassBottom.scaling.y = 0.45;
+
+    metal.rotation.x = Math.PI;
+    metal.position.z = -0.037;
+
+    glassTop.position.z = -0.134;
+
+    wrapper.addChild(metal);
+    wrapper.addChild(glassMid);
+    wrapper.addChild(glassTop);
+    wrapper.addChild(glassBottom);
+
+    const table = new this(
+      {
+        guid: '#CustomSquareTable',
+        name: '#CustomSquareTable',
+        type: ActorType.ACTOR,
+        transformation: GLASS_TABLE_MODEL.transformation,
+      },
+      wrapper,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+
+    return table;
+  }
+}
 export class SquareTable extends SquareTableMixin(ClientBase) {
   static async fromState(): Promise<SquareTable | null> {
     const [model, _] = await Loader.loadModel(SQUARE_TABLE_MODEL.frame);

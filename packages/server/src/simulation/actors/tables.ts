@@ -5,6 +5,7 @@ import { Color3, CreatePlane, Mesh } from '@babylonjs/core';
 import {
   CUSTOM_RECTANGLE_TABLE,
   CUSTOM_SQUARE_TABLE,
+  GLASS_TABLE_MODEL,
   OCTAGON_TABLE,
   POKER_TABLE,
   RECTANGLE_TABLE,
@@ -30,7 +31,34 @@ type TableCtor = Constructor<ServerBase>;
 
 export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {}
 export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {}
-export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {}
+export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<GlassTable | null> {
+    const glassTop = await Loader.loadMesh(GLASS_TABLE_MODEL.glassTop.meshURL);
+    if (!glassTop) return null;
+
+    const table = new this(
+      {
+        guid: '#CustomSquareTable',
+        name: '#CustomSquareTable',
+        type: ActorType.ACTOR,
+        transformation: {
+          position: [
+            GLASS_TABLE_MODEL.transformation.position[0],
+            GLASS_TABLE_MODEL.transformation.position[1] - 0.134,
+            GLASS_TABLE_MODEL.transformation.position[2],
+          ],
+          rotation: GLASS_TABLE_MODEL.transformation.rotation,
+          scale: GLASS_TABLE_MODEL.transformation.scale,
+        },
+      },
+      glassTop,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
 export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<SquareTable | null> {
     const model = await Loader.loadMesh(SQUARE_TABLE_MODEL.frame.meshURL);

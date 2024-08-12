@@ -120,3 +120,22 @@ export const SQUARE_TABLE_MODEL = {
     normalURL: `${STATIC_HOST}/Table02_nrm.png`,
   },
 };
+export const GLASS_TABLE_MODEL = {
+  transformation: {
+    position: [0, -3, 0],
+    rotation: [Math.PI / 2, 0, 0],
+    scale: [38, 38, 38],
+  } satisfies Transformation,
+  metal: {
+    meshURL: `${STATIC_HOST}/glass_table_metal.obj`,
+    diffuseURL: `${STATIC_HOST}/metal_diff.png`,
+  },
+  glassMid: {
+    meshURL: `${STATIC_HOST}/glass_table_mid.obj`,
+    diffuseURL: `${STATIC_HOST}/metal_diff.png`,
+  },
+  glassTop: {
+    meshURL: `${STATIC_HOST}/glass_table_top_bottom.obj`,
+    diffuseURL: `${STATIC_HOST}/glass_table_N.png`,
+  },
+};
