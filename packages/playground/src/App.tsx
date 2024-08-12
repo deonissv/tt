@@ -45,7 +45,7 @@ const App = () => {
     // ground.__model.isVisible = true;
 
     await ServerActorBuilder.buildTable({
-      type: 'Square',
+      type: 'CircleGlass',
     });
 
     new ServerBase(

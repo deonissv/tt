@@ -139,3 +139,22 @@ export const GLASS_TABLE_MODEL = {
     diffuseURL: `${STATIC_HOST}/glass_table_N.png`,
   },
 };
+
+export const CIRCLE_TABLE_MODEL = {
+  transformation: {
+    position: [0, -18, 0],
+    rotation: [0, 0, 0],
+    scale: [1, 1, 1],
+  } satisfies Transformation,
+  glass: {
+    meshURL: `${STATIC_HOST}/glass.obj`,
+  },
+  legs: {
+    meshURL: `${STATIC_HOST}/legs2088.obj`,
+    ...woodMaterialProps,
+  },
+  top: {
+    meshURL: `${STATIC_HOST}/table_top2064.obj`,
+    ...woodMaterialProps,
+  },
+};

@@ -3,6 +3,7 @@ import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMi
 import type { StandardMaterial } from '@babylonjs/core';
 import { Color3, CreatePlane, Mesh } from '@babylonjs/core';
 import {
+  CIRCLE_TABLE_MODEL,
   CUSTOM_RECTANGLE_TABLE,
   CUSTOM_SQUARE_TABLE,
   GLASS_TABLE_MODEL,
@@ -30,7 +31,31 @@ import { ServerBase } from './serverBase';
 type TableCtor = Constructor<ServerBase>;
 
 export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {}
-export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {}
+export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<CircleTable | null> {
+    const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);
+    const top = await Loader.loadMesh(CIRCLE_TABLE_MODEL.top.meshURL);
+
+    if (!glass || !top) return null;
+    [glass, top].forEach(mesh => mesh.setEnabled(true));
+
+    const wrapper = Mesh.MergeMeshes([glass, top], true, false, undefined, false, true)!;
+    const table = new this(
+      {
+        guid: '#CircleTable',
+        name: '#CircleTable',
+        type: ActorType.ACTOR,
+        transformation: CIRCLE_TABLE_MODEL.transformation,
+      },
+      wrapper,
+    );
+
+    table.model.isPickable = false;
+    table.body.setMotionType(0);
+    return table;
+  }
+}
+
 export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<GlassTable | null> {
     const glassTop = await Loader.loadMesh(GLASS_TABLE_MODEL.glassTop.meshURL);

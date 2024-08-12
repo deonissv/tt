@@ -3,6 +3,7 @@ import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMi
 import type { StandardMaterial } from '@babylonjs/core';
 import { Color3, CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
 import {
+  CIRCLE_TABLE_MODEL,
   CUSTOM_RECTANGLE_TABLE,
   CUSTOM_SQUARE_TABLE,
   feltMaterialProps,
@@ -25,11 +26,44 @@ import {
   RectangleTableMixin,
   SquareTableMixin,
 } from '@shared/playground';
+import { getGlassMaterial } from '@shared/playground/materials/glassMaterial';
 import { degToRad } from '@shared/utils';
 import { ClientBase } from './ClientBase';
 
 export class HexTable extends HexTableMixin(ClientBase) {}
-export class CircleTable extends CircleTableMixin(ClientBase) {}
+export class CircleTable extends CircleTableMixin(ClientBase) {
+  static async fromState(): Promise<CircleTable | null> {
+    const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);
+    const [legs] = await Loader.loadModel(CIRCLE_TABLE_MODEL.legs);
+    const [top] = await Loader.loadModel(CIRCLE_TABLE_MODEL.top);
+
+    if (!glass || !legs || !top) return null;
+    [glass, legs, top].forEach(mesh => mesh.setEnabled(true));
+
+    glass.material = getGlassMaterial();
+
+    const wrapper = new Mesh('circle_table_wrapper');
+    wrapper.addChild(glass);
+    wrapper.addChild(legs);
+    wrapper.addChild(top);
+
+    const table = new this(
+      {
+        guid: '#CircleTable',
+        name: '#CircleTable',
+        type: ActorType.ACTOR,
+        transformation: CIRCLE_TABLE_MODEL.transformation,
+      },
+      wrapper,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+
+    return table;
+  }
+}
+
 export class GlassTable extends GlassTableMixin(ClientBase) {
   static async fromState(): Promise<GlassTable | null> {
     const [metal] = await Loader.loadModel(GLASS_TABLE_MODEL.metal);
