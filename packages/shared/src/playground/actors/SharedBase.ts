@@ -9,7 +9,7 @@ import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
 import { ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
-import type { ActorState, Transformation } from '@shared/dto/states';
+import type { ActorState, TableState, Transformation } from '@shared/dto/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { floatCompare, vecDelta, vecFloatCompare } from '@shared/utils';
@@ -159,7 +159,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     });
   }
 
-  static fromState(_actorState?: ActorBaseState): Promise<SharedBase | null> {
+  static fromState(_actorState?: ActorBaseState | TableState): Promise<SharedBase | null> {
     throw new Error('Not implemented: fromState');
   }
 

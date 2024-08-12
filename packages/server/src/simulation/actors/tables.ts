@@ -1,8 +1,10 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
-import type { Tuple } from '@babylonjs/core';
+import { CreatePlane, Mesh, type Tuple } from '@babylonjs/core';
+import { RECTANGLE_TABLE } from '@shared/assets';
 import { STATIC_HOST } from '@shared/constants';
-import { ActorType, type ActorBaseState } from '@shared/dto/states';
+import type { TableState } from '@shared/dto/states';
+import { ActorType } from '@shared/dto/states';
 import {
   CustomRectangleTableMixin,
   CustomSquareTableMixin,
@@ -16,37 +18,68 @@ import {
 } from '@shared/playground';
 import type { Constructor } from '@shared/types';
 import { degToRad } from '@shared/utils';
-import { Actor } from './actor';
+import { ServerBase } from './serverBase';
 
-type TableCtor = Constructor<Actor>;
+type TableCtor = Constructor<ServerBase>;
 
-export class HexTable extends HexTableMixin<TableCtor>(Actor) {}
-export class CircleTable extends CircleTableMixin<TableCtor>(Actor) {}
-export class GlassTable extends GlassTableMixin<TableCtor>(Actor) {}
-export class SquareTable extends SquareTableMixin<TableCtor>(Actor) {}
-export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(Actor) {}
+export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {}
+export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {}
+export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {}
+export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {}
+
+export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerBase) {
+  static async fromState(_tableState: TableState): Promise<CustomRectangleTable | null> {
+    const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
+    if (!tableFrame) return null;
+
+    const plane = CreatePlane('plane', { width: 1.108891, height: 0.66187126 });
+    plane.rotation.x = Math.PI / 2;
+    plane.position.y = 0.3;
+
+    tableFrame.setEnabled(true);
+    const collider = Mesh.MergeMeshes([tableFrame, plane], true, false, undefined, false, true)!;
+
+    const table = new this(
+      {
+        guid: '#CustomRectangleTable',
+        name: '#CustomRectangleTable',
+        type: ActorType.ACTOR,
+        transformation: {
+          position: [0, -23.2, 0],
+          rotation: [0, 0, 0],
+          scale: RECTANGLE_TABLE.scaling,
+        },
+      },
+      collider,
+    );
+    if (table) {
+      table.model.isPickable = false;
+    }
+    table.body.setMotionType(0);
+
+    return table;
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-export class OctagonTable extends OctagonTableMixin<TableCtor>(Actor) {
-  static override async fromState(): Promise<OctagonTable | null> {
+export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
+  static async fromState(): Promise<OctagonTable | null> {
     const tableFrame = await Loader.loadMesh(`${STATIC_HOST}/OctagonTable_wood1992.obj`);
     if (!tableFrame) return null;
-    // tableFrame.rotation.x = (6 * Math.PI) / 4;
-    // tableFrame.rotation.y = degToRad(22.5);
-    // tableFrame.scaling = tableFrame.scaling.scale(1.04);
-    // tableFrame.position.y = -0.65;
-    const state: ActorBaseState = {
-      guid: '#OctagonTable',
-      name: '#OctagonTable',
-      type: ActorType.ACTOR,
-      transformation: {
-        position: [0, -0.65, 0],
-        rotation: [(6 * Math.PI) / 4, degToRad(22.5), 0],
-        scale: Array(3).fill(1.04) as Tuple<number, 3>,
+    const table = new this(
+      {
+        guid: '#OctagonTable',
+        name: '#OctagonTable',
+        type: ActorType.ACTOR,
+        transformation: {
+          position: [0, -0.65, 0],
+          rotation: [(6 * Math.PI) / 4, degToRad(22.5), 0],
+          scale: Array(3).fill(1.04) as Tuple<number, 3>,
+        },
       },
-    };
-    const table = new OctagonTable(state, tableFrame);
+      tableFrame,
+    );
     if (table) {
       table.model.isPickable = false;
     }
@@ -54,6 +87,6 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(Actor) {
     return table;
   }
 }
-export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(Actor) {}
-export class RectangleTable extends RectangleTableMixin<TableCtor>(Actor) {}
-export class PokerTable extends PokerTableMixin<TableCtor>(Actor) {}
+export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {}
+export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {}
+export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {}

@@ -71,7 +71,7 @@ export class ServerActorBuilderFactory extends ActorBuilder {
     }
   }
 
-  async buildTable(tableState: TableState): Promise<Actor | null> {
+  async buildTable(tableState: TableState): Promise<ServerBase | null> {
     switch (tableState.type) {
       case 'Hexagon':
         return await HexTable.fromState<HexTable>();
@@ -82,7 +82,7 @@ export class ServerActorBuilderFactory extends ActorBuilder {
       case 'Square':
         return await SquareTable.fromState<SquareTable>();
       case 'CustomRectangle':
-        return await CustomRectangleTable.fromState<CustomRectangleTable>(tableState);
+        return await CustomRectangleTable.fromState(tableState);
       case 'Octagon':
         return await OctagonTable.fromState();
       case 'CustomSquare':
