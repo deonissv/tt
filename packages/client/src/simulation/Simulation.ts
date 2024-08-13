@@ -12,6 +12,7 @@ import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import { type SimulationStateSave } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
@@ -160,6 +161,8 @@ export class Simulation extends SimulationBase {
     this.scene.onPointerObservable.add(evt => {
       switch (evt.type) {
         case PointerEventTypes.POINTERDOWN: {
+          if (evt.event.button !== 0) return;
+
           this._cursorPos = this.gCursor;
           this._pickedActor = this._pickActor();
           if (!this._pickedActor) return;
@@ -203,5 +206,9 @@ export class Simulation extends SimulationBase {
     if (actor) {
       (actor as ClientBase).move(...position);
     }
+  }
+
+  async handleSpawnActor(state: UnknownActorState) {
+    await Simulation.actorFromState(state);
   }
 }

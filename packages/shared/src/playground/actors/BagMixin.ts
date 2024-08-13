@@ -2,9 +2,7 @@ import { STATIC_HOST } from '@shared/constants';
 import type { BagState, Model } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type { Constructor } from '@shared/types';
-import type { Containable } from '../actions/Containable';
 import { Loader } from '../Loader';
-import { SimulationBase } from '../Simulation';
 import type { SharedBase } from './SharedBase';
 
 const BAG_MODEL: Model = {
@@ -15,7 +13,7 @@ const BAG_MODEL: Model = {
 };
 
 export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) => {
-  return class Bag extends Base implements Containable {
+  return class Bag extends Base {
     items: UnknownActorState[];
 
     get size() {
@@ -31,20 +29,6 @@ export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) =
       }
 
       return new this(state, model, collider ?? undefined);
-    }
-
-    async pickItem() {
-      if (this.size < 1) {
-        return;
-      }
-
-      const item = this.items.pop()!;
-
-      item.transformation = this.transformation;
-      item.transformation.position![0] -= 4;
-
-      const newActor = await SimulationBase.actorFromState(item);
-      return newActor;
     }
   };
 };

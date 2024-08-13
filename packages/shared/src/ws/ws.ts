@@ -1,16 +1,10 @@
 import type { Tuple } from '@babylonjs/core/types';
 import type { SimulationStateSave } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type ws from 'ws';
 import { type MessageEvent as me } from 'ws';
 import type { ClientAction, ServerAction, SimAction } from './actions';
-import type {
-  CursorsPld,
-  DownloadProgressPld,
-  DropActorPld,
-  MoveClientActorPld,
-  MoveServerActorPld,
-  SpawnActorPld,
-} from './payloads';
+import type { CursorsPld, DownloadProgressPld, DropActorPld, MoveClientActorPld, MoveServerActorPld } from './payloads';
 
 interface ActionPayloads {
   // handshake
@@ -28,7 +22,7 @@ interface ActionPayloads {
   [ClientAction.RELEASE_ACTOR]: string;
 
   [ServerAction.CURSORS]: CursorsPld;
-  [ServerAction.SPAWN_ACTOR]: SpawnActorPld;
+  [ServerAction.SPAWN_ACTOR]: UnknownActorState;
   [ServerAction.DROP_ACTOR]: DropActorPld;
   [ServerAction.REMOVE_ACTOR]: string;
 }

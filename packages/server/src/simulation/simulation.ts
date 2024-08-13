@@ -7,7 +7,8 @@ import { Logger } from '@nestjs/common';
 import type { TableState } from '@shared/dto/states';
 import { type SimulationStateSave } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import { SimulationBase } from '@shared/playground';
+import { SharedBase, SimulationBase } from '@shared/playground';
+import { isContainable } from '@shared/playground/actions/Containable';
 import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
 import type { WS } from '@shared/ws';
 import { ClientAction, ServerAction } from '@shared/ws';
@@ -93,6 +94,16 @@ export class Simulation extends SimulationBase {
       case ClientAction.MOVE_ACTOR:
         this.handleMoveActor(msg.payload.guid, msg.payload.position);
         break;
+      case ClientAction.PICK_ITEM:
+        this.handlePickItem(msg.payload);
+        break;
+    }
+  }
+
+  handlePickItem(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor && isContainable(actor)) {
+      actor.pickItem();
     }
   }
 
@@ -128,23 +139,39 @@ export class Simulation extends SimulationBase {
   getSimActions(prevState: SimulationStateSave, state: SimulationStateSave): ServerActionMsg[] {
     const actions: WS.ServerActionMsg[] = [];
 
-    this.actors.forEach(actor => {
-      const actorState = state.actorStates?.find(actorState => actorState.guid === actor.guid);
-      const prevActorState = prevState.actorStates?.find(actorState => actorState.guid === actor.guid);
-      if (!actorState) {
+    const prevActorStates = prevState.actorStates ?? [];
+    const actorStates = state.actorStates ?? [];
+
+    const guids = new Set([
+      ...prevActorStates.map(actorState => actorState.guid),
+      ...actorStates.map(actorState => actorState.guid),
+    ]);
+
+    guids.forEach(guid => {
+      const actorState = state.actorStates?.find(actorState => actorState.guid === guid);
+      const prevActorState = prevState.actorStates?.find(actorState => actorState.guid === guid);
+      if (!actorState && !prevActorState) return;
+
+      if (!actorState && prevActorState) {
         // handle remove actor
         return;
       }
-      if (!prevActorState) {
-        // handle add actor
+      if (!prevActorState && actorState) {
+        actions.push({
+          type: ServerAction.SPAWN_ACTOR,
+          payload: actorState,
+        });
         return;
       }
-      const positionUpdate = actor.getPositionUpdate(prevActorState, actorState);
-      if (positionUpdate) {
-        actions.push({
-          type: ServerAction.MOVE_ACTOR,
-          payload: { guid: actor.guid, position: positionUpdate },
-        });
+
+      if (prevActorState && actorState) {
+        const positionUpdate = SharedBase.prototype.getPositionUpdate(prevActorState, actorState);
+        if (positionUpdate) {
+          actions.push({
+            type: ServerAction.MOVE_ACTOR,
+            payload: { guid: guid, position: positionUpdate },
+          });
+        }
       }
     });
 

@@ -81,6 +81,10 @@ export class SimulationRoom {
             sim.handleMoveActor(action.payload.guid, action.payload.position);
             break;
           }
+          case ServerAction.SPAWN_ACTOR: {
+            sim.handleSpawnActor(action.payload).catch(console.error);
+            break;
+          }
         }
       });
     });
@@ -89,6 +93,7 @@ export class SimulationRoom {
   }
 
   static onPickItem = (actor: ClientBase) => {
+    console.log('PICK_ITEM', actor.guid);
     this.actions.push({
       type: ClientAction.PICK_ITEM,
       payload: actor.guid,

@@ -1,6 +1,7 @@
 import { CreateBox } from '@babylonjs/core';
 import { Inspector } from '@babylonjs/inspector';
-import { ServerBase } from '@server/src/simulation/actors';
+import type { ServerBase } from '@server/src/simulation/actors';
+import { TileStack } from '@server/src/simulation/actors';
 import { ServerActorBuilder } from '@server/src/simulation/serverActorBuilder';
 import { ActorType } from '@shared/dto/states';
 import { Logger } from '@shared/playground';
@@ -18,7 +19,9 @@ const App = () => {
       {},
       {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onPickItem: () => {},
+        onPickItem: actor => {
+          console.log('PICK_ITEM', actor.guid);
+        },
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
         // @ts-ignore
         onMoveActor: (a: ServerBase, pos) => {
@@ -48,35 +51,47 @@ const App = () => {
       type: 'CircleGlass',
     });
 
-    new ServerBase(
-      { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 5, 0] } },
+    new TileStack(
+      {
+        type: ActorType.TILE_STACK,
+        tileType: 0,
+        faceURL: 'https://i.imgur.com/1I4Z1Zb.png',
+        guid: 'tileStack',
+        name: 'tileStack',
+        size: 3,
+      },
       CreateBox('box', { size: 1 }),
     );
 
-    new ServerBase(
-      { type: ActorType.ACTOR, guid: 'box1', name: 'box1', transformation: { position: [5, 5, 0] } },
-      CreateBox('box', { size: 1 }),
-    );
+    // new ServerBase(
+    //   { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 5, 0] } },
+    //   CreateBox('box', { size: 1 }),
+    // );
 
-    new ServerBase(
-      { type: ActorType.ACTOR, guid: 'box2', name: 'box2', transformation: { position: [0, 5, 5] } },
-      CreateBox('box', { size: 1 }),
-    );
+    // new ServerBase(
+    //   { type: ActorType.ACTOR, guid: 'box1', name: 'box1', transformation: { position: [5, 5, 0] } },
+    //   CreateBox('box', { size: 1 }),
+    // );
 
-    new ServerBase(
-      { type: ActorType.ACTOR, guid: 'box3', name: 'box3', transformation: { position: [10, 5, 10] } },
-      CreateBox('box', { size: 1 }),
-    );
+    // new ServerBase(
+    //   { type: ActorType.ACTOR, guid: 'box2', name: 'box2', transformation: { position: [0, 5, 5] } },
+    //   CreateBox('box', { size: 1 }),
+    // );
 
-    new ServerBase(
-      { type: ActorType.ACTOR, guid: 'box4', name: 'box4', transformation: { position: [10, 5, -10] } },
-      CreateBox('box', { size: 1 }),
-    );
+    // new ServerBase(
+    //   { type: ActorType.ACTOR, guid: 'box3', name: 'box3', transformation: { position: [10, 5, 10] } },
+    //   CreateBox('box', { size: 1 }),
+    // );
 
-    new ServerBase(
-      { type: ActorType.ACTOR, guid: 'box5', name: 'box5', transformation: { position: [-10, 5, -10] } },
-      CreateBox('box', { size: 1 }),
-    );
+    // new ServerBase(
+    //   { type: ActorType.ACTOR, guid: 'box4', name: 'box4', transformation: { position: [10, 5, -10] } },
+    //   CreateBox('box', { size: 1 }),
+    // );
+
+    // new ServerBase(
+    //   { type: ActorType.ACTOR, guid: 'box5', name: 'box5', transformation: { position: [-10, 5, -10] } },
+    //   CreateBox('box', { size: 1 }),
+    // );
 
     Inspector.Show(sim.scene, {});
 

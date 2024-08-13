@@ -3,10 +3,11 @@ import type { TileState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
 import { TileStackMixin } from '@shared/playground/actors/TileStackMixin';
+import { ServerActorBuilder } from '../serverActorBuilder';
 import { ServerBase } from './serverBase';
 import { Tile } from './tile';
 
-export class TileStackBase extends ServerBase<TileStackState> {
+export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
   size: number;
 
   constructor(state: TileStackState, modelMesh: Mesh, colliderMesh?: Mesh) {
@@ -24,10 +25,12 @@ export class TileStackBase extends ServerBase<TileStackState> {
     const tileState: TileState = {
       ...this.__state,
       type: ActorType.TILE,
+      transformation: this.transformation,
     };
 
     tileState.transformation!.position![0] -= 4;
-    const newTile = await Tile.fromState(tileState);
+
+    const newTile = await ServerActorBuilder.buildTile(tileState);
     this.size -= 1;
     this.model.scaling.y = this.size;
 
@@ -43,5 +46,3 @@ export class TileStackBase extends ServerBase<TileStackState> {
     return new TileStack(state, tileModel);
   }
 }
-
-export class TileStack extends TileStackMixin(TileStackBase) {}
