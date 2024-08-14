@@ -359,8 +359,8 @@ export class TTSParserC extends ParserBase {
       return null;
     }
 
-    if (!this.hasProperty(objectState, 'CustomDeck', 'ERROR 12')) return null;
-    if (!this.isObject(objectState.CustomDeck, 'ERROR 13')) return null;
+    // if (!this.hasProperty(objectState, 'CustomDeck', 'ERROR 12')) return null;
+    // if (!this.isObject(objectState.CustomDeck, 'ERROR 13')) return null;
 
     const deckId = +cardID.toString().slice(0, -2);
     const sequence = +cardID.toString().slice(-2);

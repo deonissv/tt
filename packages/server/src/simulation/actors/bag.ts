@@ -20,9 +20,11 @@ export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase)
     const item = this.items.pop()!;
 
     item.transformation = this.transformation;
-    item.transformation.position![0] -= 4;
+    item.transformation.position![1] += 1;
 
     const newActor = await ServerActorBuilder.build(item);
+    newActor?.pick();
+
     return newActor;
   }
 }

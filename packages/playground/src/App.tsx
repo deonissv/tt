@@ -1,7 +1,5 @@
-import { CreateBox } from '@babylonjs/core';
 import { Inspector } from '@babylonjs/inspector';
 import type { ServerBase } from '@server/src/simulation/actors';
-import { TileStack } from '@server/src/simulation/actors';
 import { ServerActorBuilder } from '@server/src/simulation/serverActorBuilder';
 import { ActorType } from '@shared/dto/states';
 import { Logger } from '@shared/playground';
@@ -19,13 +17,17 @@ const App = () => {
       {},
       {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        onPickItem: actor => {
+        onPickItem: async actor => {
           console.log('PICK_ITEM', actor.guid);
+          const newActor = await actor?.pickItem();
+
+          sim._pickedActor = newActor;
+          //  = newActor;
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
         // @ts-ignore
         onMoveActor: (a: ServerBase, pos) => {
-          console.log(pos);
+          console.log('onMoveActor', pos);
           a.move(...pos);
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
@@ -51,17 +53,89 @@ const App = () => {
       type: 'CircleGlass',
     });
 
-    new TileStack(
-      {
-        type: ActorType.TILE_STACK,
-        tileType: 0,
-        faceURL: 'https://i.imgur.com/1I4Z1Zb.png',
-        guid: 'tileStack',
-        name: 'tileStack',
-        size: 3,
-      },
-      CreateBox('box', { size: 1 }),
-    );
+    // await ServerActorBuilder.buildCard({
+    //   type: ActorType.CARD,
+    //   guid: 'card',
+    //   name: 'card',
+    //   faceURL:
+    //     'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //   backURL:
+    //     'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //   rows: 0,
+    //   cols: 0,
+    //   sequence: 0,
+    // });
+
+    // new Card(
+    //   {
+    //     type: ActorType.CARD,
+    //     guid: 'card',
+    //     name: 'card',
+    //     faceURL:
+    //       'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //     backURL:
+    //       'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //   },
+    //   CreateBox('box', { width: 2, height: 0.1, depth: 1 }),
+    //   new Texture('https://i.imgur.com/1I4Z1Zb.png'),
+    //   new Texture('https://i.imgur.com/1I4Z1Zb.png'),
+    // );
+
+    await ServerActorBuilder.buildDeck({
+      type: ActorType.DECK,
+      guid: 'deck',
+      name: 'deck',
+      cards: [
+        {
+          type: ActorType.CARD,
+          guid: 'card1',
+          name: 'card1',
+          faceURL:
+            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+          backURL:
+            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+          rows: 0,
+          cols: 0,
+          sequence: 0,
+        },
+        {
+          type: ActorType.CARD,
+          guid: 'card2',
+          name: 'card2',
+          faceURL:
+            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+          backURL:
+            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+          rows: 0,
+          cols: 0,
+          sequence: 0,
+        },
+        {
+          type: ActorType.CARD,
+          guid: 'card3',
+          name: 'card3',
+          faceURL:
+            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+          backURL:
+            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+          rows: 0,
+          cols: 0,
+          sequence: 0,
+        },
+      ],
+    });
+
+    // new TileStack(
+    //   {
+    //     type: ActorType.TILE_STACK,
+    //     tileType: 0,
+    //     faceURL: 'https://i.imgur.com/1I4Z1Zb.png',
+    //     guid: 'tileStack',
+    //     name: 'tileStack',
+    //     size: 5,
+    //   },
+    //   CreateBox('box', { size: 1 }),
+    // );
 
     // new ServerBase(
     //   { type: ActorType.ACTOR, guid: 'box', name: 'box', transformation: { position: [0, 5, 0] } },

@@ -1,5 +1,5 @@
-import type { Mesh, Texture } from '@babylonjs/core';
-import { Vector3 } from '@babylonjs/core';
+import type { Texture } from '@babylonjs/core';
+import { Mesh, Vector3 } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
 import type { CardGrid, CardState } from '@shared/dto/states';
 import type { Constructor } from '@shared/types';
@@ -36,7 +36,8 @@ export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T)
       mesh.rotation.z = Math.PI / 2;
 
       mesh.scaling = new Vector3(2, 2.093, 1.77);
-      return mesh;
+
+      return Mesh.MergeMeshes([mesh], true, false, undefined, false, true);
     }
 
     static async fromState<T extends Card>(this: Constructor<T>, state: CardState): Promise<T | null> {

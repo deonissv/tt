@@ -82,6 +82,7 @@ export class SimulationRoom {
             break;
           }
           case ServerAction.SPAWN_ACTOR: {
+            // eslint-disable-next-line no-console
             sim.handleSpawnActor(action.payload).catch(console.error);
             break;
           }
@@ -93,9 +94,8 @@ export class SimulationRoom {
   }
 
   static onPickItem = (actor: ClientBase) => {
-    console.log('PICK_ITEM', actor.guid);
     this.actions.push({
-      type: ClientAction.PICK_ITEM,
+      type: ClientAction.PICK_START,
       payload: actor.guid,
     });
   };

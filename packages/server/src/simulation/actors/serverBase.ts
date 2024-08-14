@@ -1,4 +1,4 @@
-import type { HavokPlugin, Scene } from '@babylonjs/core';
+import type { HavokPlugin } from '@babylonjs/core';
 import {
   PhysicsBody,
   PhysicsMotionType,
@@ -11,6 +11,7 @@ import {
 } from '@babylonjs/core';
 import { PICK_HIGHT } from '@shared/constants';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
+import type { SimulationSceneBase } from '@shared/playground';
 import { SharedBase } from '@shared/playground/actors/SharedBase';
 
 export class ServerBase<T extends UnknownActorState = UnknownActorState> extends SharedBase<T> {
@@ -24,7 +25,7 @@ export class ServerBase<T extends UnknownActorState = UnknownActorState> extends
     body.shape = new PhysicsShapeMesh(this.__model, this._scene);
     body.shape.material.restitution = 0;
 
-    this.body = body;
+    this.body = this.physicsBody!;
     this.body.setMassProperties({
       mass: this.__mass,
       // centerOfMass: Vector3.Zero(),
@@ -78,8 +79,8 @@ export class ServerBase<T extends UnknownActorState = UnknownActorState> extends
     return this.scene._physicsEngine?.getPhysicsPlugin() as HavokPlugin;
   }
 
-  get scene(): Scene {
-    return this._scene;
+  get scene(): SimulationSceneBase {
+    return this._scene as SimulationSceneBase;
   }
 
   pick() {

@@ -225,4 +225,46 @@ describe('handleAction', () => {
       expect((sim.actors[0] as TileStack).size).toBe(2);
     });
   });
+
+  describe('PICK_START', () => {
+    it('should spawn object', async () => {
+      vi.spyOn(ServerActorBuilder, 'buildTile').mockImplementation(() => {
+        return Promise.resolve(
+          new Tile(
+            {
+              type: ActorType.TILE,
+              tileType: 0,
+              guid: 'tile',
+              name: 'tile',
+              faceURL: '',
+            },
+            CreateBox('box', { size: 1 }),
+          ),
+        );
+      });
+      const sim = getPhSim();
+
+      new TileStack(
+        {
+          type: ActorType.TILE_STACK,
+          tileType: 0,
+          faceURL: 'https://i.imgur.com/1I4Z1Zb.png',
+          guid: 'tileStack',
+          name: 'tileStack',
+          size: 3,
+        },
+        CreateBox('box', { size: 1 }),
+      );
+      sim.start();
+      actionHandler.actors = sim.actors;
+
+      await wait(100);
+      actionHandler.handlePickStart('tileStack');
+
+      await wait(500);
+
+      expect(sim.actors.length).toBe(2);
+      expect((sim.actors[0] as TileStack).size).toBe(2);
+    });
+  });
 });

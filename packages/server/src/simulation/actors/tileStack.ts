@@ -11,28 +11,42 @@ export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
   size: number;
 
   constructor(state: TileStackState, modelMesh: Mesh, colliderMesh?: Mesh) {
+    modelMesh.scaling.y = state.size;
+
+    if (colliderMesh) {
+      colliderMesh.scaling.y = state.size;
+    }
+
     super(state, modelMesh, colliderMesh);
     this.size = state.size;
   }
 
   async pickItem(): Promise<Tile | null> {
-    this.model.scaling.y -= 1;
-
-    if (this.size < 1) {
+    if (this.size < 2) {
       return null;
     }
 
-    const tileState: TileState = {
+    const tileState = {
       ...this.__state,
+      guid: this.scene.getUniqueGUID(),
       type: ActorType.TILE,
       transformation: this.transformation,
-    };
+    } satisfies TileState;
 
-    tileState.transformation!.position![0] -= 4;
+    tileState.transformation.position[1] += 1;
+    tileState.transformation.scale[1] /= this.size;
 
     const newTile = await ServerActorBuilder.buildTile(tileState);
+
+    newTile?.pick();
+
     this.size -= 1;
+
     this.model.scaling.y = this.size;
+    if (this.__collider) {
+      this.__collider.scaling.y = this.size;
+      this._forceUpdate();
+    }
 
     return newTile;
   }

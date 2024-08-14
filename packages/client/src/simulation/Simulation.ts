@@ -16,8 +16,7 @@ import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { Deck } from './actors';
-import { ClientBase } from './actors';
+import type { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 
 export interface SimulationCallbacks {
@@ -96,7 +95,7 @@ export class Simulation extends SimulationBase {
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
     const actorCandidate = pickedMesh?.parent;
-    if (!(actorCandidate instanceof ClientBase)) return null;
+    // if (!(actorCandidate instanceof ClientBase)) return null;
 
     return actorCandidate.pickable ? actorCandidate : null;
   }
@@ -162,17 +161,16 @@ export class Simulation extends SimulationBase {
       switch (evt.type) {
         case PointerEventTypes.POINTERDOWN: {
           if (evt.event.button !== 0) return;
+          if (this._pickedActor) return;
 
           this._cursorPos = this.gCursor;
           this._pickedActor = this._pickActor();
           if (!this._pickedActor) return;
-          // this._pickedActor.pick();
           this.cbs.onPickActor(this._pickedActor);
           break;
         }
         case PointerEventTypes.POINTERUP: {
           if (!this._pickedActor) return;
-          // this._pickedActor.release();
           this.cbs.onReleaseActor(this._pickedActor);
           this._pickedActor = null;
           break;
@@ -209,6 +207,10 @@ export class Simulation extends SimulationBase {
   }
 
   async handleSpawnActor(state: UnknownActorState) {
-    await Simulation.actorFromState(state);
+    const actor = await ClientActorBuilder.build(state);
+    if (actor) {
+      this._cursorPos = this.gCursor;
+      this._pickedActor = actor;
+    }
   }
 }

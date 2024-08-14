@@ -39,6 +39,6 @@ export class Deck extends DeckMixin(ClientBase) {
 
     const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, this.items.at(-1)!);
     this.__model = cardModel;
-    this.model.scaling.x = this.size;
+    this.model.scaling.y = this.size;
   }
 }

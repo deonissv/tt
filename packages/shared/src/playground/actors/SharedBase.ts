@@ -33,7 +33,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
   picked = false;
 
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
-    super(state.guid, undefined, true);
+    super(`[${state.guid}] ${state.name}`, undefined, true);
 
     this.guid = state.guid;
 
@@ -109,7 +109,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     }
   }
 
-  get transformation(): Transformation {
+  get transformation(): Required<Transformation> {
     return {
       scale: this.scaling.asArray(),
       rotation: this.rotation.asArray(),
