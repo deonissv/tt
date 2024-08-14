@@ -1,23 +1,21 @@
 import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 
-import type { Tuple } from '@babylonjs/core';
 import { HavokPlugin, Vector3 } from '@babylonjs/core';
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 import { Logger } from '@nestjs/common';
 import type { TableState } from '@shared/dto/states';
 import { type SimulationStateSave } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import { SharedBase, SimulationBase } from '@shared/playground';
-import { isContainable } from '@shared/playground/actions/Containable';
+import { SimulationBase } from '@shared/playground';
 import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { WS } from '@shared/ws';
-import { ClientAction, ServerAction } from '@shared/ws';
-import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
+import type { ClientActionMsg } from '@shared/ws/ws';
+import { ActionHandler } from './action-handler';
 import type { ServerBase } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
 
 export class Simulation extends SimulationBase {
   static actorBuilder = ServerActorBuilder;
+  actionsHandler = new ActionHandler();
   logger: Logger;
 
   constructor(initialState: SimulationStateSave) {
@@ -80,52 +78,7 @@ export class Simulation extends SimulationBase {
   }
 
   update(msg: ClientActionMsg[]) {
-    msg.map(msg => this.handleAction(msg));
-  }
-
-  handleAction(msg: ClientActionMsg) {
-    switch (msg.type) {
-      case ClientAction.PICK_ACTOR:
-        this.handlePickActor(msg.payload);
-        break;
-      case ClientAction.RELEASE_ACTOR:
-        this.handleReleaseActor(msg.payload);
-        break;
-      case ClientAction.MOVE_ACTOR:
-        this.handleMoveActor(msg.payload.guid, msg.payload.position);
-        break;
-      case ClientAction.PICK_ITEM:
-        this.handlePickItem(msg.payload);
-        break;
-    }
-  }
-
-  handlePickItem(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && isContainable(actor)) {
-      actor.pickItem();
-    }
-  }
-
-  handlePickActor(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor) {
-      actor.pick();
-    }
-  }
-
-  handleReleaseActor(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor) {
-      actor.release();
-    }
-  }
-
-  handleMoveActor(guid: string, position: Tuple<number, 2>) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor) {
-      actor.move(...position);
-    }
+    this.actionsHandler.handleActions(msg, this.actors);
   }
 
   static async actorFromState(actorState: UnknownActorState): Promise<ServerBase | null> {
@@ -134,48 +87,6 @@ export class Simulation extends SimulationBase {
 
   static async tableFromState(tableState: TableState): Promise<ServerBase | null> {
     return await this.actorBuilder.buildTable(tableState);
-  }
-
-  getSimActions(prevState: SimulationStateSave, state: SimulationStateSave): ServerActionMsg[] {
-    const actions: WS.ServerActionMsg[] = [];
-
-    const prevActorStates = prevState.actorStates ?? [];
-    const actorStates = state.actorStates ?? [];
-
-    const guids = new Set([
-      ...prevActorStates.map(actorState => actorState.guid),
-      ...actorStates.map(actorState => actorState.guid),
-    ]);
-
-    guids.forEach(guid => {
-      const actorState = state.actorStates?.find(actorState => actorState.guid === guid);
-      const prevActorState = prevState.actorStates?.find(actorState => actorState.guid === guid);
-      if (!actorState && !prevActorState) return;
-
-      if (!actorState && prevActorState) {
-        // handle remove actor
-        return;
-      }
-      if (!prevActorState && actorState) {
-        actions.push({
-          type: ServerAction.SPAWN_ACTOR,
-          payload: actorState,
-        });
-        return;
-      }
-
-      if (prevActorState && actorState) {
-        const positionUpdate = SharedBase.prototype.getPositionUpdate(prevActorState, actorState);
-        if (positionUpdate) {
-          actions.push({
-            type: ServerAction.MOVE_ACTOR,
-            payload: { guid: guid, position: positionUpdate },
-          });
-        }
-      }
-    });
-
-    return actions;
   }
 
   toState(): SimulationStateSave {
