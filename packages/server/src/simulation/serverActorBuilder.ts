@@ -135,7 +135,7 @@ export class ServerActorBuilderFactory extends ActorBuilder {
   }
 
   async buildTile(actorState: TileState): Promise<Tile | null> {
-    return await Tile.fromState(actorState);
+    return await Tile.fromState<Tile>(actorState);
   }
 
   async buildTileStack(actorState: TileStackState): Promise<TileStack | null> {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/dot-notation */
 import type { Tuple } from '@babylonjs/core';
-import { CreateBox, Mesh, PhysicsMotionType, Scene } from '@babylonjs/core';
+import { CreateBox, Logger, Mesh, PhysicsMotionType, Scene } from '@babylonjs/core';
 
 import { PICK_HIGHT } from '@shared/constants';
 import { ActorType, type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
