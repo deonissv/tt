@@ -40,23 +40,6 @@ export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T)
       return Mesh.MergeMeshes([mesh], true, false, undefined, false, true);
     }
 
-    static async fromState<T extends Card>(this: Constructor<T>, state: CardState): Promise<T | null> {
-      const model = await Card.loadCardModel();
-
-      if (!model) {
-        return null;
-      }
-
-      const faceTexture = await Loader.loadTexture(state.faceURL);
-      const backTexture = await Loader.loadTexture(state.backURL);
-
-      if (!faceTexture || !backTexture) {
-        return null;
-      }
-
-      return new this(state, model, faceTexture, backTexture);
-    }
-
     static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid: CardGrid) {
       const [col, row] = Card.getColRow(grid.sequence, grid.cols);
 

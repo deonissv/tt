@@ -33,7 +33,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
   picked = false;
 
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
-    super(`[${state.guid}] ${state.name}`, undefined, true);
+    super(state.guid ?? state.name, undefined, true);
 
     this.guid = state.guid;
 
