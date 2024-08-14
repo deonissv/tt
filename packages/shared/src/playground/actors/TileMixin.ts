@@ -14,15 +14,6 @@ const SQUARE_TILE_URL = `${STATIC_HOST}/square_tile.obj`;
 
 export const TileMixin = <T extends Constructor<SharedBase<TileState>>>(Base: T) => {
   return class Tile extends Base {
-    static async fromState<T extends Tile>(this: Constructor<T>, state: TileState): Promise<T | null> {
-      const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
-      if (!tileModel) {
-        return null;
-      }
-
-      return new this(state, tileModel);
-    }
-
     static async getTileModel(type: TileType, faceURL: string, backURL?: string) {
       switch (type) {
         case TileType.BOX: {
@@ -36,6 +27,26 @@ export const TileMixin = <T extends Constructor<SharedBase<TileState>>>(Base: T)
         }
         case TileType.ROUNDED: {
           return Tile.getBoxTileModel(faceURL, backURL);
+        }
+        default: {
+          return null;
+        }
+      }
+    }
+
+    static async getTileMesh(type: TileType) {
+      switch (type) {
+        case TileType.BOX: {
+          return Loader.loadMesh(SQUARE_TILE_URL);
+        }
+        case TileType.HEX: {
+          return Loader.loadMesh(HEX_TILE_URL);
+        }
+        case TileType.CIRCLE: {
+          return Loader.loadMesh(ROUND_TILE_URL);
+        }
+        case TileType.ROUNDED: {
+          return Loader.loadMesh(SQUARE_TILE_URL);
         }
         default: {
           return null;
@@ -61,7 +72,7 @@ export const TileMixin = <T extends Constructor<SharedBase<TileState>>>(Base: T)
     }
 
     static async getBoxTileModel(faceURL: string, backURL?: string) {
-      const model = await Loader.loadMesh(SQUARE_TILE_URL);
+      const model = await this.getTileMesh(TileType.BOX);
 
       if (!model) {
         return null;
@@ -80,7 +91,7 @@ export const TileMixin = <T extends Constructor<SharedBase<TileState>>>(Base: T)
     }
 
     static async getHexTileModel(faceURL: string, backURL?: string) {
-      const model = await Loader.loadMesh(HEX_TILE_URL);
+      const model = await this.getTileMesh(TileType.HEX);
 
       if (!model) {
         return null;
@@ -98,7 +109,7 @@ export const TileMixin = <T extends Constructor<SharedBase<TileState>>>(Base: T)
     }
 
     static async getCircleTileModel(faceURL: string, backURL?: string) {
-      const model = await Loader.loadMesh(ROUND_TILE_URL);
+      const model = await this.getTileMesh(TileType.CIRCLE);
 
       if (!model) {
         return null;

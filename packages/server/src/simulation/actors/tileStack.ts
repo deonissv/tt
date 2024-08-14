@@ -52,7 +52,7 @@ export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
   }
 
   static async fromState(state: TileStackState): Promise<TileStack | null> {
-    const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
+    const tileModel = await Tile.getTileMesh(state.tileType);
     if (!tileModel) {
       return null;
     }
