@@ -1,6 +1,6 @@
 import type { Tuple } from '@babylonjs/core';
 import { STATIC_HOST } from './constants';
-import type { Material, Transformation } from './dto/states';
+import type { Material, Model, Transformation } from './dto/states';
 import { degToRad } from './utils';
 
 export const feltMaterialProps: Material = {
@@ -178,4 +178,11 @@ export const HEX_TABLE_MODEL = {
     // normalURL: `${STATIC_HOST}/HexagonTable_nrm.png`,
     // specularURL: `${STATIC_HOST}/HexagonTable_spec.png`,
   },
+};
+
+export const BAG_MODEL: Model = {
+  meshURL: `${STATIC_HOST}/Group1.obj`,
+  normalURL: `${STATIC_HOST}/bag_N.png`,
+  specularURL: `${STATIC_HOST}/bag_S.png`,
+  diffuseURL: `${STATIC_HOST}/2-bag_D_gray.png`,
 };

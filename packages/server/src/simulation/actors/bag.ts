@@ -1,5 +1,7 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { BagState } from '@shared/dto/states';
+import { BAG_MODEL } from '@shared/assets';
+import type { BagState, Model } from '@shared/dto/states';
+import { Loader } from '@shared/playground';
 import type { Containable } from '@shared/playground/actions/Containable';
 import { BagMixin } from '@shared/playground/actors/BagMixin';
 import type { Constructor } from '@shared/types';
@@ -26,5 +28,16 @@ export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase)
     newActor?.pick();
 
     return newActor;
+  }
+
+  static async fromState(state: BagState): Promise<Bag | null> {
+    const modelState: Model = state.model ?? BAG_MODEL;
+    const model = await Loader.loadMesh(modelState.meshURL);
+
+    if (!model) {
+      return null;
+    }
+
+    return new this(state, model);
   }
 }
