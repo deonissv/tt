@@ -1,4 +1,8 @@
+import { CreateBox, PhysicsMotionType } from '@babylonjs/core';
 import { ConsoleLogger } from '@nestjs/common';
+import { ServerBase } from '@server/src/simulation/actors';
+import { Simulation } from '@server/src/simulation/simulation';
+import { ActorType } from '@shared/dto/states';
 import { execSync } from 'child_process';
 import type { StartedTestContainer } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
@@ -42,4 +46,19 @@ export async function startContainer(): Promise<StartedTestContainer | null> {
 
 export function getDatabaseUrl(host: string, port: number): string {
   return `postgresql://test:test@${host}:${port}/testdb`;
+}
+
+export function getPhSim() {
+  const sim = new Simulation({
+    actorStates: [],
+  });
+  sim.initPhysics();
+
+  const ground = new ServerBase(
+    { type: ActorType.ACTOR, guid: '#ground', name: '#ground', model: { meshURL: '' } },
+    CreateBox('ground', { width: 200, height: 0.1, depth: 200 }),
+  );
+  ground.physicsBody?.setMotionType(PhysicsMotionType.ANIMATED);
+
+  return sim;
 }

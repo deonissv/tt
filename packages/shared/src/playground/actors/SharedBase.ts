@@ -12,7 +12,7 @@ import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defau
 import type { ActorState, TableState, Transformation } from '@shared/dto/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import { floatCompare, vecDelta, vecFloatCompare } from '@shared/utils';
+import { floatCompare, vecDelta } from '@shared/utils';
 import { Loader } from '../Loader';
 import { Logger } from '../Logger';
 
@@ -231,42 +231,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
       transformation: this.transformation,
       mass: this.__mass,
     };
-  }
-
-  getPositionUpdate(
-    prevState: ActorBaseState,
-    currentState: ActorBaseState = this.toState(),
-  ): Transformation['position'] | null {
-    const updatePosition = vecFloatCompare<3>(
-      prevState.transformation?.position ?? DEFAULT_POSITION,
-      currentState.transformation?.position ?? DEFAULT_POSITION,
-    );
-    if (!updatePosition) return null;
-    return currentState.transformation?.position;
-  }
-
-  getRotationUpdate(
-    prevState: ActorBaseState,
-    currentState: ActorBaseState = this.toState(),
-  ): Transformation['rotation'] | null {
-    const updateRotation = vecFloatCompare<3>(
-      prevState.transformation?.rotation ?? DEFAULT_ROTATION,
-      currentState.transformation?.rotation ?? DEFAULT_ROTATION,
-    );
-    if (!updateRotation) return null;
-    return currentState.transformation?.rotation;
-  }
-
-  getScaleUpdate(
-    prevState: ActorBaseState,
-    currentState: ActorBaseState = this.toState(),
-  ): Transformation['scale'] | null {
-    const updateScale = vecFloatCompare<3>(
-      prevState.transformation?.scale ?? DEFAULT_SCALE,
-      currentState.transformation?.scale ?? DEFAULT_SCALE,
-    );
-    if (!updateScale) return null;
-    return currentState.transformation?.scale;
   }
 
   toStateUpdate(actorState?: ActorBaseState): ActorStateUpdate | null {

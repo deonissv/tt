@@ -12,7 +12,8 @@ import { isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import type { ClientActionMsg, ServerActionMsg } from '@shared/ws/ws';
+import type { ClientActionMsg } from '@shared/ws/ws';
+import { ActionBuilder } from './action-builder';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -22,11 +23,9 @@ export class SimulationRoom {
   wss: WebSocket.Server;
   clients: Map<WebSocket, Client>;
 
-  cursors: Map<WebSocket, CursorsPld[keyof CursorsPld]>;
+  cursors: Map<string, CursorsPld[keyof CursorsPld]>;
   simSave: SimulationStateSave | undefined;
-
-  prevCursors: string;
-  prevSimState: SimulationStateSave;
+  actionManager = new ActionBuilder();
 
   downloadProgress: DownloadProgressPld;
 
@@ -148,8 +147,9 @@ export class SimulationRoom {
     const actions = WS.read(event) as ClientActionMsg[];
 
     const cursorAction = actions.find(action => action.type === ClientAction.CURSOR);
-    if (cursorAction) {
-      this.cursors.set(event.target, cursorAction.payload);
+    const cursorClient = this.clients.get(event.target)?.id;
+    if (cursorAction && cursorClient) {
+      this.cursors.set(cursorClient, cursorAction.payload);
     }
 
     this.simulation.update(actions);
@@ -158,7 +158,11 @@ export class SimulationRoom {
   private onClose(event: WebSocket.CloseEvent) {
     SimulationRoom.logger.log(`Client disconnectingfrom room ${this.id}`);
     this.clients.delete(event.target);
-    this.cursors.delete(event.target);
+    const cursorClient = this.clients.get(event.target)?.id;
+    if (cursorClient) {
+      this.cursors.delete(cursorClient);
+    }
+
     if (this.clients.size === 0) {
       this.closeTimeout = setTimeout(() => {
         if (this.clients.size === 0) {
@@ -183,50 +187,16 @@ export class SimulationRoom {
       return;
     }
 
-    const actions: ServerActionMsg[] = [];
+    const cursors = Array.from(this.cursors.entries()).reduce((acc, [key, val]) => {
+      acc[key] = val;
+      return acc;
+    }, {});
+    const actions = this.actionManager.getActions(cursors, this.simulation.toState());
 
-    const cursorsAction = this.getCursorsAction();
-    if (cursorsAction) actions.push(cursorsAction);
-
-    const simActions = this.getSimActions();
-    if (simActions) actions.push(...simActions);
-
-    if (actions.length > 0) {
+    if (actions && actions.length > 0) {
       SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify(actions)}`);
       this.broadcast(actions);
     }
-  }
-
-  private getCursorsAction(): ServerActionMsg | null {
-    const cursors = Array.from(this.cursors).reduce((acc, [ws, cursor]) => {
-      acc[this.clients.get(ws)!.id] = cursor;
-      return acc;
-    }, {});
-
-    const cursorsUpdate = JSON.stringify(cursors);
-    if (cursorsUpdate === this.prevCursors) return null;
-
-    this.prevCursors = cursorsUpdate;
-    return {
-      type: ServerAction.CURSORS,
-      payload: cursors,
-    };
-  }
-
-  private getSimActions(): ServerActionMsg[] | null {
-    const simState = this.simulation.toState();
-
-    if (JSON.stringify(simState) === JSON.stringify(this.prevSimState)) return null;
-
-    if (!this.prevSimState) {
-      this.prevSimState = simState;
-      return null;
-    }
-    const actions = this.simulation.getSimActions(this.prevSimState, simState);
-    this.prevSimState = simState;
-
-    if (actions.length === 0) return null;
-    return actions;
   }
 
   private initSaving(): NodeJS.Timeout {
