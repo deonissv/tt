@@ -106,7 +106,7 @@ export class SimulationRoom {
 
   static onPickItem = (actor: ClientBase) => {
     this.actions.push({
-      type: ClientAction.PICK_START,
+      type: ClientAction.PICK_ITEM,
       payload: actor.guid,
     });
   };

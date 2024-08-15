@@ -24,7 +24,6 @@ interface ActionPayloads {
   [ServerAction.MOVE_ACTOR]: MoveClientActorPld;
 
   [ClientAction.PICK_ITEM]: string;
-  [ClientAction.PICK_START]: string;
   [ClientAction.CURSOR]: Tuple<number, 2>;
   [ClientAction.PICK_ACTOR]: string;
   [ClientAction.RELEASE_ACTOR]: string;

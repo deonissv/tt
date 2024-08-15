@@ -28,16 +28,6 @@ export class ActionHandler {
       case ClientAction.PICK_ITEM:
         this.handlePickItem(msg.payload);
         break;
-      case ClientAction.PICK_START:
-        this.handlePickStart(msg.payload);
-        break;
-    }
-  }
-
-  handlePickStart(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && isContainable(actor)) {
-      actor.pickItem(this.clientId);
     }
   }
 
