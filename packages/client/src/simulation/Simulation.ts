@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
-import { Color3 } from '@babylonjs/core/Maths/math.color';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { SimulationScene } from './SimulationScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
-import { Matrix, Vector3 } from '@babylonjs/core';
+import { Color3, Matrix, Vector3 } from '@babylonjs/core';
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
@@ -16,7 +15,8 @@ import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { ClientBase, Deck } from './actors';
+import type { Deck } from './actors';
+import { ClientBase } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 
 export interface SimulationCallbacks {
@@ -30,7 +30,7 @@ export class Simulation extends SimulationBase {
   static actorBuilder = ClientActorBuilder;
 
   private _hll: HighlightLayer;
-  private _hoveredMesh: Mesh | null = null;
+  private _hoveredActor: ClientBase | null = null;
   private _pickedActor: ClientBase | null = null;
   private _cursorPos: [number, number] = [0, 0];
   cbs: SimulationCallbacks;
@@ -39,7 +39,11 @@ export class Simulation extends SimulationBase {
     super();
     this.scene = scene;
     this.engine = scene.getEngine();
-    this._hll = new HighlightLayer('hll', this.scene); // @TODO change glow to thin solid line
+    this._hll = new HighlightLayer('hll', this.scene, {
+      isStroke: true,
+      blurVerticalSize: 0.15,
+      blurHorizontalSize: 0.15,
+    });
     this.cbs = cbs;
   }
 
@@ -95,7 +99,7 @@ export class Simulation extends SimulationBase {
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
     const actorCandidate = pickedMesh?.parent;
-    // if (!(actorCandidate instanceof ClientBase)) return null;
+    if (!(actorCandidate instanceof ClientBase)) return null;
 
     return actorCandidate.pickable ? actorCandidate : null;
   }
@@ -140,20 +144,32 @@ export class Simulation extends SimulationBase {
   private _handleHoverHighlight() {
     this.scene.onPointerObservable.add(evt => {
       if (evt.type !== PointerEventTypes.POINTERMOVE) return;
-      const pickedMesh = this._pickMesh();
-      if (!pickedMesh) {
-        if (this._hoveredMesh) {
-          this._hll.removeMesh(this._hoveredMesh);
-          this._hoveredMesh = null;
-        }
+
+      const hoveredActor = this._pickActor();
+
+      if (this._hoveredActor && !hoveredActor) {
+        this.unhighlightActor(this._hoveredActor);
+        this._hoveredActor = null;
         return;
       }
 
-      if (pickedMesh == this._hoveredMesh) return;
-      if (this._hoveredMesh) this._hll.removeMesh(this._hoveredMesh);
-      if (pickedMesh) this._hll.addMesh(pickedMesh, Color3.White());
-      this._hoveredMesh = pickedMesh;
+      if (hoveredActor) {
+        if (this._hoveredActor) {
+          if (this._hoveredActor.guid == hoveredActor.guid) return;
+          this.unhighlightActor(this._hoveredActor);
+        }
+        this.highlightActor(hoveredActor);
+        this._hoveredActor = hoveredActor;
+      }
     });
+  }
+
+  private highlightActor(actor: ClientBase) {
+    this._hll.addMesh(actor.__model, Color3.White(), false);
+  }
+
+  private unhighlightActor(actor: ClientBase) {
+    this._hll.removeMesh(actor.__model);
   }
 
   private _handlePick() {
