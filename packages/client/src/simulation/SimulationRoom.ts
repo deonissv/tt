@@ -97,6 +97,10 @@ export class SimulationRoom {
 
             break;
           }
+          case ServerAction.ROTATE_ACTOR: {
+            sim.handleRotateActor(action.payload.guid, action.payload.position);
+            break;
+          }
         }
       });
     });

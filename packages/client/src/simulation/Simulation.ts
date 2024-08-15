@@ -16,8 +16,7 @@ import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { Deck } from './actors';
-import { ClientBase } from './actors';
+import type { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 
 export interface SimulationCallbacks {
@@ -96,7 +95,7 @@ export class Simulation extends SimulationBase {
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
     const actorCandidate = pickedMesh?.parent;
-    if (!(actorCandidate instanceof ClientBase)) return null;
+    // if (!(actorCandidate instanceof ClientBase)) return null;
 
     return actorCandidate.pickable ? actorCandidate : null;
   }
@@ -216,6 +215,13 @@ export class Simulation extends SimulationBase {
     if (actor) {
       this._cursorPos = this.gCursor;
       this._pickedActor = actor;
+    }
+  }
+
+  handleRotateActor(guid: string, position: Tuple<number, 3>) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor) {
+      actor.rotation = Vector3.FromArray(position);
     }
   }
 }

@@ -10,6 +10,7 @@ import type {
   DropActorPld,
   MoveClientActorPld,
   MoveServerActorPld,
+  RotateClientActorPld,
   SpawnPickedActorPld,
 } from './payloads';
 
@@ -22,6 +23,7 @@ interface ActionPayloads {
 
   [ClientAction.MOVE_ACTOR]: MoveServerActorPld;
   [ServerAction.MOVE_ACTOR]: MoveClientActorPld;
+  [ServerAction.ROTATE_ACTOR]: RotateClientActorPld;
 
   [ClientAction.PICK_ITEM]: string;
   [ClientAction.CURSOR]: Tuple<number, 2>;

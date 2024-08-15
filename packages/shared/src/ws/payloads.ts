@@ -13,6 +13,11 @@ export interface MoveClientActorPld {
   position: Tuple<number, 3>;
 }
 
+export interface RotateClientActorPld {
+  guid: string;
+  position: Tuple<number, 3>;
+}
+
 export interface MoveServerActorPld {
   guid: string;
   position: Tuple<number, 2>;

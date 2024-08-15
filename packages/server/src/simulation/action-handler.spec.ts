@@ -266,7 +266,7 @@ describe('handleAction', () => {
       actionHandler.clientId = 'client';
 
       await wait(100);
-      actionHandler.handlePickStart('tileStack');
+      actionHandler.handlePickItem('tileStack');
 
       await wait(500);
 

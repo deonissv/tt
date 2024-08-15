@@ -98,6 +98,14 @@ export class ActionBuilder {
             payload: { guid: guid, position: positionUpdate },
           });
         }
+
+        const rotationUpdate = this.getActorRotationUpdate(prevActorState, actorState);
+        if (rotationUpdate) {
+          actions.push({
+            type: ServerAction.ROTATE_ACTOR,
+            payload: { guid: guid, position: rotationUpdate },
+          });
+        }
       }
     });
 

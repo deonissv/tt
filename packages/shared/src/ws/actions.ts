@@ -17,6 +17,7 @@ export enum ServerAction {
   DOWNLOAD_PROGRESS = 'DOWNLOAD_PROGRESS',
 
   MOVE_ACTOR = 'SERVER_MOVE_ACTOR',
+  ROTATE_ACTOR = 'ROTATE_ACTOR',
 
   CURSORS = 'CURSORS',
   SPAWN_PICKED_ACTOR = 'SPAWN_PICKED_ACTOR', // spawnig absoultelly new actor

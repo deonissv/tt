@@ -27,12 +27,14 @@ export class ServerBase<T extends UnknownActorState = UnknownActorState> extends
 
     this.body = this.physicsBody!;
     this.body.setMassProperties({
-      mass: this.__mass,
+      mass: 50,
       // centerOfMass: Vector3.Zero(),
-      inertia: Vector3.Zero(),
-      // inertia: Vector3.One(),
+      // inertia: Vector3.Zero(),
+      inertia: Vector3.FromArray([0.3, 0.3, 0.3]),
       inertiaOrientation: Quaternion.Identity(),
     });
+    this.body.shape!.material.restitution = 1;
+    this.body.shape!.material.friction = 1;
 
     this._scene.onBeforeRenderObservable.add(() => this._beforeRender());
     this.body.setCollisionCallbackEnabled(true);

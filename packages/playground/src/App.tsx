@@ -32,7 +32,7 @@ const App = () => {
         },
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        onPickActor: (a: ServerBase) => a.pick(),
+        onPickActor: (a: ServerBase) => a.pick('id'),
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
         // @ts-ignore
         onReleaseActor: (a: ServerBase) => a.release(),
@@ -81,49 +81,96 @@ const App = () => {
     //   new Texture('https://i.imgur.com/1I4Z1Zb.png'),
     // );
 
-    await ServerActorBuilder.buildDeck({
-      type: ActorType.DECK,
-      guid: 'deck',
-      name: 'deck',
-      cards: [
-        {
-          type: ActorType.CARD,
-          guid: 'card1',
-          name: 'card1',
-          faceURL:
-            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
-          backURL:
-            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
-          rows: 0,
-          cols: 0,
-          sequence: 0,
-        },
-        {
-          type: ActorType.CARD,
-          guid: 'card2',
-          name: 'card2',
-          faceURL:
-            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
-          backURL:
-            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
-          rows: 0,
-          cols: 0,
-          sequence: 0,
-        },
-        {
-          type: ActorType.CARD,
-          guid: 'card3',
-          name: 'card3',
-          faceURL:
-            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
-          backURL:
-            'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
-          rows: 0,
-          cols: 0,
-          sequence: 0,
-        },
-      ],
+    await ServerActorBuilder.buildBag({
+      guid: 'bag',
+      name: 'bag',
+      type: ActorType.BAG,
+      containedObjects: [],
     });
+
+    // await ServerActorBuilder.buildDie8({
+    //   type: ActorType.DIE8,
+    //   guid: 'die12',
+    //   name: 'die12',
+    //   rotationValues: [
+    //     {
+    //       value: 1,
+    //       rotation: [-33, 0, 90],
+    //     },
+    //     {
+    //       value: 2,
+    //       rotation: [-33, 0, 180],
+    //     },
+    //     {
+    //       value: 3,
+    //       rotation: [33, 180, -180],
+    //     },
+    //     {
+    //       value: 4,
+    //       rotation: [33, 180, 90],
+    //     },
+    //     {
+    //       value: 5,
+    //       rotation: [33, 180, -90],
+    //     },
+    //     {
+    //       value: 6,
+    //       rotation: [33, 180, 0],
+    //     },
+    //     {
+    //       value: 7,
+    //       rotation: [-33, 0, 0],
+    //     },
+    //     {
+    //       value: 8,
+    //       rotation: [-33, 0, -90],
+    //     },
+    //   ],
+    // });
+
+    // await ServerActorBuilder.buildDeck({
+    //   type: ActorType.DECK,
+    //   guid: 'deck',
+    //   name: 'deck',
+    //   cards: [
+    //     {
+    //       type: ActorType.CARD,
+    //       guid: 'card1',
+    //       name: 'card1',
+    //       faceURL:
+    //         'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //       backURL:
+    //         'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //       rows: 0,
+    //       cols: 0,
+    //       sequence: 0,
+    //     },
+    //     {
+    //       type: ActorType.CARD,
+    //       guid: 'card2',
+    //       name: 'card2',
+    //       faceURL:
+    //         'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //       backURL:
+    //         'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //       rows: 0,
+    //       cols: 0,
+    //       sequence: 0,
+    //     },
+    //     {
+    //       type: ActorType.CARD,
+    //       guid: 'card3',
+    //       name: 'card3',
+    //       faceURL:
+    //         'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //       backURL:
+    //         'https://steamusercontent-a.akamaihd.net/ugc/429358847306551738/839B87FAD61C79259B71F7E162385C3090F00810/',
+    //       rows: 0,
+    //       cols: 0,
+    //       sequence: 0,
+    //     },
+    //   ],
+    // });
 
     // new TileStack(
     //   {
