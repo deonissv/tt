@@ -36,10 +36,11 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handlePickActor('box');
-      await wait(100);
+      await wait(500);
 
       const state = sim.toState();
       const box = state.actorStates!.find(actor => actor.guid === 'box');
@@ -60,6 +61,7 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handlePickActor('box');
@@ -90,6 +92,7 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handleReleaseActor('box');
@@ -142,6 +145,7 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handleMoveActor('box', [1, 0]);
@@ -169,6 +173,7 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handlePickActor('box');
@@ -215,6 +220,7 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handlePickItem('tileStack');
@@ -257,6 +263,7 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
 
       await wait(100);
       actionHandler.handlePickStart('tileStack');

@@ -4,10 +4,12 @@ import { vecFloatCompare } from '@shared/utils';
 import { ServerAction } from '@shared/ws';
 import type { CursorsPld } from '@shared/ws/payloads';
 import type { ServerActionMsg } from '@shared/ws/ws';
+import type { Simulation } from '../simulation/simulation';
 
 export class ActionBuilder {
   prevCursors: string | null = null;
   prevSimState: SimulationStateSave | null = null;
+  sim: Simulation;
 
   getActions(cursors: CursorsPld, simState: SimulationStateSave): ServerActionMsg[] | null {
     const actions: ServerActionMsg[] = [];
@@ -52,6 +54,8 @@ export class ActionBuilder {
     const prevActorStates = prevState.actorStates ?? [];
     const actorStates = state.actorStates ?? [];
 
+    const actors = this.sim.actors;
+
     const guids = new Set([
       ...prevActorStates.map(actorState => actorState.guid),
       ...actorStates.map(actorState => actorState.guid),
@@ -67,10 +71,22 @@ export class ActionBuilder {
         return;
       }
       if (!prevActorState && actorState) {
-        actions.push({
-          type: ServerAction.SPAWN_ACTOR,
-          payload: actorState,
-        });
+        const clientId = actors.find(a => a.guid === guid)!.picked;
+        if (clientId) {
+          actions.push({
+            type: ServerAction.SPAWN_PICKED_ACTOR,
+            payload: {
+              clientId: clientId,
+              state: actorState,
+            },
+          });
+        } else {
+          actions.push({
+            type: ServerAction.SPAWN_ACTOR,
+            payload: actorState,
+          });
+        }
+
         return;
       }
 

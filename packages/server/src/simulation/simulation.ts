@@ -8,14 +8,11 @@ import { type SimulationStateSave } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { SimulationBase } from '@shared/playground';
 import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { ClientActionMsg } from '@shared/ws/ws';
-import { ActionHandler } from './action-handler';
 import type { ServerBase } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
 
 export class Simulation extends SimulationBase {
   static actorBuilder = ServerActorBuilder;
-  actionsHandler = new ActionHandler();
   logger: Logger;
 
   constructor(initialState: SimulationStateSave) {
@@ -75,10 +72,6 @@ export class Simulation extends SimulationBase {
       }),
     );
     return sim;
-  }
-
-  update(msg: ClientActionMsg[]) {
-    this.actionsHandler.handleActions(msg, this.actors);
   }
 
   static async actorFromState(actorState: UnknownActorState): Promise<ServerBase | null> {

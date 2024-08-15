@@ -13,6 +13,7 @@ import type { RecursiveType } from '@shared/types';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
 import type { ClientActionMsg } from '@shared/ws/ws';
+import { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
@@ -25,7 +26,9 @@ export class SimulationRoom {
 
   cursors: Map<string, CursorsPld[keyof CursorsPld]>;
   simSave: SimulationStateSave | undefined;
-  actionManager = new ActionBuilder();
+
+  actionBuilder = new ActionBuilder();
+  actionsHandler = new ActionHandler();
 
   downloadProgress: DownloadProgressPld;
 
@@ -87,6 +90,8 @@ export class SimulationRoom {
 
     this.simulation.start();
     SimulationRoom.logger.log(`Room ${this.id} started.`);
+    this.actionBuilder.sim = this.simulation;
+
     try {
       this.simSave = this.simulation.toState();
     } catch (e) {
@@ -152,7 +157,7 @@ export class SimulationRoom {
       this.cursors.set(cursorClient, cursorAction.payload);
     }
 
-    this.simulation.update(actions);
+    this.actionsHandler.handleActions(actions, this.simulation.actors, this.clients.get(event.target)!.id);
   }
 
   private onClose(event: WebSocket.CloseEvent) {
@@ -191,7 +196,7 @@ export class SimulationRoom {
       acc[key] = val;
       return acc;
     }, {});
-    const actions = this.actionManager.getActions(cursors, this.simulation.toState());
+    const actions = this.actionBuilder.getActions(cursors, this.simulation.toState());
 
     if (actions && actions.length > 0) {
       SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify(actions)}`);

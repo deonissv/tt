@@ -36,6 +36,7 @@ describe('getSimActions', () => {
 
     const initState = sim.toState();
     actionBuilder.prevSimState = initState;
+    actionBuilder.sim = sim;
 
     sim.start();
     await wait(500);
@@ -59,6 +60,7 @@ describe('getSimActions', () => {
 
     const initState = sim.toState();
     actionBuilder.prevSimState = initState;
+    actionBuilder.sim = sim;
 
     sim.start();
     await wait(100);
@@ -99,6 +101,8 @@ describe('getSimActions', () => {
     const sim = getPhSim();
     const initState = sim.toState();
     actionBuilder.prevSimState = initState;
+    actionBuilder.sim = sim;
+
     sim.start();
     await wait(100);
 

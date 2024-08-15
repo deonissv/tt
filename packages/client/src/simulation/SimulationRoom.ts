@@ -86,6 +86,17 @@ export class SimulationRoom {
             sim.handleSpawnActor(action.payload).catch(console.error);
             break;
           }
+          case ServerAction.SPAWN_PICKED_ACTOR: {
+            if (action.payload.clientId === clientId) {
+              // eslint-disable-next-line no-console
+              sim.handleSpawnPickedActor(action.payload.state).catch(console.error);
+            } else {
+              // eslint-disable-next-line no-console
+              sim.handleSpawnActor(action.payload.state).catch(console.error);
+            }
+
+            break;
+          }
         }
       });
     });

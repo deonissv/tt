@@ -20,6 +20,7 @@ export enum ServerAction {
   MOVE_ACTOR = 'SERVER_MOVE_ACTOR',
 
   CURSORS = 'CURSORS',
+  SPAWN_PICKED_ACTOR = 'SPAWN_PICKED_ACTOR', // spawnig absoultelly new actor
   SPAWN_ACTOR = 'SPAWN_ACTOR', // spawnig absoultelly new actor
   DROP_ACTOR = 'DROP_ACTOR', // spawning actor that is present in original state save. e.g. dropping item deck / state
   REMOVE_ACTOR = 'REMOVE_ACTOR',

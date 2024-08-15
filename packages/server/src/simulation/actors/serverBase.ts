@@ -83,17 +83,17 @@ export class ServerBase<T extends UnknownActorState = UnknownActorState> extends
     return this._scene as SimulationSceneBase;
   }
 
-  pick() {
+  pick(clientId: string) {
     if (this.picked) return;
 
     this.__targetPosition = new Vector2(this.position.x, this.position.z);
-    this.picked = true;
+    this.picked = clientId;
     this.body.setCollisionCallbackEnabled(false);
     this.body.shape!.isTrigger = true;
   }
 
   release() {
-    this.picked = false;
+    this.picked = null;
     this.__targetPosition = null;
     this.body.setCollisionCallbackEnabled(true);
     this.body.shape!.isTrigger = false;

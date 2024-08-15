@@ -30,7 +30,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
 
   colorDiffuse: number[] = [];
   pickable = true;
-  picked = false;
+  picked: string | null = null;
 
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state.guid ?? state.name, undefined, true);

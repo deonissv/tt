@@ -16,7 +16,8 @@ import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { ClientBase, Deck } from './actors';
+import type { Deck } from './actors';
+import { ClientBase } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 
 export interface SimulationCallbacks {
@@ -78,7 +79,7 @@ export class Simulation extends SimulationBase {
     sim._handlePick();
     sim._handleHoverHighlight();
     sim._bindAction(FLIP_BIND_KEYS, actor => {
-      if (isContainable(actor)) cbs.onPickItem?.(actor as Deck);
+      if (isContainable(actor)) cbs.onPickItem?.(actor as unknown as Deck);
     });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
@@ -95,7 +96,7 @@ export class Simulation extends SimulationBase {
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
     const actorCandidate = pickedMesh?.parent;
-    // if (!(actorCandidate instanceof ClientBase)) return null;
+    if (!(actorCandidate instanceof ClientBase)) return null;
 
     return actorCandidate.pickable ? actorCandidate : null;
   }
@@ -207,6 +208,10 @@ export class Simulation extends SimulationBase {
   }
 
   async handleSpawnActor(state: UnknownActorState) {
+    await ClientActorBuilder.build(state);
+  }
+
+  async handleSpawnPickedActor(state: UnknownActorState) {
     const actor = await ClientActorBuilder.build(state);
     if (actor) {
       this._cursorPos = this.gCursor;

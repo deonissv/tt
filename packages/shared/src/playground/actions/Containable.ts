@@ -4,7 +4,7 @@ import { SharedBase } from '../actors';
 
 export interface Containable {
   get size(): number;
-  pickItem(): void;
+  pickItem(clientId: string): void;
 }
 
 export const isContainable = (object: any): object is Containable => {

@@ -1,12 +1,12 @@
 import type { Mesh } from '@babylonjs/core';
 import type { CardState, DeckState } from '@shared/dto/states';
+import type { Containable } from '@shared/playground/actions/Containable';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
-import type { Constructor } from '@shared/types';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { Card } from './card';
 import { ServerBase } from './serverBase';
 
-export class Deck extends DeckMixin(ServerBase) {
+export class Deck extends DeckMixin(ServerBase) implements Containable {
   constructor(state: DeckState, model: Mesh) {
     const items = state.cards;
 
@@ -15,7 +15,7 @@ export class Deck extends DeckMixin(ServerBase) {
     this.items = items;
   }
 
-  static async fromState<T extends Deck>(this: Constructor<T>, state: DeckState): Promise<T | null> {
+  static async fromState(state: DeckState): Promise<Deck | null> {
     const model = await Card.loadCardModel();
 
     if (!model) {
@@ -25,7 +25,7 @@ export class Deck extends DeckMixin(ServerBase) {
     return new this(state, model);
   }
 
-  override async pickItem(): Promise<ServerBase<CardState> | null> {
+  async pickItem(clientId: string): Promise<ServerBase<CardState> | null> {
     this.model.scaling.y -= 1;
 
     if (this.size < 1) {
@@ -38,7 +38,7 @@ export class Deck extends DeckMixin(ServerBase) {
     cardState.transformation.position![1] += 1;
 
     const newCard = await ServerActorBuilder.buildCard(cardState);
-    newCard?.pick();
+    newCard?.pick(clientId);
 
     return newCard;
   }

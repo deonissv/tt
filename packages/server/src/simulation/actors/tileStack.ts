@@ -21,7 +21,7 @@ export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
     this.size = state.size;
   }
 
-  async pickItem(): Promise<Tile | null> {
+  async pickItem(clientId: string): Promise<Tile | null> {
     if (this.size < 2) {
       return null;
     }
@@ -38,7 +38,7 @@ export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
 
     const newTile = await ServerActorBuilder.buildTile(tileState);
 
-    newTile?.pick();
+    newTile?.pick(clientId);
 
     this.size -= 1;
 

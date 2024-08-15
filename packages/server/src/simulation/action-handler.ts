@@ -6,9 +6,11 @@ import type { ServerBase } from './actors';
 
 export class ActionHandler {
   actors: ServerBase[] = [];
+  clientId: string;
 
-  handleActions(actions: ClientActionMsg[], actors: ServerBase[]): void {
+  handleActions(actions: ClientActionMsg[], actors: ServerBase[], clientId: string): void {
     this.actors = actors;
+    this.clientId = clientId;
     actions.map(msg => this.handleAction(msg));
   }
 
@@ -35,21 +37,21 @@ export class ActionHandler {
   handlePickStart(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && isContainable(actor)) {
-      actor.pickItem();
+      actor.pickItem(this.clientId);
     }
   }
 
   handlePickItem(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && isContainable(actor)) {
-      actor.pickItem();
+      actor.pickItem(this.clientId);
     }
   }
 
   handlePickActor(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor) {
-      actor.pick();
+      actor.pick(this.clientId);
     }
   }
 

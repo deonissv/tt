@@ -14,9 +14,9 @@ export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase)
     this.items = state.containedObjects;
   }
 
-  async pickItem() {
+  async pickItem(clientId: string): Promise<ServerBase | null> {
     if (this.size < 1) {
-      return;
+      return null;
     }
 
     const item = this.items.pop()!;
@@ -25,7 +25,7 @@ export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase)
     item.transformation.position![1] += 1;
 
     const newActor = await ServerActorBuilder.build(item);
-    newActor?.pick();
+    newActor?.pick(clientId);
 
     return newActor;
   }
