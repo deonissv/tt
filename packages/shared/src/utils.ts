@@ -60,3 +60,17 @@ export const vecFloatCompare = <N extends number>(
 ): boolean => {
   return Array.prototype.some.call(a, (v: number, i: number) => !floatCompare(v, b[i] as number, epsilon));
 };
+
+/**
+ * Generates a random integer between the specified minimum and maximum values.
+ *
+ * @param min  - The minimum value of the range (inclusive).
+ * @param max - The maximum value of the range (inclusive).
+ * @returns A random integer between the specified minimum and maximum values.
+ */
+export function getRandomInt(min: number, max: number) {
+  const randomBuffer = new Uint32Array(1);
+  crypto.getRandomValues(randomBuffer);
+  const randomNumber = randomBuffer[0] / (0xffffffff + 1);
+  return Math.floor(randomNumber * (max - min)) + min;
+}

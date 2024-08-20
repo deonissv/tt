@@ -108,6 +108,13 @@ export class SimulationRoom {
     return new SimulationRoom(ws, sim, clientId, roomId, cursor);
   }
 
+  static onRoll = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.ROLL,
+      payload: actor.guid,
+    });
+  };
+
   static onPickItem = (actor: ClientBase) => {
     this.actions.push({
       type: ClientAction.PICK_ITEM,

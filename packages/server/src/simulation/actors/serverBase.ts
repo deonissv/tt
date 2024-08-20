@@ -88,6 +88,9 @@ export class ServerBase<T extends UnknownActorState = UnknownActorState> extends
   pick(clientId: string) {
     if (this.picked) return;
 
+    this.body.setLinearVelocity(Vector3.Zero());
+    this.body.setAngularVelocity(Vector3.Zero());
+
     this.__targetPosition = new Vector2(this.position.x, this.position.z);
     this.picked = clientId;
     this.body.setCollisionCallbackEnabled(false);

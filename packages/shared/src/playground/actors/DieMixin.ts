@@ -1,4 +1,6 @@
+import { Vector3 } from '@babylonjs/core';
 import { STATIC_HOST } from '@shared/constants';
+import type { RotationValue } from '@shared/dto/states';
 import { ActorType, type DieNState, type DieType, type Model } from '@shared/dto/states';
 import type { Constructor } from '@shared/types';
 import { Loader } from '../Loader';
@@ -77,6 +79,20 @@ export const DieMixin = <T extends Constructor<Die<N>>, N extends DieType>(Base:
       }
 
       return new this(state, model, collider ?? undefined);
+    }
+
+    getValue() {
+      const currentRotation = this.rotation;
+      const rotValues = this.__state.rotationValues as RotationValue[];
+      const rotationLengths = rotValues.map(({ value, rotation }) => {
+        const length = Vector3.DistanceSquared(currentRotation, Vector3.FromArray(rotation));
+        return {
+          value,
+          length,
+        };
+      });
+      rotationLengths.sort((a, b) => a.length - b.length);
+      return rotationLengths[0].value;
     }
   };
 };

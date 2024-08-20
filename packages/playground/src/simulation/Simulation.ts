@@ -2,7 +2,7 @@ import { HavokPlugin, Vector3 } from '@babylonjs/core';
 import HavokPhysics from '@babylonjs/havok';
 import { Simulation as ClientSimulation } from '@client/src/simulation';
 import type { ClientBase } from '@client/src/simulation/actors';
-import type { ServerActor } from '@server/src/simulation/actors';
+import type { ServerBase } from '@server/src/simulation/actors';
 import {
   Actor,
   Bag,
@@ -51,7 +51,7 @@ export class Simulation extends ClientSimulation {
     this.scene.enablePhysics(gravityVector, hk);
   }
 
-  static override async actorFromState(actorState: ActorBaseState): Promise<ServerActor | null> {
+  static override async actorFromState(actorState: ActorBaseState): Promise<ServerBase | null> {
     switch (actorState.type) {
       case ActorType.TILE:
         return await Tile.fromState(actorState as TileState);
@@ -77,8 +77,6 @@ export class Simulation extends ClientSimulation {
         return await Die12.fromState(actorState as Die12State);
       case ActorType.DIE20:
         return await Die20.fromState(actorState as Die20State);
-      case ActorType.TABLE:
-        return null;
     }
   }
 
@@ -93,11 +91,11 @@ export class Simulation extends ClientSimulation {
       case 'Square':
         return await SquareTable.fromState();
       case 'CustomRectangle':
-        return await CustomRectangleTable.fromState(tableState);
+        return await CustomRectangleTable.fromState();
       case 'Octagon':
         return await OctagonTable.fromState();
       case 'CustomSquare':
-        return await CustomSquareTable.fromState(tableState);
+        return await CustomSquareTable.fromState();
       case 'Rectangle':
         return await RectangleTable.fromState();
       case 'Poker':

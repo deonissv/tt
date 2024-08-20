@@ -5,6 +5,7 @@ export enum ClientAction {
   MOVE_ACTOR = 'CLIENT_MOVE_ACTOR',
 
   PICK_ITEM = 'PICK_ITEM',
+  ROLL = 'ROLL',
   CURSOR = 'CURSOR',
   PICK_ACTOR = 'PICK_ACTOR',
   RELEASE_ACTOR = 'RELEASE_ACTOR',

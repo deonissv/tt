@@ -36,6 +36,9 @@ const App = () => {
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
         // @ts-ignore
         onReleaseActor: (a: ServerBase) => a.release(),
+        // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        onRoll: (a: ServerBase) => a.roll(),
       },
     );
 
@@ -51,6 +54,30 @@ const App = () => {
 
     await ServerActorBuilder.buildTable({
       type: 'CircleGlass',
+    });
+
+    await ServerActorBuilder.buildDie4({
+      type: ActorType.DIE4,
+      guid: 'die4',
+      name: 'die4',
+      rotationValues: [
+        {
+          value: 1,
+          rotation: [0, 0, 0],
+        },
+        {
+          value: 2,
+          rotation: [0, 0, 90],
+        },
+        {
+          value: 3,
+          rotation: [0, 0, 180],
+        },
+        {
+          value: 4,
+          rotation: [0, 0, 270],
+        },
+      ],
     });
 
     // await ServerActorBuilder.buildCard({
@@ -81,12 +108,12 @@ const App = () => {
     //   new Texture('https://i.imgur.com/1I4Z1Zb.png'),
     // );
 
-    await ServerActorBuilder.buildBag({
-      guid: 'bag',
-      name: 'bag',
-      type: ActorType.BAG,
-      containedObjects: [],
-    });
+    // await ServerActorBuilder.buildBag({
+    //   guid: 'bag',
+    //   name: 'bag',
+    //   type: ActorType.BAG,
+    //   containedObjects: [],
+    // });
 
     // await ServerActorBuilder.buildDie8({
     //   type: ActorType.DIE8,

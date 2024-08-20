@@ -24,6 +24,7 @@ export interface SimulationCallbacks {
   onMoveActor: (actor: ClientBase, position: Tuple<number, 2>) => void;
   onPickActor: (actor: ClientBase) => void;
   onReleaseActor: (actor: ClientBase) => void;
+  onRoll: (actor: ClientBase) => void;
 }
 
 export class Simulation extends SimulationBase {
@@ -78,11 +79,13 @@ export class Simulation extends SimulationBase {
     );
 
     sim.start();
-
     sim._handlePick();
     sim._handleHoverHighlight();
     sim._bindAction(FLIP_BIND_KEYS, actor => {
       if (isContainable(actor)) cbs.onPickItem?.(actor as unknown as Deck);
+    });
+    sim._bindAction(['KeyR'], actor => {
+      cbs.onRoll(actor);
     });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);

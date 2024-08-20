@@ -29,6 +29,7 @@ interface ActionPayloads {
   [ClientAction.CURSOR]: Tuple<number, 2>;
   [ClientAction.PICK_ACTOR]: string;
   [ClientAction.RELEASE_ACTOR]: string;
+  [ClientAction.ROLL]: string;
 
   [ServerAction.CURSORS]: CursorsPld;
   [ServerAction.SPAWN_ACTOR]: UnknownActorState;
