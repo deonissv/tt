@@ -10,11 +10,11 @@ import {
   type Mesh,
 } from '@babylonjs/core';
 import { PICK_HIGHT } from '@shared/constants';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
+import type { ActorBaseState } from '@shared/dto/states';
 import type { SimulationSceneBase } from '@shared/playground';
 import { SharedBase } from '@shared/playground/actors/SharedBase';
 
-export class ServerBase<T extends UnknownActorState = UnknownActorState> extends SharedBase<T> {
+export class ServerBase<T extends ActorBaseState = ActorBaseState> extends SharedBase<T> {
   defaultY: number;
   obstacleHeight: number | null = null;
 

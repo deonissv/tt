@@ -1,5 +1,8 @@
 import { Vector3, type Mesh } from '@babylonjs/core';
-import { ActorMapper, type DieNState, type DieType } from '@shared/dto/states';
+import { getDieModel } from '@shared/assets';
+import type { DieState } from '@shared/dto/states';
+import { ActorMapper } from '@shared/dto/states';
+import { Loader } from '@shared/playground';
 import { DieMixin } from '@shared/playground/actors/DieMixin';
 import type { Constructor } from '@shared/types';
 import { getRandomInt } from '@shared/utils';
@@ -11,15 +14,21 @@ const ROLL_IMPULSE_MAX = 60;
 const ROLL_ANGULAR_IMPULSE_MIX = 5;
 const ROLL_ANGULAR_IMPULSE_MAX = 7;
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-export class ServerDie<T extends DieType> extends ServerBase<DieNState<T>> {
+export class ServerDie extends ServerBase<DieState> {
   numFaces: number;
 
-  constructor(state: DieNState<T>, modelMesh: Mesh, colliderMesh?: Mesh) {
+  constructor(state: DieState, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
 
     this.numFaces = ActorMapper[state.type];
+  }
+
+  static async fromState<T extends ServerDie>(this: Constructor<T>, state: DieState): Promise<T | null> {
+    const model = getDieModel(state);
+    const collider = await Loader.loadMesh(model.colliderURL);
+    if (!collider) return null;
+
+    return new this(state, collider);
   }
 
   roll() {
@@ -35,10 +44,10 @@ export class ServerDie<T extends DieType> extends ServerBase<DieNState<T>> {
   }
 }
 
-export class Die4 extends DieMixin<Constructor<ServerDie<4>>, 4>(ServerDie) {}
-export class Die6 extends DieMixin<Constructor<ServerDie<6>>, 6>(ServerDie) {}
-export class Die8 extends DieMixin<Constructor<ServerDie<8>>, 8>(ServerDie) {}
+export class Die4 extends DieMixin(ServerDie) {}
+export class Die6 extends DieMixin(ServerDie) {}
+export class Die8 extends DieMixin(ServerDie) {}
 
-export class Die10 extends DieMixin<Constructor<ServerDie<10>>, 10>(ServerDie) {}
-export class Die12 extends DieMixin<Constructor<ServerDie<12>>, 12>(ServerDie) {}
-export class Die20 extends DieMixin<Constructor<ServerDie<20>>, 20>(ServerDie) {}
+export class Die10 extends DieMixin(ServerDie) {}
+export class Die12 extends DieMixin(ServerDie) {}
+export class Die20 extends DieMixin(ServerDie) {}

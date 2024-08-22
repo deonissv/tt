@@ -6,7 +6,7 @@ import { ServerActorBuilder } from '../serverActorBuilder';
 import { Card } from './card';
 import { ServerBase } from './serverBase';
 
-export class Deck extends DeckMixin(ServerBase) implements Containable {
+export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containable {
   constructor(state: DeckState, model: Mesh) {
     const items = state.cards;
 

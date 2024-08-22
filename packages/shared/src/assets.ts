@@ -1,6 +1,7 @@
 import type { Tuple } from '@babylonjs/core';
 import { STATIC_HOST } from './constants';
-import type { Material, Transformation } from './dto/states';
+import type { DieState } from './dto/states';
+import { ActorType, type Material, type Model, type Transformation } from './dto/states';
 import { degToRad } from './utils';
 
 export const feltMaterialProps: Material = {
@@ -191,4 +192,65 @@ export const BAG_MODEL = {
   specularURL: `${STATIC_HOST}/bag_S.png`,
   diffuseURL: `${STATIC_HOST}/2-bag_D_gray.png`,
   colliderURL: `${STATIC_HOST}/bag_opened.obj`,
+};
+
+export const DIE_TEXTURES = {
+  normalURL: `${STATIC_HOST}/NEW-Dice_nrm strong.png`,
+  specularURL: `${STATIC_HOST}/Dice_spec 1_gray.png`,
+  diffuseURL: `${STATIC_HOST}/Dice_colored_diff 1.png`,
+};
+
+export const DIE4_MODEL = {
+  meshURL: `${STATIC_HOST}/Tetrahedron.obj`,
+  colliderURL: `${STATIC_HOST}/Tetrahedron_colision.obj`,
+  ...DIE_TEXTURES,
+} satisfies Model;
+
+export const DIE6_MODEL = {
+  meshURL: `${STATIC_HOST}/Cube.obj`,
+  colliderURL: `${STATIC_HOST}/Cube23284.obj`,
+  ...DIE_TEXTURES,
+} satisfies Model;
+
+export const DIE8_MODEL = {
+  ...DIE_TEXTURES,
+  meshURL: `${STATIC_HOST}/Octahedron.obj`,
+  colliderURL: `${STATIC_HOST}/Octahedron_colision.obj`,
+} satisfies Model;
+
+export const DIE10_MODEL = {
+  ...DIE_TEXTURES,
+  meshURL: `${STATIC_HOST}/Trapezohedron.obj`,
+  colliderURL: `${STATIC_HOST}/Trapezohedron_colision.obj`,
+} satisfies Model;
+
+export const DIE12_MODEL = {
+  ...DIE_TEXTURES,
+  meshURL: `${STATIC_HOST}/Dodecahedron.obj`,
+  colliderURL: `${STATIC_HOST}/Dodecahedron_colision.obj`,
+} satisfies Model;
+
+export const DIE20_MODEL = {
+  ...DIE_TEXTURES,
+  meshURL: `${STATIC_HOST}/Icosahedron.obj`,
+  colliderURL: `${STATIC_HOST}/icosahedron23294.obj`,
+} satisfies Model;
+
+export const getDieModel = (state: DieState) => {
+  switch (state.type) {
+    case ActorType.DIE4:
+      return DIE4_MODEL;
+    case ActorType.DIE6:
+      return DIE6_MODEL;
+    case ActorType.DIE8:
+      return DIE8_MODEL;
+    case ActorType.DIE10:
+      return DIE10_MODEL;
+    case ActorType.DIE12:
+      return DIE12_MODEL;
+    case ActorType.DIE20:
+      return DIE20_MODEL;
+    default:
+      throw new Error('Unknown die');
+  }
 };

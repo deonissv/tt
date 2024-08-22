@@ -36,6 +36,8 @@ export interface DieNState<N extends DieType> extends DieBaseState {
   rotationValues: Tuple<RotationValue, N>;
 }
 
+export type DieState = DieType extends infer N ? (N extends DieType ? DieNState<N> : never) : never;
+
 export type Die4State = DieNState<4>;
 export type Die6State = DieNState<6>;
 export type Die8State = DieNState<8>;
