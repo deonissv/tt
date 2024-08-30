@@ -1,4 +1,4 @@
-import * as http from 'http';
+import * as http from 'node:http';
 import type internal from 'node:stream';
 
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';

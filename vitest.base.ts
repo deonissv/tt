@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import path from 'path';
+import path from 'node:path';
 import swc from 'unplugin-swc';
 import { defineConfig } from 'vitest/config';
 
