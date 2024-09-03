@@ -63,6 +63,11 @@ export class SimulationRoom {
     };
   }
 
+  /**
+   * Initializes the simulation room.
+   *
+   * @param simSave Optional simulation state save.
+   */
   async init(simSave?: SimulationStateSave) {
     SimulationRoom.logger.log(`Room ${this.id} initializig...`);
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
@@ -101,6 +106,12 @@ export class SimulationRoom {
     SimulationRoom.logger.log(`Room ${this.id} initialized.`);
   }
 
+  /**
+   * Initializes the simulation room.
+   * Attaches an event listener to each client WebSocket to handle incoming messages.
+   * Sends the initial state to all clients.
+   * Starts the saving and update intervals.
+   */
   private onSimulationInit() {
     for (const clientWs of this.clients.keys()) {
       clientWs.onmessage = (event: WebSocket.MessageEvent) => {
@@ -122,6 +133,11 @@ export class SimulationRoom {
     SimulationRoom.logger.log(`Simulation ${this.id} initialized.`);
   }
 
+  /**
+   * Creates and returns a WebSocket server for the simulation room.
+   *
+   * @returns The WebSocket server instance.
+   */
   private getServer() {
     const wss = new WebSocket.Server({ noServer: true });
 
@@ -147,6 +163,11 @@ export class SimulationRoom {
     return wss;
   }
 
+  /**
+   * Handles the WebSocket 'message' event.
+   *
+   * @param event - The WebSocket message event.
+   */
   private onMessage(event: WebSocket.MessageEvent) {
     SimulationRoom.logger.debug(`Received message: ${JSON.stringify(event.data)}`);
     const actions = WS.read(event) as ClientActionMsg[];
@@ -160,6 +181,13 @@ export class SimulationRoom {
     this.actionsHandler.handleActions(actions, this.simulation.actors, this.clients.get(event.target)!.id);
   }
 
+  /**
+   * Handles the WebSocket close event for the simulation room.
+   * Removes the client from the room and deletes the associated cursor.
+   * If there are no more clients in the room, it schedules the room to be closed after a delay.
+   *
+   * @param event The WebSocket close event.
+   */
   private onClose(event: WebSocket.CloseEvent) {
     SimulationRoom.logger.log(`Client disconnectingfrom room ${this.id}`);
     this.clients.delete(event.target);
@@ -180,6 +208,11 @@ export class SimulationRoom {
     SimulationRoom.logger.log(`Client disconnected from room ${this.id}`);
   }
 
+  /**
+   * Closes the room by clearing intervals, saving room state, and closing the WebSocket server.
+   *
+   * @returns {Promise<void>} A promise that resolves when the room is closed.
+   */
   private async closeRoom() {
     if (this.tickInterval) clearInterval(this.tickInterval);
     if (this.savingInterval) clearInterval(this.savingInterval);
@@ -187,6 +220,11 @@ export class SimulationRoom {
     this.wss.close();
   }
 
+  /**
+   * Executes an state update tick in the simulation room.
+   * If there are no clients connected, the tick is skipped.
+   * Retrieves the cursors and actions from the simulation and broadcasts the actions to the clients.
+   */
   private tick() {
     if (this.clients.size === 0) {
       return;
@@ -204,6 +242,11 @@ export class SimulationRoom {
     }
   }
 
+  /**
+   * Initializes the saving interval for the simulation room.
+   *
+   * @returns A NodeJS.Timeout object representing the interval.
+   */
   private initSaving(): NodeJS.Timeout {
     SimulationRoom.logger.log('Saving interval started');
     return setInterval(async () => {
@@ -216,6 +259,11 @@ export class SimulationRoom {
     }, this.savingDelay);
   }
 
+  /**
+   * Initializes the update interval for the simulation room.
+   *
+   * @returns A NodeJS.Timeout object representing the interval for the update process.
+   */
   private initUpdate(): NodeJS.Timeout {
     SimulationRoom.logger.log('Saving update started');
     return setInterval(() => {
@@ -223,6 +271,12 @@ export class SimulationRoom {
     }, this.stateTickDelay);
   }
 
+  /**
+   * Broadcasts a message to all connected clients, excluding the ones specified in the `exclude` parameter.
+   *
+   * @param msg - The message to broadcast.
+   * @param exclude - An optional array of WebSocket instances to exclude from the broadcast.
+   */
   private broadcast(msg: WS.MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN && !exclude.includes(client)) {
@@ -231,6 +285,12 @@ export class SimulationRoom {
     });
   }
 
+  /**
+   * Recursively patches the state URLs to make external assets accessible via proxy.
+   *
+   * @param item - The object or array to patch the state URLs in.
+   * @returns The patched object or array.
+   */
   static patchStateURLs<T extends RecursiveType>(item: T): T {
     if (isString(item) && item.startsWith('http') && !item.startsWith(URL_PREFIX)) {
       return this.getAssetURL(item) as T;
@@ -248,6 +308,12 @@ export class SimulationRoom {
     return item;
   }
 
+  /**
+   * Returns the asset URL for the given resource.
+   *
+   * @param url - The resource URL.
+   * @returns The asset URL.
+   */
   static getAssetURL(url: string) {
     // return `http://localhost:3000/assets/${url}`
     return URL_PREFIX + url;
