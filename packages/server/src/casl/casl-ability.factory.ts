@@ -1,4 +1,4 @@
-import type { RawRuleOf, MongoAbility, ForcedSubject, MongoQuery } from '@casl/ability';
+import type { ForcedSubject, MongoAbility, MongoQuery, RawRuleOf } from '@casl/ability';
 import { createMongoAbility } from '@casl/ability';
 
 import { Injectable } from '@nestjs/common';
@@ -20,6 +20,12 @@ export type UserWithPermissions = ValidatedUser & {
 
 @Injectable()
 export class CaslAbilityFactory {
+  /**
+   * Creates an ability object for the specified user.
+   *
+   * @param user - The user object with permissions.
+   * @returns The ability object for the user.
+   */
   createForUser(user: UserWithPermissions) {
     const rules = user.Role.Permissions.map(permission => {
       const rule: RawRuleOf<AppAbility> = {
