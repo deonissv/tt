@@ -12,7 +12,8 @@ import { RoomsService } from '../rooms/rooms.service';
 
 /**
  * Aborts the WebSocket handshake with the given code and message.
- * taken from ws
+ *
+ * implementation based on ws library
  * https://github.com/websockets/ws/blob/master/lib/websocket-server.js#L490
  */
 function abortHandshake(
