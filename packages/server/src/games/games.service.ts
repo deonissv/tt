@@ -13,6 +13,7 @@ export class GamesService {
 
   /**
    * Creates a new game.
+   *
    * @param userId - The ID of the user creating the game.
    * @param createGameDto - The DTO (Data Transfer Object) containing the game details.
    * @returns The GamePreviewDto representing the created game.
@@ -65,6 +66,7 @@ export class GamesService {
 
   /**
    * Finds a unique game by its code.
+   *
    * @param code The code of the game to find.
    * @returns A GameDto object if the game is found, or null if not found.
    */
@@ -95,6 +97,7 @@ export class GamesService {
 
   /**
    * Finds the last version of a game by its code.
+   *
    * @param code The code of the game.
    * @returns The last version of the game, or null if the game is not found or has no versions.
    */
@@ -154,6 +157,7 @@ export class GamesService {
 
   /**
    * Retrieves multiple game previews.
+   *
    * @returns Array of GamePreviewDto objects.
    */
   async findManyPreview(): Promise<GamePreviewDto[]> {
@@ -168,6 +172,7 @@ export class GamesService {
 
   /**
    * Finds many game previews by author ID.
+   *
    * @param authorId - The ID of the author.
    * @returns An array of GamePreviewDto objects.
    */
@@ -183,6 +188,7 @@ export class GamesService {
 
   /**
    * Finds many game previews by author code.
+   *
    * @param authorCode The author code to search for.
    * @returns An array of GamePreviewDto objects.
    */
@@ -221,6 +227,7 @@ export class GamesService {
 
   /**
    * Updates the game preview with the specified code.
+   *
    * @param authorId - The ID of the author who owns the game.
    * @param code - The code of the game preview to update.
    * @param updateGameDto - The DTO containing the updated game information.
@@ -242,6 +249,7 @@ export class GamesService {
 
   /**
    * Updates a game with the provided code and author ID.
+   *
    * @param authorId - The ID of the game author.
    * @param code - The code of the game to update.
    * @param updateGameDto - The DTO containing the updated game data.
@@ -270,6 +278,7 @@ export class GamesService {
 
   /**
    * Deletes a game with the specified code.
+   *
    * @param code - The code of the game to delete.
    * @returns The deleted game.
    */
@@ -282,6 +291,7 @@ export class GamesService {
 
   /**
    * Converts a Game object to a GamePreviewDto object.
+   *
    * @param game - The Game object to convert.
    * @returns The converted GamePreviewDto object.
    */
@@ -296,6 +306,7 @@ export class GamesService {
 
   /**
    * Converts a Game object to a GameDto object.
+   *
    * @param game - The Game object to convert.
    * @returns The converted GameDto object.
    */
