@@ -11,6 +11,12 @@ export class GamesService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * Creates a new game.
+   * @param userId - The ID of the user creating the game.
+   * @param createGameDto - The DTO (Data Transfer Object) containing the game details.
+   * @returns The GamePreviewDto representing the created game.
+   */
   async create(userId: number, createGameDto: CreateGameDto): Promise<GamePreviewDto> {
     this.logger.log(`Parsing game context: ${createGameDto.name}`);
     const content = JSON.parse(createGameDto.content) as Prisma.JsonObject;
@@ -36,6 +42,12 @@ export class GamesService {
     return GamesService.toGamePreviewDto(createdGame);
   }
 
+  /**
+   * Finds a unique game by its ID.
+   *
+   * @param gameId - The ID of the game to find.
+   * @returns A GameDto object if the game is found, or null if not found.
+   */
   async findUnique(gameId: number): Promise<GameDto | null> {
     this.logger.log(`Finding game with ID: ${gameId}`);
     const game = await this.prisma.game.findUnique({ where: { gameId }, include: { GameVersion: true } });
@@ -51,6 +63,11 @@ export class GamesService {
     return GamesService.toGameDto(game);
   }
 
+  /**
+   * Finds a unique game by its code.
+   * @param code The code of the game to find.
+   * @returns A GameDto object if the game is found, or null if not found.
+   */
   async findUniqueByCode(code: string): Promise<GameDto | null> {
     this.logger.log(`Finding game with code: ${code}`);
     const game = await this.prisma.game.findUnique({
@@ -76,6 +93,11 @@ export class GamesService {
     return GamesService.toGameDto(game);
   }
 
+  /**
+   * Finds the last version of a game by its code.
+   * @param code The code of the game.
+   * @returns The last version of the game, or null if the game is not found or has no versions.
+   */
   async findLastVersionByCode(code: string): Promise<GameVersion | null> {
     this.logger.log(`Finding last version of game with code: ${code}`);
     const game = await this.prisma.game.findFirst({
@@ -99,6 +121,11 @@ export class GamesService {
     return lastVersion;
   }
 
+  /**
+   * Finds the content for a game with the specified code.
+   * @param code The code of the game to find the content for.
+   * @returns The content of the game, or null if the content is not found or has an invalid format.
+   */
   async findContentByCode(code: string): Promise<SimulationStateSave | null> {
     this.logger.log(`Finding content for game with code: ${code}`);
     const game = await this.prisma.game.findFirst({
@@ -125,6 +152,10 @@ export class GamesService {
     return content as SimulationStateSave;
   }
 
+  /**
+   * Retrieves multiple game previews.
+   * @returns Array of GamePreviewDto objects.
+   */
   async findManyPreview(): Promise<GamePreviewDto[]> {
     this.logger.log('Finding many game previews');
     const previews = await this.prisma.game.findMany();
@@ -135,6 +166,11 @@ export class GamesService {
     });
   }
 
+  /**
+   * Finds many game previews by author ID.
+   * @param authorId - The ID of the author.
+   * @returns An array of GamePreviewDto objects.
+   */
   async findManyPreviewByAuthorId(authorId: number): Promise<GamePreviewDto[]> {
     this.logger.log(`Finding many game previews by author ID: ${authorId}`);
     const previews = await this.prisma.game.findMany({ where: { authorId } });
@@ -145,6 +181,11 @@ export class GamesService {
     });
   }
 
+  /**
+   * Finds many game previews by author code.
+   * @param authorCode The author code to search for.
+   * @returns An array of GamePreviewDto objects.
+   */
   async findManyPreviewByAuthorCode(authorCode: string): Promise<GamePreviewDto[]> {
     this.logger.log(`Finding many game previews by author code: ${authorCode}`);
     const previews = await this.prisma.game.findMany({
@@ -161,6 +202,14 @@ export class GamesService {
     });
   }
 
+  /**
+   * Updates a game with the specified code.
+   *
+   * @param authorId - The ID of the author who owns the game.
+   * @param code - The code of the game to update.
+   * @param updateGameDto - The DTO containing the updated game data.
+   * @returns The updated game preview.
+   */
   async update(authorId: number, code: string, updateGameDto: UpdateGameDto): Promise<GamePreviewDto> {
     this.logger.log(`Updating game with code: ${code}`);
     const preview = updateGameDto.content
@@ -170,6 +219,13 @@ export class GamesService {
     return GamesService.toGamePreviewDto(preview);
   }
 
+  /**
+   * Updates the game preview with the specified code.
+   * @param authorId - The ID of the author who owns the game.
+   * @param code - The code of the game preview to update.
+   * @param updateGameDto - The DTO containing the updated game information.
+   * @returns The updated game object.
+   */
   async _updatePreview(authorId: number, code: string, updateGameDto: UpdateGameDto) {
     this.logger.log(`Updating game preview with code: ${code}`);
     const updatedGame = await this.prisma.game.update({
@@ -184,6 +240,13 @@ export class GamesService {
     return updatedGame;
   }
 
+  /**
+   * Updates a game with the provided code and author ID.
+   * @param authorId - The ID of the game author.
+   * @param code - The code of the game to update.
+   * @param updateGameDto - The DTO containing the updated game data.
+   * @returns The updated game.
+   */
   async _updateFull(authorId: number, code: string, updateGameDto: UpdateGameDto) {
     this.logger.log(`Updating game with code: ${code}`);
     const content = JSON.parse(updateGameDto.content!) as Prisma.JsonObject;
@@ -205,6 +268,11 @@ export class GamesService {
     return updatedGame;
   }
 
+  /**
+   * Deletes a game with the specified code.
+   * @param code - The code of the game to delete.
+   * @returns The deleted game.
+   */
   async delete(code: string) {
     this.logger.log(`Deleting game with code: ${code}`);
     const deletedGame = await this.prisma.game.delete({ where: { code } });
@@ -212,6 +280,11 @@ export class GamesService {
     return deletedGame;
   }
 
+  /**
+   * Converts a Game object to a GamePreviewDto object.
+   * @param game - The Game object to convert.
+   * @returns The converted GamePreviewDto object.
+   */
   static toGamePreviewDto(game: Game): GamePreviewDto {
     return {
       code: game.code,
@@ -221,6 +294,11 @@ export class GamesService {
     };
   }
 
+  /**
+   * Converts a Game object to a GameDto object.
+   * @param game - The Game object to convert.
+   * @returns The converted GameDto object.
+   */
   static toGameDto(game: Game & { GameVersion: GameVersion[] }): GameDto {
     const gameVersion = game.GameVersion.at(-1)!;
     return {
