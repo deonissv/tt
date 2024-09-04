@@ -3,15 +3,6 @@ import type { Tuple } from '@babylonjs/core/types';
 import { WebSocket } from 'ws';
 import { PRECISION_EPSILON } from './constants';
 
-/**
- * Asynchronously waits for the specified delay.
- * @param delay - The delay in milliseconds.
- * @returns A promise that resolves after the specified delay.
- */
-export async function wait(delay: number) {
-  return new Promise(resolve => setTimeout(resolve, delay));
-}
-
 export function floatCompare(a: number, b: number, epsilon = PRECISION_EPSILON): boolean {
   return Math.abs(a - b) < epsilon;
 }
@@ -74,3 +65,19 @@ export function getRandomInt(min: number, max: number) {
   const randomNumber = randomBuffer[0] / (0xffffffff + 1);
   return Math.floor(randomNumber * (max - min)) + min;
 }
+
+/**
+ * Checks if a given string is a valid URL.
+ *
+ * @param urlString - The string to be checked.
+ * @returns `true` if the string is a valid URL, `false` otherwise.
+ */
+export const isURL = (urlString: string): boolean => {
+  let url;
+  try {
+    url = new URL(urlString);
+  } catch {
+    return false;
+  }
+  return url.protocol === 'http:' || url.protocol === 'https:';
+};

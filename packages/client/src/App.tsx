@@ -1,6 +1,5 @@
 import Layout from '@components/Layout/Layout';
 import RequireAuth from '@components/RequireAuth/RequireAuth';
-import { Logger } from '@shared/playground';
 import NotFoundPage from 'client/src/pages/NotFoundPage';
 import { Route, Routes } from 'react-router-dom';
 import { CreateGame } from './pages/CreateGame/CreateGame';
@@ -11,10 +10,9 @@ import Playground from './pages/Playground';
 import Profile from './pages/Profile/Profile';
 import Room from './pages/Room';
 import Signup from './pages/Signup/Signup';
+import { StoreProvider } from './Store';
 
-Logger.register(console);
-
-const App = () => {
+export const App = () => {
   const protectedRoutes = [
     {
       path: 'room/:roomCode',
@@ -39,19 +37,21 @@ const App = () => {
   ];
 
   return (
-    <Routes>
-      <Route path="room/:roomCode" element={<Room />} />
-      <Route path="playground" element={<Playground />} />
-      <Route element={<Layout />}>
-        <Route path="login" element={<Login />} />
-        <Route path="signup" element={<Signup />} />
-        <Route path="profile" element={<Profile />} />
-        {protectedRoutes.map(({ path, element }) => (
-          <Route key={path} path={path} element={<RequireAuth>{element}</RequireAuth>} />
-        ))}
-        <Route path="*" element={<NotFoundPage />} />
-      </Route>
-    </Routes>
+    <StoreProvider>
+      <Routes>
+        <Route path="room/:roomCode" element={<Room />} />
+        <Route path="playground" element={<Playground />} />
+        <Route element={<Layout />}>
+          <Route path="login" element={<Login />} />
+          <Route path="signup" element={<Signup />} />
+          <Route path="profile" element={<Profile />} />
+          {protectedRoutes.map(({ path, element }) => (
+            <Route key={path} path={path} element={<RequireAuth>{element}</RequireAuth>} />
+          ))}
+          <Route path="*" element={<NotFoundPage />} />
+        </Route>
+      </Routes>
+    </StoreProvider>
   );
 };
 

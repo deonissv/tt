@@ -1,4 +1,5 @@
 import { hasProperty, isNumber, isObject, isString } from '@shared/guards';
+import { isURL } from '@shared/utils';
 
 export class ParserBase {
   errors: string[] = [];
@@ -29,7 +30,7 @@ export class ParserBase {
   }
 
   hasPropertyURL<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
-    return this.hasPropertyString(obj, name) && this._isURL(obj[name]);
+    return this.hasPropertyString(obj, name) && isURL(obj[name]);
   }
 
   isString(obj: unknown, message?: string): obj is string {
@@ -52,18 +53,8 @@ export class ParserBase {
     return this.assert(isString(obj[name]), message);
   }
 
-  _isURL(urlString: string): boolean {
-    let url;
-    try {
-      url = new URL(urlString);
-    } catch {
-      return false;
-    }
-    return url.protocol === 'http:' || url.protocol === 'https:';
-  }
-
   isURL(urlString: string, message?: string): boolean {
-    return this.assert(this._isURL(urlString), message);
+    return this.assert(isURL(urlString), message);
   }
 
   parseNumber(value: unknown): number | null {
