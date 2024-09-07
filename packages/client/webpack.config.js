@@ -27,11 +27,12 @@ module.exports = {
       path: false,
     },
     plugins: [new TsconfigPathsPlugin({ configFile: tsconfig })],
-    // alias: {
-    //   '@shared': path.resolve(__dirname, '../shared/src/'),
-    //   '@components': path.resolve(__dirname, './src/components/'),
-    //   '@services': path.resolve(__dirname, './src/services/'),
-    // },
+    alias: {
+      '@shared': path.resolve(__dirname, '../shared/src/'),
+      '@components': path.resolve(__dirname, './src/components/'),
+      '@services': path.resolve(__dirname, './src/services/'),
+      '@client': path.resolve(__dirname, '../client/'),
+    },
   },
   module: {
     rules: [

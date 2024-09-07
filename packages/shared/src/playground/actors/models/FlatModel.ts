@@ -2,7 +2,7 @@ import { MultiMaterial } from '@babylonjs/core/Materials/multiMaterial';
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { SubMesh } from '@babylonjs/core/Meshes/subMesh';
 
-import type { Texture } from '@babylonjs/core';
+import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 export interface TextureBounds {

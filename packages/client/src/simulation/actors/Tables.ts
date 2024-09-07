@@ -1,7 +1,10 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
-import type { StandardMaterial } from '@babylonjs/core';
-import { Color3, CreatePlane, Mesh, Vector3 } from '@babylonjs/core';
+import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { Color3 } from '@babylonjs/core/Maths/math.color';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import {
   CIRCLE_TABLE_MODEL,
   CUSTOM_RECTANGLE_TABLE,

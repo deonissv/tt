@@ -1,4 +1,4 @@
-import type { Mesh } from '@babylonjs/core';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { BAG_MODEL } from '@shared/assets';
 import type { BagState, Model } from '@shared/dto/states';
 import { Loader } from '@shared/playground';

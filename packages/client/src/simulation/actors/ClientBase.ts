@@ -1,4 +1,5 @@
-import { Vector3, type Mesh } from '@babylonjs/core';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { ActorBaseState } from '@shared/dto/states';
 import { SharedBase } from '@shared/playground/actors/SharedBase';
 

@@ -1,4 +1,4 @@
-import type { Tuple } from '@babylonjs/core';
+import type { Tuple } from '@babylonjs/core/types';
 import { STATIC_HOST } from './constants';
 import type { DieState } from './dto/states';
 import { ActorType, type Material, type Model, type Transformation } from './dto/states';

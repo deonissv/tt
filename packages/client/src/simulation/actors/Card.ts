@@ -1,4 +1,5 @@
-import type { Mesh, Texture } from '@babylonjs/core';
+import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { CardState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { CardMixin } from '@shared/playground/actors/CardMixin';

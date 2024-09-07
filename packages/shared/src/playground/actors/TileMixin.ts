@@ -1,4 +1,4 @@
-import type { Texture } from '@babylonjs/core';
+import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { STATIC_HOST } from '@shared/constants';
 import type { TileState } from '@shared/dto/states';
 import { TileType } from '@shared/dto/states';

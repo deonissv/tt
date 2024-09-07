@@ -13,9 +13,6 @@ export default defineConfig({
       '@client': path.resolve(__dirname, '../client/'),
     },
   },
-  optimizeDeps: {
-    exclude: ['./*/HavokPhysics.wasm', '@babylonjs/havok'],
-  },
   server: {
     host: true,
     port: 5500,

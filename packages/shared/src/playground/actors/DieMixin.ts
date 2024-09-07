@@ -1,4 +1,4 @@
-import { Vector3 } from '@babylonjs/core';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { DieState, RotationValue } from '@shared/dto/states';
 import type { Constructor } from '@shared/types';
 import type { SharedBase } from './SharedBase';

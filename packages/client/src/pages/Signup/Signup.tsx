@@ -1,6 +1,6 @@
+import { saveAccessToken } from '@client/src/utils';
 import Input from '@components/Input';
 import { AuthService } from '@services/auth.service';
-import { saveAccessToken } from 'client/src/utils';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 

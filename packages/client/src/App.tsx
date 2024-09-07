@@ -1,6 +1,6 @@
+import NotFoundPage from '@client/src/pages/NotFoundPage';
 import Layout from '@components/Layout/Layout';
 import RequireAuth from '@components/RequireAuth/RequireAuth';
-import NotFoundPage from 'client/src/pages/NotFoundPage';
 import { Route, Routes } from 'react-router-dom';
 import { CreateGame } from './pages/CreateGame/CreateGame';
 import CreateRoom from './pages/CreateRoom';

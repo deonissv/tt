@@ -6,8 +6,9 @@ import { SimulationScene } from './SimulationScene';
 
 import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 
-import { Color3, Matrix, Vector3 } from '@babylonjs/core';
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
+import { Color3 } from '@babylonjs/core/Maths/math.color';
+import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import { type SimulationStateSave } from '@shared/dto/states';

@@ -1,4 +1,4 @@
-import { Mesh } from '@babylonjs/core';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { BAG_MODEL } from '@shared/assets';
 import type { BagState } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';

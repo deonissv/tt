@@ -1,4 +1,6 @@
-import { CreateBox, StandardMaterial, Texture } from '@babylonjs/core';
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
 import type { Loader } from '@shared/playground';
 
 export const LoaderMock: Partial<typeof Loader> = {

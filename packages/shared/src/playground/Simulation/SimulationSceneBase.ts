@@ -1,4 +1,4 @@
-import { Scene } from '@babylonjs/core';
+import { Scene } from '@babylonjs/core/scene';
 import { SharedBase } from '../actors/SharedBase';
 
 const GET_GUID_ATTEMPTS = 1000000;

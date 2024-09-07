@@ -1,5 +1,6 @@
-import type { Texture } from '@babylonjs/core';
-import { Mesh, Vector3 } from '@babylonjs/core';
+import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import { Vector3 } from '@babylonjs/core/Maths/math.vector';
+import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { STATIC_HOST } from '@shared/constants';
 import type { CardGrid, CardState } from '@shared/dto/states';
 import type { Constructor } from '@shared/types';

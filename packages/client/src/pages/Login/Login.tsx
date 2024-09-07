@@ -1,6 +1,6 @@
+import { saveAccessToken } from '@client/src/utils';
 import { Input } from '@components/Input';
 import { AuthService } from '@services/auth.service';
-import { saveAccessToken } from 'client/src/utils';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -30,7 +30,7 @@ const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
       password,
     });
     saveAccessToken(token);
-    onLogin && onLogin();
+    if (onLogin) onLogin();
   };
 
   const showError = (message: string): void => {
