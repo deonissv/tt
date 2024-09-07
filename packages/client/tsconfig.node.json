@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
-    "types": ["vitest/globals"],
+    "types": ["vitest/globals", "vite/client"],
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",

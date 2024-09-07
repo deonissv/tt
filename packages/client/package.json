@@ -4,10 +4,11 @@
   "description": "",
   "author": "",
   "license": "ISC",
+  "type": "module",
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "build:v": "vite build",
+    "build:v": "vite build --mode staging",
     "start": "vite preview",
     "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite",
     "test": "vitest run --config ../../vitest.config.ts",
