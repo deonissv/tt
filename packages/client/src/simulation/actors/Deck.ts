@@ -1,6 +1,6 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { DeckState } from '@shared/dto/states';
+import type { CardGrid, DeckState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
 import { Card } from './Card';
@@ -33,13 +33,29 @@ export class Deck extends DeckMixin(ClientBase) {
     return new Deck(state, model, faceTexture, backTexture);
   }
 
-  renderDeck(faceTexture: Texture, backTexture: Texture) {
+  renderDeck(faceTexture: Texture, backTexture: Texture, grid?: CardGrid) {
     if (this.items.length === 0) {
       this.setEnabled(false);
     }
 
-    const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, this.items.at(-1)!);
+    if (!grid) {
+      grid = this.items.at(-1)!;
+    }
+    const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, grid);
     this.__model = cardModel;
+
     this.model.scaling.y = this.size;
+  }
+
+  async rerenderDeck(grid: CardGrid, size: number) {
+    this._size = size;
+
+    const faceTexture = await Loader.loadTexture(grid.faceURL);
+    const backTexture = await Loader.loadTexture(grid.backURL);
+
+    if (!faceTexture || !backTexture) {
+      return;
+    }
+    this.renderDeck(faceTexture, backTexture, grid);
   }
 }

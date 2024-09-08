@@ -1,5 +1,6 @@
 import type { Tuple } from '@babylonjs/core/types';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
+import type { CardGrid } from '@shared/dto/states/actor/CardState';
 
 export interface DownloadProgressPld {
   loaded: number;
@@ -33,4 +34,10 @@ export interface DropActorPld {
 export interface SpawnPickedActorPld {
   clientId: string;
   state: UnknownActorState;
+}
+
+export interface RerenderDeckPld {
+  guid: string;
+  grid: CardGrid;
+  size: number;
 }

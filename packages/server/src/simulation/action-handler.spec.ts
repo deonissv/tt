@@ -1,10 +1,11 @@
-import { CreateBox, Logger } from '@babylonjs/core';
+import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { getPhSim, wait } from '@server/test/testUtils';
 import { PICK_HIGHT } from '@shared/constants';
 import { ActorType } from '@shared/dto/states';
 import { initHavok } from '@shared/initHavok';
 import { ActionHandler } from './action-handler';
-import { ServerBase, Tile, TileStack } from './actors';
+import type { Card } from './actors';
+import { Deck, ServerBase, Tile, TileStack } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
 
 describe('handleAction', () => {
@@ -189,7 +190,7 @@ describe('handleAction', () => {
   });
 
   describe('PICK_ITEM', () => {
-    it('should spawn object', async () => {
+    it('should spawn tile object', async () => {
       vi.spyOn(ServerActorBuilder, 'buildTile').mockImplementation(() => {
         return Promise.resolve(
           new Tile(
@@ -228,6 +229,58 @@ describe('handleAction', () => {
 
       expect(sim.actors.length).toBe(2);
       expect((sim.actors[0] as TileStack).size).toBe(2);
+    });
+
+    it('should sparn card object', async () => {
+      vi.spyOn(ServerActorBuilder, 'buildCard').mockImplementation(() => {
+        return Promise.resolve(new Mesh('cardMesh') as unknown as Card);
+      });
+
+      const sim = getPhSim();
+      new Deck(
+        {
+          guid: 'deck',
+          name: 'deck',
+          type: ActorType.DECK,
+          cards: [
+            {
+              type: ActorType.CARD,
+              guid: 'card',
+              name: 'card',
+              faceURL: '',
+              backURL: '',
+              cols: 1,
+              rows: 1,
+              sequence: 0,
+            },
+            {
+              type: ActorType.CARD,
+              guid: 'card',
+              name: 'card',
+              faceURL: '',
+              backURL: '',
+              cols: 1,
+              rows: 1,
+              sequence: 0,
+            },
+          ],
+        },
+        new Mesh('deckMesh'),
+      );
+
+      sim.start();
+      actionHandler.actors = sim.actors;
+      actionHandler.clientId = 'client';
+
+      await wait(100);
+      actionHandler.handlePickItem('deck');
+
+      await wait(500);
+      expect(sim.actors.length).toBe(2);
+      expect((sim.actors[0] as Deck).size).toBe(1);
+
+      const state = sim.toState();
+      expect(state.actorStates!.length).toBe(2);
     });
   });
 

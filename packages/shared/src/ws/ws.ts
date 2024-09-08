@@ -10,6 +10,7 @@ import type {
   DropActorPld,
   MoveClientActorPld,
   MoveServerActorPld,
+  RerenderDeckPld,
   RotateClientActorPld,
   SpawnPickedActorPld,
 } from './payloads';
@@ -30,12 +31,14 @@ interface ActionPayloads {
   [ClientAction.PICK_ACTOR]: string;
   [ClientAction.RELEASE_ACTOR]: string;
   [ClientAction.ROLL]: string;
+  [ClientAction.SHUFFLE]: string;
 
   [ServerAction.CURSORS]: CursorsPld;
   [ServerAction.SPAWN_ACTOR]: UnknownActorState;
   [ServerAction.SPAWN_PICKED_ACTOR]: SpawnPickedActorPld;
   [ServerAction.DROP_ACTOR]: DropActorPld;
   [ServerAction.REMOVE_ACTOR]: string;
+  [ServerAction.RERENDER_DECK]: RerenderDeckPld;
 }
 
 export type MsgMap = {

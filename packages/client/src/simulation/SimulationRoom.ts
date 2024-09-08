@@ -101,6 +101,11 @@ export class SimulationRoom {
             sim.handleRotateActor(action.payload.guid, action.payload.position);
             break;
           }
+
+          case ServerAction.RERENDER_DECK: {
+            sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size);
+            break;
+          }
         }
       });
     });
@@ -139,6 +144,13 @@ export class SimulationRoom {
   static onReleaseActor = (actor: ClientBase) => {
     this.actions.push({
       type: ClientAction.RELEASE_ACTOR,
+      payload: actor.guid,
+    });
+  };
+
+  static onShuffle = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.SHUFFLE,
       payload: actor.guid,
     });
   };

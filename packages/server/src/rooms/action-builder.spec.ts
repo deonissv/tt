@@ -1,10 +1,12 @@
-import { CreateBox, Logger } from '@babylonjs/core';
+import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { getPhSim, wait } from '@server/test/testUtils';
 import { ActorType } from '@shared/dto/states';
 import { initHavok } from '@shared/initHavok';
 import { ServerAction } from '@shared/ws';
 import type { MsgMap } from '@shared/ws/ws';
-import { ServerBase } from '../simulation/actors';
+import type { Card } from '../simulation/actors';
+import { Actor, Deck, ServerBase } from '../simulation/actors';
+import { ServerActorBuilder } from '../simulation/serverActorBuilder';
 import { ActionBuilder } from './action-builder';
 
 describe('getSimActions', () => {
@@ -125,5 +127,67 @@ describe('getSimActions', () => {
     expect(spawnAction.payload.transformation!.position![0]).toBeCloseTo(3);
     expect(spawnAction.payload.transformation!.position![1]).toBeCloseTo(0.55);
     expect(spawnAction.payload.transformation!.position![2]).toBeCloseTo(0);
+  });
+
+  it('returns RERENDER_DECK', async () => {
+    vi.spyOn(ServerActorBuilder, 'buildCard').mockImplementation(() => {
+      return Promise.resolve(
+        new Actor(
+          { guid: 'card', name: 'card', type: ActorType.ACTOR, model: { meshURL: '' } },
+          new Mesh('card'),
+        ) as unknown as Card,
+      );
+    });
+
+    const sim = getPhSim();
+
+    sim.start();
+    await wait(100);
+
+    new Deck(
+      {
+        guid: 'deck',
+        name: 'deck',
+        type: ActorType.DECK,
+        cards: [
+          {
+            type: ActorType.CARD,
+            guid: 'card1',
+            name: 'card1',
+            faceURL: 'url1face',
+            backURL: 'url1back',
+            cols: 1,
+            rows: 1,
+            sequence: 0,
+          },
+          {
+            type: ActorType.CARD,
+            guid: 'card2',
+            name: 'card2',
+            faceURL: 'url2face',
+            backURL: 'url2back',
+            cols: 1,
+            rows: 1,
+            sequence: 0,
+          },
+        ],
+      },
+      new Mesh('deckMesh'),
+    );
+    await wait(100);
+    const initState = structuredClone(sim.toState());
+    await wait(250);
+    await (sim.actors[0] as Deck).pickItem('client');
+    await wait(250);
+
+    actionBuilder.prevSimState = initState;
+    actionBuilder.sim = sim;
+
+    const state = sim.toState();
+    const actions = actionBuilder.getSimActions(state);
+    sim.stop();
+
+    const renderActior = actions.find(action => action.type === ServerAction.RERENDER_DECK);
+    expect(renderActior).toBeDefined();
   });
 });

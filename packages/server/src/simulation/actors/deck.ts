@@ -2,6 +2,7 @@ import type { Mesh } from '@babylonjs/core';
 import type { CardState, DeckState } from '@shared/dto/states';
 import type { Containable } from '@shared/playground/actions/Containable';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
+import { shuffle } from '@shared/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { Card } from './card';
 import { ServerBase } from './serverBase';
@@ -31,8 +32,8 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
     if (this.size < 1) {
       return null;
     }
-    const isFipped = true;
-    const cardState = isFipped ? this.items.pop()! : this.items.shift()!;
+    console.error('before pick:' + this.items.length);
+    const cardState = this.items.pop()!;
 
     cardState.transformation = this.transformation;
     cardState.transformation.position![1] += 1;
@@ -41,5 +42,9 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
     newCard?.pick(clientId);
 
     return newCard;
+  }
+
+  shuffle() {
+    shuffle(this.items);
   }
 }

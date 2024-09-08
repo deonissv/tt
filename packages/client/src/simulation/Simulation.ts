@@ -12,13 +12,13 @@ import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
+import type { CardGrid } from '@shared/dto/states';
 import { type SimulationStateSave } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
-import type { Deck } from './actors';
-import { ClientBase } from './actors';
+import { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 
 export interface SimulationCallbacks {
@@ -27,6 +27,7 @@ export interface SimulationCallbacks {
   onPickActor: (actor: ClientBase) => void;
   onReleaseActor: (actor: ClientBase) => void;
   onRoll: (actor: ClientBase) => void;
+  onShuffle: (actor: ClientBase) => void;
 }
 
 export class Simulation extends SimulationBase {
@@ -88,6 +89,11 @@ export class Simulation extends SimulationBase {
     });
     sim._bindAction(['KeyR'], actor => {
       cbs.onRoll(actor);
+    });
+    sim._bindAction(['KeyH'], actor => {
+      if (isContainable(actor)) {
+        cbs.onShuffle(actor);
+      }
     });
     // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
     // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
@@ -246,5 +252,11 @@ export class Simulation extends SimulationBase {
     if (actor) {
       actor.rotation = Vector3.FromArray(position);
     }
+  }
+
+  handleDeckRerender(guid: string, grid: CardGrid, size: number) {
+    const actor = this.actors.find(a => a.guid === guid);
+    // eslint-disable-next-line no-console
+    if (actor instanceof Deck) actor.rerenderDeck(grid, size).catch(console.error);
   }
 }

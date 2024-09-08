@@ -5,6 +5,7 @@ import { Loader } from '@shared/playground';
 import type { Containable } from '@shared/playground/actions/Containable';
 import { BagMixin } from '@shared/playground/actors/BagMixin';
 import type { Constructor } from '@shared/types';
+import { shuffle } from '@shared/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { ServerBase } from './serverBase';
 
@@ -40,5 +41,9 @@ export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase)
     }
 
     return new this(state, model);
+  }
+
+  shuffle() {
+    shuffle(this.items);
   }
 }

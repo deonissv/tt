@@ -238,13 +238,9 @@ export class SimulationRoom {
     const cursorsAction = this.actionBuilder.getCursorsAction(cursors);
     const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
 
-    if (cursorsAction || simActions.length > 0) {
-      SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify([cursorsAction, ...simActions])}`);
-    }
-
     this.clients.forEach((client, ws) => {
       const actions = [] as WS.ServerActionMsg[];
-      if (cursorsAction && Object.keys(cursorsAction).length > 0) {
+      if (cursorsAction && Object.keys(cursorsAction).length > 1) {
         const clientCursors = structuredClone(cursorsAction);
         delete clientCursors.payload[client.id];
         actions.push(cursorsAction);
@@ -252,6 +248,7 @@ export class SimulationRoom {
       if (simActions) actions.push(...simActions);
 
       if (actions && actions.length > 0) {
+        SimulationRoom.logger.verbose(`Sending actions to [${client.id}]: ${JSON.stringify(actions)}`);
         WS.send(ws, actions);
       }
     });

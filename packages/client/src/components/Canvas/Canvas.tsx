@@ -20,7 +20,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const init = useCallback(async (): Promise<SimulationRoom> => {
     const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, setCursors);
 
-    // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
+    import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
 
     return sr;
   }, [nickname, roomId]);

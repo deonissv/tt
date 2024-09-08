@@ -1,8 +1,14 @@
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
-import type { ActorBaseState, SimulationStateSave, Transformation } from '@shared/dto/states';
+import {
+  ActorType,
+  type ActorBaseState,
+  type DeckState,
+  type SimulationStateSave,
+  type Transformation,
+} from '@shared/dto/states';
 import { vecFloatCompare } from '@shared/utils';
 import { ServerAction } from '@shared/ws';
-import type { CursorsPld } from '@shared/ws/payloads';
+import type { CursorsPld, RerenderDeckPld } from '@shared/ws/payloads';
 import type { MsgMap, ServerActionMsg } from '@shared/ws/ws';
 import type { Simulation } from '../simulation/simulation';
 
@@ -45,7 +51,7 @@ export class ActionBuilder {
       return [];
     }
     const actions = this._getSimActions(this.prevSimState, simState);
-    this.prevSimState = simState;
+    this.prevSimState = structuredClone(simState);
 
     return actions;
   }
@@ -108,6 +114,14 @@ export class ActionBuilder {
             payload: { guid: guid, position: rotationUpdate },
           });
         }
+
+        const deckRerender = this.getDeckRerender(prevActorState as DeckState, actorState as DeckState);
+        if (deckRerender) {
+          actions.push({
+            type: ServerAction.RERENDER_DECK,
+            payload: deckRerender,
+          });
+        }
       }
     });
 
@@ -139,5 +153,33 @@ export class ActionBuilder {
     );
     if (!updateScale) return null;
     return currentState.transformation?.scale;
+  }
+
+  getDeckRerender(prevState: DeckState, currentState: DeckState): RerenderDeckPld | null {
+    if (prevState.type != ActorType.DECK) return null;
+    if (
+      JSON.stringify(prevState.cards.at(-1)) === JSON.stringify(currentState.cards.at(-1)) &&
+      JSON.stringify(prevState.cards.at(0)) === JSON.stringify(currentState.cards.at(0))
+    )
+      return null;
+
+    return this.getRerenderDeckPld(currentState);
+  }
+
+  private getRerenderDeckPld(deckState: DeckState): RerenderDeckPld {
+    const faceCard = deckState.cards.at(-1)!;
+    const backCard = deckState.cards.at(0)!;
+
+    return {
+      guid: deckState.guid,
+      grid: {
+        faceURL: faceCard.faceURL,
+        backURL: backCard.backURL,
+        cols: faceCard.cols,
+        rows: faceCard.rows,
+        sequence: faceCard.sequence,
+      },
+      size: deckState.cards.length,
+    };
   }
 }

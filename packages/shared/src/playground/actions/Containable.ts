@@ -5,6 +5,7 @@ import { SharedBase } from '../actors';
 export interface Containable {
   get size(): number;
   pickItem(clientId: string): void;
+  shuffle(): void;
 }
 
 export const isContainable = (object: any): object is Containable => {
@@ -12,12 +13,4 @@ export const isContainable = (object: any): object is Containable => {
   const TileStack = SharedBase<TileStackState>;
   const Deck = SharedBase<DeckState>;
   return object instanceof Bag || object instanceof TileStack || object instanceof Deck;
-  // return (
-  //   'size' in object &&
-  //   'pickItem' in object &&
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  //   typeof object.size === 'number' &&
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  //   typeof object.pickItem === 'function'
-  // );
 };

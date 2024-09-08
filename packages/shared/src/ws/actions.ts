@@ -9,6 +9,7 @@ export enum ClientAction {
   CURSOR = 'CURSOR',
   PICK_ACTOR = 'PICK_ACTOR',
   RELEASE_ACTOR = 'RELEASE_ACTOR',
+  SHUFFLE = 'SHUFFLE ',
 }
 
 // actions sent by server
@@ -25,6 +26,7 @@ export enum ServerAction {
   SPAWN_ACTOR = 'SPAWN_ACTOR', // spawnig absoultelly new actor
   DROP_ACTOR = 'DROP_ACTOR', // spawning actor that is present in original state save. e.g. dropping item deck / state
   REMOVE_ACTOR = 'REMOVE_ACTOR',
+  RERENDER_DECK = 'RERENDER_DECK',
 }
 
 export type SimAction = ClientAction | ServerAction;
