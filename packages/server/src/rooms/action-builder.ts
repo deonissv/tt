@@ -25,6 +25,8 @@ export class ActionBuilder {
   }
 
   getCursorsAction(cursors: CursorsPld): MsgMap[ServerAction.CURSORS] | null {
+    if (Object.keys(cursors).length === 0) return null;
+
     const cursorsUpdate = JSON.stringify(cursors);
     if (cursorsUpdate === this.prevCursors) return null;
 

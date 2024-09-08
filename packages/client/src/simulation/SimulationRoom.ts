@@ -74,7 +74,7 @@ export class SimulationRoom {
       message.forEach(action => {
         switch (action.type) {
           case ServerAction.CURSORS: {
-            setCursors(prev => ({ ...prev, ...action.payload }));
+            setCursors(_ => ({ ...action.payload }));
             break;
           }
           case ServerAction.MOVE_ACTOR: {

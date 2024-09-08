@@ -190,11 +190,11 @@ export class SimulationRoom {
    */
   private onClose(event: WebSocket.CloseEvent) {
     SimulationRoom.logger.log(`Client disconnectingfrom room ${this.id}`);
-    this.clients.delete(event.target);
     const cursorClient = this.clients.get(event.target)?.id;
     if (cursorClient) {
       this.cursors.delete(cursorClient);
     }
+    this.clients.delete(event.target);
 
     if (this.clients.size === 0) {
       this.closeTimeout = setTimeout(() => {
@@ -238,19 +238,17 @@ export class SimulationRoom {
     const cursorsAction = this.actionBuilder.getCursorsAction(cursors);
     const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
 
-    if (cursorsAction && simActions.length > 0) {
+    if (cursorsAction || simActions.length > 0) {
       SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify([cursorsAction, ...simActions])}`);
     }
+
     this.clients.forEach((client, ws) => {
-      let clientCursors = {} as typeof cursorsAction;
-
-      if (cursorsAction) {
-        clientCursors = { ...cursorsAction } as typeof cursorsAction;
-        delete clientCursors.payload[client.id];
-      }
-
       const actions = [] as WS.ServerActionMsg[];
-      if (cursorsAction) actions.push(cursorsAction);
+      if (cursorsAction && Object.keys(cursorsAction).length > 0) {
+        const clientCursors = structuredClone(cursorsAction);
+        delete clientCursors.payload[client.id];
+        actions.push(cursorsAction);
+      }
       if (simActions) actions.push(...simActions);
 
       if (actions && actions.length > 0) {
