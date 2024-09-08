@@ -25,43 +25,65 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
     return sr;
   }, [nickname, roomId]);
 
-  const updateCursors = useCallback(() => {
-    const sim = simulation.current;
-    if (sim instanceof Simulation) {
-      screenCursors.current = Object.entries(cursors).reduce(
-        (acc, [id, c]) => {
-          const screenCursor = sim.getScreenCursor(c);
-          acc[id] = screenCursor;
-          return acc;
-        },
-        {
-          [clientId.current]: cursor,
-        } as CursorsPld,
-      );
-    }
-  }, []);
+  const updateCursors = useCallback(
+    (cursor: Tuple<number, 2>, cursors: CursorsPld, screenCursors: React.MutableRefObject<CursorsPld>) => {
+      const sim = simulation.current;
+      if (sim instanceof Simulation) {
+        screenCursors.current = Object.entries(cursors).reduce(
+          (acc, [id, c]) => {
+            const screenCursor = sim.getScreenCursor(c);
+            acc[id] = screenCursor;
+            return acc;
+          },
+          {
+            [clientId.current]: cursor,
+          } as CursorsPld,
+        );
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     init()
       .then(sr => {
         simulationRoom.current = sr;
-        canvas.current!.addEventListener('pointermove', _ => {
-          const screenCursor = [sr.simulation.scene.pointerX, sr.simulation.scene.pointerY] as Tuple<number, 2>;
-          setCursor(screenCursor);
-        });
-
         clientId.current = sr.clientId;
         simulation.current = sr.simulation;
-        canvas.current!.addEventListener('mousemove', () => {
+
+        const handlePointerMove = () => {
+          const screenCursor = [sr.simulation.scene.pointerX, sr.simulation.scene.pointerY] as Tuple<number, 2>;
+          setCursor(screenCursor);
+        };
+
+        const handleMouseMove = () => {
           setCursor(sr.simulation.rawCursor);
-        });
-        canvas.current!.addEventListener('scroll', () => {
-          updateCursors();
-        });
+        };
+
+        canvas.current!.addEventListener('pointermove', handlePointerMove);
+        canvas.current!.addEventListener('mousemove', handleMouseMove);
+
+        return () => {
+          canvas.current?.removeEventListener('pointermove', handlePointerMove);
+          canvas.current?.removeEventListener('mousemove', handleMouseMove);
+          sr.destructor();
+        };
       })
       // eslint-disable-next-line no-console
       .catch(console.error);
-  }, [init, updateCursors]);
+  }, []);
+
+  // useEffect(() => {
+  //   const canv = canvas.current!;
+  //   const handler = () => {
+  //     updateCursors(cursor, cursors, screenCursors);
+  //   };
+
+  //   canv.addEventListener('scroll', handler);
+  //   return () => {
+  //     canv.removeEventListener('scroll', handler);
+  //   };
+  // });
 
   useEffect(() => {
     return () => {
@@ -70,8 +92,8 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   }, [simulationRoom]);
 
   useEffect(() => {
-    updateCursors();
-  });
+    updateCursors(cursor, cursors, screenCursors);
+  }, [updateCursors, cursor, cursors, screenCursors]);
 
   return (
     <>
