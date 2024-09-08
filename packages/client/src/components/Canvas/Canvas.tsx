@@ -1,4 +1,4 @@
-// import { Inspector } from '@babylonjs/inspector';
+import { Inspector } from '@babylonjs/inspector';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
@@ -16,7 +16,7 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const init = useCallback(async (): Promise<SimulationRoom> => {
     const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, cursor, setCursors);
 
-    // Inspector.Show(sr.simulation.scene, {});
+    Inspector.Show(sr.simulation.scene, {});
     return sr;
   }, [cursor, nickname, roomId]);
 

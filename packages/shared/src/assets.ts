@@ -33,13 +33,13 @@ export const CUSTOM_RECTANGLE_TABLE = {
 };
 
 export const RECTANGLE_TABLE = {
-  transformation: {
-    position: [0, -1.4, 0],
-    rotation: [(3 * Math.PI) / 2, 0, 0],
-    scale: [1.01, 1.01, 1.01],
-  },
+  // transformation: {
+  //   position: [0, -1.4, 0],
+  //   rotation: [(3 * Math.PI) / 2, 0, 0],
+  //   scale: [1.01, 1.01, 1.01],
+  // },
   frame: {
-    meshURL: `${STATIC_HOST}/rpg_table_wood2057.obj`,
+    meshURL: `${STATIC_HOST}/rpg_table_wood.obj`,
     ...woodMaterialProps,
   },
   felt: {

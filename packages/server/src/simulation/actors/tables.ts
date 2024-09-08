@@ -205,9 +205,11 @@ export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerB
 export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<RectangleTable | null> {
     const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
-    const felt = await Loader.loadMesh(RECTANGLE_TABLE.felt.meshURL);
+    const felt = CreatePlane('felt', { width: 56.24, height: 36.33 });
+    felt.rotation.x = Math.PI / 2;
+    felt.position.y = 0.85;
 
-    if (!tableFrame || !felt) return null;
+    if (!tableFrame) return null;
     const wrapper = Mesh.MergeMeshes([tableFrame, felt], true, false, undefined, false, true)!;
 
     const table = new this(
@@ -215,7 +217,6 @@ export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
         guid: '#RectangleTable',
         name: '#RectangleTable',
         type: ActorType.ACTOR,
-        transformation: RECTANGLE_TABLE.transformation,
       },
       wrapper,
     );
