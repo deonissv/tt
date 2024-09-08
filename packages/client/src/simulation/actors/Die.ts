@@ -20,10 +20,10 @@ export class ClientDie extends ClientBase<DieState> {
   }
 }
 
-export class Die4 extends DieMixin(ClientBase) {}
-export class Die6 extends DieMixin(ClientBase) {}
-export class Die8 extends DieMixin(ClientBase) {}
+export class Die4 extends DieMixin(ClientDie) {}
+export class Die6 extends DieMixin(ClientDie) {}
+export class Die8 extends DieMixin(ClientDie) {}
 
-export class Die10 extends DieMixin(ClientBase) {}
-export class Die12 extends DieMixin(ClientBase) {}
-export class Die20 extends DieMixin(ClientBase) {}
+export class Die10 extends DieMixin(ClientDie) {}
+export class Die12 extends DieMixin(ClientDie) {}
+export class Die20 extends DieMixin(ClientDie) {}

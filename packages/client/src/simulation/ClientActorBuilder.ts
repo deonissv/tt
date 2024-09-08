@@ -99,11 +99,11 @@ export class ClientActorBuilderFactory extends ActorBuilder {
   }
 
   async buildBag(actorState: BagState): Promise<Bag | null> {
-    return await Bag.fromState<Bag>(actorState);
+    return await Bag.fromState(actorState);
   }
 
   async buildCard(actorState: CardState): Promise<Card | null> {
-    return await Card.fromState<Card>(actorState);
+    return await Card.fromState(actorState);
   }
 
   async buildDeck(actorState: DeckState): Promise<Deck | null> {
