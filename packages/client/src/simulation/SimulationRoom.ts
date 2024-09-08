@@ -3,7 +3,7 @@ import { RoomService } from '@services/room.service';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld } from '@shared/ws/payloads';
 import type { ClientActionMsg } from '@shared/ws/ws';
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 import type { ClientBase } from './actors';
 
@@ -17,7 +17,8 @@ export class SimulationRoom {
   readonly clientId: string;
   readonly roomId: string;
 
-  cursor: MutableRefObject<Tuple<number, 2>>;
+  // cursor: MutableRefObject<Tuple<number, 2>>;
+  cursor: Tuple<number, 2>;
   updateTimeout: NodeJS.Timeout;
   lastUpdate: string;
 
@@ -26,13 +27,12 @@ export class SimulationRoom {
     simulation: typeof SimulationRoom.prototype.simulation,
     clientId: typeof SimulationRoom.prototype.roomId,
     roomId: typeof SimulationRoom.prototype.roomId,
-    cursor: typeof SimulationRoom.prototype.cursor,
   ) {
     this.ws = ws;
     this.simulation = simulation;
     this.clientId = clientId;
     this.roomId = roomId;
-    this.cursor = cursor;
+    this.cursor = [0, 0];
 
     this.updateTimeout = setInterval(() => {
       this.sendUpdate();
@@ -40,7 +40,8 @@ export class SimulationRoom {
   }
 
   sendUpdate() {
-    const simStateUpdate = this.cursor.current;
+    const cursor = this.simulation.getCursor();
+    const simStateUpdate = cursor;
     const updateStringified = JSON.stringify(simStateUpdate);
     if (this.lastUpdate === updateStringified && SimulationRoom.actions.length === 0) {
       return;
@@ -48,7 +49,7 @@ export class SimulationRoom {
 
     SimulationRoom.actions.push({
       type: ClientAction.CURSOR,
-      payload: this.cursor.current,
+      payload: cursor,
     });
 
     if (SimulationRoom.actions.length > 0) {
@@ -62,7 +63,6 @@ export class SimulationRoom {
     canvas: HTMLCanvasElement,
     roomId: typeof SimulationRoom.prototype.roomId,
     nickname = '',
-    cursor: typeof SimulationRoom.prototype.cursor,
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
   ): Promise<SimulationRoom> {
     const [ws, clientId, simState] = await RoomService.connect(roomId, nickname);
@@ -105,7 +105,7 @@ export class SimulationRoom {
       });
     });
 
-    return new SimulationRoom(ws, sim, clientId, roomId, cursor);
+    return new SimulationRoom(ws, sim, clientId, roomId);
   }
 
   static onRoll = (actor: ClientBase) => {

@@ -9,6 +9,7 @@ import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
+import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import { type SimulationStateSave } from '@shared/dto/states';
@@ -112,37 +113,39 @@ export class Simulation extends SimulationBase {
     return this.scene.activeCamera as ArcRotateCamera;
   }
 
-  get gCursor(): [number, number] {
+  get viewport(): Viewport {
     const engine = this.scene.getEngine();
-    const viewport = this._camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
-    const screenVector = new Vector3(this.scene.pointerX, this.scene.pointerY, 0);
+    return this._camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight());
+  }
+
+  get rawCursor(): Tuple<number, 2> {
+    return [this.scene.pointerX, this.scene.pointerY];
+  }
+
+  getCursor(): Tuple<number, 2> {
+    const camera = this._camera;
+    const ray = this.scene.createPickingRay(this.scene.pointerX, this.scene.pointerY, Matrix.Identity(), camera);
+    const t = -ray.origin.y / ray.direction.y;
+    const groundPoint = ray.origin.add(ray.direction.scale(t));
+
+    return [groundPoint.x, groundPoint.z];
+  }
+
+  getScreenCursor(cursor: Tuple<number, 2>): Tuple<number, 2> {
+    const viewport = this.viewport;
+    const groundPoint = new Vector3(cursor[0], 0, cursor[1]);
 
     const viewMatrix = this._camera.getViewMatrix();
     const projectionMatrix = this._camera.getProjectionMatrix();
 
-    const nearWorld = Vector3.Unproject(
-      screenVector,
-      viewport.width,
-      viewport.height,
+    const screenVector = Vector3.Project(
+      groundPoint,
       Matrix.IdentityReadOnly,
-      viewMatrix,
-      projectionMatrix,
+      viewMatrix.multiply(projectionMatrix),
+      viewport,
     );
 
-    screenVector.z = 1;
-    const farWorld = Vector3.Unproject(
-      screenVector,
-      viewport.width,
-      viewport.height,
-      Matrix.IdentityReadOnly,
-      viewMatrix,
-      projectionMatrix,
-    );
-
-    const direction = farWorld.subtract(nearWorld).normalize();
-    const t = (-1 * nearWorld.y) / direction.y;
-    const groundPoint = nearWorld.add(direction.scale(t));
-    return [groundPoint._x, groundPoint._z];
+    return [screenVector.x, screenVector.y];
   }
 
   private _handleHoverHighlight() {
@@ -183,7 +186,7 @@ export class Simulation extends SimulationBase {
           if (evt.event.button !== 0) return;
           if (this._pickedActor) return;
 
-          this._cursorPos = this.gCursor;
+          this._cursorPos = this.getCursor();
           this._pickedActor = this._pickActor();
           if (!this._pickedActor) return;
           this.cbs.onPickActor(this._pickedActor);
@@ -198,7 +201,7 @@ export class Simulation extends SimulationBase {
         case PointerEventTypes.POINTERMOVE: {
           if (!this._pickedActor) return;
           const prevCursorPos = this._cursorPos;
-          this._cursorPos = this.gCursor;
+          this._cursorPos = this.getCursor();
 
           const cursorDX = this._cursorPos[0] - prevCursorPos[0];
           const cursorDY = this._cursorPos[1] - prevCursorPos[1];
@@ -233,7 +236,7 @@ export class Simulation extends SimulationBase {
   async handleSpawnPickedActor(state: UnknownActorState) {
     const actor = await ClientActorBuilder.build(state);
     if (actor) {
-      this._cursorPos = this.gCursor;
+      this._cursorPos = this.getCursor();
       this._pickedActor = actor;
     }
   }

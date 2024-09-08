@@ -1,37 +1,67 @@
-import { Inspector } from '@babylonjs/inspector';
 import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 
+import type { Tuple } from '@babylonjs/core';
+import { Simulation } from '@client/src/simulation';
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { Context } from '@client/src/Store';
 import type { CursorsPld } from '@shared/ws/payloads';
 
 const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
   const simulationRoom = useRef<SimulationRoom>();
-  const cursor = useRef<[number, number]>([0, 0]);
   const canvas = useRef<HTMLCanvasElement>(null);
+  const clientId = useRef<string>('');
+  const screenCursors = useRef<CursorsPld>({});
+  const simulation = useRef<Simulation>();
 
+  const [cursor, setCursor] = useState<[number, number]>([0, 0]);
   const [cursors, setCursors] = useState<CursorsPld>({});
   const [nickname] = useContext(Context).nickname;
 
   const init = useCallback(async (): Promise<SimulationRoom> => {
-    const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, cursor, setCursors);
+    const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, setCursors);
 
-    Inspector.Show(sr.simulation.scene, {});
+    // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
+
     return sr;
-  }, [cursor, nickname, roomId]);
+  }, [nickname, roomId]);
+
+  const updateCursors = useCallback(() => {
+    const sim = simulation.current;
+    if (sim instanceof Simulation) {
+      screenCursors.current = Object.entries(cursors).reduce(
+        (acc, [id, c]) => {
+          const screenCursor = sim.getScreenCursor(c);
+          acc[id] = screenCursor;
+          return acc;
+        },
+        {
+          [clientId.current]: cursor,
+        } as CursorsPld,
+      );
+    }
+  }, []);
 
   useEffect(() => {
     init()
       .then(sr => {
         simulationRoom.current = sr;
-        canvas.current!.addEventListener('pointermove', event => {
-          cursor.current[0] = event.clientX;
-          cursor.current[1] = event.clientY;
+        canvas.current!.addEventListener('pointermove', _ => {
+          const screenCursor = [sr.simulation.scene.pointerX, sr.simulation.scene.pointerY] as Tuple<number, 2>;
+          setCursor(screenCursor);
+        });
+
+        clientId.current = sr.clientId;
+        simulation.current = sr.simulation;
+        canvas.current!.addEventListener('mousemove', () => {
+          setCursor(sr.simulation.rawCursor);
+        });
+        canvas.current!.addEventListener('scroll', () => {
+          updateCursors();
         });
       })
       // eslint-disable-next-line no-console
       .catch(console.error);
-  }, [init]);
+  }, [init, updateCursors]);
 
   useEffect(() => {
     return () => {
@@ -39,10 +69,14 @@ const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
     };
   }, [simulationRoom]);
 
+  useEffect(() => {
+    updateCursors();
+  });
+
   return (
     <>
       <div>
-        {Object.entries(cursors).map(([id, [x, y]]) => (
+        {Object.entries(screenCursors.current).map(([id, [x, y]]) => (
           <div
             key={id}
             className="w-3 h-3 bg-green-500 absolute pointer-events-none"

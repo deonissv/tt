@@ -3,7 +3,7 @@ import type { ActorBaseState, SimulationStateSave, Transformation } from '@share
 import { vecFloatCompare } from '@shared/utils';
 import { ServerAction } from '@shared/ws';
 import type { CursorsPld } from '@shared/ws/payloads';
-import type { ServerActionMsg } from '@shared/ws/ws';
+import type { MsgMap, ServerActionMsg } from '@shared/ws/ws';
 import type { Simulation } from '../simulation/simulation';
 
 export class ActionBuilder {
@@ -24,7 +24,7 @@ export class ActionBuilder {
     return actions;
   }
 
-  private getCursorsAction(cursors: CursorsPld): ServerActionMsg | null {
+  getCursorsAction(cursors: CursorsPld): MsgMap[ServerAction.CURSORS] | null {
     const cursorsUpdate = JSON.stringify(cursors);
     if (cursorsUpdate === this.prevCursors) return null;
 

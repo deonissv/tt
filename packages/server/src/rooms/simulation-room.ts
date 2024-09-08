@@ -234,12 +234,29 @@ export class SimulationRoom {
       acc[key] = val;
       return acc;
     }, {});
-    const actions = this.actionBuilder.getActions(cursors, this.simulation.toState());
 
-    if (actions && actions.length > 0) {
-      SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify(actions)}`);
-      this.broadcast(actions);
+    const cursorsAction = this.actionBuilder.getCursorsAction(cursors);
+    const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
+
+    if (cursorsAction && simActions.length > 0) {
+      SimulationRoom.logger.verbose(`Broadcasting actions: ${JSON.stringify([cursorsAction, ...simActions])}`);
     }
+    this.clients.forEach((client, ws) => {
+      let clientCursors = {} as typeof cursorsAction;
+
+      if (cursorsAction) {
+        clientCursors = { ...cursorsAction } as typeof cursorsAction;
+        delete clientCursors.payload[client.id];
+      }
+
+      const actions = [] as WS.ServerActionMsg[];
+      if (cursorsAction) actions.push(cursorsAction);
+      if (simActions) actions.push(...simActions);
+
+      if (actions && actions.length > 0) {
+        WS.send(ws, actions);
+      }
+    });
   }
 
   /**
@@ -279,7 +296,7 @@ export class SimulationRoom {
    */
   private broadcast(msg: WS.MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN && !exclude.includes(client)) {
+      if (!exclude.includes(client)) {
         WS.send(client, msg);
       }
     });
