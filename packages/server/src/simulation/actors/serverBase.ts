@@ -49,6 +49,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     if (this.picked && this.__targetPosition) {
       let upHeight = this.defaultY + PICK_HIGHT;
 
+      const rotation = this.absoluteRotationQuaternion;
       const shapeLocalResult = new ShapeCastResult();
       const hitWorldResult = new ShapeCastResult();
       shapeLocalResult.reset();
@@ -60,7 +61,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
           startPosition: this.position,
           endPosition: this.position.add(new Vector3(0, -999, 0)),
           shouldHitTriggers: true,
-          rotation: Quaternion.Identity(),
+          rotation: rotation,
           ignoreBody: this.body,
         },
         shapeLocalResult,
@@ -73,7 +74,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
         this.obstacleHeight = null;
       }
       const pos = new Vector3(this.__targetPosition.x, upHeight, this.__targetPosition.y);
-      this.body.setTargetTransform(pos, Quaternion.Identity());
+      this.body.setTargetTransform(pos, rotation);
     }
   }
 
