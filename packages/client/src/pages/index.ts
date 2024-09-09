@@ -1,0 +1,9 @@
+export { CreateGame } from './CreateGame';
+export { GamesList } from './GamesList';
+export { JoinRoom } from './JoinRoom';
+export { Login } from './Login';
+export { NotFoundPage } from './NotFoundPage';
+export { Profile } from './Profile';
+export { Room } from './Room';
+export { Saves } from './Saves';
+export { Signup } from './Signup';

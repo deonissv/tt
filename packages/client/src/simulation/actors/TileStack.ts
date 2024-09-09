@@ -28,7 +28,7 @@ export class TileStack extends TileStackMixin(ClientBase<TileStackState>) {
     };
 
     tileState.transformation!.position![0] -= 4;
-    const newTile = await Tile.fromState<ClientBase<TileState>>(tileState);
+    const newTile = await Tile.fromState(tileState);
     this.size -= 1;
     this.model.scaling.y = this.size;
 

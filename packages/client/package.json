@@ -15,7 +15,7 @@
     "test:w": "vitest --config ../../vitest.config.ts",
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit --project tsconfig.app.json "
   },
   "devDependencies": {
     "@babylonjs/inspector": "^7.18.0",

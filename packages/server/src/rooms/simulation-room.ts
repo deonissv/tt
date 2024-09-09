@@ -77,6 +77,7 @@ export class SimulationRoom {
       () => {
         this.downloadProgress.loaded++;
 
+        SimulationRoom.logger.error(`DOWNLOAD_PROGRESS ${this.clients.size}`);
         this.broadcast([
           {
             type: ServerAction.DOWNLOAD_PROGRESS,
@@ -248,7 +249,7 @@ export class SimulationRoom {
       if (simActions) actions.push(...simActions);
 
       if (actions && actions.length > 0) {
-        SimulationRoom.logger.verbose(`Sending actions to [${client.id}]: ${JSON.stringify(actions)}`);
+        // SimulationRoom.logger.verbose(`Sending actions to [${client.id}]: ${JSON.stringify(actions)}`);
         WS.send(ws, actions);
       }
     });

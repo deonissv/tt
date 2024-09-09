@@ -49,7 +49,10 @@ export const vecFloatCompare = <N extends number>(
   b: Tuple<number, N>,
   epsilon = PRECISION_EPSILON,
 ): boolean => {
-  return Array.prototype.some.call(a, (v: number, i: number) => !floatCompare(v, b[i] as number, epsilon));
+  return Array.prototype.some.call(
+    a,
+    (v: number, i: number) => !floatCompare(v, b[i as keyof typeof b] as number, epsilon),
+  );
 };
 
 /**
@@ -95,4 +98,14 @@ export const shuffle = <T>(array: T[]): T[] => {
     [array[i], array[j]] = [array[j], array[i]];
   }
   return array;
+};
+
+/**
+ * Checks if a string is a valid UUID v4.
+ *
+ * @param uuid - The string to be checked.
+ * @returns `true` if the string is a valid UUID, `false` otherwise.
+ */
+export const isUUIDv4 = (uuid: string): boolean => {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
 };

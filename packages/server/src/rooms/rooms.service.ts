@@ -279,6 +279,23 @@ export class RoomsService {
   }
 
   /**
+   * Removes a room with the specified room code.
+   * If the room is currently running, a BadRequestException is thrown.
+   *
+   * @param roomCode - The code of the room to be removed.
+   * @throws BadRequestException - If the room is currently running.
+   */
+  async removeRoom(roomCode: string) {
+    if (RoomsService.hasRoom(roomCode)) {
+      throw new BadRequestException('Room is running');
+    }
+
+    this.logger.log(`Removing room with code: ${roomCode}`);
+    await this.prismaService.room.delete({ where: { code: roomCode } });
+    this.logger.log(`Room with code: ${roomCode} successfully removed`);
+  }
+
+  /**
    * Finds a room by its code.
    *
    * @param roomCode - The code of the room to find.

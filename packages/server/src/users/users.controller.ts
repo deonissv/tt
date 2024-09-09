@@ -1,8 +1,17 @@
 import { subject } from '@casl/ability';
-import { Body, Controller, Delete, ForbiddenException, Param, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  forwardRef,
+  Inject,
+  Param,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ValidatedUser } from '../auth/validated-user';
 import type { AppAbility } from '../casl/casl-ability.factory';
 import { CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
@@ -11,6 +20,8 @@ import { PermissionsService } from '../permissions.service';
 import { UsersService } from './users.service';
 
 import { UpdateUserDto } from '@shared/dto/users';
+import { AuthService } from '../auth/auth.service';
+import { ValidatedUser } from '../auth/validated-user';
 
 @ApiTags('users')
 @Controller('users')
@@ -18,6 +29,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly permissionsService: PermissionsService,
+    @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
   ) {}
 
   @ApiBearerAuth('JWT')
@@ -59,6 +71,7 @@ export class UsersController {
       throw new ForbiddenException('Cannot delete the user');
     }
 
-    return this.usersService.update(user.userId, updateUserDto);
+    const updatedUser = await this.usersService.update(user.userId, updateUserDto);
+    return this.authService.generateToken(updatedUser);
   }
 }

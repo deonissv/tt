@@ -1,55 +1,74 @@
-import { useEffect, useState } from 'react';
+import { getErrorMsg } from '@client/src/utils';
+import { Button, Input, useToast } from '@components';
+import { AuthService } from '@services';
+import type { UpdateUserDto } from '@shared/dto/users';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import RoomsGallery from '@components/RoomsGallery/RoomsGallery';
-import { AuthService } from '@services/auth.service';
-import { RoomService } from '@services/room.service';
-
-import type { RoomPreviewDto } from '@shared/dto/rooms';
-
-const Profile = () => {
+export const Profile = () => {
   const navigate = useNavigate();
-  const user = AuthService.authorized();
-  const [rooms, setRooms] = useState<RoomPreviewDto[]>([]);
+  const userJWT = AuthService.getJWT();
+
+  const { addToast } = useToast();
+
+  const [username, setUsername] = useState(userJWT?.username);
+  const [password, setPassword] = useState('');
+
+  const onModify = (e: React.FormEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    if (!userJWT?.code || (!username && !password)) return;
+
+    const updatedContent: UpdateUserDto = {};
+    if (username !== userJWT.username) updatedContent.username = username;
+    if (password) updatedContent.password = password;
+
+    if (Object.keys(updatedContent).length > 0) {
+      AuthService.updateUser(userJWT.code, updatedContent)
+        .then(() => navigate('/games'))
+        .catch(e => addToast(`Failed to modify user: ${getErrorMsg(e)}`));
+    } else {
+      navigate('/games');
+    }
+  };
 
   const onLogout = () => {
     AuthService.logout();
-    navigate('/');
+    navigate('/games');
   };
-
-  const onRoomClick = async (roomCode: string) => {
-    const roomId = await RoomService.startRoom(roomCode);
-
-    localStorage.setItem('tt-nickname', '');
-    navigate(`/room/${roomId}`);
-  };
-
-  useEffect(() => {
-    const loadPreviews = async () => {
-      const roomPreviews = await RoomService.getUserRooms(user!.code);
-      setRooms(roomPreviews);
-    };
-
-    // eslint-disable-next-line no-console
-    loadPreviews().catch(console.error);
-  }, [user]);
-
   return (
-    <>
-      <div className="flex justify-center sm:items-center lg:items-stretch sm:flex-col lg:flex-row w-full">
-        <div className="bg-[#E6EAFF] w-[30rem] p-5 m-5">
-          <h1>Profile</h1>
-          <h1>{user?.username}</h1>
-          <button className="bg-blue w-max rounded-full px-4 py-1 text-white" onClick={onLogout}>
-            Logout
-          </button>
-          <div>
-            <RoomsGallery onRoomClick={onRoomClick} rooms={rooms} />
+    <div className="flex justify-center w-full mb-5">
+      <div className="flex flex-col bg-light-blue w-[1000px]">
+        <div className="flex flex-col  p-11">
+          <h4 className="text-center !text-2xl !font-bold mb-6">Profile</h4>
+          <div className="p-3">
+            <Input
+              label="Username"
+              placeholder="Username"
+              type="text"
+              value={username}
+              onChange={e => setUsername((e.target as HTMLInputElement).value)}
+            />
+            <Input
+              label="Password"
+              placeholder="Password"
+              type="password"
+              value={password}
+              onChange={e => setPassword((e.target as HTMLInputElement).value)}
+            />
+            <div className="mt-3 flex flex-col justify-center">
+              <Button onClick={onModify}>
+                <p className="font-bold uppercase tracking-wide text-sm">Modify</p>
+              </Button>
+            </div>
           </div>
         </div>
+        <button
+          className="relative bottom-0 w-full bg-accent text-black hover:font-bold text-lg uppercase font-semibold py-5 transition duration-300 ease-in-out shadow-md hover:shadow-xl"
+          onClick={onLogout}
+        >
+          Logout
+        </button>
       </div>
-    </>
+    </div>
   );
 };
-
-export default Profile;

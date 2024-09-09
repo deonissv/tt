@@ -1,11 +1,12 @@
-import { saveAccessToken } from '@client/src/utils';
-import Input from '@components/Input';
-import { AuthService } from '@services/auth.service';
+import { getErrorMsg } from '@client/src/utils';
+import { Button, Input, useToast } from '@components';
+import { AuthService } from '@services';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Signup: React.FC = (): React.ReactNode => {
+export const Signup: React.FC = (): React.ReactNode => {
   const navigate = useNavigate();
+  const { addToast } = useToast();
 
   const [email, setEmail] = React.useState('');
   const [username, setUsername] = React.useState('');
@@ -26,14 +27,13 @@ const Signup: React.FC = (): React.ReactNode => {
       return;
     }
 
-    const token = await AuthService.signup({
+    await AuthService.signup({
       email,
       username,
       password,
-    });
-
-    saveAccessToken(token);
-    navigate('/');
+    })
+      .then(() => navigate('/'))
+      .catch(e => addToast(`Failed to create game: ${getErrorMsg(e)}`));
   };
 
   return (
@@ -59,12 +59,6 @@ const Signup: React.FC = (): React.ReactNode => {
               value={password}
               onChange={e => setPassword((e.target as HTMLInputElement).value)}
             />
-            <button
-              className="bg-blue rounded-full px-10 py-3 text-white float-right"
-              onClick={e => onRegisterSubmit(e)}
-            >
-              Sign Up
-            </button>
           </div>
           <div className="p-3 w-1/2">
             <Input
@@ -84,12 +78,14 @@ const Signup: React.FC = (): React.ReactNode => {
               value={rePassword}
               onChange={e => setRePassword((e.target as HTMLInputElement).value)}
             />
-            <div className="text-blue mt-[13px]">Forgot password?</div>
           </div>
+        </div>
+        <div className=" flex justify-center">
+          <Button onClick={onRegisterSubmit}>
+            <p className="font-bold uppercase tracking-wide text-sm">Sign Up</p>
+          </Button>
         </div>
       </div>
     </div>
   );
 };
-
-export default Signup;

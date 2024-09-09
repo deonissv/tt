@@ -78,6 +78,12 @@ const _permissions = [
     action: 'read',
     subject: 'Room',
   },
+  {
+    roleId: 2,
+    action: 'delete',
+    subject: 'Room',
+    conditions: { creatorId: '${ userId }' },
+  },
   // Rooms - Guest
   {
     roleId: 3,

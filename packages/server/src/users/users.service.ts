@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
@@ -7,6 +7,8 @@ import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
@@ -25,7 +27,9 @@ export class UsersService {
     }
     const passwordHash = await this.hashPassword(createUser.password);
 
-    return await this.prisma.user.create({
+    this.logger.log('Creating a new user:', createUser);
+
+    const newUser = await this.prisma.user.create({
       data: {
         email: createUser.email,
         username: createUser.username,
@@ -34,6 +38,9 @@ export class UsersService {
         roleId: 2,
       },
     });
+
+    this.logger.log('New user created:', newUser.code);
+    return newUser;
   }
 
   /**
@@ -43,7 +50,10 @@ export class UsersService {
    * @returns A promise that resolves to the found user.
    */
   async findOneById(userId: number) {
-    return await this.prisma.user.findUnique({ where: { userId } });
+    this.logger.log(`Finding user by ID: ${userId}`);
+    const user = await this.prisma.user.findUnique({ where: { userId } });
+    this.logger.log(`User found: ${user?.code}`);
+    return user;
   }
 
   /**
@@ -53,7 +63,10 @@ export class UsersService {
    * @returns A promise that resolves to the user object if found, or `null` if not found.
    */
   async findOneByEmail(email: string) {
-    return await this.prisma.user.findUnique({ where: { email } });
+    this.logger.log(`Finding user by email: ${email}`);
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    this.logger.log(`User found: ${user?.code}`);
+    return user;
   }
 
   /**
@@ -63,7 +76,10 @@ export class UsersService {
    * @returns A promise that resolves to the unique user found, or `null` if no user is found.
    */
   async findUniqueByCode(code: string) {
-    return await this.prisma.user.findUnique({ where: { code } });
+    this.logger.log(`Finding user by code: ${code}`);
+    const user = await this.prisma.user.findUnique({ where: { code } });
+    this.logger.log(`User found: ${user?.code}`);
+    return user;
   }
 
   /**
@@ -74,7 +90,8 @@ export class UsersService {
    * @returns A promise that resolves to the updated user.
    */
   async update(userId: number, updateUserDto: UpdateUserDto) {
-    return await this.prisma.user.update({
+    this.logger.log(`Updating user with ID: ${userId}`);
+    const updatedUser = await this.prisma.user.update({
       where: { userId },
       data: {
         username: updateUserDto?.username,
@@ -82,6 +99,8 @@ export class UsersService {
         passwordHash: updateUserDto.password ? await this.hashPassword(updateUserDto.password) : undefined,
       },
     });
+    this.logger.log(`User updated: ${updatedUser?.code}`);
+    return updatedUser;
   }
 
   /**
@@ -91,7 +110,10 @@ export class UsersService {
    * @returns A promise that resolves to the deleted user.
    */
   async delete(userId: number) {
-    return await this.prisma.user.delete({ where: { userId } });
+    this.logger.log(`Deleting user with ID: ${userId}`);
+    const deletedUser = await this.prisma.user.delete({ where: { userId } });
+    this.logger.log(`User deleted: ${deletedUser?.code}`);
+    return deletedUser;
   }
 
   /**

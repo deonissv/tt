@@ -7,7 +7,6 @@ import {
   Get,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Post,
   Put,
   UseGuards,
@@ -58,9 +57,9 @@ export class GamesController {
 
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
-  @Get(':id')
-  async get(@Param('id', new ParseIntPipe()) id: number): Promise<GameDto> {
-    const game = await this.gamesService.findUnique(id);
+  @Get(':code')
+  async get(@Param('code') code: string): Promise<GameDto> {
+    const game = await this.gamesService.findUniqueByCode(code);
     if (!game) {
       throw new NotFoundException('Game not found');
     }

@@ -1,5 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import { RoomService } from '@services/room.service';
+import { RoomService } from '@services';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld } from '@shared/ws/payloads';
 import type { ClientActionMsg } from '@shared/ws/ws';
@@ -17,7 +17,6 @@ export class SimulationRoom {
   readonly clientId: string;
   readonly roomId: string;
 
-  // cursor: MutableRefObject<Tuple<number, 2>>;
   cursor: Tuple<number, 2>;
   updateTimeout: NodeJS.Timeout;
   lastUpdate: string;
@@ -64,8 +63,9 @@ export class SimulationRoom {
     roomId: typeof SimulationRoom.prototype.roomId,
     nickname = '',
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
+    setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
   ): Promise<SimulationRoom> {
-    const [ws, clientId, simState] = await RoomService.connect(roomId, nickname);
+    const [ws, clientId, simState] = await RoomService.connect(roomId, nickname, setDownloadProgress);
     const sim = await Simulation.init(canvas, simState, SimulationRoom);
 
     ws.addEventListener('message', event => {
@@ -82,17 +82,14 @@ export class SimulationRoom {
             break;
           }
           case ServerAction.SPAWN_ACTOR: {
-            // eslint-disable-next-line no-console
-            sim.handleSpawnActor(action.payload).catch(console.error);
+            void sim.handleSpawnActor(action.payload);
             break;
           }
           case ServerAction.SPAWN_PICKED_ACTOR: {
             if (action.payload.clientId === clientId) {
-              // eslint-disable-next-line no-console
-              sim.handleSpawnPickedActor(action.payload.state).catch(console.error);
+              void sim.handleSpawnPickedActor(action.payload.state);
             } else {
-              // eslint-disable-next-line no-console
-              sim.handleSpawnActor(action.payload.state).catch(console.error);
+              void sim.handleSpawnActor(action.payload.state);
             }
 
             break;

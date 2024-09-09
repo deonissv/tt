@@ -28,8 +28,8 @@
     "baseUrl": "../",
     "rootDir": "../",
     "paths": {
-      "@components/*": [ "client/src/components/*" ],
-      "@services/*": [ "client/src/services/*" ],
+      "@components": [ "client/src/components/index" ],
+      "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],
       "@client/*": [ "client/*" ],
       "@assets/*": [ "shared/tests/assets/*" ],

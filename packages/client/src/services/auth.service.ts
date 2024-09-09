@@ -1,23 +1,46 @@
 import axios from 'axios';
 import { LOADER_URL } from '../config';
-import { getAccessToken, resetAccessToken } from '../utils';
+import { getAccessToken, resetAccessToken, saveAccessToken } from '../utils';
 
 import type { AccessTokenDto, JWT, SignInDto } from '@shared/dto/auth';
-import type { CreateUserDto } from '@shared/dto/users';
+import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
 
 export const AuthService = {
   async signin(payload: SignInDto): Promise<AccessTokenDto> {
     const response = await axios.post(LOADER_URL + 'auth/signin', payload);
-    return response.data as AccessTokenDto;
+    const token = response.data as AccessTokenDto;
+    saveAccessToken(token);
+    return token;
   },
 
   async signup(payload: CreateUserDto): Promise<AccessTokenDto> {
     const response = await axios.post(LOADER_URL + 'auth/signup', payload);
-    return response.data as AccessTokenDto;
+    const token = response.data as AccessTokenDto;
+    saveAccessToken(token);
+    return token;
+  },
+
+  async updateUser(code: string, updateUser: UpdateUserDto): Promise<AccessTokenDto> {
+    const response = await axios.put(LOADER_URL + `users/${code}`, updateUser, {
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
+    });
+    const accessToken = response.data as AccessTokenDto;
+    saveAccessToken(accessToken);
+    return accessToken;
   },
 
   logout(): void {
     resetAccessToken();
+  },
+
+  getJWT() {
+    const token = getAccessToken();
+    if (!token) {
+      return null;
+    }
+    return this.decode(token);
   },
 
   authorized(): JWT | null {
@@ -25,11 +48,11 @@ export const AuthService = {
     if (!token) {
       return null;
     }
-    const decoded = this.decode(token);
-    if (!decoded || decoded.exp * 1000 < Date.now()) {
+    const decodedUser = this.getJWT();
+    if (!decodedUser || decodedUser.exp * 1000 < Date.now()) {
       return null;
     }
-    return decoded;
+    return decodedUser;
   },
 
   decode(token: string): JWT | null {

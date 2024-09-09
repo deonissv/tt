@@ -1,13 +1,10 @@
-import Login from '@client/src/pages/Login/Login';
-import type IProps from '@components/IProps';
-import { AuthService } from '@services/auth.service';
-import type { FC } from 'react';
+import { Login } from '@client/src/pages';
+import type { IProps } from '@components';
+import { AuthService } from '@services';
 import { useCallback } from 'react';
 
-const RequireAuth: FC<IProps> = ({ children }) => {
+export const RequireAuth: React.FC<IProps> = ({ children }) => {
   const authorized = AuthService.authorized();
-  // const [, updateState] = useState({});
-  // const forceUpdate = useCallback(() => updateState({}), []);
   const forceUpdate = useCallback(() => {
     window.location.reload();
   }, []);
@@ -17,5 +14,3 @@ const RequireAuth: FC<IProps> = ({ children }) => {
   }
   return children;
 };
-
-export default RequireAuth;

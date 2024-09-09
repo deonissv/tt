@@ -75,7 +75,7 @@ model RoomUser {
   userId Int
   roomId Int
   seatId Int
-  Room   Room @relation(fields: [roomId], references: [roomId])
+  Room   Room @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
   User   User @relation(fields: [userId], references: [userId])
 
   @@id([userId, roomId, seatId])
@@ -102,7 +102,7 @@ model RoomProgress {
   order                Int                   @default(autoincrement())
   turn                 Int?
   createdAt            DateTime              @default(now()) @db.Timestamp(6)
-  Room                 Room                  @relation(fields: [roomId], references: [roomId])
+  Room                 Room                  @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
   RoomProgressSave     RoomProgressSave?
   RoomProgressUpdate   RoomProgressUpdate?
   RoomProgressGameLoad RoomProgressGameLoad?
@@ -114,8 +114,8 @@ model RoomProgressSave {
   roomId       Int
   order        Int
   content      Json
-  Room         Room         @relation(fields: [roomId], references: [roomId])
-  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId])
+  Room         Room         @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
+  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId], onDelete: Cascade)
 
   @@id([order, roomId])
 }
@@ -124,8 +124,8 @@ model RoomProgressUpdate {
   roomId       Int
   order        Int
   content      Json         @db.JsonB()
-  Room         Room         @relation(fields: [roomId], references: [roomId])
-  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId])
+  Room         Room         @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
+  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId], onDelete: Cascade)
 
   @@id([order, roomId])
 }
@@ -135,9 +135,9 @@ model RoomProgressGameLoad {
   order        Int
   gameId       Int
   gameVersion  Int
-  Room         Room         @relation(fields: [roomId], references: [roomId])
-  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId])
-  GameVersion  GameVersion  @relation(fields: [gameId, gameVersion], references: [gameId, version])
+  Room         Room         @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
+  RoomProgress RoomProgress @relation(fields: [order, roomId], references: [order, roomId], onDelete: Cascade)
+  GameVersion  GameVersion  @relation(fields: [gameId, gameVersion], references: [gameId, version], onDelete: Cascade)
 
   @@id([order, roomId])
 }
@@ -149,6 +149,6 @@ model Message {
   style     Json
   authorId  Int?
   roomId    Int?
-  Room      Room?    @relation(fields: [roomId], references: [roomId])
+  Room      Room?    @relation(fields: [roomId], references: [roomId], onDelete: Cascade)
   User      User?    @relation(fields: [authorId], references: [userId])
 }

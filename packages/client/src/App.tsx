@@ -1,58 +1,38 @@
-import NotFoundPage from '@client/src/pages/NotFoundPage';
-import Layout from '@components/Layout/Layout';
-import RequireAuth from '@components/RequireAuth/RequireAuth';
-import { Route, Routes } from 'react-router-dom';
-import { CreateGame } from './pages/CreateGame/CreateGame';
-import CreateRoom from './pages/CreateRoom';
-import JoinRoom from './pages/JoinRoom';
-import Login from './pages/Login/Login';
-import Playground from './pages/Playground';
-import Profile from './pages/Profile/Profile';
-import Room from './pages/Room';
-import Signup from './pages/Signup/Signup';
+import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { Layout, RequireAuth, ToastProvider } from './components';
+
+import { CreateGame, GamesList, JoinRoom, Login, NotFoundPage, Profile, Room, Saves, Signup } from './pages';
 import { StoreProvider } from './Store';
 
 export const App = () => {
-  const protectedRoutes = [
-    {
-      path: 'room/:roomCode',
-      element: <Room />,
-    },
-    {
-      path: 'join',
-      element: <JoinRoom />,
-    },
-    {
-      path: 'new',
-      element: <CreateGame />,
-    },
-    {
-      path: 'profile',
-      element: <Profile />,
-    },
-    {
-      path: '',
-      element: <CreateRoom />,
-    },
-  ];
+  const navigate = useNavigate();
+
+  const onLogin = () => {
+    navigate('/games');
+  };
 
   return (
     <StoreProvider>
-      <Routes>
-        <Route path="room/:roomCode" element={<Room />} />
-        <Route path="playground" element={<Playground />} />
-        <Route element={<Layout />}>
-          <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} />
-          <Route path="profile" element={<Profile />} />
-          {protectedRoutes.map(({ path, element }) => (
-            <Route key={path} path={path} element={<RequireAuth>{element}</RequireAuth>} />
-          ))}
-          <Route path="*" element={<NotFoundPage />} />
-        </Route>
-      </Routes>
+      <ToastProvider>
+        <Routes>
+          <Route path="room/:roomCode" element={<Room />} />
+          <Route element={<Layout />}>
+            <Route path="login" element={<Login onLogin={onLogin} />} />
+            <Route path="signup" element={<Signup />} />
+            <Route path="profile" element={<Profile />} />
+            <Route element={RequireAuth({ children: <Outlet /> })}>
+              <Route path="join" element={<JoinRoom />} />
+              <Route path="saves" element={<Saves />} />
+              <Route path="games">
+                <Route index element={<GamesList />} />
+                <Route path="new" element={<CreateGame />} />
+                <Route path=":gameCode" element={<CreateGame />} />
+              </Route>
+              <Route path="*" element={<NotFoundPage />} />
+            </Route>
+          </Route>
+        </Routes>
+      </ToastProvider>
     </StoreProvider>
   );
 };
-
-export default App;

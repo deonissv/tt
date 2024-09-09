@@ -1,6 +1,5 @@
-import { saveAccessToken } from '@client/src/utils';
-import { Input } from '@components/Input';
-import { AuthService } from '@services/auth.service';
+import { Button, Input, useToast } from '@components';
+import { AuthService } from '@services';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,8 +9,10 @@ interface Props {
   onLogin?: () => void;
 }
 
-const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
+export const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
   const navigate = useNavigate();
+  const { addToast } = useToast();
+
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
@@ -25,11 +26,11 @@ const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
       showError('password is too short');
     }
 
-    const token = await AuthService.signin({
+    await AuthService.signin({
       email,
       password,
-    });
-    saveAccessToken(token);
+    }).catch(e => addToast(`Failed to start room: ${e}`));
+
     if (onLogin) onLogin();
   };
 
@@ -58,12 +59,9 @@ const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
           value={password}
           onChange={e => setPassword((e.target as HTMLInputElement).value)}
         />
-        <div>
-          <button className="bg-blue w-max rounded-full px-10 py-3 mb-6 text-white" onClick={e => onRegisterSubmit(e)}>
-            Login
-          </button>
-          <span className="text-blue ml-5">Forgot password?</span>
-        </div>
+        <Button className="mr-2" onClick={onRegisterSubmit}>
+          <p className="font-bold uppercase tracking-wide text-sm">Login</p>
+        </Button>
       </div>
       <div className="bg-[#E6EAFF] w-[30rem] p-5  m-5">
         <h1 className="text-xl font-bold mb-3">New customer?</h1>
@@ -73,12 +71,10 @@ const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
           <li>Save game progress</li>
           <li>Add new templates</li>
         </ul>
-        <button className="bg-blue w-max rounded-full px-10 py-3 mb-7 text-white" onClick={() => navigate('/signup')}>
-          Create An Account
-        </button>
+        <Button className="mr-2" onClick={() => navigate('/signup')}>
+          <p className="font-bold uppercase tracking-wide text-sm">Create An Account</p>
+        </Button>
       </div>
     </div>
   );
 };
-
-export default Login;

@@ -134,6 +134,7 @@ describe('GamesModule', () => {
       await prismaService.game.create({
         data: {
           gameId: 1,
+          code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
           name: 'name',
           description: 'desc',
           bannerUrl: 'url',
@@ -156,7 +157,7 @@ describe('GamesModule', () => {
       });
 
       await request(app.getHttpServer())
-        .get('/games/1')
+        .get('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.OK)
@@ -173,49 +174,13 @@ describe('GamesModule', () => {
         );
     });
 
-    it('should throw bad request in id is not a number', async () => {
-      await prismaService.user.create({
-        data: authMockAdmin,
-      });
-
-      await prismaService.game.create({
-        data: {
-          gameId: 1,
-          name: 'name',
-          description: 'desc',
-          bannerUrl: 'url',
-          createdAt: new Date(),
-          authorId: 0,
-          deletedAt: null,
-          GameVersion: {
-            create: [
-              {
-                version: 1,
-                content: {},
-              },
-              {
-                version: 2,
-                content: {},
-              },
-            ],
-          },
-        },
-      });
-
-      await request(app.getHttpServer())
-        .get('/games/asd')
-        .set('Accept', 'application/json')
-        .set('Authorization', `Bearer ${authMockAdminToken}`)
-        .expect(HttpStatus.BAD_REQUEST);
-    });
-
     it('should return not found', async () => {
       await prismaService.user.create({
         data: authMockAdmin,
       });
 
       await request(app.getHttpServer())
-        .get('/games/1')
+        .get('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cbc')
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${authMockAdminToken}`)
         .expect(HttpStatus.NOT_FOUND);

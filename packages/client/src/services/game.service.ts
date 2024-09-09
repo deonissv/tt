@@ -2,7 +2,9 @@ import axios from 'axios';
 import { LOADER_URL } from '../config';
 import { getAccessToken } from '../utils';
 
-import type { CreateGameDto, GamePreviewDto } from '@shared/dto/games';
+import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
+
+export type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto };
 
 export const GameService = {
   async getGamePreviews(): Promise<GamePreviewDto[]> {
@@ -39,5 +41,23 @@ export const GameService = {
       },
     });
     return response.data as string;
+  },
+
+  async getGame(code: string): Promise<GameDto> {
+    const response = await axios.get(LOADER_URL + `games/${code}`, {
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
+    });
+    return response.data as GameDto;
+  },
+
+  async modifyGame(code: string, updateGame: UpdateGameDto): Promise<GameDto> {
+    const response = await axios.put(LOADER_URL + `games/${code}`, updateGame, {
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
+    });
+    return response.data as GameDto;
   },
 };

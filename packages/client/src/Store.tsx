@@ -1,6 +1,5 @@
-import type IProps from '@components/IProps';
-import type { FC } from 'react';
 import { createContext, useState } from 'react';
+import type { IProps } from './components';
 
 interface IContext {
   nickname: ReturnType<typeof useState<string | undefined>>;
@@ -8,7 +7,7 @@ interface IContext {
 
 export const Context = createContext<IContext>({} as IContext);
 
-export const StoreProvider: FC<IProps> = ({ children }) => {
+export const StoreProvider: React.FC<IProps> = ({ children }) => {
   const storeValue = {
     nickname: useState<string | undefined>(undefined),
   };

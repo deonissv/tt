@@ -27,7 +27,7 @@ export class GamesService {
       data: {
         name: createGameDto.name,
         description: createGameDto.description,
-        bannerUrl: createGameDto.bannerUrl,
+        bannerUrl: createGameDto.bannerUrl ?? '',
         authorId: userId,
         GameVersion: {
           create: {

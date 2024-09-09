@@ -256,7 +256,6 @@ export class Simulation extends SimulationBase {
 
   handleDeckRerender(guid: string, grid: CardGrid, size: number) {
     const actor = this.actors.find(a => a.guid === guid);
-    // eslint-disable-next-line no-console
-    if (actor instanceof Deck) actor.rerenderDeck(grid, size).catch(console.error);
+    if (actor instanceof Deck) void actor.rerenderDeck(grid, size);
   }
 }

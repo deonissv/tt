@@ -1,10 +1,17 @@
-import Canvas from '@components/Canvas';
-import { useParams } from 'react-router-dom';
+import { Canvas } from '@components';
+import { useCallback } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
-const Room: React.FC = (): React.ReactNode => {
+export const Room: React.FC = (): React.ReactNode => {
   const { roomCode } = useParams();
+  const navigate = useNavigate();
 
-  return <>{roomCode ? <Canvas roomId={roomCode} /> : <div>Room not found</div>}</>;
+  const roomCodeGuard = useCallback(() => {
+    if (!roomCode) {
+      navigate('/not-found');
+    }
+    return roomCode!;
+  }, []);
+
+  return <Canvas roomId={roomCodeGuard()} />;
 };
-
-export default Room;
