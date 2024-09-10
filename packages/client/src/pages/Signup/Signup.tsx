@@ -32,7 +32,7 @@ export const Signup: React.FC = (): React.ReactNode => {
       username,
       password,
     })
-      .then(() => navigate('/'))
+      .then(() => navigate('/games'))
       .catch(e => addToast(`Failed to create game: ${getErrorMsg(e)}`));
   };
 

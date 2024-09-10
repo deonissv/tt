@@ -44,10 +44,10 @@ export const GamesList = () => {
     const confirmed = await openModal();
     if (!confirmed) return;
     try {
-      await GameService.removeGame(gameCode);
-      await loadGamesPreviews().catch(e => addToast(`Error removing game: ${e}`));
+      await GameService.deleteGame(gameCode);
+      await loadGamesPreviews().catch(e => addToast(`Failed to load game preview: ${getErrorMsg(e)}`));
     } catch (e) {
-      addToast(`Failed to remove room: ${getErrorMsg(e)}`);
+      addToast(`Failed to delete game: ${getErrorMsg(e)}`);
     }
   };
 
@@ -61,7 +61,7 @@ export const GamesList = () => {
 
   return (
     <div className="flex justify-center w-full">
-      <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-16 bg-bgblue text-white">
+      <div className="w-[1000px] grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-16 bg-bgblue text-white">
         {games ? (
           games.map(game => (
             <GameCard

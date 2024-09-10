@@ -47,7 +47,7 @@ describe('UsersModule', () => {
           password: 'password',
         })
         .expect(HttpStatus.OK)
-        .expect(res => expect(res.body).toMatchObject({ username: 'newUsername', avatarUrl: 'newAvatarUrl' }));
+        .expect(res => expect(res.body).toMatchObject({ access_token: expect.any(String) as string }));
 
       const users = await prismaService.user.findMany();
       expect(users.length).toBe(1);

@@ -156,6 +156,9 @@ describe('GamesModule', () => {
         },
       });
 
+      // const a = await prismaService.game.findUnique({ where: { code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7' } });
+      // debugger;
+
       await request(app.getHttpServer())
         .get('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')

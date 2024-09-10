@@ -1,5 +1,5 @@
-// export const HOST= '192.168.43.141';
-export const HOST = 'localhost';
+export const HOST = '192.168.130.99';
+// export const HOST = 'localhost';
 export const API_PORT = 3000;
 
 export const STATIC_HOST = `http://${HOST}:5500`;

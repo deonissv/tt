@@ -119,7 +119,7 @@ export const CreateGame = () => {
   return (
     <div className="flex justify-center w-full mb-5">
       <div className="bg-light-blue p-11 w-[1000px]">
-        <h4 className="text-center !text-2xl !font-bold mb-6">Add game</h4>
+        <h4 className="text-center !text-2xl !font-bold mb-6">{newGame ? 'Add game' : 'Modify game'}</h4>
         <div className="p-3">
           <Input
             label="Name"

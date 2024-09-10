@@ -99,10 +99,7 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
           ></div>
         ))}
       </div>
-      <canvas
-        ref={canvas}
-        className="w-full h-full m-0 p-0 overflow-hidden !border-none !hover:border-none !foucs:border-none !outline-none !hover:outline-none !foucs:outline-none"
-      />
+      <canvas ref={canvas} className="w-full h-full m-0 p-0 !overflow-hidden !border-none" />
       {!loaded.current && (
         <div className="absolute top-0 left-0 w-full h-full bg-[#33334c] flex justify-center content-center flex-wrap">
           <div className="w-[500px] h-[200px]">

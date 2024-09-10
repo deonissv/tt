@@ -43,11 +43,12 @@ export const AuthService = {
     return this.decode(token);
   },
 
+  isAdmin(): boolean {
+    const user = this.getJWT();
+    return user?.role === 1;
+  },
+
   authorized(): JWT | null {
-    const token = getAccessToken();
-    if (!token) {
-      return null;
-    }
     const decodedUser = this.getJWT();
     if (!decodedUser || decodedUser.exp * 1000 < Date.now()) {
       return null;

@@ -109,7 +109,7 @@ export class GamesController {
     }
 
     if (!ability.can('delete', subject('Game', game))) {
-      throw new ForbiddenException('Cannot delete the game');
+      throw new ForbiddenException('Not authorized to delete the game');
     }
 
     return this.gamesService.delete(code);

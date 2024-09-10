@@ -3,4 +3,5 @@ export class GamePreviewDto {
   name: string;
   description: string;
   bannerUrl: string;
+  authorId: number;
 }

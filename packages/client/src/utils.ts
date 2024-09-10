@@ -1,5 +1,6 @@
 import type { AccessTokenDto } from '@shared/dto/auth';
 import { hasProperty, isObject } from '@shared/guards';
+import { AxiosError } from 'axios';
 
 export const fileToUrl = (file: File, type = 'application/octet-stream'): string => {
   const textureBlob = new Blob([file], { type });
@@ -19,6 +20,12 @@ export const resetAccessToken = (): void => {
 };
 
 export const getErrorMsg = (error: unknown): string => {
+  if (error instanceof AxiosError) {
+    const responseData = error.response?.data as unknown;
+    if (isObject(responseData) && hasProperty(responseData, 'message')) return responseData.message as string;
+    return error.message;
+  }
+
   if (error instanceof Error) {
     return error.message;
   }

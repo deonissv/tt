@@ -34,7 +34,7 @@ export const GameService = {
     return response.data as GamePreviewDto;
   },
 
-  async removeGame(code: string): Promise<string> {
+  async deleteGame(code: string): Promise<string> {
     const response = await axios.delete(LOADER_URL + `games/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,

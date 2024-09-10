@@ -301,6 +301,7 @@ export class GamesService {
       name: game.name,
       description: game.description,
       bannerUrl: game.bannerUrl,
+      authorId: game.authorId,
     };
   }
 
