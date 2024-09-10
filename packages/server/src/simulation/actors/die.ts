@@ -8,11 +8,11 @@ import type { Constructor } from '@shared/types';
 import { getRandomInt } from '@shared/utils';
 import { ServerBase } from './serverBase';
 
-const ROLL_IMPULSE_MIX = 35;
-const ROLL_IMPULSE_MAX = 60;
+const ROLL_IMPULSE_MIX = 350;
+const ROLL_IMPULSE_MAX = 600;
 
-const ROLL_ANGULAR_IMPULSE_MIX = 5;
-const ROLL_ANGULAR_IMPULSE_MAX = 7;
+const ROLL_ANGULAR_IMPULSE_MIX = 50;
+const ROLL_ANGULAR_IMPULSE_MAX = 70;
 
 export class ServerDie extends ServerBase<DieState> {
   numFaces: number;

@@ -275,14 +275,15 @@ export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {
 
 export class RectangleTable extends RectangleTableMixin(ClientBase) {
   static async fromState(): Promise<RectangleTable | null> {
-    const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
+    const [tableFrame] = await Loader.loadModel(RECTANGLE_TABLE.frame);
 
     const handles = await Loader.loadMesh(RECTANGLE_TABLE.handles.meshURL);
     const feltMaterial = await Loader.loadModelMaterial(feltMaterialProps);
     if (!tableFrame || !handles) return null;
 
     const wrapper = new Mesh('rectangle_table_wrapper');
-    const felt = CreatePlane('felt', { width: 56.24, height: 36.33 });
+    // const felt = CreatePlane('felt', { width: 56.24, height: 36.33 });
+    const felt = CreatePlane('felt', { width: 57, height: 38 });
     felt.rotation.x = Math.PI / 2;
     felt.position.y = 0.85;
     [tableFrame, handles].forEach(mesh => mesh.setEnabled(true));

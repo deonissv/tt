@@ -21,7 +21,10 @@ export const GameCard = ({ game, onCreateRoom, onEditGame, onRemoveGame }: GameC
   const canModify = AuthService.isAdmin() || AuthService.authorized()?.sub === game.authorId;
 
   return (
-    <div key={game.code} className="text-center rounded-lg bg-[#DDE6ED] duration-300 shadow-lg hover:shadow-xl">
+    <div
+      key={game.code}
+      className="text-center rounded-lg bg-[#DDE6ED] duration-300 shadow-lg hover:shadow-xl aspect-[2/3]"
+    >
       <div className="w-full h-[150px] bg-[#144272] aspect-w-16 aspect-h-9 mb-4 overflow-hidden">
         {isURL(game.bannerUrl) ? (
           <img

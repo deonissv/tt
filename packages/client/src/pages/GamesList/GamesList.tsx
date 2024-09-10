@@ -77,7 +77,7 @@ export const GamesList = () => {
         )}
 
         <div
-          className="p-4 text-center border border-dashed border-gray-500 rounded-lg bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg hover:shadow-xl cursor-pointer flex flex-col items-center justify-center"
+          className="aspect-[2/3] p-4 text-center border border-dashed border-gray-500 rounded-lg bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg hover:shadow-xl cursor-pointer flex flex-col items-center justify-center"
           onClick={onNewGame}
         >
           <img className="w-28 mb-4" src="https://www.svgrepo.com/show/218190/add-plus.svg" alt="Add New" />

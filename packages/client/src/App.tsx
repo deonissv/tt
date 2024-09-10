@@ -19,8 +19,8 @@ export const App = () => {
           <Route element={<Layout />}>
             <Route path="login" element={<Login onLogin={onLogin} />} />
             <Route path="signup" element={<Signup />} />
-            <Route path="profile" element={<Profile />} />
             <Route element={RequireAuth({ children: <Outlet /> })}>
+              <Route path="profile" element={<Profile />} />
               <Route path="join" element={<JoinRoom />} />
               <Route path="saves" element={<Saves />} />
               <Route path="games">
@@ -28,6 +28,7 @@ export const App = () => {
                 <Route path="new" element={<CreateGame />} />
                 <Route path=":gameCode" element={<CreateGame />} />
               </Route>
+              <Route path="*" element={<GamesList />} />
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Route>

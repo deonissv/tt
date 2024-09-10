@@ -32,7 +32,6 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
     if (this.size < 1) {
       return null;
     }
-    console.error('before pick:' + this.items.length);
     const cardState = this.items.pop()!;
 
     cardState.transformation = this.transformation;

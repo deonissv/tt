@@ -77,25 +77,48 @@ export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
 
 export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<GlassTable | null> {
-    const glassTop = await Loader.loadMesh(GLASS_TABLE_MODEL.glassTop.meshURL);
-    if (!glassTop) return null;
+    const [metal] = await Loader.loadModel(GLASS_TABLE_MODEL.metal);
+    const [glassMid, _gCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassMid);
+    const [glassBottom, _gTopCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassTop);
+
+    if (!metal || !glassMid || !glassBottom) {
+      return null;
+    }
+
+    const glassMaterial = glassBottom.material as StandardMaterial;
+    glassMaterial.alpha = 0.5;
+    glassMaterial.diffuseColor = new Color3(0, 0, 0.1);
+
+    const glassTop = glassBottom.clone();
+    [metal, glassMid, glassTop, glassBottom].forEach(mesh => mesh.setEnabled(true));
+
+    glassBottom.position.z = 0.633;
+    glassBottom.scaling.x = 0.45;
+    glassBottom.scaling.y = 0.45;
+
+    metal.rotation.x = Math.PI;
+    metal.position.z = -0.037;
+
+    glassTop.position.z = -0.134;
+
+    const wrapper = Mesh.MergeMeshes([metal, glassMid, glassTop, glassBottom], true, false, undefined, false, true)!;
 
     const table = new this(
       {
-        guid: '#CustomSquareTable',
-        name: '#CustomSquareTable',
+        guid: '#GlassTable',
+        name: '#GlassTable',
         type: ActorType.ACTOR,
         transformation: {
           position: [
             GLASS_TABLE_MODEL.transformation.position[0],
-            GLASS_TABLE_MODEL.transformation.position[1] - 0.134,
+            GLASS_TABLE_MODEL.transformation.position[1],
             GLASS_TABLE_MODEL.transformation.position[2],
           ],
           rotation: GLASS_TABLE_MODEL.transformation.rotation,
           scale: GLASS_TABLE_MODEL.transformation.scale,
         },
       },
-      glassTop,
+      wrapper,
     );
 
     table.model.isPickable = false;

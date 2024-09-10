@@ -1,6 +1,7 @@
 import { getErrorMsg } from '@client/src/utils';
 import { Button, Input, useToast } from '@components';
 import { AuthService } from '@services';
+import { isEmail } from '@shared/utils';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,20 +13,20 @@ export const Signup: React.FC = (): React.ReactNode => {
   const [username, setUsername] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [rePassword, setRePassword] = React.useState('');
-  const [reqRes, setReqRes] = React.useState('');
 
   const onRegisterSubmit = async (e: React.FormEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
-    if (password !== rePassword) {
-      setReqRes('Password not match');
-      return;
-    }
+    const validUsername = username.length > 0;
+    if (!validUsername) addToast('Username is required');
 
-    if (email === '' || username === '' || password === '' || rePassword === '') {
-      setReqRes('Please fill all fields');
-      return;
-    }
+    const validPassword = password !== rePassword;
+    if (!validPassword) addToast('Passwords do not match');
+
+    const validEmail = isEmail(email);
+    if (!validEmail) addToast('Invalid email');
+
+    if (!validUsername || !validPassword || !validEmail) return;
 
     await AuthService.signup({
       email,
@@ -40,7 +41,6 @@ export const Signup: React.FC = (): React.ReactNode => {
     <div className="flex justify-center w-full mb-5">
       <div className="bg-light-blue p-11">
         <h4 className="text-center !text-2xl !font-bold mb-6">Registration</h4>
-        <h4 className="text-center !text-2xl !font-bold mb-2 text-red-500">{reqRes}</h4>
         <div className="flex">
           <div className="p-3 w-1/2">
             <Input

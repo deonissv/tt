@@ -58,7 +58,7 @@ export const RoomService = {
 
           message.forEach(action => {
             if (action.type == ServerAction.DOWNLOAD_PROGRESS) {
-              const loaded = action.payload.total;
+              const loaded = action.payload.loaded;
               const total = action.payload.total;
               setDownloadProgress(_ => [loaded, total]);
             }

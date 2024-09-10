@@ -11,7 +11,7 @@ import { Logger } from '../Logger';
 import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
 
-const RETRY_ATTEMPTS = 3;
+const RETRY_ATTEMPTS = 4;
 const RETRY_DELAY = 1000; // ms
 
 OBJFileLoader.SKIP_MATERIALS = true;
@@ -156,12 +156,12 @@ class Loader {
     let attempts = 0;
     for (attempts = 0; attempts < RETRY_ATTEMPTS; attempts++) {
       try {
+        await new Promise(resolve => setTimeout(resolve, attempts * RETRY_DELAY));
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
         if (arrayBuffer) {
           return arrayBuffer;
         }
-        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
       } catch {
         Logger.log(`Failed attempt to fetch: ${url}`);
       }

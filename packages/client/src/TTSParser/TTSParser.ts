@@ -51,7 +51,7 @@ export class TTSParserC extends ParserBase {
 
       if (hasProperty(obj, 'Gravity')) {
         const candidate = this.parseNumber(obj.Gravity);
-        if (candidate) Object.assign(save, { gravity: candidate });
+        if (candidate) Object.assign(save, { gravity: candidate * 9.8 });
       }
 
       const candidate = this.parseTable(obj);
