@@ -42,6 +42,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     this.__collider = this._getColliderMesh(modelMesh, colliderMesh);
 
     this.__state = state;
+    this.pickable = !state.locked;
 
     modelMesh.name = `${this.name}: model`;
     modelMesh.setParent(this);

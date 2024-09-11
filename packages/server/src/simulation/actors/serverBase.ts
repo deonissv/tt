@@ -43,6 +43,8 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     this._forceUpdate();
 
     this.defaultY = this.body.getBoundingBox().extendSize.y;
+
+    if (state.locked) this.lock();
   }
 
   private _beforeRender() {
@@ -50,6 +52,10 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
       let upHeight = this.defaultY + PICK_HIGHT;
 
       const rotation = this.absoluteRotationQuaternion;
+      rotation.toEulerAngles();
+      rotation.x = 0;
+      const newRotation = Quaternion.FromEulerAngles(0, rotation.y, rotation.z);
+
       const shapeLocalResult = new ShapeCastResult();
       const hitWorldResult = new ShapeCastResult();
       shapeLocalResult.reset();
@@ -74,7 +80,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
         this.obstacleHeight = null;
       }
       const pos = new Vector3(this.__targetPosition.x, upHeight, this.__targetPosition.y);
-      this.body.setTargetTransform(pos, rotation);
+      this.body.setTargetTransform(pos, newRotation);
     }
   }
 
@@ -107,5 +113,10 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   move(dx: number, dy: number) {
     this.__targetPosition?.addInPlaceFromFloats(dx, dy);
+  }
+
+  lock() {
+    this.model.isPickable = false;
+    this.body.setMotionType(0);
   }
 }

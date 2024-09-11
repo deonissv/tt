@@ -8,4 +8,5 @@ export interface ActorBaseState {
   name: string;
   transformation?: Transformation;
   mass?: number;
+  locked?: boolean;
 }
