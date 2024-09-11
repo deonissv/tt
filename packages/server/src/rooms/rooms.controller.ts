@@ -43,13 +43,6 @@ export class RoomsController {
     return this.roomService.getUserRooms(code);
   }
 
-  // @ApiBearerAuth('JWT')
-  // @UseGuards(JwtAuthGuard)
-  // @Post('start/:code')
-  // async remove(@Param('code') code: string) {
-  //   return this.roomService.removeRoom(code);
-  // }
-
   @ApiBearerAuth('JWT')
   @CheckPolicies((ability: AppAbility) => ability.can('delete', 'Room'))
   @UseGuards(PoliciesGuard)

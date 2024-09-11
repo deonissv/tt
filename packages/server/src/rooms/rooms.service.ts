@@ -302,11 +302,18 @@ export class RoomsService {
    * @returns A promise that resolves to the found room, or null if no room is found.
    */
   async findRoomByCode(roomCode: string): Promise<Room | null> {
-    return await this.prismaService.room.findFirst({
+    this.logger.log(`Finding room with code: ${roomCode}`);
+    const room = await this.prismaService.room.findFirst({
       where: {
         code: roomCode,
       },
     });
+    if (room) {
+      this.logger.log(`Room found with code: ${roomCode}`);
+    } else {
+      this.logger.warn(`Room not found with code: ${roomCode}`);
+    }
+    return room;
   }
 
   /**

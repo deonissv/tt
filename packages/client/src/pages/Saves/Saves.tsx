@@ -30,21 +30,19 @@ export const Saves: React.FC = (): React.ReactNode => {
     cancelLabel: 'Cancel',
   });
 
-  const onCreateRoom = async (gameCode: string) => {
+  const onCreateRoom = async (roomCode: string) => {
     try {
-      const roomId = await RoomService.createRoom({
-        gameCode,
-      });
+      const roomId = await RoomService.startRoom(roomCode);
       navigate(`/room/${roomId}`);
     } catch (e) {
       addToast(`Failed to create game: ${getErrorMsg(e)}`);
     }
   };
 
-  const onDeleteRoom = async (gameCode: string) => {
+  const onDeleteRoom = async (roomCode: string) => {
     const confirmed = await openModal();
     if (!confirmed) return;
-    await RoomService.deleteRoom(gameCode);
+    await RoomService.deleteRoom(roomCode);
     await loadPreviews().catch(e => addToast(`Failed to delete a room: ${e}`));
   };
 

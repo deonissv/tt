@@ -3,18 +3,24 @@ import { LOADER_URL, WSS_URL } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { Tuple } from '@babylonjs/core/types';
-import type { CreateRoomDto, RoomPreviewDto } from '@shared/dto/rooms';
+import type { RoomPreviewDto } from '@shared/dto/rooms';
 import type { SimulationStateSave } from '@shared/dto/states';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { Dispatch, SetStateAction } from 'react';
 
 export const RoomService = {
-  async createRoom(payload: CreateRoomDto): Promise<string> {
-    const response = await axios.post(LOADER_URL + 'rooms', payload, {
-      headers: {
-        Authorization: `Bearer ${getAccessToken()}`,
+  async createRoom(gameCode: string): Promise<string> {
+    const response = await axios.post(
+      LOADER_URL + 'rooms',
+      {
+        gameCode: gameCode,
       },
-    });
+      {
+        headers: {
+          Authorization: `Bearer ${getAccessToken()}`,
+        },
+      },
+    );
     return response.data as string;
   },
 

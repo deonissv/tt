@@ -77,7 +77,6 @@ export class SimulationRoom {
       () => {
         this.downloadProgress.loaded++;
 
-        SimulationRoom.logger.error(`DOWNLOAD_PROGRESS ${this.clients.size}`);
         this.broadcast([
           {
             type: ServerAction.DOWNLOAD_PROGRESS,
