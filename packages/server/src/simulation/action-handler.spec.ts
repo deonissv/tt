@@ -5,7 +5,7 @@ import { ActorType } from '@shared/dto/states';
 import { initHavok } from '@shared/initHavok';
 import { ActionHandler } from './action-handler';
 import type { Card } from './actors';
-import { Deck, ServerBase, Tile, TileStack } from './actors';
+import { Actor, Deck, ServerBase, Tile, TileStack } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
 
 describe('handleAction', () => {
@@ -233,7 +233,19 @@ describe('handleAction', () => {
 
     it('should sparn card object', async () => {
       vi.spyOn(ServerActorBuilder, 'buildCard').mockImplementation(() => {
-        return Promise.resolve(new Mesh('cardMesh') as unknown as Card);
+        return Promise.resolve(
+          new Actor(
+            {
+              type: ActorType.ACTOR,
+              guid: 'card',
+              name: 'card',
+              model: {
+                meshURL: '',
+              },
+            },
+            new Mesh('cardMesh'),
+          ) as unknown as Card,
+        );
       });
 
       const sim = getPhSim();

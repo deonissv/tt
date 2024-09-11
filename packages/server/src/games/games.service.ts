@@ -7,7 +7,7 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GamesService {
-  private readonly logger = new Logger(GamesService.name);
+  private readonly logger = new Logger('GamesService');
 
   constructor(private readonly prisma: PrismaService) {}
 

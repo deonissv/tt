@@ -6,7 +6,7 @@ import { Logger } from '@nestjs/common';
 import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
-import { URL_PREFIX } from '@shared/constants';
+import { PROXY_PREFIX } from '@shared/constants';
 import type { SimulationStateSave } from '@shared/dto/states';
 import { isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
@@ -39,7 +39,7 @@ export class SimulationRoom {
   tickInterval: NodeJS.Timeout | undefined;
   closeTimeout: NodeJS.Timeout | undefined;
 
-  private static readonly logger = new Logger(SimulationRoom.name);
+  private static readonly logger = new Logger('SimulationRoom');
 
   constructor(
     private readonly roomsService: RoomsService,
@@ -305,7 +305,7 @@ export class SimulationRoom {
    * @returns The patched object or array.
    */
   static patchStateURLs<T extends RecursiveType>(item: T): T {
-    if (isString(item) && item.startsWith('http') && !item.startsWith(URL_PREFIX)) {
+    if (isString(item) && item.startsWith('http') && !item.startsWith(PROXY_PREFIX)) {
       return this.getAssetURL(item) as T;
     } else if (Array.isArray(item)) {
       return item.map(i => this.patchStateURLs(i)) as T;
@@ -328,7 +328,6 @@ export class SimulationRoom {
    * @returns The asset URL.
    */
   static getAssetURL(url: string) {
-    // return `http://localhost:3000/assets/${url}`
-    return URL_PREFIX + url;
+    return PROXY_PREFIX + url;
   }
 }

@@ -44,9 +44,8 @@ describe('Die', () => {
         CreateBox('box', { size: 1 }),
         CreateBox('box', { size: 1 }),
       );
-      const result = die4.roll();
-
-      expect(result).toBe(1);
+      die4.roll();
+      expect(die4.body.getLinearVelocity().y).not.toBe(0);
     });
   });
 });

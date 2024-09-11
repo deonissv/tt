@@ -1,3 +1,4 @@
+import { getErrorMsg } from '@client/src/utils';
 import { Button, Input, useToast } from '@components';
 import { AuthService } from '@services';
 import React from 'react';
@@ -16,26 +17,25 @@ export const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
   const [email, setEmail] = React.useState('');
   const [password, setPassword] = React.useState('');
 
-  const onRegisterSubmit = async (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const onRegisterSubmit = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     if (email === '' || password === '') {
-      showError('Please fill all fields');
+      addToast('Please fill in all fields');
+      return;
     }
-
     if (password.length < MIN_PASSWD_LENGTH) {
-      showError('password is too short');
+      addToast('Password is too short');
+      return;
     }
 
-    await AuthService.signin({
+    AuthService.signin({
       email,
       password,
-    }).catch(e => addToast(`Failed to start room: ${e}`));
-
-    if (onLogin) onLogin();
-  };
-
-  const showError = (message: string): void => {
-    alert(message);
+    })
+      .then(() => {
+        if (onLogin) onLogin();
+      })
+      .catch(e => addToast(`Failed to sign in: ${getErrorMsg(e)}`));
   };
 
   return (

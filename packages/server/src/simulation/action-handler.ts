@@ -38,7 +38,7 @@ export class ActionHandler {
 
   handlePickItem(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor && isContainable(actor) && typeof actor.pickItem == 'function') {
+    if (actor && isContainable(actor)) {
       actor.pickItem(this.clientId);
     }
   }

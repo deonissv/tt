@@ -5,7 +5,7 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "build": "NODE_OPTIONS=\"$NODE_OPTIONS NODE_NO_WARNINGS=1 --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules \" NODE_NO_WARNINGS=1  webpack --config ./webpack.config.js --env production",
+    "build": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules \" NODE_NO_WARNINGS=1  webpack --config ./webpack.config.js --env production",
     "dev": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules\" NODE_NO_WARNINGS=1  webpack --config ./webpack.config.js --watch",
     "lint": "eslint --ext .ts src",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -13,7 +13,7 @@
     "test:w": "vitest --config ../../vitest.config.ts",
     "test:e2e": "vitest run --config ../../vitest.e2e.config.ts",
     "typecheck": "tsc --noEmit",
-    "start": "node dist/server/src/main.js -e 'node --experimental-require-module'",
+    "start": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules \" NODE_NO_WARNINGS=1 node ../../build/main.js",
     "debug": "nest start --debug --watch -e 'node --experimental-require-module'",
     "db": "prisma generate",
     "db:update": "prisma generate && prisma db push"
@@ -42,7 +42,6 @@
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
-    "dotenv-cli": "^7.4.2",
     "fork-ts-checker-webpack-plugin": "^9.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -66,6 +65,8 @@
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "testcontainers": "^10.11.0",
+    "webpack-cli": "^5.1.4",
+    "dotenv-cli": "^7.4.2",
     "vitest": "^2.0.5"
   }
 }

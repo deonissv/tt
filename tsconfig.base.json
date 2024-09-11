@@ -16,7 +16,7 @@
     "declaration": false,
     "noEmit": true,
 
-// client
+    // client
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "strictNullChecks": true,
@@ -27,5 +27,5 @@
       "@shared/*": ["packages/shared/src/*"]
     }
   },
-  "exclude": ["node_modules", "packages/server/dist", "packages/client/dist"]
+  "exclude": ["node_modules", "packages/**/dist"]
 }

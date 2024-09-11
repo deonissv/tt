@@ -147,7 +147,7 @@ export class TTSParserC extends ParserBase {
     }
 
     if (this.hasProperty(objectState, 'Locked')) {
-      if (typeof objectState.Locked === 'boolean') {
+      if (typeof objectState.Locked === 'boolean' && objectState.Locked) {
         actorState.locked = objectState.Locked;
       }
     }

@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "types": ["vitest/globals"],
-    "module": "commonjs",
+    "module": "ESNext",
     "declaration": false,
     "noEmit": true,
     "removeComments": true,

@@ -2,7 +2,7 @@ import { Injectable, Logger, StreamableFile } from '@nestjs/common';
 
 @Injectable()
 export class AppService {
-  private readonly logger = new Logger(AppService.name);
+  private readonly logger = new Logger('AppService');
 
   async load(url: string): Promise<StreamableFile | null> {
     try {

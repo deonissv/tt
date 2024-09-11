@@ -20,7 +20,7 @@ export const Signup: React.FC = (): React.ReactNode => {
     const validUsername = username.length > 0;
     if (!validUsername) addToast('Username is required');
 
-    const validPassword = password !== rePassword;
+    const validPassword = password === rePassword;
     if (!validPassword) addToast('Passwords do not match');
 
     const validEmail = isEmail(email);

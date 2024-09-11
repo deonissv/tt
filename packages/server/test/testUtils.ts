@@ -6,6 +6,7 @@ import { ActorType } from '@shared/dto/states';
 import { execSync } from 'child_process';
 import type { StartedTestContainer } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';
+import { WebSocket } from 'ws';
 
 const logger = new ConsoleLogger('TestUtils');
 
@@ -70,4 +71,16 @@ export function getPhSim() {
   ground.physicsBody?.setMotionType(PhysicsMotionType.ANIMATED);
 
   return sim;
+}
+
+export async function wsConnect(url: string, protocol?: string | string[]): Promise<WebSocket> {
+  const ws = new WebSocket(url, protocol);
+  return new Promise((resolve, reject) => {
+    ws.onopen = () => {
+      resolve(ws);
+    };
+    ws.onerror = err => {
+      reject(new Error(err.message));
+    };
+  });
 }

@@ -1,3 +1,4 @@
+import { UUIDv4 } from '@shared/utils';
 import type React from 'react';
 import { createContext, useState } from 'react';
 import { Toast } from './Toast';
@@ -20,7 +21,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const addToast = (message: string) => {
     setToasts(prevToasts => {
-      const newToasts = [...prevToasts, { id: crypto.randomUUID(), message }];
+      const newToasts = [...prevToasts, { id: UUIDv4(), message }];
       return newToasts.slice(-MAX_TOASTS);
     });
   };

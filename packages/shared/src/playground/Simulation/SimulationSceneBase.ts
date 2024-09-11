@@ -1,4 +1,5 @@
 import { Scene } from '@babylonjs/core/scene';
+import { UUIDv4 } from '@shared/utils';
 import { SharedBase } from '../actors/SharedBase';
 
 const GET_GUID_ATTEMPTS = 1000000;
@@ -10,7 +11,7 @@ export class SimulationSceneBase extends Scene {
     }
 
     for (let i = 0; i < GET_GUID_ATTEMPTS; i++) {
-      const candidate = crypto.randomUUID().slice(0, 6);
+      const candidate = UUIDv4().slice(0, 6);
       if (!guids.includes(candidate)) {
         return candidate;
       }

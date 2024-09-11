@@ -1,7 +1,9 @@
-version: '3.8'
 services:
   db:
-    image: postgres:14-alpine
+    build:
+      context: .
+      dockerfile: ./Dockerfile.postgres
+    network_mode: 'host'
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     expose:
@@ -9,5 +11,36 @@ services:
     ports:
       - '5432:5432'
     env_file: .env
+
+  server:
+    build:
+      context: .
+      dockerfile: ./packages/server/Dockerfile
+    volumes:
+      - .:/app
+    network_mode: 'host'
+    ports:
+      - '5500:5500'
+    env_file: .env
+    depends_on:
+      - db
+
+  client:
+    build:
+      context: .
+      dockerfile: ./packages/client/Dockerfile
+    network_mode: 'host'
+    volumes:
+      - .:/app
+    ports:
+      - '3000:3000'
+    env_file: .env
+    environment:
+      - VITE_SERVER_HOST=server
+    depends_on:
+      - db
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+
 volumes:
   postgres_data:

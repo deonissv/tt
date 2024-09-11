@@ -5,12 +5,12 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SimulationRoom } from './simulation-room';
 
 import type { RoomPreviewDto } from '@shared/dto/rooms';
-import type { SimulationStateSave, SimulationStateUpdate } from '../../../shared/src/dto/states/simulation';
+import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { Simulation } from '../simulation/simulation';
 
 @Injectable()
 export class RoomsService {
-  private readonly logger = new Logger(this.constructor.name);
+  private readonly logger = new Logger('RoomsService');
   static rooms = new Map<string, SimulationRoom>();
 
   constructor(

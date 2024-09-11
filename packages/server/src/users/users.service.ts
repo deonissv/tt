@@ -7,7 +7,7 @@ import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
 
 @Injectable()
 export class UsersService {
-  private readonly logger = new Logger(UsersService.name);
+  private readonly logger = new Logger('UsersService');
 
   constructor(
     private readonly prisma: PrismaService,
@@ -27,7 +27,7 @@ export class UsersService {
     }
     const passwordHash = await this.hashPassword(createUser.password);
 
-    this.logger.log('Creating a new user:', createUser);
+    this.logger.log('Creating a new user:', createUser.email);
 
     const newUser = await this.prisma.user.create({
       data: {

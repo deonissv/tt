@@ -1,4 +1,5 @@
 import { Logger } from '@nestjs/common';
+import { UUIDv4 } from '@shared/utils';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type WebSocket from 'ws';
 
@@ -16,7 +17,7 @@ export class Client {
   static async init(ws: WebSocket): Promise<Client> {
     logger.log('Initializing client...');
 
-    const id = crypto.randomUUID();
+    const id = UUIDv4();
     logger.log('Sending client ID: ', id);
 
     WS.send(ws, [

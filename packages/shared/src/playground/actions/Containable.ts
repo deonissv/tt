@@ -1,6 +1,4 @@
-import type { BagState, DeckState } from '@shared/dto/states';
-import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { SharedBase } from '../actors';
+import { hasProperty, isObject } from '@shared/guards';
 
 export interface Containable {
   get size(): number;
@@ -9,8 +7,14 @@ export interface Containable {
 }
 
 export const isContainable = (object: any): object is Containable => {
-  const Bag = SharedBase<BagState>;
-  const TileStack = SharedBase<TileStackState>;
-  const Deck = SharedBase<DeckState>;
-  return object instanceof Bag || object instanceof TileStack || object instanceof Deck;
+  debugger;
+  return (
+    isObject(object) &&
+    hasProperty(object, 'size') &&
+    typeof object.size === 'number' &&
+    hasProperty(object, 'pickItem') &&
+    typeof object.pickItem === 'function'
+    // hasProperty(object, 'shuffle') &&
+    // typeof object.shuffle === 'function'
+  );
 };

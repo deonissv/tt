@@ -16,6 +16,7 @@ describe('TTSParser - parseCustomObject', () => {
     const expected: ActorState = {
       type: 0,
       guid: '8d1169',
+      locked: true,
       name: 'Custom_Model',
       transformation: {
         position: [-0.101872981, 0.932778358, -0.41528818],

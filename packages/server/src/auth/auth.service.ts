@@ -9,7 +9,7 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(this.constructor.name);
+  private readonly logger = new Logger('AuthService');
 
   constructor(
     private readonly usersService: UsersService,

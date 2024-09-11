@@ -20,7 +20,7 @@
     "test:e2e": "npm run test:e2e --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run test",
     "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' + && find . -name 'build' -type d -prune -exec rm -rf '{}' +",
-    "i:all": "npm i && npm -w ./packages/server i  && npm -w ./packages/client i"
+    "i:all": "npm i && npm install --workspaces  --if-present"
   },
   "devDependencies": {
     "@swc/core": "^1.7.4",
