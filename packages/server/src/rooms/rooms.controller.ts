@@ -61,7 +61,7 @@ export class RoomsController {
       throw new ForbiddenException('Cannot delete the room');
     }
 
-    return this.roomService.removeRoom(code);
+    return this.roomService.deleteRoom(code);
   }
 
   @ApiBearerAuth('JWT')

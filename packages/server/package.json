@@ -16,7 +16,9 @@
     "start": "NODE_OPTIONS=\"$NODE_OPTIONS --experimental-modules --experimental-wasm-modules --experimental-require-module --experimental-vm-modules \" NODE_NO_WARNINGS=1 node ../../build/main.js",
     "debug": "nest start --debug --watch -e 'node --experimental-require-module'",
     "db": "prisma generate",
-    "db:update": "prisma generate && prisma db push"
+    "db:update": "prisma generate && prisma db push",
+    "db:seed": "prisma db seed",
+    "env": "dotenv -e ./../../.env"
   },
   "prisma": {
     "schema": "prisma/schema.prisma",

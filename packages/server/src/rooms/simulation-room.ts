@@ -264,7 +264,8 @@ export class SimulationRoom {
     return setInterval(async () => {
       const simSave = this.simulation.toState();
       const simUpdate = this.simulation.toStateUpdate(this.simSave);
-      if (simSave.actorStates?.length && simSave.actorStates.length > 0) {
+      if (simUpdate.actorStates?.length && simUpdate.actorStates.length > 0) {
+        SimulationRoom.logger.log(`Saving room ${this.id} update ${JSON.stringify(simUpdate)}`);
         await this.roomsService.saveRoomProgressUpdate(this.id, simUpdate);
       }
       this.simSave = simSave;
