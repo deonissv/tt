@@ -1,6 +1,7 @@
+import { Logger } from '@shared/playground';
 import { UUIDv4 } from '@shared/utils';
 import type React from 'react';
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useState } from 'react';
 import { Toast } from './Toast';
 
 const MAX_TOASTS = 5;
@@ -29,6 +30,19 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const removeToast = (id: string) => {
     setToasts(prevToasts => prevToasts.filter(toast => toast.id !== id));
   };
+
+  const toastLog = useCallback((...args: unknown[]) => {
+    addToast(args.join(' '));
+  }, []);
+
+  Logger.register({
+    fatal: toastLog,
+    error: toastLog,
+    warn: toastLog,
+    log: () => void 0,
+    debug: () => void 0,
+    verbose: () => void 0,
+  });
 
   return (
     <ToastContext.Provider value={{ addToast }}>
