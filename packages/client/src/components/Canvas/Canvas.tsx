@@ -69,6 +69,10 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
 
         loaded.current = true;
 
+        if (downloadProgress && downloadProgress[0] !== downloadProgress[1]) {
+          addToast(`Failed to load ${downloadProgress[0]}/${downloadProgress[1]} assets. Try to restart the room`);
+        }
+
         return () => {
           canvas.current?.removeEventListener('pointermove', handlePointerMove);
           canvas.current?.removeEventListener('mousemove', handleMouseMove);
