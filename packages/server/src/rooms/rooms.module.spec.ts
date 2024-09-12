@@ -130,6 +130,30 @@ describe('Rooms', () => {
         ],
       });
 
+      await prismaService.roomProgress.create({
+        data: {
+          roomId: 1,
+          RoomProgressGameLoad: {
+            create: {
+              gameId: 1,
+              gameVersion: 1,
+            },
+          },
+        },
+      });
+
+      await prismaService.roomProgress.create({
+        data: {
+          roomId: 2,
+          RoomProgressGameLoad: {
+            create: {
+              gameId: 1,
+              gameVersion: 1,
+            },
+          },
+        },
+      });
+
       const response = await request(app.getHttpServer())
         .get(`/rooms/${authMockAdmin.code}`)
         .set('Accept', 'application/json')
