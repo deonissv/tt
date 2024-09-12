@@ -91,9 +91,15 @@ export class RoomsService {
       include: {
         Rooms: {
           include: {
-            RoomProgress: {
-              orderBy: {
-                createdAt: 'desc',
+            RoomProgressGameLoad: {
+              take: 1,
+              orderBy: { order: 'desc' },
+              include: {
+                GameVersion: {
+                  include: {
+                    Game: true,
+                  },
+                },
               },
             },
           },
@@ -107,6 +113,9 @@ export class RoomsService {
 
     return usersRooms.Rooms.map(room => ({
       roomCode: room.code,
+      gameCode: room.RoomProgressGameLoad[0].GameVersion.Game.code,
+      gameName: room.RoomProgressGameLoad[0].GameVersion.Game.name,
+      gameBannerUrl: room.RoomProgressGameLoad[0].GameVersion.Game.bannerUrl,
     }));
   }
 
