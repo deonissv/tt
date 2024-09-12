@@ -1,7 +1,9 @@
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import type { RoomPreviewDto } from '@shared/dto/rooms';
+import { isURL } from '@shared/utils';
+
 interface RoomCardProps {
-  room: {
-    roomCode: string;
-  };
+  room: RoomPreviewDto;
   onCreateRoom: (roomCode: string) => Promise<void>;
   onRemoveRoom: (roomCode: string) => Promise<void>;
 }
@@ -9,13 +11,26 @@ interface RoomCardProps {
 export const RoomCard: React.FC<RoomCardProps> = ({ room, onCreateRoom, onRemoveRoom }): React.ReactNode => {
   return (
     <div className="flex items-center w-full m-1 p-3 border-2 rounded-xl border-gray-500" key={room.roomCode}>
-      <img
-        src="https://chvmpionmind.com/wp-content/uploads/2022/09/Crecimiento-personal.png"
-        alt="Profile"
-        className="w-[15%] h-[100px] object-cover border-2 mr-8"
-      />
+      <div className="w-[15%] h-[100px] object-cover">
+        {isURL(room.gameBannerUrl) ? (
+          <img
+            src={room.gameBannerUrl ?? 'https://www.svgrepo.com/show/126178/question-mark.svg'}
+            alt={room.gameName}
+            className=" inset-0 w-full h-full object-cover p-0 m-0"
+          />
+        ) : (
+          <VideogameAssetIcon
+            sx={{
+              width: '100%',
+              height: '100%',
+              fontSize: '5rem',
+            }}
+          />
+        )}
+      </div>
+
       <div className="flex flex-col w-[65%]">
-        <h2>Name</h2>
+        <h2>{room.gameName}</h2>
         <div>{room.roomCode}</div>
       </div>
       <div className="flex flex-col w-[20%] space-y-4">
