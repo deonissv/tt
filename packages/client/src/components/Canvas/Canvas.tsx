@@ -75,7 +75,7 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
           sr.destructor();
         };
       })
-      .catch(e => addToast(`Failed to start room: ${e}`));
+      .catch(() => addToast(`Failed to join room`));
   }, []);
 
   useEffect(() => {
