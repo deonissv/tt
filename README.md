@@ -1,6 +1,6 @@
 # SETUP
 
-rename _.example.env_ to _.env_
+rename _example-env_ to _.env_
 
 ## Via docker
 
@@ -9,6 +9,10 @@ docker compose up
 ```
 
 ## Manual
+
+### Requirements:
+
+Node.js 22 or higher
 
 - Start a PostresSQL db
 - Initialize a schema and init data (corresponding files located on _./init-scripts folder_)
