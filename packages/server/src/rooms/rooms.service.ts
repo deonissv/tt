@@ -167,39 +167,49 @@ export class RoomsService {
    * @throws `BadRequestException` if the room progress is not found.
    */
   private async getRoomLastState(roomId: number): Promise<{ order: number; content: SimulationStateSave }> {
-    const lastSave = await this.prismaService.roomProgressSave.findFirst({
+    this.logger.log(`Retrieving last state for room with ID: ${roomId}`);
+
+    const lastSave = await this.prismaService.roomProgress.findFirst({
       where: {
         roomId,
+        OR: [{ RoomProgressSave: { isNot: null } }, { RoomProgressGameLoad: { isNot: null } }],
       },
       orderBy: {
         order: 'desc',
+      },
+      include: {
+        RoomProgressSave: true,
+        RoomProgressGameLoad: {
+          include: {
+            GameVersion: true,
+          },
+        },
       },
     });
 
-    if (lastSave) {
-      return {
-        order: 0,
-        content: lastSave.content as SimulationStateSave,
-      };
-    }
-    const gameLoad = await this.prismaService.roomProgressGameLoad.findFirst({
-      where: {
-        roomId,
-      },
-      include: {
-        GameVersion: true,
-      },
-      orderBy: {
-        order: 'desc',
-      },
-    });
-    if (!gameLoad) {
+    if (!lastSave) {
+      this.logger.warn(`Room progress not found for room ID: ${roomId}`);
       throw new BadRequestException('Room progress not found');
     }
-    return {
-      order: gameLoad.order,
-      content: gameLoad.GameVersion.content as SimulationStateSave,
-    };
+
+    if (lastSave.RoomProgressSave) {
+      this.logger.log(`Found RoomProgressSave for room ID: ${roomId}`);
+      return {
+        order: lastSave.order,
+        content: lastSave.RoomProgressSave.content as SimulationStateSave,
+      };
+    }
+
+    if (lastSave.RoomProgressGameLoad) {
+      this.logger.log(`Found RoomProgressGameLoad for room ID: ${roomId}`);
+      return {
+        order: lastSave.order,
+        content: lastSave.RoomProgressGameLoad.GameVersion.content as SimulationStateSave,
+      };
+    }
+
+    this.logger.error(`Failed to load game progress for room ID: ${roomId}`);
+    throw new BadRequestException('Failed to load game progress');
   }
 
   /**
@@ -294,7 +304,7 @@ export class RoomsService {
    * @param roomCode - The code of the room to be removed.
    * @throws BadRequestException - If the room is currently running.
    */
-  async removeRoom(roomCode: string) {
+  async deleteRoom(roomCode: string) {
     if (RoomsService.hasRoom(roomCode)) {
       throw new BadRequestException('Room is running');
     }

@@ -1,9 +1,9 @@
 import { subject } from '@casl/ability';
+import type { Game, Room } from '@prisma/client';
 import { permissions } from '../../prisma/permitions';
 import { authMockAdmin } from '../../test/authMock';
 import type { UserWithPermissions } from './casl-ability.factory';
 import { CaslAbilityFactory } from './casl-ability.factory';
-import type { Game } from '@prisma/client';
 
 const userFactory = (roleId: number): UserWithPermissions => {
   return {
@@ -172,6 +172,32 @@ describe('CaslAbilityFactory', () => {
       it('should allow reading Room', () => {
         const ability = new CaslAbilityFactory().createForUser(user);
         expect(ability.can('read', 'Room')).toBeTruthy();
+      });
+      it('should allow deleting own Room', () => {
+        const room: Room = {
+          roomId: 1,
+          code: 'code',
+          authorId: user.userId,
+          savingDelay: 1,
+          stateTickDelay: 1,
+          type: 1,
+        };
+
+        const ability = new CaslAbilityFactory().createForUser(user);
+        expect(ability.can('delete', subject('Room', room))).toBeTruthy();
+      });
+      it('should allow deleting not own Room', () => {
+        const room: Room = {
+          roomId: 1,
+          code: 'code',
+          authorId: user.userId + 9,
+          savingDelay: 1,
+          stateTickDelay: 1,
+          type: 1,
+        };
+
+        const ability = new CaslAbilityFactory().createForUser(user);
+        expect(ability.can('delete', subject('Room', room))).toBeFalsy();
       });
     });
 
