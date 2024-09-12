@@ -1,5 +1,6 @@
 import type { HavokPlugin } from '@babylonjs/core';
 import {
+  Axis,
   PhysicsBody,
   PhysicsMotionType,
   PhysicsShapeMesh,
@@ -9,7 +10,7 @@ import {
   Vector3,
   type Mesh,
 } from '@babylonjs/core';
-import { PICK_HIGHT } from '@shared/constants';
+import { PICK_HIGHT, PRECISION_EPSILON } from '@shared/constants';
 import type { ActorBaseState } from '@shared/dto/states';
 import type { SimulationSceneBase } from '@shared/playground';
 import { SharedBase } from '@shared/playground/actors/SharedBase';
@@ -52,9 +53,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
       let upHeight = this.defaultY + PICK_HIGHT;
 
       const rotation = this.absoluteRotationQuaternion;
-      rotation.toEulerAngles();
-      rotation.x = 0;
-      const newRotation = Quaternion.FromEulerAngles(0, rotation.y, rotation.z);
+      const newRotation = this.alignToYAxis(rotation);
 
       const shapeLocalResult = new ShapeCastResult();
       const hitWorldResult = new ShapeCastResult();
@@ -82,6 +81,35 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
       const pos = new Vector3(this.__targetPosition.x, upHeight, this.__targetPosition.y);
       this.body.setTargetTransform(pos, newRotation);
     }
+  }
+
+  alignToYAxis(quaternion: Quaternion) {
+    const up = Vector3.UpReadOnly;
+    const upVector = new Vector3().copyFromFloats(0, 1, 0).applyRotationQuaternion(quaternion);
+
+    if (
+      Math.abs(upVector.x) < PRECISION_EPSILON &&
+      Math.abs(upVector.y - 1) < PRECISION_EPSILON &&
+      Math.abs(upVector.z) < PRECISION_EPSILON
+    ) {
+      return quaternion;
+    }
+
+    if (
+      Math.abs(upVector.x) < PRECISION_EPSILON &&
+      Math.abs(upVector.y + 1) < PRECISION_EPSILON &&
+      Math.abs(upVector.z) < PRECISION_EPSILON
+    ) {
+      return Quaternion.RotationAxis(Axis.X, Math.PI).multiply(quaternion);
+    }
+
+    const rotationAxis = Vector3.Cross(upVector, up).normalize();
+    const rotationAngle = Math.acos(Vector3.Dot(upVector, up));
+
+    const correction = Quaternion.RotationAxis(rotationAxis, rotationAngle);
+    const result = correction.multiply(quaternion);
+
+    return result.normalize();
   }
 
   get hk(): HavokPlugin {
