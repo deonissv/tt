@@ -30,9 +30,7 @@ export const GamesList = () => {
 
   const onCreateRoom = async (gameCode: string) => {
     try {
-      const roomId = await RoomService.createRoom({
-        gameCode,
-      });
+      const roomId = await RoomService.createRoom(gameCode);
 
       navigate(`/room/${roomId}`);
     } catch (e) {

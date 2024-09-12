@@ -76,6 +76,7 @@ export class GamesService {
       where: { code },
       include: {
         GameVersion: {
+          take: 1,
           orderBy: { version: 'desc' },
         },
       },
@@ -107,6 +108,7 @@ export class GamesService {
       where: { code },
       include: {
         GameVersion: {
+          take: 1,
           orderBy: { version: 'desc' },
         },
       },

@@ -7,7 +7,6 @@ export interface Containable {
 }
 
 export const isContainable = (object: any): object is Containable => {
-  debugger;
   return (
     isObject(object) &&
     hasProperty(object, 'size') &&

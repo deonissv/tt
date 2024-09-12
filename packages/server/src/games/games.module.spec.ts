@@ -4,6 +4,7 @@ import request from 'supertest';
 
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
+import type { GamePreviewDto } from '@shared/dto/games';
 import type { Server } from 'net';
 import {
   authMockAdmin,
@@ -103,12 +104,14 @@ describe('GamesModule', () => {
       expect((response.body as any[]).length).toEqual(2);
       expect(response.body).toEqual([
         {
+          authorId: 0,
           code: expect.any(String) as string,
           name: 'name',
           description: 'desc',
           bannerUrl: 'url',
         },
         {
+          authorId: 0,
           code: expect.any(String) as string,
           name: 'name1',
           description: 'desc1',
@@ -155,9 +158,6 @@ describe('GamesModule', () => {
           },
         },
       });
-
-      // const a = await prismaService.game.findUnique({ where: { code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7' } });
-      // debugger;
 
       await request(app.getHttpServer())
         .get('/games/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
@@ -261,11 +261,12 @@ describe('GamesModule', () => {
         .expect(res =>
           expect(res.body).toEqual([
             {
+              authorId: 0,
               code: expect.any(String) as string,
               name: 'name',
               description: 'desc',
               bannerUrl: 'url',
-            },
+            } satisfies GamePreviewDto,
           ]),
         );
     });
@@ -342,11 +343,12 @@ describe('GamesModule', () => {
         .expect(res =>
           expect(res.body).toEqual([
             {
+              authorId: 0,
               code: expect.any(String) as string,
               name: 'name',
               description: 'desc',
               bannerUrl: 'url',
-            },
+            } satisfies GamePreviewDto,
           ]),
         );
     });
@@ -403,11 +405,12 @@ describe('GamesModule', () => {
         .expect(HttpStatus.OK)
         .expect(res =>
           expect(res.body).toEqual({
+            authorId: 0,
             code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
             name: 'name1',
             description: 'desc1',
             bannerUrl: 'url1',
-          }),
+          } satisfies GamePreviewDto),
         );
 
       const games = await prismaService.game.findMany({ include: { GameVersion: true } });
@@ -472,11 +475,12 @@ describe('GamesModule', () => {
         .expect(HttpStatus.OK)
         .expect(res =>
           expect(res.body).toEqual({
+            authorId: 0,
             code: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
             name: 'name1',
             description: 'desc1',
             bannerUrl: 'url1',
-          }),
+          } satisfies GamePreviewDto),
         );
 
       const games = await prismaService.game.findMany({ include: { GameVersion: true } });
@@ -617,11 +621,12 @@ describe('GamesModule', () => {
         .expect(HttpStatus.CREATED)
         .expect(res =>
           expect(res.body).toEqual({
+            authorId: 0,
             code: expect.any(String) as string,
             name: 'name',
             description: 'desc',
             bannerUrl: 'url',
-          }),
+          } satisfies GamePreviewDto),
         );
 
       const games = await prismaService.game.findMany({ include: { GameVersion: true } });

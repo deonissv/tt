@@ -17,6 +17,7 @@ const DBMockFactory = (): (() => PrismaService) => {
 
     const host = container.getHost();
     const port = container.getMappedPort(5432);
+    console.log('host', host);
     dbUrl = getDatabaseUrl(host, port);
     process.env.DATABASE_URL = dbUrl;
 
