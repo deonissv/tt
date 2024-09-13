@@ -15,7 +15,7 @@ export const App = () => {
     <StoreProvider>
       <ToastProvider>
         <Routes>
-          <Route path="room/:roomCode" element={<Room />} />
+          <Route path="room/:roomCode" element={RequireAuth({ children: <Room /> })} />
           <Route element={<Layout />}>
             <Route path="login" element={<Login onLogin={onLogin} />} />
             <Route path="signup" element={<Signup />} />
