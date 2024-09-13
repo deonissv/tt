@@ -5,6 +5,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
+import { FileLoaderModule } from './file-loader/file-loader.moduler';
 import { GamesModule } from './games/games.module';
 import { MessagesModule } from './messages/messages.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -25,6 +26,7 @@ import { UsersModule } from './users/users.module';
     GamesModule,
     MessagesModule,
     EventsModule,
+    FileLoaderModule,
   ],
   controllers: [AppController],
   providers: [AppService],

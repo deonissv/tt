@@ -49,15 +49,6 @@ export function getDatabaseUrl(host: string, port: number): string {
   return `postgresql://test:test@${host}:${port}/testdb`;
 }
 
-/**
- * Asynchronously waits for the specified delay.
- * @param delay - The delay in milliseconds.
- * @returns A promise that resolves after the specified delay.
- */
-export async function wait(delay: number) {
-  return new Promise(resolve => setTimeout(resolve, delay));
-}
-
 export function getPhSim() {
   const sim = new Simulation({
     actorStates: [],

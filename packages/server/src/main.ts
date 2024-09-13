@@ -5,8 +5,9 @@ import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { initHavok } from '@shared/initHavok';
-import { Logger as PGLogger } from '@shared/playground';
+import { Loader, Logger as PGLogger } from '@shared/playground';
 import { AppModule } from './app.module';
+import { FileLoaderService } from './file-loader/file-loader.service';
 import { mainConfig } from './main.config';
 
 declare const module: any;
@@ -16,19 +17,16 @@ async function bootstrap() {
   PGLogger.register(new Logger('Playground'));
 
   const app = await NestFactory.create(AppModule, {
-    logger: [
-      'fatal',
-      'error',
-      'warn',
-      'log',
-      'debug',
-      // 'debug',
-      'verbose',
-    ],
+    logger: ['fatal', 'error', 'warn', 'log', 'debug', 'verbose'],
   });
   app.useWebSocketAdapter(new WsAdapter(app));
 
   mainConfig(app);
+
+  const fileLoader = app.get(FileLoaderService);
+  Loader.registartFileFetcher(url => {
+    return fileLoader.load(url);
+  });
 
   const config = new DocumentBuilder()
     .setTitle('TT API')
