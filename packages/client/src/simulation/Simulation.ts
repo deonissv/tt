@@ -13,10 +13,9 @@ import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_BIND_KEYS } from '@shared/constants';
 import type { CardGrid } from '@shared/dto/states';
-import { type SimulationStateSave } from '@shared/dto/states';
+import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
-import { isContainable } from '@shared/playground/actions/Containable';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
 import { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
@@ -85,13 +84,22 @@ export class Simulation extends SimulationBase {
     sim._handlePick();
     sim._handleHoverHighlight();
     sim._bindAction(FLIP_BIND_KEYS, actor => {
-      if (isContainable(actor)) cbs.onPickItem?.(actor as unknown as Deck);
+      if (
+        actor.__state.type === ActorType.BAG ||
+        actor.__state.type === ActorType.DECK ||
+        actor.__state.type === ActorType.TILE_STACK
+      )
+        cbs.onPickItem?.(actor as unknown as Deck);
     });
     sim._bindAction(['KeyR'], actor => {
       cbs.onRoll(actor);
     });
     sim._bindAction(['KeyH'], actor => {
-      if (isContainable(actor)) {
+      if (
+        actor.__state.type === ActorType.BAG ||
+        actor.__state.type === ActorType.DECK ||
+        actor.__state.type === ActorType.TILE_STACK
+      ) {
         cbs.onShuffle(actor);
       }
     });
