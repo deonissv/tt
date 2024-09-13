@@ -97,6 +97,14 @@ export const isUUIDv4 = (uuid: string): boolean => {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(uuid);
 };
 
+/**
+ * Checks if the provided string is a valid email address.
+ *
+ * This function uses a regular expression to validate the email format.
+ *
+ * @param email - The email address to validate.
+ * @returns `true` if the email is valid, `false` otherwise.
+ */
 export const isEmail = (email: string): boolean => {
   return /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(
     String(email).toLowerCase(),
@@ -113,3 +121,27 @@ export const UUIDv4 = () => {
     (+c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (+c / 4)))).toString(16),
   );
 };
+
+/**
+ * Converts an ArrayBuffer to a Base64-encoded data URL.
+ *
+ * @param buffer - The ArrayBuffer to convert.
+ * @returns A string representing the Base64-encoded data URL.
+ */
+export const getB64URL = (buffer: ArrayBuffer) => {
+  const b64 = btoa(
+    Array.from(new Uint8Array(buffer))
+      .map(b => String.fromCharCode(b))
+      .join(''),
+  );
+  return `data:;base64,${b64}`;
+};
+
+/**
+ * Asynchronously waits for the specified delay.
+ * @param delay - The delay in milliseconds.
+ * @returns A promise that resolves after the specified delay.
+ */
+export async function wait(delay: number) {
+  return new Promise(resolve => setTimeout(resolve, delay));
+}

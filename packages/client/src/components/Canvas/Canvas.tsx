@@ -5,6 +5,9 @@ import { Simulation } from '@client/src/simulation';
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { Context } from '@client/src/Store';
 import { ProgressLoader, Spinner, useToast } from '@components';
+import { Loader, Logger, MimeDetector } from '@shared/playground';
+import { MimeType } from '@shared/playground/Loader';
+import { getB64URL } from '@shared/utils';
 import type { CursorsPld } from '@shared/ws/payloads';
 
 export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
@@ -23,6 +26,17 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
   const [nickname] = useContext(Context).nickname;
 
   const init = useCallback(async (): Promise<SimulationRoom> => {
+    Loader.registartFileFetcher(async (url: string) => {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+
+      const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+      const b64 = getB64URL(arrayBuffer);
+
+      Logger.log(`Fetched file: ${url}`);
+      return { url: b64, mime };
+    });
+
     const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, setCursors, setDownloadProgress);
     // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
 

@@ -17,7 +17,7 @@ jobs:
           node-version: 22.x
           cache: 'npm'
       - run: npm ci
-      - run: npm run server db
+      - run: npm run db:gen
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -37,5 +37,5 @@ jobs:
           node-version: 22.x
           cache: 'npm'
       - run: npm ci
-      - run: npm run server db
+      - run: npm run db:gen
       - run: npm run test:e2e -ws --if-present --  --shard=${{ matrix.shard }}/${{ strategy.job-total }} --no-file-parallelism --testTimeout=3000000 --hookTimeout=6000000 --teardownTimeout=6000000

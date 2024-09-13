@@ -8,11 +8,7 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { OBJFileLoader } from '@babylonjs/loaders';
 import type { Material, Model } from '@shared/dto/states';
 import { Logger } from '../Logger';
-import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
-
-const RETRY_ATTEMPTS = 5;
-const RETRY_DELAY = 1000; // ms
 
 OBJFileLoader.SKIP_MATERIALS = true;
 
@@ -21,8 +17,17 @@ interface FetchedFile {
   mime: MimeType;
 }
 
+export type FileFetcher = (url: string) => Promise<FetchedFile | null>;
+
 class Loader {
   public Assets = new Map<string, Promise<FetchedFile | null>>();
+  fetchFile: FileFetcher = (_url: string) => {
+    throw new Error('FileFetcher should be registered');
+  };
+
+  registartFileFetcher(fetcher: FileFetcher) {
+    this.fetchFile = fetcher;
+  }
 
   _getModelExtension(mime: MimeType): string {
     // @TODO: add more extensions
@@ -114,7 +119,6 @@ class Loader {
 
     const material = new StandardMaterial(name);
     material.diffuseColor = new Color3(1, 1, 1);
-    // @TODO test maps
     material.diffuseTexture = modelMaterial.diffuseURL ? await this.loadTexture(modelMaterial.diffuseURL) : null;
     material.ambientTexture = modelMaterial.ambientURL ? await this.loadTexture(modelMaterial.ambientURL) : null;
     material.specularTexture = modelMaterial.specularURL ? await this.loadTexture(modelMaterial.specularURL) : null;
@@ -150,65 +154,6 @@ class Loader {
 
   private filterEmptyMeshes(meshes: AbstractMesh[]): AbstractMesh[] {
     return meshes.filter(mesh => mesh.getTotalVertices() > 0);
-  }
-
-  async _fetchFile(url: string): Promise<ArrayBuffer | null> {
-    let attempts = 0;
-    for (attempts = 0; attempts < RETRY_ATTEMPTS; attempts++) {
-      try {
-        await new Promise(resolve => setTimeout(resolve, attempts * RETRY_DELAY));
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
-        if (arrayBuffer) {
-          return arrayBuffer;
-        }
-      } catch {
-        Logger.log(`Failed attempt to fetch: ${url}`);
-      }
-    }
-    return null;
-  }
-
-  async fetchFile(url: string): Promise<FetchedFile | null> {
-    if (!this.Assets.has(url)) {
-      const promiseCb = async (): Promise<FetchedFile | null> => {
-        const arrayBuffer = await this._fetchFile(url);
-        if (!arrayBuffer) {
-          Logger.error(`Empty arrayBuffer: ${url}`);
-          return null;
-        }
-
-        const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
-        const b64 = this._getB64URL(arrayBuffer);
-
-        Logger.log(`Fetched file: ${url}`);
-        return { url: b64, mime };
-      };
-      this.Assets.set(url, promiseCb());
-    }
-    return this.Assets.get(url)!;
-  }
-
-  _getB64URL(buffer: ArrayBuffer) {
-    const b64 = btoa(
-      Array.from(new Uint8Array(buffer))
-        .map(b => String.fromCharCode(b))
-        .join(''),
-    );
-    return `data:;base64,${b64}`;
-  }
-
-  _getObjectURL(buffer: ArrayBuffer, type?: string) {
-    type = type ?? MimeDetector.getMime(buffer);
-    const blob = new Blob([buffer], { type });
-    return URL.createObjectURL(blob);
-  }
-
-  bufferToURL(buffer: ArrayBuffer, _url: string, _type?: string): string {
-    // const resourceURL = this._getObjectURL(buffer, type); // @TODO switch to getObjectURL, possible solution - wrapper for xhr2 using fetch
-    const resourceURL = this._getB64URL(buffer);
-    // this.Resources.set(url, resourceURL);
-    return resourceURL;
   }
 }
 
