@@ -14,6 +14,4 @@ COPY packages/shared packages/shared
 RUN npm run i:all
 RUN npm run client build  
 
-EXPOSE 5500
-
 CMD ["npm", "run", "client", "start"]
