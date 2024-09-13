@@ -30,8 +30,6 @@ services:
     ports:
       - '5500:5500'
     env_file: .env
-    environment:
-      - VITE_SERVER_HOST=server
     depends_on:
       - db
 

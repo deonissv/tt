@@ -12,7 +12,7 @@ COPY packages/server packages/server
 COPY packages/shared packages/shared
 
 RUN npm run i:all
-RUN npm run server db -- --schema=./packages/server/prisma/schema.prisma
+RUN npm run db:gen
 RUN npm run server build  
 
 CMD ["npm", "run", "server", "start"]

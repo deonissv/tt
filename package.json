@@ -20,7 +20,11 @@
     "test:e2e": "npm run test:e2e --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run test",
     "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' + && find . -name 'build' -type d -prune -exec rm -rf '{}' +",
-    "i:all": "npm i && npm install --workspaces  --if-present"
+    "i:all": "npm i && npm install --workspaces  --if-present",
+    "db:init": "npm run db:gen && npm run db:push && npm run db:seed",
+    "db:gen": "dotenv -e .env -- npm run server db:gen",
+    "db:push": "dotenv -e .env -- npm run server db:push",
+    "db:seed": "dotenv -e .env -- npm run server db:seed"
   },
   "devDependencies": {
     "@swc/core": "^1.7.4",
@@ -29,6 +33,7 @@
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",

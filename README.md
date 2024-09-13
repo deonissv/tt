@@ -12,18 +12,25 @@ docker compose up
 
 ### Requirements:
 
-Node.js 22 or higher
+Node.js 22 or higher, PostgreSQL
 
 - Start a PostresSQL db
-- Initialize a schema and init data (corresponding files located on _./init-scripts folder_)
 - Edit data required to connect to db in .env file
-- build apps
+- Initialize a schema and init data
+
+```
+  npm run i:all
+  npm run db:init
+
+```
+
+- Build apps
 
 ```
 npm run build
 ```
 
-- start apps
+- Start apps
 
 ```
 npm run start
@@ -31,6 +38,6 @@ npm run start
 
 # Simulation key bindings:
 
-key **F** to pick object from container (bag, deck)
-key **R** to roll die
-key **H** to shuffle items in container
+- key **F** to pick object from container (bag, deck)
+- key **R** to roll die
+- key **H** to shuffle items in container

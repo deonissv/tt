@@ -11,7 +11,7 @@ import { Logger } from '../Logger';
 import MimeDetector from './MimeDetector';
 import { MimeType } from './MimeTypes';
 
-const RETRY_ATTEMPTS = 4;
+const RETRY_ATTEMPTS = 5;
 const RETRY_DELAY = 1000; // ms
 
 OBJFileLoader.SKIP_MATERIALS = true;
