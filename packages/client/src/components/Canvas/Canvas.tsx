@@ -93,12 +93,12 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
   }, [updateCursors, cursor, cursors, screenCursors]);
 
   return (
-    <>
+    <div className="w-full h-screen m-0 p-0 !overflow-hidden">
       <div>
         {Object.entries(screenCursors.current).map(([id, [x, y]]) => (
           <div
             key={id}
-            className="w-3 h-3 bg-green-500 absolute pointer-events-none"
+            className="w-3 h-3 bg-green-500 fixed pointer-events-none"
             style={{ left: `${x}px`, top: `${y}px`, backgroundColor: `#${id.substring(id.length - 6)}` }}
           ></div>
         ))}
@@ -114,6 +114,6 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 };
