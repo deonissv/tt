@@ -59,7 +59,9 @@ export class RoomsController {
     const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
     const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
 
-    const room = await this.roomService.findRoomByCode(code);
+    const room = await this.roomService.findRoomByCode(code).catch(() => {
+      throw new NotFoundException('Room not found');
+    });
     if (!room) {
       throw new NotFoundException('Room not found');
     }

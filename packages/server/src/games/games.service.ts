@@ -113,6 +113,7 @@ export class GamesService {
         },
       },
     });
+
     if (!game) {
       this.logger.log(`Game with code ${code} not found`);
       return null;

@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Prisma, Room } from '@prisma/client';
 import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -47,30 +47,36 @@ export class RoomsService {
    * @throws BadRequestException if the game is not found.
    */
   async createRoom(authorId: number, gameCode: string): Promise<string> {
-    const gameVersion = await this.gameService.findLastVersionByCode(gameCode);
+    const gameVersion = await this.gameService.findLastVersionByCode(gameCode).catch(() => {
+      throw new BadRequestException('Game not found');
+    });
     if (!gameVersion) {
       throw new BadRequestException('Game not found');
     }
 
-    const roomTable = await this.prismaService.room.create({
-      data: {
-        authorId,
-        type: 1,
-        RoomProgress: {
-          create: {
-            RoomProgressGameLoad: {
-              create: {
-                gameId: gameVersion.gameId,
-                gameVersion: gameVersion.version,
+    const roomTable = await this.prismaService.room
+      .create({
+        data: {
+          authorId,
+          type: 1,
+          RoomProgress: {
+            create: {
+              RoomProgressGameLoad: {
+                create: {
+                  gameId: gameVersion.gameId,
+                  gameVersion: gameVersion.version,
+                },
               },
             },
           },
         },
-      },
-      include: {
-        RoomProgress: true,
-      },
-    });
+        include: {
+          RoomProgress: true,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestException('Game not found');
+      });
 
     const simSave = gameVersion.content as SimulationStateSave;
     return this.startSimulationRoom(roomTable, simSave);
@@ -84,28 +90,32 @@ export class RoomsService {
    * @throws BadRequestException if the user is not found.
    */
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
-    const usersRooms = await this.prismaService.user.findFirst({
-      where: {
-        code: userCode,
-      },
-      include: {
-        Rooms: {
-          include: {
-            RoomProgressGameLoad: {
-              take: 1,
-              orderBy: { order: 'desc' },
-              include: {
-                GameVersion: {
-                  include: {
-                    Game: true,
+    const usersRooms = await this.prismaService.user
+      .findFirst({
+        where: {
+          code: userCode,
+        },
+        include: {
+          Rooms: {
+            include: {
+              RoomProgressGameLoad: {
+                take: 1,
+                orderBy: { order: 'desc' },
+                include: {
+                  GameVersion: {
+                    include: {
+                      Game: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      })
+      .catch(() => {
+        throw new BadRequestException('User not found');
+      });
 
     if (!usersRooms) {
       throw new BadRequestException('User not found');
@@ -120,14 +130,18 @@ export class RoomsService {
   }
 
   async findRoom(roomCode: string): Promise<RoomwDto> {
-    const room = await this.prismaService.room.findFirst({
-      where: {
-        code: roomCode,
-      },
-    });
+    const room = await this.prismaService.room
+      .findUnique({
+        where: {
+          code: roomCode,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestException('Room not found');
+      });
 
     if (!room) {
-      throw new BadRequestException('Room not found');
+      throw new NotFoundException('Room not found');
     }
 
     return room;
@@ -341,7 +355,9 @@ export class RoomsService {
     }
 
     this.logger.log(`Removing room with code: ${roomCode}`);
-    await this.prismaService.room.delete({ where: { code: roomCode } });
+    await this.prismaService.room.delete({ where: { code: roomCode } }).catch(() => {
+      throw new NotFoundException('Room not found');
+    });
     this.logger.log(`Room with code: ${roomCode} successfully removed`);
   }
 
