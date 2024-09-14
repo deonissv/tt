@@ -28,6 +28,7 @@ describe('TTSParser - parseTile', () => {
       backURL: 'http://i.imgur.com/vURavdX.jpg',
       size: 10,
       widthScale: 0,
+      colorDiffuse: [1, 1, 1],
     };
 
     const parsed = parser.parseTileStack(DEMO.TILE_STACK as unknown as ObjectState)!;

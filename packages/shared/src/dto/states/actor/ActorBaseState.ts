@@ -8,5 +8,6 @@ export interface ActorBaseState {
   name: string;
   transformation?: Transformation;
   mass?: number;
+  colorDiffuse?: number[]; // default: [1, 1, 1]
   locked?: boolean;
 }

@@ -146,6 +146,13 @@ export class TTSParserC extends ParserBase {
       }
     }
 
+    if (objectState?.ColorDiffuse) {
+      actorState.colorDiffuse = [objectState.ColorDiffuse.r, objectState.ColorDiffuse.g, objectState.ColorDiffuse.b];
+      if (objectState.ColorDiffuse.a && objectState.ColorDiffuse.a !== 1) {
+        actorState.colorDiffuse.push(objectState.ColorDiffuse.a);
+      }
+    }
+
     if (this.hasProperty(objectState, 'Locked')) {
       if (typeof objectState.Locked === 'boolean' && objectState.Locked) {
         actorState.locked = objectState.Locked;
@@ -488,13 +495,6 @@ export class TTSParserC extends ParserBase {
       ...actorBase,
       model,
     };
-
-    if (objectState?.ColorDiffuse) {
-      actorState.colorDiffuse = [objectState.ColorDiffuse.r, objectState.ColorDiffuse.g, objectState.ColorDiffuse.b];
-      if (objectState.ColorDiffuse.a && objectState.ColorDiffuse.a !== 1) {
-        actorState.colorDiffuse.push(objectState.ColorDiffuse.a);
-      }
-    }
 
     if (objectState?.ChildObjects) {
       actorState.children = objectState.ChildObjects.reduce<ActorState[]>((acc, o) => {

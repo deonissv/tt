@@ -28,7 +28,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
   __flipTranslate = 1;
   __targetPosition: Vector2 | null = null;
 
-  colorDiffuse: number[] = [];
   pickable = true;
   picked: string | null = null;
 
@@ -47,8 +46,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     modelMesh.name = `${this.name}: model`;
     modelMesh.setParent(this);
     modelMesh.setEnabled(true);
-
-    // this.colorDiffuse = state.colorDiffuse ?? [];
 
     this._setTransformations(state.transformation);
     Logger.log(`Actor created. guid: ${this.guid} type: ${state?.type}`);
