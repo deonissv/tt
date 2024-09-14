@@ -55,7 +55,7 @@ describe('Rooms', () => {
         },
       });
 
-      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startSimulationRoom').mockReturnValue('code');
       const dto: CreateRoomDto = {
         gameCode: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
       };
@@ -71,7 +71,7 @@ describe('Rooms', () => {
     });
   });
 
-  describe('GET /rooms/:code', () => {
+  describe('GET /rooms/user/:code', () => {
     it('should return user rooms', async () => {
       await prismaService.user.create({
         data: authMockAdmin,
@@ -155,7 +155,7 @@ describe('Rooms', () => {
       });
 
       const response = await request(app.getHttpServer())
-        .get(`/rooms/${authMockAdmin.code}`)
+        .get(`/rooms/user/${authMockAdmin.code}`)
         .set('Accept', 'application/json')
         .set('Authorization', `Bearer ${authMockAdminToken}`);
 
@@ -223,7 +223,7 @@ describe('Rooms', () => {
         },
       });
 
-      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startSimulationRoom').mockReturnValue('code');
       const response = await request(app.getHttpServer())
         .post('/rooms/start/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')
@@ -266,7 +266,7 @@ describe('Rooms', () => {
 
       expect(response.status).toBe(HttpStatus.BAD_REQUEST);
       expect(response.body).toMatchObject({ message: 'Room not found' });
-      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startSimulationRoom').mockReturnValue('code');
       expect(startSimulationMock).toHaveBeenCalledTimes(0);
     });
 
@@ -317,7 +317,7 @@ describe('Rooms', () => {
         ],
       });
 
-      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startRoomSimulation').mockReturnValue('code');
+      const startSimulationMock = vi.spyOn(RoomsService.prototype, 'startSimulationRoom').mockReturnValue('code');
       const response = await request(app.getHttpServer())
         .post('/rooms/start/4dbab385-0a62-442c-a4b2-c22e8ae35cb7')
         .set('Accept', 'application/json')

@@ -3,6 +3,7 @@ export { Canvas } from './Canvas';
 export { DragDropLoader } from './DragDropLoader';
 export { GameCard } from './GameCard';
 export { Header } from './Header';
+export { HUD } from './HUD';
 export { Input } from './Input';
 export type { InputProps } from './Input';
 export type { IProps } from './IProps';

@@ -339,14 +339,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     const mergedPosition = actorStateUpdate.transformation?.position ?? actorState.transformation?.position;
     const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
 
-    const rv: ActorBaseState = {
-      type: actorState.type,
-
-      guid: actorStateUpdate.guid,
-      // model: actorStateUpdate.model ?? actorState.model,
-      name: actorStateUpdate.name ?? actorState.name,
-      mass: actorStateUpdate.mass ?? actorState.mass,
-    };
+    const rv = structuredClone(actorState);
 
     if (mergedScale !== undefined || mergedPosition !== undefined || mergedRotation !== undefined) {
       rv.transformation = {

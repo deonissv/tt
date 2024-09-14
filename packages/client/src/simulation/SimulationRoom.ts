@@ -1,5 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import { RoomService } from '@services';
+import { AuthService, RoomService } from '@services';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld } from '@shared/ws/payloads';
 import type { ClientActionMsg } from '@shared/ws/ws';
@@ -61,12 +61,13 @@ export class SimulationRoom {
   static async init(
     canvas: HTMLCanvasElement,
     roomId: typeof SimulationRoom.prototype.roomId,
-    nickname = '',
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
+    onRoomClosed: () => void,
   ): Promise<SimulationRoom> {
-    const [ws, clientId, simState] = await RoomService.connect(roomId, nickname, setDownloadProgress);
+    const [ws, simState] = await RoomService.connect(roomId, setDownloadProgress);
     const sim = await Simulation.init(canvas, simState, SimulationRoom);
+    const clientId = AuthService.getJWT()!.code;
 
     ws.addEventListener('message', event => {
       const message = WS.read(event);
@@ -98,9 +99,13 @@ export class SimulationRoom {
             sim.handleRotateActor(action.payload.guid, action.payload.position);
             break;
           }
-
           case ServerAction.RERENDER_DECK: {
             sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size);
+            break;
+          }
+          case ServerAction.CLOSED: {
+            ws.close();
+            onRoomClosed();
             break;
           }
         }
@@ -151,6 +156,10 @@ export class SimulationRoom {
       payload: actor.guid,
     });
   };
+
+  closeRoom() {
+    WS.send(this.ws, [{ type: ClientAction.CLOSE, payload: null }]);
+  }
 
   destructor() {
     if (this.updateTimeout) clearInterval(this.updateTimeout);

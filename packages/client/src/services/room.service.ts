@@ -3,9 +3,9 @@ import { LOADER_URL, WSS_URL } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { Tuple } from '@babylonjs/core/types';
-import type { RoomPreviewDto } from '@shared/dto/rooms';
+import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
 import type { SimulationStateSave } from '@shared/dto/states';
-import { ClientAction, ServerAction, WS } from '@shared/ws';
+import { ServerAction, WS } from '@shared/ws';
 import type { Dispatch, SetStateAction } from 'react';
 
 export const RoomService = {
@@ -25,12 +25,21 @@ export const RoomService = {
   },
 
   async getUserRooms(code: string): Promise<RoomPreviewDto[]> {
-    const response = await axios.get(LOADER_URL + `rooms/${code}`, {
+    const response = await axios.get(LOADER_URL + `rooms/user/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
     });
     return response.data as RoomPreviewDto[];
+  },
+
+  async getRoom(code: string): Promise<RoomwDto> {
+    const response = await axios.get(LOADER_URL + `rooms/${code}`, {
+      headers: {
+        Authorization: `Bearer ${getAccessToken()}`,
+      },
+    });
+    return response.data as RoomwDto;
   },
 
   async startRoom(code: string): Promise<string> {
@@ -53,9 +62,8 @@ export const RoomService = {
 
   async connect(
     roomId: string,
-    nickname: string,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
-  ): Promise<[WebSocket, string, SimulationStateSave]> {
+  ): Promise<[WebSocket, SimulationStateSave]> {
     const ws = new WebSocket(WSS_URL + roomId, `Bearer.${getAccessToken()}`);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
@@ -71,40 +79,26 @@ export const RoomService = {
           });
         };
 
-        const idListener = (event: MessageEvent) => {
+        const stateListener = (event: MessageEvent) => {
           const message = WS.read(event);
 
           const action = message[0];
-          if (action.type == ServerAction.CLIENT_ID) {
-            const id = action.payload;
-
-            WS.send(ws, [
-              {
-                type: ClientAction.NICKNAME,
-                payload: nickname,
-              },
-            ]);
-
-            const stateListener = (event: MessageEvent) => {
-              const message = WS.read(event);
-
-              const action = message[0];
-              if (action.type == ServerAction.STATE) {
-                ws.removeEventListener('message', stateListener);
-                ws.removeEventListener('message', progressListener);
-                const simState = action.payload;
-                resolve([ws, id, simState]);
-              }
-            };
-            ws.removeEventListener('message', idListener);
-            ws.addEventListener('message', stateListener);
+          if (action.type == ServerAction.STATE) {
+            ws.removeEventListener('message', stateListener);
+            ws.removeEventListener('message', progressListener);
+            const simState = action.payload;
+            resolve([ws, simState]);
           }
         };
-        ws.addEventListener('message', idListener);
+
+        ws.addEventListener('message', stateListener);
         ws.addEventListener('message', progressListener);
       };
       ws.onerror = error => {
         reject(new Error(error.type));
+      };
+      ws.onclose = () => {
+        ws.close();
       };
     });
   },
