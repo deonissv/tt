@@ -13,5 +13,5 @@ export const Room: React.FC = (): React.ReactNode => {
     return roomCode!;
   }, []);
 
-  return <Canvas roomId={roomCodeGuard()} />;
+  return <Canvas roomCode={roomCodeGuard()} />;
 };

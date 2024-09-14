@@ -1,17 +1,21 @@
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { Tuple } from '@babylonjs/core/types';
 import { Simulation } from '@client/src/simulation';
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
-import { Context } from '@client/src/Store';
-import { ProgressLoader, Spinner, useToast } from '@components';
+import { HUD, ProgressLoader, Spinner, useToast } from '@components';
+import { RoomService } from '@services';
+import type { RoomwDto } from '@shared/dto/rooms';
 import { Loader, Logger, MimeDetector } from '@shared/playground';
 import { MimeType } from '@shared/playground/Loader';
 import { getB64URL } from '@shared/utils';
 import type { CursorsPld } from '@shared/ws/payloads';
+import { useNavigate } from 'react-router-dom';
 
-export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNode => {
+export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.ReactNode => {
   const { addToast } = useToast();
+  const navigate = useNavigate();
 
   const simulationRoom = useRef<SimulationRoom>();
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -19,13 +23,20 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
   const screenCursors = useRef<CursorsPld>({});
   const simulation = useRef<Simulation>();
   const loaded = useRef(false);
+  const room = useRef<RoomwDto>();
+
   const [downloadProgress, setDownloadProgress] = useState<Tuple<number, 2> | null>(null);
 
   const [cursor, setCursor] = useState<[number, number]>([0, 0]);
   const [cursors, setCursors] = useState<CursorsPld>({});
-  const [nickname] = useContext(Context).nickname;
 
   const init = useCallback(async (): Promise<SimulationRoom> => {
+    RoomService.getRoom(roomCode)
+      .then(r => {
+        room.current = r;
+      })
+      .catch(() => addToast(`Failed to get room preview`));
+
     Loader.registartFileFetcher(async (url: string) => {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
@@ -37,11 +48,11 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
       return { url: b64, mime };
     });
 
-    const sr = await SimulationRoom.init(canvas.current!, roomId, nickname, setCursors, setDownloadProgress);
+    const sr = await SimulationRoom.init(canvas.current!, roomCode, setCursors, setDownloadProgress, onRoomClosed);
     // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
 
     return sr;
-  }, [nickname, roomId]);
+  }, [roomCode]);
 
   const updateCursors = useCallback(
     (cursor: Tuple<number, 2>, cursors: CursorsPld, screenCursors: React.MutableRefObject<CursorsPld>) => {
@@ -61,6 +72,16 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
     },
     [],
   );
+
+  const onRoomClosed = useCallback(() => {
+    addToast('Room has been closed');
+    navigate('/games');
+  }, [addToast, navigate]);
+
+  const onCloseRoom = useCallback(() => {
+    simulationRoom.current?.closeRoom();
+    onRoomClosed();
+  }, [simulationRoom, onRoomClosed]);
 
   useEffect(() => {
     init()
@@ -108,6 +129,7 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
 
   return (
     <div className="w-full h-screen m-0 p-0 !overflow-hidden">
+      <HUD onCloseRoom={onCloseRoom} room={room.current} />
       <div>
         {Object.entries(screenCursors.current).map(([id, [x, y]]) => (
           <div
@@ -119,7 +141,7 @@ export const Canvas: React.FC<{ roomId: string }> = ({ roomId }): React.ReactNod
       </div>
       <canvas ref={canvas} className="w-full h-full m-0 p-0 !overflow-hidden !border-none" />
       {!loaded.current && (
-        <div className="absolute top-0 left-0 w-full h-full bg-[#33334c] flex justify-center content-center flex-wrap">
+        <div className="absolute top-0 left-0 w-full h-full bg-[#33334c] flex justify-center content-center flex-wrap z-10">
           <div className="w-[500px] h-[200px]">
             <Spinner />
             {downloadProgress && (

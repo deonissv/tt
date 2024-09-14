@@ -26,6 +26,7 @@ interface ActionPayloads {
   [ServerAction.MOVE_ACTOR]: MoveClientActorPld;
   [ServerAction.ROTATE_ACTOR]: RotateClientActorPld;
 
+  [ClientAction.CLOSE]: null;
   [ClientAction.PICK_ITEM]: string;
   [ClientAction.CURSOR]: Tuple<number, 2>;
   [ClientAction.PICK_ACTOR]: string;
@@ -33,6 +34,7 @@ interface ActionPayloads {
   [ClientAction.ROLL]: string;
   [ClientAction.SHUFFLE]: string;
 
+  [ServerAction.CLOSED]: null;
   [ServerAction.CURSORS]: CursorsPld;
   [ServerAction.SPAWN_ACTOR]: UnknownActorState;
   [ServerAction.SPAWN_PICKED_ACTOR]: SpawnPickedActorPld;

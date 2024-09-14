@@ -1,6 +1,7 @@
 // actions sent by client
 export enum ClientAction {
   NICKNAME = 'NICKNAME',
+  CLOSE = 'CLOSE',
 
   MOVE_ACTOR = 'CLIENT_MOVE_ACTOR',
 
@@ -17,6 +18,7 @@ export enum ServerAction {
   CLIENT_ID = 'CLIENT_ID',
   STATE = 'STATE',
   DOWNLOAD_PROGRESS = 'DOWNLOAD_PROGRESS',
+  CLOSED = 'CLOSED',
 
   MOVE_ACTOR = 'SERVER_MOVE_ACTOR',
   ROTATE_ACTOR = 'ROTATE_ACTOR',

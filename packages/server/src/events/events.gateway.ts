@@ -72,25 +72,26 @@ export class EventsGateway implements OnGatewayInit {
         if (!validatedUser) {
           abortHandshake(socket, 500, 'Token is damaged');
         }
+
+        const roomId = this.getRoomUrl(request);
+        if (!roomId || !RoomsService.hasRoom(roomId)) {
+          abortHandshake(socket, 400, 'No room found');
+          return new BadRequestException('no room found');
+        }
+
+        const wss = RoomsService.getRoom(roomId)!.wss;
+        wss.handleUpgrade(request, socket, head, ws => {
+          Object.assign(ws, { user: validatedUser });
+          wss.emit('connection', ws, request);
+        });
+
+        wss.on('close', _ws => {
+          RoomsService.deleteRoom(roomId);
+        });
       } catch {
         abortHandshake(socket, 401, 'Unauthorized');
         return new UnauthorizedException();
       }
-
-      const roomId = this.getRoomUrl(request);
-      if (!roomId || !RoomsService.hasRoom(roomId)) {
-        abortHandshake(socket, 400, 'No room found');
-        return new BadRequestException('no room found');
-      }
-
-      const wss = RoomsService.getRoom(roomId)!.wss;
-      wss.handleUpgrade(request, socket, head, ws => {
-        wss.emit('connection', ws, request);
-      });
-
-      wss.on('close', _ws => {
-        RoomsService.deleteRoom(roomId);
-      });
     });
   }
 

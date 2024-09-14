@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Prisma, Room } from '@prisma/client';
 import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SimulationRoom } from './simulation-room';
 
-import type { RoomPreviewDto } from '@shared/dto/rooms';
+import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
 import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { Simulation } from '../simulation/simulation';
 
@@ -19,23 +19,23 @@ export class RoomsService {
   ) {}
 
   /**
-   * Starts the simulation for a room.
+   * Starts the simulation for a given room.
    *
-   * @param roomCode - The code of the room to start the simulation for.
-   * @param savingDelay - The delay (in milliseconds) between saving simulation state.
-   * @param stateTickDelay - The delay (in milliseconds) between simulation state ticks.
-   * @param simSave - Optional. The simulation state to initialize the room with.
+   * @param roomTable - The room configuration.
+   * @param simSave - Optional parameter to provide a saved simulation state.
    * @returns The code of the room.
    */
-  startRoomSimulation(roomCode: string, savingDelay: number, stateTickDelay: number, simSave?: SimulationStateSave) {
-    const room = new SimulationRoom(this, roomCode, savingDelay, stateTickDelay);
+  startSimulationRoom(roomTable: Room, simSave?: SimulationStateSave, gameId?: number, gameVersion?: number): string {
+    const room = new SimulationRoom(this, roomTable);
     try {
-      room.init(simSave).catch((e: Error) => this.logger.error(e.message));
+      room.init(simSave, gameId, gameVersion).catch(e => {
+        this.logger.error((e as Error).message);
+      });
     } catch (e) {
       this.logger.error((e as Error).message);
     }
     RoomsService.setRoom(room);
-    return roomCode;
+    return roomTable.code;
   }
 
   /**
@@ -47,33 +47,39 @@ export class RoomsService {
    * @throws BadRequestException if the game is not found.
    */
   async createRoom(authorId: number, gameCode: string): Promise<string> {
-    const gameVersion = await this.gameService.findLastVersionByCode(gameCode);
+    const gameVersion = await this.gameService.findLastVersionByCode(gameCode).catch(() => {
+      throw new BadRequestException('Game not found');
+    });
     if (!gameVersion) {
       throw new BadRequestException('Game not found');
     }
 
-    const roomTable = await this.prismaService.room.create({
-      data: {
-        authorId,
-        type: 1,
-        RoomProgress: {
-          create: {
-            RoomProgressGameLoad: {
-              create: {
-                gameId: gameVersion.gameId,
-                gameVersion: gameVersion.version,
+    const roomTable = await this.prismaService.room
+      .create({
+        data: {
+          authorId,
+          type: 1,
+          RoomProgress: {
+            create: {
+              RoomProgressGameLoad: {
+                create: {
+                  gameId: gameVersion.gameId,
+                  gameVersion: gameVersion.version,
+                },
               },
             },
           },
         },
-      },
-      include: {
-        RoomProgress: true,
-      },
-    });
+        include: {
+          RoomProgress: true,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestException('Game not found');
+      });
 
     const simSave = gameVersion.content as SimulationStateSave;
-    return this.startRoomSimulation(roomTable.code, roomTable.savingDelay, roomTable.stateTickDelay, simSave);
+    return this.startSimulationRoom(roomTable, simSave);
   }
 
   /**
@@ -84,28 +90,32 @@ export class RoomsService {
    * @throws BadRequestException if the user is not found.
    */
   async getUserRooms(userCode: string): Promise<RoomPreviewDto[]> {
-    const usersRooms = await this.prismaService.user.findFirst({
-      where: {
-        code: userCode,
-      },
-      include: {
-        Rooms: {
-          include: {
-            RoomProgressGameLoad: {
-              take: 1,
-              orderBy: { order: 'desc' },
-              include: {
-                GameVersion: {
-                  include: {
-                    Game: true,
+    const usersRooms = await this.prismaService.user
+      .findFirst({
+        where: {
+          code: userCode,
+        },
+        include: {
+          Rooms: {
+            include: {
+              RoomProgressGameLoad: {
+                take: 1,
+                orderBy: { order: 'desc' },
+                include: {
+                  GameVersion: {
+                    include: {
+                      Game: true,
+                    },
                   },
                 },
               },
             },
           },
         },
-      },
-    });
+      })
+      .catch(() => {
+        throw new BadRequestException('User not found');
+      });
 
     if (!usersRooms) {
       throw new BadRequestException('User not found');
@@ -119,14 +129,32 @@ export class RoomsService {
     }));
   }
 
+  async findRoom(roomCode: string): Promise<RoomwDto> {
+    const room = await this.prismaService.room
+      .findUnique({
+        where: {
+          code: roomCode,
+        },
+      })
+      .catch(() => {
+        throw new BadRequestException('Room not found');
+      });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    return room;
+  }
+
   /**
-   * Starts a room with the specified room code.
+   * Starts an existing room with the specified room code.
    *
    * @param roomCode - The code of the room to start.
    * @returns A Promise that resolves to a string representing the result of starting the room.
    * @throws BadRequestException if the room is already started or not found.
    */
-  async startRoom(roomCode: string): Promise<string> {
+  async resumeRoom(roomCode: string): Promise<string> {
     if (RoomsService.hasRoom(roomCode)) {
       throw new BadRequestException('Room already started');
     }
@@ -146,17 +174,18 @@ export class RoomsService {
         },
       },
       orderBy: {
-        order: 'desc',
+        order: 'asc',
       },
     });
 
     const simSave = lastState.content;
 
+    let finalSimSave = structuredClone(simSave);
     updates.forEach(update => {
-      Simulation.mergeStateDelta(simSave, update.content as SimulationStateUpdate);
+      finalSimSave = Simulation.mergeStateDelta(finalSimSave, update.content as SimulationStateUpdate);
     });
 
-    return this.startRoomSimulation(roomCode, room.savingDelay, room.stateTickDelay, simSave);
+    return this.startSimulationRoom(room, finalSimSave);
   }
 
   /**
@@ -220,9 +249,12 @@ export class RoomsService {
    * @throws BadRequestException if the room is not found.
    */
   async saveRoomProgressUpdate(roomCode: string, stateUpdate: SimulationStateUpdate) {
+    this.logger.log(`Saving progress update for room with code: ${roomCode}`);
+
     const room = await this.findRoomByCode(roomCode);
 
     if (!room) {
+      this.logger.warn(`Room not found with code: ${roomCode}`);
       throw new BadRequestException('Room not found');
     }
 
@@ -239,6 +271,8 @@ export class RoomsService {
         RoomProgressUpdate: true,
       },
     });
+
+    this.logger.log(`Progress update saved for room with code: ${roomCode}`);
   }
 
   /**
@@ -248,14 +282,18 @@ export class RoomsService {
    * @throws BadRequestException if the room or simulation room is not found.
    */
   async saveRoomState(roomCode: string) {
+    this.logger.log(`Saving state for room with code: ${roomCode}`);
+
     const room = await this.findRoomByCode(roomCode);
     const simulationRoom = RoomsService.getRoom(roomCode);
 
     if (!room || !simulationRoom) {
+      this.logger.warn(`Room not found with code: ${roomCode}`);
       throw new BadRequestException('Room not found');
     }
 
     const simSave = simulationRoom.simulation.toState();
+    this.logger.log(`Simulation state generated for room with code: ${roomCode}`);
 
     await this.prismaService.roomProgress.create({
       data: {
@@ -267,6 +305,8 @@ export class RoomsService {
         },
       },
     });
+
+    this.logger.log(`State saved for room with code: ${roomCode}`);
   }
 
   /**
@@ -278,9 +318,12 @@ export class RoomsService {
    * @throws BadRequestException if the room is not found.
    */
   async saveRoomGameLoad(roomCode: string, gameId: number, gameVersion: number) {
+    this.logger.log(`Saving game load for room with code: ${roomCode}, gameId: ${gameId}, gameVersion: ${gameVersion}`);
+
     const room = await this.findRoomByCode(roomCode);
 
     if (!room) {
+      this.logger.warn(`Room not found with code: ${roomCode}`);
       throw new BadRequestException('Room not found');
     }
 
@@ -295,6 +338,8 @@ export class RoomsService {
         },
       },
     });
+
+    this.logger.log(`Game load saved for room with code: ${roomCode}`);
   }
 
   /**
@@ -310,7 +355,9 @@ export class RoomsService {
     }
 
     this.logger.log(`Removing room with code: ${roomCode}`);
-    await this.prismaService.room.delete({ where: { code: roomCode } });
+    await this.prismaService.room.delete({ where: { code: roomCode } }).catch(() => {
+      throw new NotFoundException('Room not found');
+    });
     this.logger.log(`Room with code: ${roomCode} successfully removed`);
   }
 
@@ -341,7 +388,7 @@ export class RoomsService {
    * @param room - The room to be set.
    */
   static setRoom(room: SimulationRoom) {
-    RoomsService.rooms.set(room.id, room);
+    RoomsService.rooms.set(room.room.code, room);
   }
 
   /**
