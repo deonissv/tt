@@ -94,7 +94,7 @@ describe('AuthModule', () => {
           email: 'email',
           password: 'password',
         })
-        .expect(HttpStatus.CREATED) // @TODO replace with HttpStatus.OK
+        .expect(HttpStatus.CREATED)
         .expect(res => expect(res.body).toMatchObject({ access_token: expect.any(String) as string }));
     });
 
@@ -106,7 +106,7 @@ describe('AuthModule', () => {
           email: 'email',
           password: 'password',
         })
-        .expect(HttpStatus.BAD_REQUEST) // @TODO replace with HttpStatus.OK
+        .expect(HttpStatus.BAD_REQUEST)
         .expect(res => expect(res.body).toMatchObject({ message: 'Wrong email or password' }));
     });
 
@@ -125,7 +125,7 @@ describe('AuthModule', () => {
           email: 'email',
           password: 'wrongPassword',
         })
-        .expect(HttpStatus.BAD_REQUEST) // @TODO replace with HttpStatus.OK
+        .expect(HttpStatus.BAD_REQUEST)
         .expect(res => expect(res.body).toMatchObject({ message: 'Wrong email or password' }));
     });
   });
