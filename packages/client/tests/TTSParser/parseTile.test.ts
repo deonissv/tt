@@ -25,6 +25,7 @@ describe('TTSParser - parseTile', () => {
       tileType: 0,
       faceURL: 'http://cloud-3.steamusercontent.com/ugc/155773601379927983/C7109CE55B4403815B5515C29EC5E3B9E534FEEC/',
       widthScale: 0,
+      colorDiffuse: [1, 1, 1],
     };
 
     const parsed = parser.parseTile(CATAN.LONGEST_ROAD as unknown as ObjectState);

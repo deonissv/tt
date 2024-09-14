@@ -8,7 +8,6 @@ export interface ActorState extends ActorBaseState {
   type: ActorType.ACTOR;
 
   model: Model;
-  colorDiffuse?: number[]; // default: [1, 1, 1]
   children?: ActorState[];
   containedObjects?: ActorBaseState[];
 }
