@@ -8,7 +8,6 @@ import type { Observer } from '@babylonjs/core/Misc/observable';
 import { Observable } from '@babylonjs/core/Misc/observable';
 import type { Nullable } from '@babylonjs/core/types';
 
-// @TODO refactor
 export class CameraWheelInput implements ICameraInput<ArcRotateCamera> {
   protected _wheelDeltaX = 0;
   protected _wheelDeltaY = 0;

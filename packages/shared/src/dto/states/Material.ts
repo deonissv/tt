@@ -1,5 +1,5 @@
 export interface Material {
-  // @TODO extend https://doc.babylonjs.com/typedoc/classes/BABYLON.Material
+  // https://doc.babylonjs.com/typedoc/classes/BABYLON.Material
   diffuseURL?: string;
   ambientURL?: string;
   specularURL?: string;

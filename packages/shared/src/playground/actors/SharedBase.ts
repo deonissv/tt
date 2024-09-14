@@ -349,8 +349,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
       };
     }
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore @todo fix
     return rv;
   }
 }

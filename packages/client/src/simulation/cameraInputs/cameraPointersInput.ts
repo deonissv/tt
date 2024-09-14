@@ -5,7 +5,6 @@ import type { Nullable } from '@babylonjs/core/types';
 
 const RIGHT_MOUSE_BTN = 2;
 
-// @TODO refactor
 export class CameraPointersInput extends BaseCameraPointersInput {
   public camera: ArcRotateCamera;
 

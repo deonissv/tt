@@ -6,7 +6,7 @@ import { PrismaService } from './prisma/prisma.service';
 
 @Injectable()
 export class PermissionsService {
-  permissions = new Map<number, Permission[]>(); // @TODO add ttl
+  permissions = new Map<number, Permission[]>();
   prismaService: PrismaService;
 
   constructor() {
