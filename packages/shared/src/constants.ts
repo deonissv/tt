@@ -7,11 +7,11 @@ export const PROXY_PREFIX = `http://${HOST}:3000/?url=`;
 export const PRECISION_EPSILON = 0.005;
 
 export const CAMERA_DEFAULT_ALPHA = 0;
-export const CAMERA_DEFAULT_BETA = 0;
-export const CAMERA_DEFAULT_RADIUS = 5;
+export const CAMERA_DEFAULT_BETA = 1;
+export const CAMERA_DEFAULT_RADIUS = 25;
 export const CAMERA_DEFAULT_POSITION = 2;
 
-export const MOVE_SENSETIVITY = 0.1;
+export const MOVE_SENSETIVITY = 0.7;
 export const WHEEL_SENSETIVITY = 0.5;
 export const MOUSE_MOVE_SENSETIVITY = 20;
 

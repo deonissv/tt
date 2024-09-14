@@ -44,8 +44,8 @@ export class SimulationScene extends SimulationSceneBase {
     camera.setTarget(Vector3.Zero());
 
     camera.allowUpsideDown = false;
-    camera.lowerRadiusLimit = 3;
-    camera.upperBetaLimit = Math.PI / 2;
+    camera.lowerRadiusLimit = 10;
+    camera.upperBetaLimit = 1.3;
 
     camera.inputs.clear();
     camera.inputs.add(new CameraKeyboardMoveInput(MOVE_SENSETIVITY));
