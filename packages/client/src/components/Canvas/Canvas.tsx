@@ -49,7 +49,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
     });
 
     const sr = await SimulationRoom.init(canvas.current!, roomCode, setCursors, setDownloadProgress, onRoomClosed);
-    // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
+    import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
 
     return sr;
   }, [roomCode]);

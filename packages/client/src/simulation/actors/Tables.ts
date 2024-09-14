@@ -42,6 +42,7 @@ export class HexTable extends HexTableMixin(ClientBase) {
     if (!top || !leg) return null;
 
     [leg, top].forEach(mesh => mesh.setEnabled(true));
+    (top.material as StandardMaterial).specularColor = Color3.Black();
 
     leg.position.z = -14;
 
@@ -76,6 +77,7 @@ export class CircleTable extends CircleTableMixin(ClientBase) {
     [glass, legs, top].forEach(mesh => mesh.setEnabled(true));
 
     glass.material = getGlassMaterial();
+    (top.material as StandardMaterial).specularColor = Color3.Black();
 
     const wrapper = new Mesh('circle_table_wrapper');
     wrapper.addChild(glass);
@@ -153,6 +155,7 @@ export class SquareTable extends SquareTableMixin(ClientBase) {
     if (!model) return null;
 
     (model.material as StandardMaterial).diffuseColor = new Color3(0.5, 0, 0);
+    (model.material as StandardMaterial).specularColor = Color3.Black();
 
     const table = new this(
       {
@@ -188,6 +191,7 @@ export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) 
     plane.position.y = 0.3;
     const planeMatetialProps = tableState.url ? { diffuseURL: tableState.url } : feltMaterialProps;
     const planeMatetial = await Loader.loadModelMaterial(planeMatetialProps);
+    planeMatetial.specularColor = Color3.Black();
     plane.material = planeMatetial;
     wrapper.addChild(plane);
     wrapper.scaling = Vector3.FromArray(CUSTOM_RECTANGLE_TABLE.transformation.scale);
@@ -212,6 +216,7 @@ export class OctagonTable extends OctagonTableMixin(ClientBase) {
 
     if (!top || !leg) return null;
     [leg, top].forEach(mesh => mesh.setEnabled(true));
+    (top.material as StandardMaterial).specularColor = Color3.Black();
 
     leg.position.z = -14;
     const wrapper = new Mesh('octagon_table_wrapper');
@@ -249,6 +254,7 @@ export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {
 
     const planeMatetial = await Loader.loadModelMaterial({ diffuseURL: tableState.url! });
     plane.material = planeMatetial;
+    planeMatetial.specularColor = Color3.Black();
 
     const wrapper = new Mesh('CustomSquareTable');
     wrapper.addChild(tableBox);
@@ -282,13 +288,13 @@ export class RectangleTable extends RectangleTableMixin(ClientBase) {
     if (!tableFrame || !handles) return null;
 
     const wrapper = new Mesh('rectangle_table_wrapper');
-    // const felt = CreatePlane('felt', { width: 56.24, height: 36.33 });
     const felt = CreatePlane('felt', { width: 57, height: 38 });
     felt.rotation.x = Math.PI / 2;
     felt.position.y = 0.85;
     [tableFrame, handles].forEach(mesh => mesh.setEnabled(true));
     [tableFrame, handles, felt].forEach(mesh => wrapper.addChild(mesh));
     if (feltMaterialProps) {
+      feltMaterial.specularColor = Color3.Black();
       felt.material = feltMaterial;
     }
 

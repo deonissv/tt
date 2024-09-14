@@ -1,5 +1,4 @@
 import { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
-import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
@@ -7,6 +6,7 @@ import { CameraKeyboardMoveInput } from './cameraInputs/cameraKeyboardMoveInput'
 import { CameraPointersInput } from './cameraInputs/cameraPointersInput';
 import { CameraWheelInput } from './cameraInputs/cameraWheelInput';
 
+import { HemisphericLight } from '@babylonjs/core';
 import {
   CAMERA_DEFAULT_ALPHA,
   CAMERA_DEFAULT_BETA,
@@ -57,7 +57,13 @@ export class SimulationScene extends SimulationSceneBase {
   }
 
   private initLight() {
-    const light = new HemisphericLight('light', new Vector3(0, 1, 0), this);
-    light.intensity = 0.8;
+    const lights = [
+      new HemisphericLight('light', new Vector3(0, 50, 0), this),
+      new HemisphericLight('light', new Vector3(40, 50, 0), this),
+      new HemisphericLight('light', new Vector3(0, 50, 40), this),
+      new HemisphericLight('light', new Vector3(40, 50, 40), this),
+      new HemisphericLight('light', new Vector3(40, 50, 0), this),
+    ];
+    lights.map(l => (l.intensity = 0.5));
   }
 }

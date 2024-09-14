@@ -236,6 +236,10 @@ export const DIE20_MODEL = {
   colliderURL: `${STATIC_HOST}/icosahedron23294.obj`,
 } satisfies Model;
 
+export const PAWN_TOKEN_MODEL = {
+  meshURL: `${STATIC_HOST}/PawnToken.obj`,
+} satisfies Model;
+
 export const getDieModel = (state: DieState) => {
   switch (state.type) {
     case ActorType.DIE4:

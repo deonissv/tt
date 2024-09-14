@@ -9,6 +9,7 @@ import type {
   DieNState,
   DieType,
   Model,
+  PawnTokenState,
   RotationValue,
   TableType,
   Transformation,
@@ -117,9 +118,21 @@ export class TTSParserC extends ParserBase {
         return this.parseDieN(objectState as ObjectState, ActorMapper[type]) as unknown as ActorState;
       case ActorType.ACTOR:
         return this.parseCustomObject(objectState as ObjectState) as unknown as ActorState;
-      default:
-        return null;
+      case ActorType.PAWN_TOKEN:
+        return this.parseBuiltInActorState(objectState, type) as unknown as ActorState;
     }
+  }
+
+  parseBuiltInActorState(objectState: MinimalObjectState, type: ActorType.PAWN_TOKEN): PawnTokenState | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
+    const pawnTokenState: PawnTokenState = {
+      type,
+      ...actorBase,
+    };
+
+    return pawnTokenState;
   }
 
   parseActorBase(objectState: MinimalObjectState): Omit<ActorBaseState, 'type'> | null {
@@ -325,6 +338,7 @@ export class TTSParserC extends ParserBase {
       die_12: ActorType.DIE12,
       die_20: ActorType.DIE20,
       model: ActorType.ACTOR,
+      pawntoken: ActorType.PAWN_TOKEN,
     };
 
     for (const [p, v] of Object.entries(pattern)) {
