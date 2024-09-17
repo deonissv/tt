@@ -38,6 +38,19 @@ npm run start
 
 # Simulation key bindings:
 
-- key **F** to pick object from container (bag, deck)
-- key **R** to roll die
-- key **H** to shuffle items in container
+- **Left mouse button** to pick object
+- **RIght mouse button** to rotate camera
+- **WASD** to move camera
+
+- Key **G** to pick object from container (bag, deck)
+- Key **R** to roll die
+- Key **H** to shuffle items in container
+- Key **E** to rotate object clockwise (while picked)
+- Key **Q** to rotate object counter clockwise (while picked)
+- Key **F** to flip object (while picked)
+
+# Games examples are located in /static folder
+
+- **castles** - Castles of Burgundy
+- **chess5** - 5 mas chess
+- **demo** - demo game with supported objects
