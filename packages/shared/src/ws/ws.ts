@@ -1,5 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import type { SimulationStateSave } from '@shared/dto/states';
+import type { SimulationState } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type ws from 'ws';
 import { type MessageEvent as me } from 'ws';
@@ -19,7 +19,7 @@ interface ActionPayloads {
   // handshake
   [ClientAction.NICKNAME]: string;
   [ServerAction.CLIENT_ID]: string;
-  [ServerAction.STATE]: SimulationStateSave;
+  [ServerAction.STATE]: SimulationState;
   [ServerAction.DOWNLOAD_PROGRESS]: DownloadProgressPld;
 
   [ClientAction.MOVE_ACTOR]: MoveServerActorPld;
@@ -36,6 +36,8 @@ interface ActionPayloads {
   [ClientAction.FLIP]: string;
   [ClientAction.CW]: string;
   [ClientAction.CCW]: string;
+  [ClientAction.SET_PICK_HEIGHT]: number;
+  [ClientAction.SET_ROTATION_STEP]: number;
 
   [ServerAction.CLOSED]: null;
   [ServerAction.CURSORS]: CursorsPld;

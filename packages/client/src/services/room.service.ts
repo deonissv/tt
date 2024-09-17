@@ -4,7 +4,7 @@ import { getAccessToken } from '../utils';
 
 import type { Tuple } from '@babylonjs/core/types';
 import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
-import type { SimulationStateSave } from '@shared/dto/states';
+import type { SimulationState } from '@shared/dto/states';
 import { ServerAction, WS } from '@shared/ws';
 import type { Dispatch, SetStateAction } from 'react';
 
@@ -63,7 +63,7 @@ export const RoomService = {
   async connect(
     roomId: string,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
-  ): Promise<[WebSocket, SimulationStateSave]> {
+  ): Promise<[WebSocket, SimulationState]> {
     const ws = new WebSocket(WSS_URL + roomId, `Bearer.${getAccessToken()}`);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
@@ -72,9 +72,9 @@ export const RoomService = {
 
           message.forEach(action => {
             if (action.type == ServerAction.DOWNLOAD_PROGRESS) {
-              const loaded = action.payload.loaded;
+              const succeded = action.payload.succeded;
               const total = action.payload.total;
-              setDownloadProgress(_ => [loaded, total]);
+              setDownloadProgress(_ => [succeded, total]);
             }
           });
         };
@@ -84,9 +84,15 @@ export const RoomService = {
 
           const action = message[0];
           if (action.type == ServerAction.STATE) {
+            const simState = action.payload;
+
+            // console.log('setDownloadProgress');
+            // console.log('setDownloadProgress', simState.downloadProgress);
+
+            setDownloadProgress([simState.downloadProgress.succeded, simState.downloadProgress.total]);
+
             ws.removeEventListener('message', stateListener);
             ws.removeEventListener('message', progressListener);
-            const simState = action.payload;
             resolve([ws, simState]);
           }
         };

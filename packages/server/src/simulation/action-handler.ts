@@ -2,15 +2,16 @@ import type { Tuple } from '@babylonjs/core';
 import { isContainable } from '@shared/playground/actions/Containable';
 import { ClientAction } from '@shared/ws';
 import type { ClientActionMsg } from '@shared/ws/ws';
+import type { Client } from '../rooms/client';
 import { Die10, Die12, Die20, Die4, Die6, Die6Round, Die8, type ServerBase } from './actors';
 
 export class ActionHandler {
   actors: ServerBase[] = [];
-  clientId: string;
+  client: Client;
 
-  handleActions(actions: ClientActionMsg[], actors: ServerBase[], clientId: string): void {
+  handleActions(actions: ClientActionMsg[], actors: ServerBase[], client: Client): void {
     this.actors = actors;
-    this.clientId = clientId;
+    this.client = client;
     actions.map(msg => this.handleAction(msg));
   }
 
@@ -43,20 +44,26 @@ export class ActionHandler {
       case ClientAction.CCW:
         this.handleRotateCCW(msg.payload);
         break;
+      case ClientAction.SET_PICK_HEIGHT:
+        this.handleSetPickHeight(msg.payload);
+        break;
+      case ClientAction.SET_ROTATION_STEP:
+        this.handleSetRotationStep(msg.payload);
+        break;
     }
   }
 
   handlePickItem(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && isContainable(actor)) {
-      actor.pickItem(this.clientId);
+      actor.pickItem(this.client.code, this.client.pickHeight);
     }
   }
 
   handlePickActor(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && typeof actor.pick == 'function') {
-      actor.pick(this.clientId);
+      actor.pick(this.client.code, this.client.pickHeight);
     }
   }
 
@@ -83,7 +90,7 @@ export class ActionHandler {
         actor instanceof Die12 ||
         actor instanceof Die20 ||
         actor instanceof Die6Round) &&
-      typeof actor.roll == 'function'
+      typeof actor.roll === 'function'
     )
       actor.roll();
   }
@@ -105,14 +112,22 @@ export class ActionHandler {
   handleRotateCW(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && typeof actor.rotateCW == 'function') {
-      actor.rotateCW();
+      actor.rotateCW(this.client.rotationStep);
     }
   }
 
   handleRotateCCW(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && typeof actor.rotateCCW == 'function') {
-      actor.rotateCCW();
+      actor.rotateCCW(this.client.rotationStep);
     }
+  }
+
+  handleSetPickHeight(height: number) {
+    this.client.pickHeight = height;
+  }
+
+  handleSetRotationStep(step: number) {
+    this.client.rotationStep = step;
   }
 }

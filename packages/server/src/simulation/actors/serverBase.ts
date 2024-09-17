@@ -9,7 +9,7 @@ import {
   Vector3,
   type Mesh,
 } from '@babylonjs/core';
-import { PICK_HIGHT, PRECISION_EPSILON } from '@shared/constants';
+import { PRECISION_EPSILON } from '@shared/constants';
 import type { DieBaseState } from '@shared/dto/states';
 import { ActorType, type ActorBaseState } from '@shared/dto/states';
 import type { SimulationSceneBase } from '@shared/playground';
@@ -21,7 +21,9 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   __targetPosition: Vector2 | null = null;
   __targetRotation: Quaternion | null = null;
+
   flipped = false;
+  pickHeight = 0;
 
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
@@ -54,7 +56,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   private _beforeRender() {
     if (this.picked && this.__targetPosition) {
-      let upHeight = this.defaultY + PICK_HIGHT;
+      let upHeight = this.defaultY + this.pickHeight;
       if (this.flipped) upHeight += 2 * this.defaultY;
 
       const shapeLocalResult = new ShapeCastResult();
@@ -145,11 +147,12 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     return this._scene as SimulationSceneBase;
   }
 
-  pick(clientId: string) {
+  pick(clientId: string, pickHeight: number) {
     if (this.picked) return;
 
     this.body.setLinearVelocity(Vector3.Zero());
     this.body.setAngularVelocity(Vector3.Zero());
+    this.pickHeight = pickHeight;
 
     this.__targetPosition = new Vector2(this.position.x, this.position.z);
 
@@ -167,6 +170,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   release() {
     this.picked = null;
+    this.pickHeight = 0;
     this.__targetPosition = null;
     this.body.setCollisionCallbackEnabled(true);
     this.body.shape!.isTrigger = false;
@@ -183,17 +187,15 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     this.flipped = !this.flipped;
   }
 
-  rotateCW() {
-    const rotationAngle = Math.PI / 12; // 15 degrees
+  rotateCW(rotationAngle: number) {
     const currentUp = Vector3.Up().applyRotationQuaternion(this.absoluteRotationQuaternion);
     const rotationQuaternion = Quaternion.RotationAxis(currentUp, rotationAngle);
     this.__targetRotation = this.absoluteRotationQuaternion.multiply(rotationQuaternion);
   }
 
-  rotateCCW() {
-    const rotationAngle = -Math.PI / 12; // 15 degrees
+  rotateCCW(rotationAngle: number) {
     const currentUp = Vector3.Up().applyRotationQuaternion(this.absoluteRotationQuaternion);
-    const rotationQuaternion = Quaternion.RotationAxis(currentUp, rotationAngle);
+    const rotationQuaternion = Quaternion.RotationAxis(currentUp, -1 * rotationAngle);
     this.__targetRotation = this.absoluteRotationQuaternion.multiply(rotationQuaternion);
   }
 

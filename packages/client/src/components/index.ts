@@ -15,6 +15,8 @@ export type { ProgressLoaderProps } from './ProgressLoader';
 export { PromiseModal } from './PromiseModal';
 export { RequireAuth } from './RequireAuth';
 export { RoomCard } from './RoomCard';
+export { Slider } from './Slider';
+export type { SliderProps } from './Slider';
 export { Spinner } from './Spinner';
 export { Toast, ToastContext, ToastProvider, useToast } from './Toast';
 export type { ToastContextType, ToastItem, ToastProps } from './Toast';

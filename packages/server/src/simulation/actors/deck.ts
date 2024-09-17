@@ -40,7 +40,7 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
     return dotProduct > 0;
   }
 
-  async pickItem(clientId: string): Promise<ServerBase<CardState> | null> {
+  async pickItem(clientId: string, pickHeight: number): Promise<ServerBase<CardState> | null> {
     this.model.scaling.y -= 1;
 
     if (this.size < 1) {
@@ -55,7 +55,7 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
     cardState.transformation.position![1] += 1;
 
     const newCard = await ServerActorBuilder.buildCard(cardState);
-    newCard?.pick(clientId);
+    newCard?.pick(clientId, pickHeight);
 
     return newCard;
   }

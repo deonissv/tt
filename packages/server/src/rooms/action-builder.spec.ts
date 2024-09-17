@@ -178,7 +178,7 @@ describe('getSimActions', () => {
     await wait(100);
     const initState = structuredClone(sim.toState());
     await wait(250);
-    await (sim.actors[0] as Deck).pickItem('client');
+    await (sim.actors[0] as Deck).pickItem('client', 1);
     await wait(250);
 
     actionBuilder.prevSimState = initState;

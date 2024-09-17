@@ -2,7 +2,7 @@ import { hasProperty, isObject } from '@shared/guards';
 
 export interface Containable {
   get size(): number;
-  pickItem(clientId: string): void;
+  pickItem(clientId: string, pickHeight: number): void;
   shuffle(): void;
 }
 

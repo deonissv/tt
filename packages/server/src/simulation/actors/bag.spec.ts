@@ -54,7 +54,7 @@ describe('handleAction', () => {
     sim.start();
     await wait(100);
 
-    await bag.pickItem('');
+    await bag.pickItem('', 1);
     await wait(100);
 
     const actors = sim.actors;

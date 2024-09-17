@@ -4,6 +4,7 @@ import { PICK_HIGHT } from '@shared/constants';
 import { ActorType } from '@shared/dto/states';
 import { initHavok } from '@shared/initHavok';
 import { wait } from '@shared/utils';
+import { Client } from '../rooms/client';
 import { ActionHandler } from './action-handler';
 import type { Card } from './actors';
 import { Actor, Deck, ServerBase, Tile, TileStack } from './actors';
@@ -37,7 +38,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handlePickActor('box');
@@ -62,7 +69,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handlePickActor('box');
@@ -93,7 +106,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handleReleaseActor('box');
@@ -118,6 +137,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(300);
       actionHandler.handlePickActor('box');
@@ -146,7 +172,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handleMoveActor('box', [1, 0]);
@@ -174,11 +206,18 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handlePickActor('box');
       actionHandler.handleMoveActor('box', [1, 0]);
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(500);
 
@@ -221,7 +260,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handlePickItem('tileStack');
@@ -283,7 +328,13 @@ describe('handleAction', () => {
 
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handlePickItem('deck');
@@ -328,7 +379,13 @@ describe('handleAction', () => {
       );
       sim.start();
       actionHandler.actors = sim.actors;
-      actionHandler.clientId = 'client';
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
       actionHandler.handlePickItem('tileStack');
