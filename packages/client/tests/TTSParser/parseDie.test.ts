@@ -36,7 +36,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = parser.parseDieN(DEMO.DIE4 as unknown as ObjectState, 4);
+    const result = parser.parseDieN(DEMO.DIE4 as unknown as ObjectState, ActorType.DIE4);
     expect(result).toMatchObject(expected);
   });
 
@@ -73,7 +73,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = parser.parseDieN(DEMO.DIE6 as unknown as ObjectState, 6);
+    const result = parser.parseDieN(DEMO.DIE6 as unknown as ObjectState, ActorType.DIE6);
     expect(result).toMatchObject(expected);
   });
 
@@ -118,7 +118,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = parser.parseDieN(DEMO.DIE8 as unknown as ObjectState, 8);
+    const result = parser.parseDieN(DEMO.DIE8 as unknown as ObjectState, ActorType.DIE8);
     expect(result).toMatchObject(expected);
   });
 });
