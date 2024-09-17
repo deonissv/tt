@@ -9,7 +9,7 @@
     "build": "webpack --config webpack.config.js",
     "build:v": "vite build",
     "start": "vite preview",
-    "dev": "mkdir -p ./node_modules/.vite/deps/ && cp ../../static/HavokPhysics.wasm ./node_modules/.vite/deps/ && vite"
+    "dev": "vite"
   },
   "devDependencies": {
     "@babylonjs/inspector": "^7.18.0",

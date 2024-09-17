@@ -1,6 +1,5 @@
 import type { HavokPlugin } from '@babylonjs/core';
 import {
-  Axis,
   PhysicsBody,
   PhysicsMotionType,
   PhysicsShapeMesh,
@@ -11,7 +10,8 @@ import {
   type Mesh,
 } from '@babylonjs/core';
 import { PICK_HIGHT, PRECISION_EPSILON } from '@shared/constants';
-import type { ActorBaseState } from '@shared/dto/states';
+import type { DieBaseState } from '@shared/dto/states';
+import { ActorType, type ActorBaseState } from '@shared/dto/states';
 import type { SimulationSceneBase } from '@shared/playground';
 import { SharedBase } from '@shared/playground/actors/SharedBase';
 
@@ -53,7 +53,11 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
       let upHeight = this.defaultY + PICK_HIGHT;
 
       const rotation = this.absoluteRotationQuaternion;
-      const newRotation = this.alignToYAxis(rotation);
+
+      const newRotation =
+        this.__state.type === ActorType.CARD || this.__state.type === ActorType.DECK
+          ? rotation
+          : this.alignToAxis(rotation, this.getNewTargetRotation());
 
       const shapeLocalResult = new ShapeCastResult();
       const hitWorldResult = new ShapeCastResult();
@@ -83,34 +87,86 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     }
   }
 
-  alignToYAxis(quaternion: Quaternion) {
-    const up = Vector3.UpReadOnly;
-    const upVector = new Vector3().copyFromFloats(0, 1, 0).applyRotationQuaternion(quaternion);
+  getNewTargetRotation() {
+    const currentRotation = this.absoluteRotationQuaternion.toEulerAngles();
+    const state = this.__state as unknown as DieBaseState;
 
-    if (
-      Math.abs(upVector.x) < PRECISION_EPSILON &&
-      Math.abs(upVector.y - 1) < PRECISION_EPSILON &&
-      Math.abs(upVector.z) < PRECISION_EPSILON
-    ) {
+    const rotationVariants =
+      this.__state.type === ActorType.DIE4 ||
+      this.__state.type === ActorType.DIE6 ||
+      this.__state.type === ActorType.DIE8 ||
+      this.__state.type === ActorType.DIE10 ||
+      this.__state.type === ActorType.DIE12 ||
+      this.__state.type === ActorType.DIE20 ||
+      this.__state.type === ActorType.DIE6ROUND
+        ? state.rotationValues.map(rv => rv.rotation)
+        : [Vector3.Up().asArray(), Vector3.Down().asArray()];
+
+    const rotation = rotationVariants.reduce(
+      (closest, rotation) => {
+        const distance = Vector3.DistanceSquared(currentRotation, Vector3.FromArray(rotation));
+        return distance < closest.distance ? { rotation, distance } : closest;
+      },
+      { rotation: null as number[] | null, distance: Infinity },
+    ).rotation;
+
+    const rv = rotation ? Vector3.FromArray(rotation) : Vector3.Up();
+    return rv;
+  }
+
+  alignToAxis(quaternion: Quaternion, targetAxis: Vector3) {
+    const currentAxis = new Vector3(0, 1, 0).applyRotationQuaternion(quaternion);
+    targetAxis.normalize();
+
+    if (Vector3.Distance(currentAxis, targetAxis) < PRECISION_EPSILON) {
       return quaternion;
     }
 
-    if (
-      Math.abs(upVector.x) < PRECISION_EPSILON &&
-      Math.abs(upVector.y + 1) < PRECISION_EPSILON &&
-      Math.abs(upVector.z) < PRECISION_EPSILON
-    ) {
-      return Quaternion.RotationAxis(Axis.X, Math.PI).multiply(quaternion);
+    if (Vector3.Distance(currentAxis, targetAxis.scale(-1)) < PRECISION_EPSILON) {
+      const perpendicularAxis = Vector3.Cross(currentAxis, new Vector3(1, 0, 0));
+      if (perpendicularAxis.length() < PRECISION_EPSILON) {
+        perpendicularAxis.copyFromFloats(0, 0, 1);
+      }
+      return Quaternion.RotationAxis(perpendicularAxis, Math.PI).multiply(quaternion);
     }
 
-    const rotationAxis = Vector3.Cross(upVector, up).normalize();
-    const rotationAngle = Math.acos(Vector3.Dot(upVector, up));
+    const rotationAxis = Vector3.Cross(currentAxis, targetAxis).normalize();
+    const rotationAngle = Math.acos(Vector3.Dot(currentAxis, targetAxis));
 
     const correction = Quaternion.RotationAxis(rotationAxis, rotationAngle);
     const result = correction.multiply(quaternion);
 
     return result.normalize();
   }
+
+  // alignToYAxis(quaternion: Quaternion) {
+  //   const up = Vector3.UpReadOnly;
+  //   const upVector = new Vector3().copyFromFloats(0, 1, 0).applyRotationQuaternion(quaternion);
+
+  //   if (
+  //     Math.abs(upVector.x) < PRECISION_EPSILON &&
+  //     Math.abs(upVector.y - 1) < PRECISION_EPSILON &&
+  //     Math.abs(upVector.z) < PRECISION_EPSILON
+  //   ) {
+  //     return quaternion;
+  //   }
+
+  //   if (
+  //     Math.abs(upVector.x) < PRECISION_EPSILON &&
+  //     Math.abs(upVector.y + 1) < PRECISION_EPSILON &&
+  //     Math.abs(upVector.z) < PRECISION_EPSILON
+  //   ) {
+  //     return Quaternion.RotationAxis(Axis.X, Math.PI).multiply(quaternion);
+  //   }
+
+  //   const rotationAxis = Vector3.Cross(upVector, up).normalize();
+  //   const rotationAngle = Math.acos(Vector3.Dot(upVector, up));
+
+  //   const correction = Quaternion.RotationAxis(rotationAxis, rotationAngle);
+  //   const result = correction.multiply(quaternion);
+
+  //   return result.normalize();
+  // }
 
   get hk(): HavokPlugin {
     return this.scene._physicsEngine?.getPhysicsPlugin() as HavokPlugin;

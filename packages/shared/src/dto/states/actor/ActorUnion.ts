@@ -3,7 +3,7 @@ import type { ActorType } from './ActorType';
 import type { BagState } from './BagState';
 import type { CardState } from './CardState';
 import type { DeckState } from './DeckState';
-import type { Die10State, Die12State, Die20State, Die4State, Die6State, Die8State } from './DieState';
+import type { Die10State, Die12State, Die20State, Die4State, Die6RoundState, Die6State, Die8State } from './DieState';
 import type { PawnTokenState } from './PawnTokenState';
 import type { TileStackState } from './Stack';
 import type { TileState } from './TileState';
@@ -13,6 +13,7 @@ interface ActorStates {
   [ActorType.BAG]: BagState;
   [ActorType.CARD]: CardState;
   [ActorType.DECK]: DeckState;
+  [ActorType.DIE6ROUND]: Die6RoundState;
   [ActorType.DIE4]: Die4State;
   [ActorType.DIE6]: Die6State;
   [ActorType.DIE8]: Die8State;

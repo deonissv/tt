@@ -37,6 +37,11 @@ describe('TTSParser - mapType', () => {
     expect(result).toEqual(expected);
   });
 
+  it('should parse rounded dice', () => {
+    const result = parser.mapType('Die_6_Rounded');
+    expect(result).toEqual(ActorType.DIE6ROUND);
+  });
+
   it('should return null for unknown types', () => {
     const result = parser.mapType('Unknown');
     expect(result === null).toBeTruthy();

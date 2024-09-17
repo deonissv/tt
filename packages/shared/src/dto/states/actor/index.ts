@@ -1,4 +1,5 @@
-export * from './ActorType';
+export { ActorType } from './ActorType';
+export type { DieActorType } from './ActorType';
 
 export * from './ActorBaseState';
 export * from './ActorState';

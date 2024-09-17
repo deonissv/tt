@@ -1,6 +1,6 @@
 import type { Tuple } from '@babylonjs/core/types';
 import { STATIC_HOST } from './constants';
-import type { DieState } from './dto/states';
+import type { DieBaseState } from './dto/states';
 import { ActorType, type Material, type Model, type Transformation } from './dto/states';
 import { degToRad } from './utils';
 
@@ -240,7 +240,13 @@ export const PAWN_TOKEN_MODEL = {
   meshURL: `${STATIC_HOST}/PawnToken.obj`,
 } satisfies Model;
 
-export const getDieModel = (state: DieState) => {
+export const ROUNDED_DIE = {
+  meshURL: `${STATIC_HOST}/Rounded_Dice.obj`,
+  diffuseURL: `${STATIC_HOST}/Rounded_Dice(Dots).png`,
+  normalURL: `${STATIC_HOST}/Rounded_Dice_normal.png`,
+} satisfies Model;
+
+export const getDieModel = (state: DieBaseState) => {
   switch (state.type) {
     case ActorType.DIE4:
       return DIE4_MODEL;

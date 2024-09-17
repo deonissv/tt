@@ -1,3 +1,4 @@
+import { StandardMaterial } from '@babylonjs/core';
 import { PAWN_TOKEN_MODEL } from '@shared/assets';
 import type { ActorBaseState, PawnTokenState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
@@ -10,6 +11,9 @@ export class PawnToken extends ClientBase<ActorBaseState> {
     if (!model) {
       return null;
     }
+
+    const material = new StandardMaterial('pawn-token-material');
+    model.material = material;
 
     return new this(state, model);
   }

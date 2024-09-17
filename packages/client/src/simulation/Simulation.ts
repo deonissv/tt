@@ -44,8 +44,8 @@ export class Simulation extends SimulationBase {
     this.engine = scene.getEngine();
     this._hll = new HighlightLayer('hll', this.scene, {
       isStroke: true,
-      blurVerticalSize: 0.15,
-      blurHorizontalSize: 0.15,
+      blurVerticalSize: 0.1,
+      blurHorizontalSize: 0.1,
     });
     this.cbs = cbs;
   }

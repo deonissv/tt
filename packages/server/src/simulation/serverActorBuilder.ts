@@ -7,6 +7,7 @@ import type {
   Die12State,
   Die20State,
   Die4State,
+  Die6RoundState,
   Die6State,
   Die8State,
   PawnTokenState,
@@ -31,6 +32,7 @@ import {
   Die20,
   Die4,
   Die6,
+  Die6Round,
   Die8,
   GlassTable,
   HexTable,
@@ -72,6 +74,9 @@ export class ServerActorBuilderFactory extends ActorBuilder {
         return await this.buildTileStack(actorState);
       case ActorType.PAWN_TOKEN:
         return await this.buildPawnToken(actorState);
+      default:
+      case ActorType.DIE6ROUND:
+        return await this.buildDie6Round(actorState);
     }
   }
 
@@ -148,6 +153,10 @@ export class ServerActorBuilderFactory extends ActorBuilder {
 
   async buildPawnToken(pawnTOkenState: PawnTokenState): Promise<PawnToken | null> {
     return await PawnToken.fromState(pawnTOkenState);
+  }
+
+  async buildDie6Round(actorState: Die6RoundState): Promise<Die6Round | null> {
+    return await Die6Round.fromState(actorState);
   }
 }
 
