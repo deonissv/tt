@@ -8,7 +8,7 @@ import type { RoomsService } from './rooms.service';
 
 import type { Room } from '@prisma/client';
 import { PROXY_PREFIX } from '@shared/constants';
-import type { SimulationStateSave } from '@shared/dto/states';
+import type { SimulationState, SimulationStateSave } from '@shared/dto/states';
 import { hasProperty, isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
@@ -114,11 +114,10 @@ export class SimulationRoom {
       };
     }
 
-    const patchedState = SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave;
     this.broadcast([
       {
         type: ServerAction.STATE,
-        payload: patchedState,
+        payload: this.getSimulationState(),
       },
     ]);
 
@@ -126,6 +125,14 @@ export class SimulationRoom {
     this.tickInterval = this.initUpdate();
 
     SimulationRoom.logger.log(`Simulation ${this.room.roomId} initialized.`);
+  }
+
+  getSimulationState(): SimulationState {
+    const patchedState = SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave;
+    return {
+      ...patchedState,
+      downloadProgress: this.downloadProgress,
+    };
   }
 
   /**
@@ -151,7 +158,7 @@ export class SimulationRoom {
         WS.send(ws, [
           {
             type: ServerAction.STATE,
-            payload: SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave,
+            payload: this.getSimulationState(),
           },
         ]);
       }

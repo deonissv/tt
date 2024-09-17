@@ -18,6 +18,7 @@ export const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]): any => {
   }, {});
 };
 
+export const radToDeg = (rad: number): number => rad * (180 / Math.PI);
 export const degToRad = (deg: number): number => deg * (Math.PI / 180);
 export const meshSizes = (mesh: Mesh) => {
   const vectorsWorld = mesh.getBoundingInfo().boundingBox.vectorsWorld;

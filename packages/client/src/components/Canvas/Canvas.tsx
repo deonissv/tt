@@ -9,8 +9,8 @@ import { RoomService } from '@services';
 import type { RoomwDto } from '@shared/dto/rooms';
 import { Loader, Logger, MimeDetector } from '@shared/playground';
 import { MimeType } from '@shared/playground/Loader';
-import { debounce, getB64URL } from '@shared/utils';
-import type { CursorsPld } from '@shared/ws/payloads';
+import { debounce, degToRad, getB64URL } from '@shared/utils';
+import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
 import { useNavigate } from 'react-router-dom';
 
 export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.ReactNode => {
@@ -30,12 +30,16 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   const [cursor, setCursor] = useState<[number, number]>([0, 0]);
   const [cursors, setCursors] = useState<CursorsPld>({});
 
-  const init = useCallback(async (): Promise<SimulationRoom | null> => {
+  const init = useCallback(async (): Promise<[SimulationRoom, DownloadProgressPld] | null> => {
     RoomService.getRoom(roomCode)
       .then(r => {
         room.current = r;
       })
-      .catch(() => addToast(`Failed to get room preview`));
+      .catch(() => {
+        addToast(`Failed to get room preview`);
+        navigate('/games');
+        return null;
+      });
 
     Loader.registartFileFetcher(async (url: string) => {
       const response = await fetch(url);
@@ -48,7 +52,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       return { url: b64, mime };
     });
 
-    const sr = await SimulationRoom.init(
+    const rv = await SimulationRoom.init(
       canvas.current!,
       roomCode,
       setCursors,
@@ -59,10 +63,9 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       navigate('/games');
       return null;
     });
-
     // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
 
-    return sr;
+    return rv;
   }, [roomCode]);
 
   const updateCursors = useCallback(
@@ -105,15 +108,16 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   const onSetRotateStep = useMemo(
     () =>
       debounce((step: number) => {
-        simulationRoom.current?.onSetRotateStep(step);
+        simulationRoom.current?.onSetRotateStep(degToRad(step));
       }, 300),
     [],
   );
 
   useEffect(() => {
     init()
-      .then(sr => {
-        if (!sr) return;
+      .then(rv => {
+        if (!rv) return;
+        const [sr, downloadProgress] = rv;
 
         simulationRoom.current = sr;
         clientId.current = sr.clientId;
@@ -133,8 +137,10 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
 
         loaded.current = true;
 
-        if (downloadProgress && downloadProgress[0] !== downloadProgress[1]) {
-          addToast(`Failed to load ${downloadProgress[0]}/${downloadProgress[1]} assets. Try to restart the room`);
+        if (downloadProgress && downloadProgress.succeded !== downloadProgress.total) {
+          addToast(
+            `Failed to load ${downloadProgress.failed}/${downloadProgress.total} assets. Try to restart the room`,
+          );
         }
 
         return () => {

@@ -1,3 +1,4 @@
+import type { DownloadProgressPld } from '@shared/ws/payloads';
 import type { ActorStateUpdate, TableState } from '../actor';
 import type { UnknownActorState } from '../actor/ActorUnion';
 
@@ -7,16 +8,15 @@ export interface SimulationStateBase {
   table?: TableState;
 }
 
-export interface SimulationState extends SimulationStateBase {
-  actorStates: UnknownActorState[];
-  cursorPositions: CursorPositions;
-}
-
 export interface SimulationStateSave extends SimulationStateBase {
   actorStates?: UnknownActorState[]; // Objects on the table
 }
 
-export interface SimulationStateUpdate extends Omit<Partial<SimulationState>, 'actorStates'> {
+export interface SimulationState extends SimulationStateSave {
+  downloadProgress: DownloadProgressPld;
+}
+
+export interface SimulationStateUpdate extends Omit<Partial<SimulationStateSave>, 'actorStates'> {
   actorStates?: ActorStateUpdate[];
 }
 

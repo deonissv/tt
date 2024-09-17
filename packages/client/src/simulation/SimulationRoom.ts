@@ -1,7 +1,7 @@
 import type { Tuple } from '@babylonjs/core/types';
 import { AuthService, RoomService } from '@services';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
-import type { CursorsPld } from '@shared/ws/payloads';
+import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
 import type { ClientActionMsg } from '@shared/ws/ws';
 import type { Dispatch, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
@@ -64,7 +64,7 @@ export class SimulationRoom {
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
     onRoomClosed: () => void,
-  ): Promise<SimulationRoom> {
+  ): Promise<[SimulationRoom, DownloadProgressPld]> {
     const [ws, simState] = await RoomService.connect(roomId, setDownloadProgress);
     const sim = await Simulation.init(canvas, simState, SimulationRoom);
     const clientId = AuthService.getJWT()!.code;
@@ -112,7 +112,7 @@ export class SimulationRoom {
       });
     });
 
-    return new SimulationRoom(ws, sim, clientId, roomId);
+    return [new SimulationRoom(ws, sim, clientId, roomId), simState.downloadProgress];
   }
 
   static onRoll = (actor: ClientBase) => {

@@ -4,6 +4,7 @@ import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import { AuthService } from '@services';
 import { PICK_HIGHT, ROTATION_STEP } from '@shared/constants';
 import type { RoomwDto } from '@shared/dto/rooms';
+import { radToDeg } from '@shared/utils';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +19,7 @@ export const HUD: React.FC<HUDProps> = ({ onCloseRoom, room, onSetPickHeight, on
   const navigate = useNavigate();
   const [simOptions, setSimOptions] = useState(false);
   const [pickHeight, setPickHeight] = useState(PICK_HIGHT);
-  const [rotateStep, setRotateStep] = useState(ROTATION_STEP);
+  const [rotateStep, setRotateStep] = useState(radToDeg(ROTATION_STEP));
 
   const showStopRoom = useMemo(() => {
     return AuthService.getJWT()!.sub === room?.authorId;
