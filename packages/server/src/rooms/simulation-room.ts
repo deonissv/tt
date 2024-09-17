@@ -187,7 +187,7 @@ export class SimulationRoom {
       }
     }
 
-    this.actionsHandler.handleActions(actions, this.simulation.actors, this.clients.get(event.target)!.code);
+    this.actionsHandler.handleActions(actions, this.simulation.actors, this.clients.get(event.target)!);
   }
 
   /**

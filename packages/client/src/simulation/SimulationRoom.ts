@@ -182,6 +182,14 @@ export class SimulationRoom {
     WS.send(this.ws, [{ type: ClientAction.CLOSE, payload: null }]);
   }
 
+  onSetPickHeight(height: number) {
+    WS.send(this.ws, [{ type: ClientAction.SET_PICK_HEIGHT, payload: height }]);
+  }
+
+  onSetRotateStep(step: number) {
+    WS.send(this.ws, [{ type: ClientAction.SET_ROTATION_STEP, payload: step }]);
+  }
+
   destructor() {
     if (this.updateTimeout) clearInterval(this.updateTimeout);
     this.ws.close();

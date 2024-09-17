@@ -15,7 +15,6 @@ export const MOVE_SENSETIVITY = 0.7;
 export const WHEEL_SENSETIVITY = 0.5;
 export const MOUSE_MOVE_SENSETIVITY = 20;
 
-export const PICK_HIGHT = 1;
 export const MOVEMENT_VELOCITY = 500;
 
 export const FLIP_KEYS = ['KeyF'];
@@ -25,7 +24,8 @@ export const ROTATE_CCW_KEYS = ['KeyQ'];
 export const ROLL_KEYS = ['KeyR'];
 export const SHUFFLE_KEYS = ['KeyH'];
 
-export const ROTATE_STEP = Math.PI / 12;
+export const PICK_HIGHT = 1;
+export const ROTATION_STEP = Math.PI / 18;
 
 export const SCALE_UP_KEYS = ['NumpadAdd', 'Equal'];
 export const SCALE_DOWN_KEYS = ['NumpadSubtract', 'Minus'];

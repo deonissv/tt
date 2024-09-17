@@ -14,6 +14,8 @@ export enum ClientAction {
   FLIP = 'FLIP',
   CW = 'CW',
   CCW = 'CCW',
+  SET_PICK_HEIGHT = 'SET_PICK_HEIGHT',
+  SET_ROTATION_STEP = 'SET_ROTATION_STEP',
 }
 
 // actions sent by server

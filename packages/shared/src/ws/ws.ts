@@ -36,6 +36,8 @@ interface ActionPayloads {
   [ClientAction.FLIP]: string;
   [ClientAction.CW]: string;
   [ClientAction.CCW]: string;
+  [ClientAction.SET_PICK_HEIGHT]: number;
+  [ClientAction.SET_ROTATION_STEP]: number;
 
   [ServerAction.CLOSED]: null;
   [ServerAction.CURSORS]: CursorsPld;

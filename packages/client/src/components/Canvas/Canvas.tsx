@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { Tuple } from '@babylonjs/core/types';
 import { Simulation } from '@client/src/simulation';
@@ -9,7 +9,7 @@ import { RoomService } from '@services';
 import type { RoomwDto } from '@shared/dto/rooms';
 import { Loader, Logger, MimeDetector } from '@shared/playground';
 import { MimeType } from '@shared/playground/Loader';
-import { getB64URL } from '@shared/utils';
+import { debounce, getB64URL } from '@shared/utils';
 import type { CursorsPld } from '@shared/ws/payloads';
 import { useNavigate } from 'react-router-dom';
 
@@ -94,6 +94,22 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
     onRoomClosed();
   }, [simulationRoom, onRoomClosed]);
 
+  const onSetPickHeight = useMemo(
+    () =>
+      debounce((height: number) => {
+        simulationRoom.current?.onSetPickHeight(height);
+      }, 300),
+    [],
+  );
+
+  const onSetRotateStep = useMemo(
+    () =>
+      debounce((step: number) => {
+        simulationRoom.current?.onSetRotateStep(step);
+      }, 300),
+    [],
+  );
+
   useEffect(() => {
     init()
       .then(sr => {
@@ -142,7 +158,12 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
 
   return (
     <div className="w-full h-screen m-0 p-0 !overflow-hidden">
-      <HUD onCloseRoom={onCloseRoom} room={room.current} />
+      <HUD
+        onCloseRoom={onCloseRoom}
+        room={room.current}
+        onSetPickHeight={onSetPickHeight}
+        onSetRotateStep={onSetRotateStep}
+      />
       <div>
         {Object.entries(screenCursors.current).map(([id, [x, y]]) => (
           <div
