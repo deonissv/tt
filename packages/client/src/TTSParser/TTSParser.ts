@@ -5,18 +5,18 @@ import type {
   ActorBaseState,
   CardState,
   DeckState,
+  DieActorType,
   DieBaseState,
-  DieNState,
-  DieType,
+  DieState,
   Model,
+  PawnTokenState,
   RotationValue,
   TableType,
   Transformation,
 } from '@shared/dto/states';
 import {
-  ActorMapper,
   ActorType,
-  DieMapper,
+  DieFacesNumber,
   type ActorState,
   type BagState,
   type SimulationStateSave,
@@ -27,7 +27,7 @@ import {
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type { CustomImage } from '@shared/dto/states/actor/FlatActorState';
 import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { hasProperty, isObject, isTuple } from '@shared/guards';
+import { hasProperty, isNumber, isObject, isTuple } from '@shared/guards';
 import type { CustomImageState } from '@shared/tts-model/CustomImageState';
 import type { CustomMeshState } from '@shared/tts-model/CustomMeshState';
 import type { TransformState } from '@shared/tts-model/TransformState';
@@ -82,7 +82,7 @@ export class TTSParserC extends ParserBase {
     this.guids.push(objectState.GUID);
 
     const type = this.mapType(objectState.Name);
-    this.assert(type !== null, `Failed to parse object type ${this.guid}`);
+    this.assert(type !== null, `Failed to parse object type ${objectState.Name} of ${this.guid}`);
 
     const parsedObject = this.parseUnknownActorState(objectState);
 
@@ -108,18 +108,31 @@ export class TTSParserC extends ParserBase {
         return this.parseTileStack(objectState as ObjectState);
       case ActorType.DECK:
         return this.parseDeck(objectState as ObjectState);
+      case ActorType.DIE6ROUND:
       case ActorType.DIE4:
       case ActorType.DIE6:
       case ActorType.DIE8:
       case ActorType.DIE10:
       case ActorType.DIE12:
       case ActorType.DIE20:
-        return this.parseDieN(objectState as ObjectState, ActorMapper[type]) as unknown as ActorState;
+        return this.parseDieN(objectState as ObjectState, type);
       case ActorType.ACTOR:
         return this.parseCustomObject(objectState as ObjectState) as unknown as ActorState;
-      default:
-        return null;
+      case ActorType.PAWN_TOKEN:
+        return this.parseBuiltInActorState(objectState, type) as unknown as ActorState;
     }
+  }
+
+  parseBuiltInActorState(objectState: MinimalObjectState, type: ActorType.PAWN_TOKEN): PawnTokenState | null {
+    const actorBase = this.parseActorBase(objectState);
+    if (!actorBase) return null;
+
+    const pawnTokenState: PawnTokenState = {
+      type,
+      ...actorBase,
+    };
+
+    return pawnTokenState;
   }
 
   parseActorBase(objectState: MinimalObjectState): Omit<ActorBaseState, 'type'> | null {
@@ -318,6 +331,7 @@ export class TTSParserC extends ParserBase {
       card: ActorType.CARD,
       deck: ActorType.DECK,
       tile: ActorType.TILE,
+      die_6_rounded: ActorType.DIE6ROUND,
       die_4: ActorType.DIE4,
       die_6: ActorType.DIE6,
       die_8: ActorType.DIE8,
@@ -325,6 +339,7 @@ export class TTSParserC extends ParserBase {
       die_12: ActorType.DIE12,
       die_20: ActorType.DIE20,
       model: ActorType.ACTOR,
+      playerpawn: ActorType.PAWN_TOKEN,
     };
 
     for (const [p, v] of Object.entries(pattern)) {
@@ -377,7 +392,7 @@ export class TTSParserC extends ParserBase {
 
     const deckId = +cardID.toString().slice(0, -2);
     const sequence = +cardID.toString().slice(-2);
-    if (!deckId || !sequence) {
+    if (!isNumber(deckId) || !isNumber(sequence)) {
       this.errors.push(objectState.GUID);
       return null;
     }
@@ -509,26 +524,27 @@ export class TTSParserC extends ParserBase {
     return actorState;
   }
 
-  parseDieN<N extends DieType>(objectState: ObjectState, dieType: N): DieNState<N> | null {
+  parseDieN(objectState: ObjectState, dieType: DieActorType): DieState | null {
+    const numFace = DieFacesNumber[dieType];
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
-    const rotationValues = this.parseRotatioValues(objectState);
+    const rotationValues = this.parseRotatioValues(objectState) as Tuple<RotationValue, typeof numFace>;
     if (!rotationValues) {
       this.errors.push(objectState.GUID);
       return null;
     }
 
-    if (!isTuple(rotationValues, dieType)) {
+    if (!isTuple(rotationValues, numFace)) {
       this.errors.push(objectState.GUID);
       return null;
     }
 
     return {
       ...actorBase,
-      type: DieMapper[dieType],
+      type: dieType,
       rotationValues,
-    };
+    } as DieState;
   }
 
   parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {

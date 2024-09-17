@@ -7,8 +7,10 @@ import type {
   Die12State,
   Die20State,
   Die4State,
+  Die6RoundState,
   Die6State,
   Die8State,
+  PawnTokenState,
   TableState,
   TileState,
 } from '@shared/dto/states';
@@ -30,10 +32,12 @@ import {
   Die20,
   Die4,
   Die6,
+  Die6Round,
   Die8,
   GlassTable,
   HexTable,
   OctagonTable,
+  PawnToken,
   PokerTable,
   RectangleTable,
   SquareTable,
@@ -68,6 +72,10 @@ export class ClientActorBuilderFactory extends ActorBuilder {
         return await this.buildTile(actorState);
       case ActorType.TILE_STACK:
         return await this.buildTileStack(actorState);
+      case ActorType.PAWN_TOKEN:
+        return await this.buildPawnToken(actorState);
+      case ActorType.DIE6ROUND:
+        return await this.buildDie6Round(actorState);
     }
   }
 
@@ -140,6 +148,14 @@ export class ClientActorBuilderFactory extends ActorBuilder {
 
   async buildTileStack(actorState: TileStackState): Promise<TileStack | null> {
     return await TileStack.fromState(actorState);
+  }
+
+  async buildPawnToken(actorState: PawnTokenState): Promise<PawnToken | null> {
+    return await PawnToken.fromState(actorState);
+  }
+
+  async buildDie6Round(actorState: Die6RoundState): Promise<Die6Round | null> {
+    return await Die6Round.fromState(actorState);
   }
 }
 

@@ -1,5 +1,4 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
-import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { STATIC_HOST } from '@shared/constants';
 import type { CardGrid, CardState } from '@shared/dto/states';
@@ -8,7 +7,7 @@ import { Loader } from '../Loader';
 import type { SharedBase } from './SharedBase';
 import { FlatMoodel } from './models';
 
-const CARD_MODEL_URL = STATIC_HOST + '/Card_Mesh.obj';
+const CARD_MODEL_URL = STATIC_HOST + '/Card.obj';
 
 const CARD_VERT_START = 0; //model.subMeshes[0].verticesStart
 const CARD_VERT_COUNT = 137; // model.subMeshes[0].verticesCount;
@@ -33,10 +32,8 @@ export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T)
       if (!mesh) {
         return null;
       }
-      mesh.rotation.y = Math.PI / 2;
-      mesh.rotation.z = Math.PI / 2;
 
-      mesh.scaling = new Vector3(2, 2.093, 1.77);
+      // mesh.scaling = new Vector3(2, 2.093, 1.77);
 
       return Mesh.MergeMeshes([mesh], true, false, undefined, false, true);
     }

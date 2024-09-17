@@ -30,7 +30,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   const [cursor, setCursor] = useState<[number, number]>([0, 0]);
   const [cursors, setCursors] = useState<CursorsPld>({});
 
-  const init = useCallback(async (): Promise<SimulationRoom> => {
+  const init = useCallback(async (): Promise<SimulationRoom | null> => {
     RoomService.getRoom(roomCode)
       .then(r => {
         room.current = r;
@@ -48,7 +48,18 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       return { url: b64, mime };
     });
 
-    const sr = await SimulationRoom.init(canvas.current!, roomCode, setCursors, setDownloadProgress, onRoomClosed);
+    const sr = await SimulationRoom.init(
+      canvas.current!,
+      roomCode,
+      setCursors,
+      setDownloadProgress,
+      onRoomClosed,
+    ).catch(() => {
+      addToast(`Failed to get room preview`);
+      navigate('/games');
+      return null;
+    });
+
     // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
 
     return sr;
@@ -86,6 +97,8 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   useEffect(() => {
     init()
       .then(sr => {
+        if (!sr) return;
+
         simulationRoom.current = sr;
         clientId.current = sr.clientId;
         simulation.current = sr.simulation;

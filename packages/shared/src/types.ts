@@ -56,3 +56,5 @@ export interface RecursiveObject {
 export type RecursiveArray = RecursiveType[];
 
 export type RecursiveType = Primitive | RecursiveObject | RecursiveArray;
+
+export type ParseInt<T extends string> = T extends `${infer N extends number}` ? N : never;

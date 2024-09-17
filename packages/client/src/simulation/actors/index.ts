@@ -4,6 +4,7 @@ export * from './Card';
 export * from './ClientBase';
 export * from './Deck';
 export * from './Die';
+export { PawnToken } from './PawnToken';
 export * from './Tables';
 export * from './Tile';
 export * from './TileStack';

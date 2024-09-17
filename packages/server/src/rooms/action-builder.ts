@@ -6,11 +6,14 @@ import {
   type SimulationStateSave,
   type Transformation,
 } from '@shared/dto/states';
+import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
+import type { RecursiveObject } from '@shared/types';
 import { vecFloatCompare } from '@shared/utils';
 import { ServerAction } from '@shared/ws';
 import type { CursorsPld, RerenderDeckPld } from '@shared/ws/payloads';
 import type { MsgMap, ServerActionMsg } from '@shared/ws/ws';
 import type { Simulation } from '../simulation/simulation';
+import { SimulationRoom } from './simulation-room';
 
 export class ActionBuilder {
   prevCursors: string | null = null;
@@ -85,13 +88,17 @@ export class ActionBuilder {
             type: ServerAction.SPAWN_PICKED_ACTOR,
             payload: {
               clientId: clientId,
-              state: actorState,
+              state: SimulationRoom.patchStateURLs(
+                actorState as unknown as RecursiveObject,
+              ) as unknown as UnknownActorState,
             },
           });
         } else {
           actions.push({
             type: ServerAction.SPAWN_ACTOR,
-            payload: actorState,
+            payload: SimulationRoom.patchStateURLs(
+              actorState as unknown as RecursiveObject,
+            ) as unknown as UnknownActorState,
           });
         }
 
@@ -163,7 +170,8 @@ export class ActionBuilder {
     )
       return null;
 
-    return this.getRerenderDeckPld(currentState);
+    const rerenderPld = this.getRerenderDeckPld(currentState);
+    return SimulationRoom.patchStateURLs(rerenderPld as unknown as RecursiveObject) as unknown as RerenderDeckPld;
   }
 
   private getRerenderDeckPld(deckState: DeckState): RerenderDeckPld {

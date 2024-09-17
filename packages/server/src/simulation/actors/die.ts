@@ -1,14 +1,14 @@
 import { Vector3, type Mesh } from '@babylonjs/core';
-import { getDieModel } from '@shared/assets';
+import { getDieModel, ROUNDED_DIE } from '@shared/assets';
 import type { DieState } from '@shared/dto/states';
-import { ActorMapper } from '@shared/dto/states';
+import { DieFacesNumber } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { DieMixin } from '@shared/playground/actors/DieMixin';
 import type { Constructor } from '@shared/types';
 import { getRandomInt } from '@shared/utils';
 import { ServerBase } from './serverBase';
 
-const ROLL_IMPULSE_MIX = 350;
+const ROLL_IMPULSE_MIX = 450;
 const ROLL_IMPULSE_MAX = 600;
 
 const ROLL_ANGULAR_IMPULSE_MIX = 50;
@@ -20,7 +20,7 @@ export class ServerDie extends ServerBase<DieState> {
   constructor(state: DieState, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
 
-    this.numFaces = ActorMapper[state.type];
+    this.numFaces = DieFacesNumber[state.type];
   }
 
   static async fromState<T extends ServerDie>(this: Constructor<T>, state: DieState): Promise<T | null> {
@@ -51,3 +51,11 @@ export class Die8 extends DieMixin(ServerDie) {}
 export class Die10 extends DieMixin(ServerDie) {}
 export class Die12 extends DieMixin(ServerDie) {}
 export class Die20 extends DieMixin(ServerDie) {}
+
+export class Die6Round extends DieMixin(ServerDie) {
+  static async fromState<T extends ServerDie>(this: Constructor<T>, state: DieState): Promise<T | null> {
+    const model = await Loader.loadMesh(ROUNDED_DIE.meshURL);
+
+    return new this(state, model);
+  }
+}
