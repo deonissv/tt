@@ -11,7 +11,7 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import type { Tuple } from '@babylonjs/core/types';
-import { FLIP_BIND_KEYS } from '@shared/constants';
+import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '@shared/constants';
 import type { CardGrid } from '@shared/dto/states';
 import { ActorType, type SimulationStateSave } from '@shared/dto/states';
 import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
@@ -27,6 +27,9 @@ export interface SimulationCallbacks {
   onReleaseActor: (actor: ClientBase) => void;
   onRoll: (actor: ClientBase) => void;
   onShuffle: (actor: ClientBase) => void;
+  onFlip: (actor: ClientBase) => void;
+  onCW: (actor: ClientBase) => void;
+  onCCW: (actor: ClientBase) => void;
 }
 
 export class Simulation extends SimulationBase {
@@ -83,7 +86,8 @@ export class Simulation extends SimulationBase {
     sim.start();
     sim._handlePick();
     sim._handleHoverHighlight();
-    sim._bindAction(FLIP_BIND_KEYS, actor => {
+
+    sim._bindAction(PICK_ITEM_KEYS, actor => {
       if (
         actor.__state.type === ActorType.BAG ||
         actor.__state.type === ActorType.DECK ||
@@ -91,10 +95,19 @@ export class Simulation extends SimulationBase {
       )
         cbs.onPickItem?.(actor as unknown as Deck);
     });
-    sim._bindAction(['KeyR'], actor => {
-      cbs.onRoll(actor);
+    sim._bindAction(ROLL_KEYS, actor => {
+      if (
+        actor.__state.type === ActorType.DIE4 ||
+        actor.__state.type === ActorType.DIE6 ||
+        actor.__state.type === ActorType.DIE8 ||
+        actor.__state.type === ActorType.DIE10 ||
+        actor.__state.type === ActorType.DIE12 ||
+        actor.__state.type === ActorType.DIE20 ||
+        actor.__state.type === ActorType.DIE6ROUND
+      )
+        cbs.onRoll(actor);
     });
-    sim._bindAction(['KeyH'], actor => {
+    sim._bindAction(SHUFFLE_KEYS, actor => {
       if (
         actor.__state.type === ActorType.BAG ||
         actor.__state.type === ActorType.DECK ||
@@ -103,11 +116,16 @@ export class Simulation extends SimulationBase {
         cbs.onShuffle(actor);
       }
     });
-    // pg._bindAction(FLIP_BIND_KEYS, Actor.prototype.flip);
-    // pg._bindAction(ROTATE_CW_KEYS, Actor.prototype.rotateCW);
-    // pg._bindAction(ROTATE_CCW_KEYS, Actor.prototype.rotateCCW);
-    // pg._bindAction(SCALE_UP_KEYS, Actor.prototype.scaleUp);
-    // pg._bindAction(SCALE_DOWN_KEYS, Actor.prototype.scaleDown);
+    sim._bindAction(FLIP_KEYS, actor => {
+      cbs.onFlip(actor);
+    });
+    sim._bindAction(ROTATE_CW_KEYS, actor => {
+      cbs.onCW(actor);
+    });
+    sim._bindAction(ROTATE_CCW_KEYS, actor => {
+      cbs.onCCW(actor);
+    });
+
     return sim;
   }
 

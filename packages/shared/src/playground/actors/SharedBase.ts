@@ -1,13 +1,9 @@
-import { Axis, Space } from '@babylonjs/core/Maths/math.axis';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
-import type { Vector2 } from '@babylonjs/core/Maths/math.vector';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
-import { PhysicsShapeMesh } from '@babylonjs/core/Physics/v2/physicsShape';
 
-import { ROTATE_STEP, SCALE_COEF } from '@shared/constants';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import type { ActorState, TableState, Transformation } from '@shared/dto/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
@@ -26,7 +22,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
 
   body: PhysicsBody;
   __flipTranslate = 1;
-  __targetPosition: Vector2 | null = null;
 
   pickable = true;
   picked: string | null = null;
@@ -113,41 +108,6 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
       rotation: this.rotation.asArray(),
       position: this.position.asArray(),
     };
-  }
-
-  flip() {
-    // const ft = this._getFlipTranslate();
-    // this.__flipTranslate *= -1;
-    // this.translate(Axis.Y, ft, Space.WORLD);
-    // this.rotate(Axis.Z, Math.PI, Space.LOCAL);
-    // this._forceUpdate();
-  }
-
-  rotateCW() {
-    this._rotate(-ROTATE_STEP);
-  }
-
-  rotateCCW() {
-    this._rotate(ROTATE_STEP);
-  }
-
-  _rotate(step: number) {
-    this.rotate(Axis.Y, step, Space.WORLD);
-    this._forceUpdate();
-  }
-
-  scaleUp() {
-    this._scale(SCALE_COEF);
-  }
-
-  scaleDown() {
-    this._scale(-SCALE_COEF);
-  }
-
-  _scale(step: number) {
-    this.scaling.addInPlace(new Vector3(step, step, step));
-    const colliderShape = new PhysicsShapeMesh(this.__model, this._scene);
-    this.body.shape = colliderShape;
   }
 
   _forceUpdate() {

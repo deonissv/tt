@@ -10,7 +10,10 @@ export enum ClientAction {
   CURSOR = 'CURSOR',
   PICK_ACTOR = 'PICK_ACTOR',
   RELEASE_ACTOR = 'RELEASE_ACTOR',
-  SHUFFLE = 'SHUFFLE ',
+  SHUFFLE = 'SHUFFLE',
+  FLIP = 'FLIP',
+  CW = 'CW',
+  CCW = 'CCW',
 }
 
 // actions sent by server

@@ -18,10 +18,13 @@ export const MOUSE_MOVE_SENSETIVITY = 20;
 export const PICK_HIGHT = 1;
 export const MOVEMENT_VELOCITY = 500;
 
-export const FLIP_BIND_KEYS = ['KeyF'];
-
+export const FLIP_KEYS = ['KeyF'];
+export const PICK_ITEM_KEYS = ['KeyG'];
 export const ROTATE_CW_KEYS = ['KeyE'];
 export const ROTATE_CCW_KEYS = ['KeyQ'];
+export const ROLL_KEYS = ['KeyR'];
+export const SHUFFLE_KEYS = ['KeyH'];
+
 export const ROTATE_STEP = Math.PI / 12;
 
 export const SCALE_UP_KEYS = ['NumpadAdd', 'Equal'];

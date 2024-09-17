@@ -20,6 +20,7 @@ const CARD_FACE_INDEX_COUNT = 51;
 const CARD_BACK_INDEX_START = 240;
 const CARD_BACK_INDEX_COUNT = 60;
 
+// card width: 3.2 x 2
 export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T) => {
   return class Card extends Base {
     // constructor(state: CardState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
@@ -32,8 +33,6 @@ export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T)
       if (!mesh) {
         return null;
       }
-
-      // mesh.scaling = new Vector3(2, 2.093, 1.77);
 
       return Mesh.MergeMeshes([mesh], true, false, undefined, false, true);
     }
@@ -49,6 +48,9 @@ export const CardMixin = <T extends Constructor<SharedBase<CardState>>>(Base: T)
 
       faceTexture.uScale = cardWidth;
       faceTexture.vScale = cardHeight;
+
+      const ratio = faceTexture.getBaseSize().width / grid.cols / (faceTexture.getBaseSize().height / grid.rows);
+      model.scaling.x = 1.6 * ratio;
 
       return FlatMoodel(
         model,
