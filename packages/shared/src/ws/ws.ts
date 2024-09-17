@@ -33,6 +33,9 @@ interface ActionPayloads {
   [ClientAction.RELEASE_ACTOR]: string;
   [ClientAction.ROLL]: string;
   [ClientAction.SHUFFLE]: string;
+  [ClientAction.FLIP]: string;
+  [ClientAction.CW]: string;
+  [ClientAction.CCW]: string;
 
   [ServerAction.CLOSED]: null;
   [ServerAction.CURSORS]: CursorsPld;

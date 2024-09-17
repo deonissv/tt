@@ -19,6 +19,10 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
   defaultY: number;
   obstacleHeight: number | null = null;
 
+  __targetPosition: Vector2 | null = null;
+  __targetRotation: Quaternion | null = null;
+  flipped = false;
+
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
 
@@ -51,13 +55,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
   private _beforeRender() {
     if (this.picked && this.__targetPosition) {
       let upHeight = this.defaultY + PICK_HIGHT;
-
-      const rotation = this.absoluteRotationQuaternion;
-
-      const newRotation =
-        this.__state.type === ActorType.CARD || this.__state.type === ActorType.DECK
-          ? rotation
-          : this.alignToAxis(rotation, this.getNewTargetRotation());
+      if (this.flipped) upHeight += 2 * this.defaultY;
 
       const shapeLocalResult = new ShapeCastResult();
       const hitWorldResult = new ShapeCastResult();
@@ -70,7 +68,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
           startPosition: this.position,
           endPosition: this.position.add(new Vector3(0, -999, 0)),
           shouldHitTriggers: true,
-          rotation: rotation,
+          rotation: this.absoluteRotationQuaternion,
           ignoreBody: this.body,
         },
         shapeLocalResult,
@@ -83,7 +81,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
         this.obstacleHeight = null;
       }
       const pos = new Vector3(this.__targetPosition.x, upHeight, this.__targetPosition.y);
-      this.body.setTargetTransform(pos, newRotation);
+      this.body.setTargetTransform(pos, this.__targetRotation ?? this.absoluteRotationQuaternion);
     }
   }
 
@@ -100,7 +98,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
       this.__state.type === ActorType.DIE20 ||
       this.__state.type === ActorType.DIE6ROUND
         ? state.rotationValues.map(rv => rv.rotation)
-        : [Vector3.Up().asArray(), Vector3.Down().asArray()];
+        : [Vector3.Up().asArray()];
 
     const rotation = rotationVariants.reduce(
       (closest, rotation) => {
@@ -139,35 +137,6 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     return result.normalize();
   }
 
-  // alignToYAxis(quaternion: Quaternion) {
-  //   const up = Vector3.UpReadOnly;
-  //   const upVector = new Vector3().copyFromFloats(0, 1, 0).applyRotationQuaternion(quaternion);
-
-  //   if (
-  //     Math.abs(upVector.x) < PRECISION_EPSILON &&
-  //     Math.abs(upVector.y - 1) < PRECISION_EPSILON &&
-  //     Math.abs(upVector.z) < PRECISION_EPSILON
-  //   ) {
-  //     return quaternion;
-  //   }
-
-  //   if (
-  //     Math.abs(upVector.x) < PRECISION_EPSILON &&
-  //     Math.abs(upVector.y + 1) < PRECISION_EPSILON &&
-  //     Math.abs(upVector.z) < PRECISION_EPSILON
-  //   ) {
-  //     return Quaternion.RotationAxis(Axis.X, Math.PI).multiply(quaternion);
-  //   }
-
-  //   const rotationAxis = Vector3.Cross(upVector, up).normalize();
-  //   const rotationAngle = Math.acos(Vector3.Dot(upVector, up));
-
-  //   const correction = Quaternion.RotationAxis(rotationAxis, rotationAngle);
-  //   const result = correction.multiply(quaternion);
-
-  //   return result.normalize();
-  // }
-
   get hk(): HavokPlugin {
     return this.scene._physicsEngine?.getPhysicsPlugin() as HavokPlugin;
   }
@@ -183,6 +152,14 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     this.body.setAngularVelocity(Vector3.Zero());
 
     this.__targetPosition = new Vector2(this.position.x, this.position.z);
+
+    const rotation = this.absoluteRotationQuaternion;
+
+    this.__targetRotation =
+      this.__state.type === ActorType.CARD || this.__state.type === ActorType.DECK
+        ? rotation
+        : this.alignToAxis(rotation, this.getNewTargetRotation());
+
     this.picked = clientId;
     this.body.setCollisionCallbackEnabled(false);
     this.body.shape!.isTrigger = true;
@@ -197,6 +174,27 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   move(dx: number, dy: number) {
     this.__targetPosition?.addInPlaceFromFloats(dx, dy);
+  }
+
+  flip() {
+    const rotationAxis = Vector3.Right().applyRotationQuaternion(this.absoluteRotationQuaternion);
+    const flipRotation = Quaternion.RotationAxis(rotationAxis, Math.PI);
+    this.__targetRotation = this.absoluteRotationQuaternion.multiply(flipRotation);
+    this.flipped = !this.flipped;
+  }
+
+  rotateCW() {
+    const rotationAngle = Math.PI / 12; // 15 degrees
+    const currentUp = Vector3.Up().applyRotationQuaternion(this.absoluteRotationQuaternion);
+    const rotationQuaternion = Quaternion.RotationAxis(currentUp, rotationAngle);
+    this.__targetRotation = this.absoluteRotationQuaternion.multiply(rotationQuaternion);
+  }
+
+  rotateCCW() {
+    const rotationAngle = -Math.PI / 12; // 15 degrees
+    const currentUp = Vector3.Up().applyRotationQuaternion(this.absoluteRotationQuaternion);
+    const rotationQuaternion = Quaternion.RotationAxis(currentUp, rotationAngle);
+    this.__targetRotation = this.absoluteRotationQuaternion.multiply(rotationQuaternion);
   }
 
   lock() {

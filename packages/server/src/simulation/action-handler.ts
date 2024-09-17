@@ -33,6 +33,16 @@ export class ActionHandler {
         break;
       case ClientAction.SHUFFLE:
         this.handleShuffle(msg.payload);
+        break;
+      case ClientAction.FLIP:
+        this.handleFlip(msg.payload);
+        break;
+      case ClientAction.CW:
+        this.handleRotateCW(msg.payload);
+        break;
+      case ClientAction.CCW:
+        this.handleRotateCCW(msg.payload);
+        break;
     }
   }
 
@@ -82,6 +92,27 @@ export class ActionHandler {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor && isContainable(actor) && typeof actor.shuffle == 'function') {
       actor.shuffle();
+    }
+  }
+
+  handleFlip(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor && typeof actor.flip == 'function') {
+      actor.flip();
+    }
+  }
+
+  handleRotateCW(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor && typeof actor.rotateCW == 'function') {
+      actor.rotateCW();
+    }
+  }
+
+  handleRotateCCW(guid: string) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor && typeof actor.rotateCCW == 'function') {
+      actor.rotateCCW();
     }
   }
 }

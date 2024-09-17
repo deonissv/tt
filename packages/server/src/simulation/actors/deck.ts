@@ -1,4 +1,4 @@
-import type { Mesh } from '@babylonjs/core';
+import { Axis, Vector3, type Mesh } from '@babylonjs/core';
 import type { CardState, DeckState } from '@shared/dto/states';
 import type { Containable } from '@shared/playground/actions/Containable';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
@@ -8,6 +8,8 @@ import { Card } from './card';
 import { ServerBase } from './serverBase';
 
 export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containable {
+  flipped = false;
+
   constructor(state: DeckState, model: Mesh) {
     const items = state.cards;
 
@@ -23,7 +25,19 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
       return null;
     }
 
+    model.scaling.y = state.cards.length;
+
     return new this(state, model);
+  }
+
+  isFaceUp(model: Mesh): boolean {
+    const worldMatrix = model.getWorldMatrix();
+
+    const meshUpVector = Vector3.TransformNormal(Axis.Y, worldMatrix);
+
+    meshUpVector.normalize();
+    const dotProduct = Vector3.Dot(meshUpVector, Axis.Y);
+    return dotProduct > 0;
   }
 
   async pickItem(clientId: string): Promise<ServerBase<CardState> | null> {
@@ -32,7 +46,10 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
     if (this.size < 1) {
       return null;
     }
-    const cardState = this.items.pop()!;
+
+    const isFaceUp = this.isFaceUp(this.model);
+
+    const cardState = isFaceUp ? this.items.pop()! : this.items.shift()!;
 
     cardState.transformation = this.transformation;
     cardState.transformation.position![1] += 1;

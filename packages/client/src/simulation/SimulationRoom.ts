@@ -157,6 +157,27 @@ export class SimulationRoom {
     });
   };
 
+  static onFlip = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.FLIP,
+      payload: actor.guid,
+    });
+  };
+
+  static onCW = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.CW,
+      payload: actor.guid,
+    });
+  };
+
+  static onCCW = (actor: ClientBase) => {
+    this.actions.push({
+      type: ClientAction.CCW,
+      payload: actor.guid,
+    });
+  };
+
   closeRoom() {
     WS.send(this.ws, [{ type: ClientAction.CLOSE, payload: null }]);
   }
