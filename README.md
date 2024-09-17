@@ -5,7 +5,7 @@ rename _example-env_ to _.env_
 ## Via docker
 
 ```
-docker compose up
+docker compose up --build
 ```
 
 ## Manual
