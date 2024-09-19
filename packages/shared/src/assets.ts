@@ -137,8 +137,8 @@ export const GLASS_TABLE_MODEL = {
   },
   glassTop: {
     meshURL: `${STATIC_HOST}/glass_table_top_bottom.obj`,
-    diffuseURL: `${STATIC_HOST}/glass_table_N.png`,
-  },
+    normalURL: `${STATIC_HOST}/glass_table_N.png`,
+  } satisfies Model,
 };
 
 export const CIRCLE_TABLE_MODEL = {
@@ -208,7 +208,7 @@ export const DIE4_MODEL = {
 
 export const DIE6_MODEL = {
   meshURL: `${STATIC_HOST}/Cube.obj`,
-  colliderURL: `${STATIC_HOST}/Cube23284.obj`,
+  colliderURL: `${STATIC_HOST}/Cube.obj`,
   ...DIE_TEXTURES,
 } satisfies Model;
 
@@ -242,6 +242,7 @@ export const PAWN_TOKEN_MODEL = {
 
 export const ROUNDED_DIE = {
   meshURL: `${STATIC_HOST}/Rounded_Dice.obj`,
+  colliderURL: `${STATIC_HOST}/Rounded_Dice.obj`,
   diffuseURL: `${STATIC_HOST}/Rounded_Dice(Dots).png`,
   normalURL: `${STATIC_HOST}/Rounded_Dice_normal.png`,
 } satisfies Model;
