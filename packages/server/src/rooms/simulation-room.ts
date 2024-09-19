@@ -86,19 +86,14 @@ export class SimulationRoom {
         this.downloadProgress.failed++;
       },
     );
-    SimulationRoom.logger.log(`Room ${this.room.roomId} starting`);
-
-    this.simulation.start();
-    SimulationRoom.logger.log(`Room ${this.room.roomId} started.`);
     this.actionBuilder.sim = this.simulation;
 
-    try {
-      this.simSave = this.simulation.toState();
-    } catch (e) {
-      SimulationRoom.logger.error(e);
-    }
     this.onSimulationInit(this.room, gameId, gameVersion);
     SimulationRoom.logger.log(`Room ${this.room.roomId} initialized.`);
+    SimulationRoom.logger.log(`Room ${this.room.roomId} starting`);
+    this.simulation.start();
+
+    SimulationRoom.logger.log(`Room ${this.room.roomId} started.`);
   }
 
   /**
@@ -114,6 +109,7 @@ export class SimulationRoom {
       };
     }
 
+    SimulationRoom.logger.log(`Sending state room ${this.room.roomId}.`);
     this.broadcast([
       {
         type: ServerAction.STATE,
@@ -128,7 +124,8 @@ export class SimulationRoom {
   }
 
   getSimulationState(): SimulationState {
-    const patchedState = SimulationRoom.patchStateURLs(this.simSave as unknown as RecursiveType) as SimulationStateSave;
+    const simSave = this.simulation.toState();
+    const patchedState = SimulationRoom.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
     return {
       ...patchedState,
       downloadProgress: this.downloadProgress,
@@ -154,14 +151,13 @@ export class SimulationRoom {
 
       this.clients.set(ws, client);
 
-      if (this.simSave) {
-        WS.send(ws, [
-          {
-            type: ServerAction.STATE,
-            payload: this.getSimulationState(),
-          },
-        ]);
-      }
+      SimulationRoom.logger.log(`Sending room ${this.room.roomId} state.`);
+      WS.send(ws, [
+        {
+          type: ServerAction.STATE,
+          payload: this.getSimulationState(),
+        },
+      ]);
 
       ws.onmessage = event => this.onMessage(event, client.userId == this.room.authorId);
       ws.onclose = event => this.onClose(event);
