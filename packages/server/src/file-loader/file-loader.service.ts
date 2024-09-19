@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { MimeDetector } from '@shared/playground';
 import { MimeType } from '@shared/playground/Loader';
 import { getB64URL, wait } from '@shared/utils';
@@ -13,6 +14,12 @@ const RETRY_DELAY = 200; // ms
 
 @Injectable()
 export class FileLoaderService {
+  staticHost: string;
+
+  constructor(private readonly configService: ConfigService) {
+    this.staticHost = this.configService.getOrThrow<string>('STATIC_HOST');
+  }
+
   static logger = new Logger('FileLoaderService');
 
   public Assets = new Map<string, Promise<FetchedFile | null>>();
@@ -27,8 +34,10 @@ export class FileLoaderService {
         if (arrayBuffer) {
           return arrayBuffer;
         }
-      } catch {
-        FileLoaderService.logger.log(`Failed attempt to fetch: ${url}`);
+      } catch (e) {
+        FileLoaderService.logger.log(
+          `Failed attempt to fetch: ${url} - ${(e as Error).message.toString().slice(0, 100)}`,
+        );
       }
     }
     return null;
@@ -38,7 +47,7 @@ export class FileLoaderService {
     if (!this.Assets.has(url)) {
       const promiseCb = async (): Promise<FetchedFile | null> => {
         const arrayBuffer = await this._fetchFile(url);
-        if (!arrayBuffer) {
+        if (arrayBuffer == null) {
           Logger.error(`Empty arrayBuffer: ${url}`);
           this.Assets.delete(url);
           return null;
@@ -56,9 +65,10 @@ export class FileLoaderService {
   }
 
   async load(url: string): Promise<FetchedFile | null> {
-    const fetched = await this.fetchFile(url);
+    const patchedURL = url.replace(this.staticHost, 'client');
+    const fetched = await this.fetchFile(patchedURL);
     if (!fetched) {
-      throw new Error(`Failed to load file: ${url}`);
+      throw new Error(`Failed to load file: ${patchedURL}`);
     }
     return fetched;
   }
