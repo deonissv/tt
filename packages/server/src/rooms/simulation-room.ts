@@ -86,14 +86,15 @@ export class SimulationRoom {
         this.downloadProgress.failed++;
       },
     );
+    SimulationRoom.logger.log(`Room ${this.room.roomId} starting`);
+    this.simulation.start();
+    SimulationRoom.logger.log(`Room ${this.room.roomId} started.`);
+
     this.actionBuilder.sim = this.simulation;
 
     this.onSimulationInit(this.room, gameId, gameVersion);
-    SimulationRoom.logger.log(`Room ${this.room.roomId} initialized.`);
-    SimulationRoom.logger.log(`Room ${this.room.roomId} starting`);
-    this.simulation.start();
 
-    SimulationRoom.logger.log(`Room ${this.room.roomId} started.`);
+    SimulationRoom.logger.log(`Room ${this.room.roomId} initialized.`);
   }
 
   /**
@@ -152,12 +153,13 @@ export class SimulationRoom {
       this.clients.set(ws, client);
 
       SimulationRoom.logger.log(`Sending room ${this.room.roomId} state.`);
-      WS.send(ws, [
-        {
-          type: ServerAction.STATE,
-          payload: this.getSimulationState(),
-        },
-      ]);
+      if (this.simulation)
+        WS.send(ws, [
+          {
+            type: ServerAction.STATE,
+            payload: this.getSimulationState(),
+          },
+        ]);
 
       ws.onmessage = event => this.onMessage(event, client.userId == this.room.authorId);
       ws.onclose = event => this.onClose(event);

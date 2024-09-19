@@ -397,7 +397,7 @@ export class TTSParserC extends ParserBase {
       return null;
     }
 
-    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId]; // @todo validate
+    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId];
     if (!this.isObject(customDeckObj, 'ERROR 14')) return null;
 
     if (!this.hasProperty(customDeckObj, 'FaceURL', 'ERROR 15')) return null;

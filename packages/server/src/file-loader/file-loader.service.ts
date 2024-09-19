@@ -10,7 +10,7 @@ export interface FetchedFile {
 }
 
 const RETRY_ATTEMPTS = 5;
-const RETRY_DELAY = 200; // ms
+const RETRY_DELAY = 300; // ms
 
 @Injectable()
 export class FileLoaderService {

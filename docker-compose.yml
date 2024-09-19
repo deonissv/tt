@@ -20,7 +20,7 @@ services:
     env_file: .env
     environment:
       - DATABASE_URL=postgresql://testuser:qwerty@db/testdb
-      - STATIC_HOST=localhost
+      - STATIC_HOST=client
     depends_on:
       - db
 

@@ -35,7 +35,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       .then(r => {
         room.current = r;
       })
-      .catch(() => {
+      .catch(_ => {
         addToast(`Failed to get room preview`);
         navigate('/games');
         return null;
@@ -59,7 +59,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       setDownloadProgress,
       onRoomClosed,
     ).catch(() => {
-      addToast(`Failed to get room preview`);
+      addToast(`Failed to initialize room`);
       navigate('/games');
       return null;
     });

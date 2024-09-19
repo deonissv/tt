@@ -1,7 +1,7 @@
 import * as http from 'node:http';
 import type internal from 'node:stream';
 
-import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { OnGatewayInit } from '@nestjs/websockets';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -48,6 +48,9 @@ function abortHandshake(
 export class EventsGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
+
+  static logger = new Logger('EventsGateway');
+
   constructor(
     private readonly adapterHost: HttpAdapterHost,
     private readonly authService: AuthService,
@@ -88,7 +91,8 @@ export class EventsGateway implements OnGatewayInit {
         wss.on('close', _ws => {
           RoomsService.deleteRoom(roomId);
         });
-      } catch {
+      } catch (e) {
+        EventsGateway.logger.error(e);
         abortHandshake(socket, 401, 'Unauthorized');
         return new UnauthorizedException();
       }
