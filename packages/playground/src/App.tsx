@@ -2,7 +2,9 @@ import { Inspector } from '@babylonjs/inspector';
 import type { ServerBase } from '@server/src/simulation/actors';
 import { ServerActorBuilder } from '@server/src/simulation/serverActorBuilder';
 import { ActorType } from '@shared/dto/states';
-import { Logger } from '@shared/playground';
+import { Loader, Logger, MimeDetector } from '@shared/playground';
+import { MimeType } from '@shared/playground/Loader';
+import { getB64URL } from '@shared/utils';
 import { useCallback, useEffect, useRef } from 'react';
 import { Simulation } from './simulation';
 
@@ -10,6 +12,17 @@ Logger.register(console);
 
 const App = () => {
   const canvas = useRef<HTMLCanvasElement>(null);
+
+  Loader.registartFileFetcher(async (url: string) => {
+    const response = await fetch(url);
+    const arrayBuffer = await response.arrayBuffer();
+
+    const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+    const b64 = getB64URL(arrayBuffer);
+
+    Logger.log(`Fetched file: ${url}`);
+    return { url: b64, mime };
+  });
 
   const init = useCallback(async (): Promise<Simulation> => {
     const sim = await Simulation.init(
@@ -38,7 +51,9 @@ const App = () => {
         onReleaseActor: (a: ServerBase) => a.release(),
         // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        onRoll: (a: ServerBase) => a.roll(),
+        onRoll: (a: ServerBase) => {
+          a.roll();
+        },
       },
     );
 
@@ -56,10 +71,11 @@ const App = () => {
       type: 'CircleGlass',
     });
 
-    await ServerActorBuilder.buildDie4({
-      type: ActorType.DIE4,
-      guid: 'die4',
-      name: 'die4',
+    await ServerActorBuilder.buildDie6Round({
+      type: ActorType.DIE6ROUND,
+      guid: 'die6r',
+      name: 'die6r',
+      transformation: { position: [0, 5, 0] },
       rotationValues: [
         {
           value: 1,
@@ -76,6 +92,14 @@ const App = () => {
         {
           value: 4,
           rotation: [0, 0, 270],
+        },
+        {
+          value: 5,
+          rotation: [0, 0, 275],
+        },
+        {
+          value: 6,
+          rotation: [0, 0, 300],
         },
       ],
     });
