@@ -19,7 +19,7 @@ export const ProgressLoader = ({ loaded, total, title = 'Progress' }: ProgressLo
             </span>
           </div>
           <div className="text-right">
-            <span className="text-xs font-semibold inline-block text-accent">
+            <span className="text-xs font-semibold inline-block py-1 px-2 text-accent">
               {loaded} / {total}{' '}
             </span>
           </div>
