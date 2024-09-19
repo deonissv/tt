@@ -63,7 +63,12 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       navigate('/games');
       return null;
     });
-    // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
+
+    // import('@babylonjs/inspector')
+    //   .then(inspector => inspector.Inspector.Show(rv![0].simulation.scene, {}))
+    //   .catch(e => {
+    //     console.error(e);
+    //   });
 
     return rv;
   }, [roomCode]);

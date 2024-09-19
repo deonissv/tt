@@ -65,7 +65,7 @@ export class FileLoaderService {
   }
 
   async load(url: string): Promise<FetchedFile | null> {
-    const patchedURL = url.replace(this.staticHost, 'client');
+    const patchedURL = url.replace('localhost', this.staticHost);
     const fetched = await this.fetchFile(patchedURL);
     if (!fetched) {
       throw new Error(`Failed to load file: ${patchedURL}`);
