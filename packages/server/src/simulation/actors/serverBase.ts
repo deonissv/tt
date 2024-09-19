@@ -23,7 +23,11 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
   __targetRotation: Quaternion | null = null;
 
   flipped = false;
+  flipOffset = 0;
   pickHeight = 0;
+
+  shapeLocalResult = new ShapeCastResult();
+  hitWorldResult = new ShapeCastResult();
 
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
@@ -50,19 +54,18 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     this._forceUpdate();
 
     this.defaultY = this.body.getBoundingBox().extendSize.y;
+    this.flipOffset = this.getFlipOffset();
 
     if (state.locked) this.lock();
   }
 
   private _beforeRender() {
-    if (this.picked && this.__targetPosition) {
+    if (this.picked !== null && this.__targetPosition !== null) {
       let upHeight = this.defaultY + this.pickHeight;
       if (this.flipped) upHeight += 2 * this.defaultY;
 
-      const shapeLocalResult = new ShapeCastResult();
-      const hitWorldResult = new ShapeCastResult();
-      shapeLocalResult.reset();
-      hitWorldResult.reset();
+      this.shapeLocalResult.reset();
+      this.hitWorldResult.reset();
 
       this.hk.shapeCast(
         {
@@ -73,12 +76,12 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
           rotation: this.absoluteRotationQuaternion,
           ignoreBody: this.body,
         },
-        shapeLocalResult,
-        hitWorldResult,
+        this.shapeLocalResult,
+        this.hitWorldResult,
       );
 
-      if (shapeLocalResult.hasHit && hitWorldResult.hasHit) {
-        upHeight += hitWorldResult.hitPoint.y;
+      if (this.shapeLocalResult.hasHit && this.hitWorldResult.hasHit) {
+        upHeight += Math.max(0, this.hitWorldResult.hitPoint.y);
       } else {
         this.obstacleHeight = null;
       }
@@ -178,6 +181,14 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   move(dx: number, dy: number) {
     this.__targetPosition?.addInPlaceFromFloats(dx, dy);
+  }
+
+  getFlipOffset() {
+    const bbox = this.body.getBoundingBox();
+    const center = this.body.getObjectCenterWorld().y;
+    const lCenter = (bbox.maximumWorld.y + bbox.minimumWorld.y) / 2;
+    const offset = lCenter - center;
+    return 2 * offset;
   }
 
   flip() {

@@ -6,7 +6,9 @@ import { CameraKeyboardMoveInput } from './cameraInputs/cameraKeyboardMoveInput'
 import { CameraPointersInput } from './cameraInputs/cameraPointersInput';
 import { CameraWheelInput } from './cameraInputs/cameraWheelInput';
 
-import { HemisphericLight } from '@babylonjs/core';
+import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
+import { Color3 } from '@babylonjs/core/Maths/math.color';
+
 import {
   CAMERA_DEFAULT_ALPHA,
   CAMERA_DEFAULT_BETA,
@@ -64,6 +66,9 @@ export class SimulationScene extends SimulationSceneBase {
       new HemisphericLight('light', new Vector3(40, 50, 40), this),
       new HemisphericLight('light', new Vector3(40, 50, 0), this),
     ];
-    lights.map(l => (l.intensity = 0.5));
+    lights.map(l => {
+      l.intensity = 0.5;
+      l.specular = Color3.Black();
+    });
   }
 }

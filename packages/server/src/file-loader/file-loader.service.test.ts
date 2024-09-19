@@ -1,3 +1,4 @@
+import type { ConfigService } from '@nestjs/config';
 import { MimeDetector, MimeType } from '@shared/playground';
 import { vi } from 'vitest';
 import { FileLoaderService } from './file-loader.service';
@@ -6,7 +7,9 @@ describe('FileLoaderService', () => {
   let service: FileLoaderService;
 
   beforeEach(() => {
-    service = new FileLoaderService();
+    service = new FileLoaderService({
+      getOrThrow: () => 'http://example.com',
+    } as unknown as ConfigService);
   });
 
   afterEach(() => {

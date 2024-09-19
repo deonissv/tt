@@ -35,7 +35,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       .then(r => {
         room.current = r;
       })
-      .catch(() => {
+      .catch(_ => {
         addToast(`Failed to get room preview`);
         navigate('/games');
         return null;
@@ -59,11 +59,16 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       setDownloadProgress,
       onRoomClosed,
     ).catch(() => {
-      addToast(`Failed to get room preview`);
+      addToast(`Failed to initialize room`);
       navigate('/games');
       return null;
     });
-    // import('@babylonjs/inspector').then(inspector => inspector.Inspector.Show(sr.simulation.scene, {}));
+
+    // import('@babylonjs/inspector')
+    //   .then(inspector => inspector.Inspector.Show(rv![0].simulation.scene, {}))
+    //   .catch(e => {
+    //     console.error(e);
+    //   });
 
     return rv;
   }, [roomCode]);

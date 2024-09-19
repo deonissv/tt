@@ -32,6 +32,7 @@ export class Simulation extends SimulationBase {
     const hk = new HavokPlugin(true, global.havok);
     const gravityVec = gravity ? new Vector3(0, -gravity, 0) : undefined;
 
+    hk.setVelocityLimits(50, 200);
     this.scene.enablePhysics(gravityVec, hk);
   }
 

@@ -45,7 +45,7 @@ export const CreateGame = () => {
     if (ttsGame) {
       return ttsGame;
     }
-    return JSON.parse(text) as SimulationStateSave; // @TODO add validation
+    return JSON.parse(text) as SimulationStateSave;
   };
 
   const onFileLoad = (file: File) => {

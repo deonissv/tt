@@ -86,9 +86,6 @@ export const RoomService = {
           if (action.type == ServerAction.STATE) {
             const simState = action.payload;
 
-            // console.log('setDownloadProgress');
-            // console.log('setDownloadProgress', simState.downloadProgress);
-
             setDownloadProgress([simState.downloadProgress.succeded, simState.downloadProgress.total]);
 
             ws.removeEventListener('message', stateListener);

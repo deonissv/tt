@@ -8,12 +8,11 @@ export class ClientBase<T extends ActorBaseState = ActorBaseState> extends Share
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
 
-    if (this.__model.material && state.colorDiffuse) {
-      (this.__model.material as StandardMaterial).diffuseColor = new Color3(
-        state.colorDiffuse[0],
-        state.colorDiffuse[1],
-        state.colorDiffuse[2],
-      );
+    if (this.__model.material) {
+      const mat = this.__model.material as StandardMaterial;
+      if (state.colorDiffuse) {
+        mat.diffuseColor = new Color3(state.colorDiffuse[0], state.colorDiffuse[1], state.colorDiffuse[2]);
+      }
     }
   }
 

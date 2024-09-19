@@ -397,7 +397,7 @@ export class TTSParserC extends ParserBase {
       return null;
     }
 
-    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId]; // @todo validate
+    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId];
     if (!this.isObject(customDeckObj, 'ERROR 14')) return null;
 
     if (!this.hasProperty(customDeckObj, 'FaceURL', 'ERROR 15')) return null;
@@ -632,7 +632,7 @@ export class TTSParserC extends ParserBase {
         this.errors.push(guid);
         return null;
       }
-      rotation.push(candidate);
+      rotation.push(degToRad(candidate));
     }
     if (!isTuple(rotation, 3)) {
       this.errors.push(guid);

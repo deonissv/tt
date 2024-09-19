@@ -39,8 +39,14 @@ export class ServerDie extends ServerBase<DieState> {
 
     this.body.setLinearVelocity(new Vector3(0, 0, 0));
 
-    this.body.applyImpulse(new Vector3(0, impulse, 0), this.body.getObjectCenterWorld());
-    this.body.applyAngularImpulse(new Vector3(imluseAngularX, imluseAngularY, imluseAngularZ));
+    this.pick('', 0.5);
+    setTimeout(() => {
+      this.release();
+      setTimeout(() => {
+        this.body.applyImpulse(new Vector3(0, impulse, 0), this.body.getObjectCenterWorld());
+        this.body.applyAngularImpulse(new Vector3(imluseAngularX, imluseAngularY, imluseAngularZ));
+      }, 50);
+    }, 50);
   }
 }
 
@@ -54,7 +60,9 @@ export class Die20 extends DieMixin(ServerDie) {}
 
 export class Die6Round extends DieMixin(ServerDie) {
   static async fromState<T extends ServerDie>(this: Constructor<T>, state: DieState): Promise<T | null> {
-    const model = await Loader.loadMesh(ROUNDED_DIE.meshURL);
+    const model = await Loader.loadMesh(ROUNDED_DIE.colliderURL);
+
+    if (!model) return null;
 
     return new this(state, model);
   }

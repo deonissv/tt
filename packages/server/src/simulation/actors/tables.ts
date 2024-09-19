@@ -1,7 +1,6 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
-import type { StandardMaterial } from '@babylonjs/core';
-import { Color3, CreatePlane, Mesh } from '@babylonjs/core';
+import { CreatePlane, Mesh } from '@babylonjs/core';
 import {
   CIRCLE_TABLE_MODEL,
   CUSTOM_RECTANGLE_TABLE,
@@ -77,46 +76,23 @@ export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
 
 export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<GlassTable | null> {
-    const [metal] = await Loader.loadModel(GLASS_TABLE_MODEL.metal);
-    const [glassMid, _gCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassMid);
-    const [glassBottom, _gTopCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassTop);
+    const [glassTop] = await Loader.loadModel(GLASS_TABLE_MODEL.glassTop);
 
-    if (!metal || !glassMid || !glassBottom) {
+    if (!glassTop) {
       return null;
     }
 
-    const glassMaterial = glassBottom.material as StandardMaterial;
-    glassMaterial.alpha = 0.5;
-    glassMaterial.diffuseColor = new Color3(0, 0, 0.1);
-
-    const glassTop = glassBottom.clone();
-    [metal, glassMid, glassTop, glassBottom].forEach(mesh => mesh.setEnabled(true));
-
-    glassBottom.position.z = 0.633;
-    glassBottom.scaling.x = 0.45;
-    glassBottom.scaling.y = 0.45;
-
-    metal.rotation.x = Math.PI;
-    metal.position.z = -0.037;
-
+    glassTop.setEnabled(true);
     glassTop.position.z = -0.134;
 
-    const wrapper = Mesh.MergeMeshes([metal, glassMid, glassTop, glassBottom], true, false, undefined, false, true)!;
+    const wrapper = Mesh.MergeMeshes([glassTop], true, false, undefined, false, true)!;
 
     const table = new this(
       {
         guid: '#GlassTable',
         name: '#GlassTable',
         type: ActorType.ACTOR,
-        transformation: {
-          position: [
-            GLASS_TABLE_MODEL.transformation.position[0],
-            GLASS_TABLE_MODEL.transformation.position[1],
-            GLASS_TABLE_MODEL.transformation.position[2],
-          ],
-          rotation: GLASS_TABLE_MODEL.transformation.rotation,
-          scale: GLASS_TABLE_MODEL.transformation.scale,
-        },
+        transformation: GLASS_TABLE_MODEL.transformation,
       },
       wrapper,
     );
@@ -131,7 +107,6 @@ export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
     const model = await Loader.loadMesh(SQUARE_TABLE_MODEL.frame.meshURL);
     if (!model) return null;
 
-    (model.material as StandardMaterial).diffuseColor = new Color3(0.5, 0, 0);
     model.setEnabled(true);
 
     const table = new this(

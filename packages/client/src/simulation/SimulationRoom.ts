@@ -2,7 +2,7 @@ import type { Tuple } from '@babylonjs/core/types';
 import { AuthService, RoomService } from '@services';
 import { ClientAction, ServerAction, WS } from '@shared/ws';
 import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import type { ClientActionMsg } from '@shared/ws/ws';
+import type { ActionMsg, ClientActionMsg } from '@shared/ws/ws';
 import type { Dispatch, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 import type { ClientBase } from './actors';
@@ -66,51 +66,68 @@ export class SimulationRoom {
     onRoomClosed: () => void,
   ): Promise<[SimulationRoom, DownloadProgressPld]> {
     const [ws, simState] = await RoomService.connect(roomId, setDownloadProgress);
-    const sim = await Simulation.init(canvas, simState, SimulationRoom);
     const clientId = AuthService.getJWT()!.code;
+
+    let sim: Simulation | null = null;
+    const buffer: ActionMsg[] = [];
+
+    const handleActtion = (action: ActionMsg) => {
+      if (sim == null) {
+        buffer.push(action);
+        return;
+      }
+
+      switch (action.type) {
+        case ServerAction.CURSORS: {
+          setCursors(_ => ({ ...action.payload }));
+          break;
+        }
+        case ServerAction.MOVE_ACTOR: {
+          sim.handleMoveActor(action.payload.guid, action.payload.position);
+          break;
+        }
+        case ServerAction.SPAWN_ACTOR: {
+          void sim.handleSpawnActor(action.payload);
+          break;
+        }
+        case ServerAction.SPAWN_PICKED_ACTOR: {
+          if (action.payload.clientId === clientId) {
+            void sim.handleSpawnPickedActor(action.payload.state);
+          } else {
+            void sim.handleSpawnActor(action.payload.state);
+          }
+
+          break;
+        }
+        case ServerAction.ROTATE_ACTOR: {
+          sim.handleRotateActor(action.payload.guid, action.payload.position);
+          break;
+        }
+        case ServerAction.RERENDER_DECK: {
+          sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size);
+          break;
+        }
+        case ServerAction.CLOSED: {
+          ws.close();
+          onRoomClosed();
+          break;
+        }
+      }
+    };
 
     ws.addEventListener('message', event => {
       const message = WS.read(event);
 
       message.forEach(action => {
-        switch (action.type) {
-          case ServerAction.CURSORS: {
-            setCursors(_ => ({ ...action.payload }));
-            break;
-          }
-          case ServerAction.MOVE_ACTOR: {
-            sim.handleMoveActor(action.payload.guid, action.payload.position);
-            break;
-          }
-          case ServerAction.SPAWN_ACTOR: {
-            void sim.handleSpawnActor(action.payload);
-            break;
-          }
-          case ServerAction.SPAWN_PICKED_ACTOR: {
-            if (action.payload.clientId === clientId) {
-              void sim.handleSpawnPickedActor(action.payload.state);
-            } else {
-              void sim.handleSpawnActor(action.payload.state);
-            }
-
-            break;
-          }
-          case ServerAction.ROTATE_ACTOR: {
-            sim.handleRotateActor(action.payload.guid, action.payload.position);
-            break;
-          }
-          case ServerAction.RERENDER_DECK: {
-            sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size);
-            break;
-          }
-          case ServerAction.CLOSED: {
-            ws.close();
-            onRoomClosed();
-            break;
-          }
-        }
+        handleActtion(action);
       });
     });
+
+    sim = await Simulation.init(canvas, simState, SimulationRoom);
+    buffer.forEach(action => {
+      handleActtion(action);
+    });
+    sim.start();
 
     return [new SimulationRoom(ws, sim, clientId, roomId), simState.downloadProgress];
   }

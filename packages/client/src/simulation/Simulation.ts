@@ -83,7 +83,6 @@ export class Simulation extends SimulationBase {
       }),
     );
 
-    sim.start();
     sim._handlePick();
     sim._handleHoverHighlight();
 
