@@ -632,7 +632,7 @@ export class TTSParserC extends ParserBase {
         this.errors.push(guid);
         return null;
       }
-      rotation.push(candidate);
+      rotation.push(degToRad(candidate));
     }
     if (!isTuple(rotation, 3)) {
       this.errors.push(guid);
