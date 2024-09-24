@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LOADER_URL } from '../config';
+import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
@@ -8,7 +8,7 @@ export type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto };
 
 export const GameService = {
   async getGamePreviews(): Promise<GamePreviewDto[]> {
-    const response = await axios.get(LOADER_URL + 'games', {
+    const response = await axios.get(ENDPOINT + 'games', {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -17,7 +17,7 @@ export const GameService = {
   },
 
   async getUserGamePreviews(code: string): Promise<GamePreviewDto[]> {
-    const response = await axios.get(LOADER_URL + `games/user/${code}`, {
+    const response = await axios.get(ENDPOINT + `games/user/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -26,7 +26,7 @@ export const GameService = {
   },
 
   async createGame(createGameDto: CreateGameDto): Promise<GamePreviewDto> {
-    const response = await axios.post(LOADER_URL + 'games', createGameDto, {
+    const response = await axios.post(ENDPOINT + 'games', createGameDto, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -35,7 +35,7 @@ export const GameService = {
   },
 
   async deleteGame(code: string): Promise<string> {
-    const response = await axios.delete(LOADER_URL + `games/${code}`, {
+    const response = await axios.delete(ENDPOINT + `games/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -44,7 +44,7 @@ export const GameService = {
   },
 
   async getGame(code: string): Promise<GameDto> {
-    const response = await axios.get(LOADER_URL + `games/${code}`, {
+    const response = await axios.get(ENDPOINT + `games/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -53,7 +53,7 @@ export const GameService = {
   },
 
   async modifyGame(code: string, updateGame: UpdateGameDto): Promise<GameDto> {
-    const response = await axios.put(LOADER_URL + `games/${code}`, updateGame, {
+    const response = await axios.put(ENDPOINT + `games/${code}`, updateGame, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },

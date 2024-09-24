@@ -354,6 +354,6 @@ export class SimulationRoom {
    * @returns The asset URL.
    */
   static getAssetURL(url: string) {
-    return PROXY_PREFIX + url;
+    return `http://localhost:3000/proxy/${url}`;
   }
 }

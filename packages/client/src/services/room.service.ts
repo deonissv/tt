@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { LOADER_URL, WSS_URL } from '../config';
+import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { Tuple } from '@babylonjs/core/types';
@@ -11,7 +11,7 @@ import type { Dispatch, SetStateAction } from 'react';
 export const RoomService = {
   async createRoom(gameCode: string): Promise<string> {
     const response = await axios.post(
-      LOADER_URL + 'rooms',
+      ENDPOINT + 'rooms',
       {
         gameCode: gameCode,
       },
@@ -25,7 +25,7 @@ export const RoomService = {
   },
 
   async getUserRooms(code: string): Promise<RoomPreviewDto[]> {
-    const response = await axios.get(LOADER_URL + `rooms/user/${code}`, {
+    const response = await axios.get(ENDPOINT + `rooms/user/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -34,7 +34,7 @@ export const RoomService = {
   },
 
   async getRoom(code: string): Promise<RoomwDto> {
-    const response = await axios.get(LOADER_URL + `rooms/${code}`, {
+    const response = await axios.get(ENDPOINT + `rooms/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -43,7 +43,7 @@ export const RoomService = {
   },
 
   async startRoom(code: string): Promise<string> {
-    const response = await axios.post(LOADER_URL + `rooms/start/${code}`, null, {
+    const response = await axios.post(ENDPOINT + `rooms/start/${code}`, null, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -53,7 +53,7 @@ export const RoomService = {
   },
 
   async deleteRoom(code: string): Promise<void> {
-    await axios.delete(LOADER_URL + `rooms/${code}`, {
+    await axios.delete(ENDPOINT + `rooms/${code}`, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },
@@ -64,7 +64,7 @@ export const RoomService = {
     roomId: string,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
   ): Promise<[WebSocket, SimulationState]> {
-    const ws = new WebSocket(WSS_URL + roomId, `Bearer.${getAccessToken()}`);
+    const ws = new WebSocket(`${ENDPOINT}ws/${roomId}`, `Bearer.${getAccessToken()}`);
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
         const progressListener = (event: MessageEvent) => {

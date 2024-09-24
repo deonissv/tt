@@ -44,7 +44,7 @@ function abortHandshake(
   );
 }
 
-@WebSocketGateway({ transports: ['websocket'] })
+@WebSocketGateway({ transports: ['websocket'], path: '/api/v1/ws/' })
 export class EventsGateway implements OnGatewayInit {
   @WebSocketServer()
   server: Server;
@@ -100,6 +100,6 @@ export class EventsGateway implements OnGatewayInit {
   }
 
   private getRoomUrl(request: http.IncomingMessage): string | undefined {
-    return request.url?.split('/')?.[1];
+    return request.url?.split('/')?.at(-1);
   }
 }

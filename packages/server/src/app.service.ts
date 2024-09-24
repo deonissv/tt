@@ -7,7 +7,7 @@ export class AppService {
 
   constructor(private readonly fileLoaderService: FileLoaderService) {}
 
-  async b64tobuffer(b64: string): Promise<Uint8Array> {
+  async b64tobuffer(b64: string) {
     const res = await fetch(b64);
     const buffer = await res.arrayBuffer();
     return new Uint8Array(buffer);
