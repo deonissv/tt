@@ -1,0 +1,39 @@
+FROM node:22.9.0-alpine3.20 AS build
+
+WORKDIR /app
+COPY package.json ./
+COPY package-lock.json ./
+
+COPY tsconfig.base.json ./
+COPY client.tsconfig.json tsconfig.json
+
+COPY packages ./packages
+
+RUN npm run i:all
+RUN npm run db:gen
+RUN npm run build
+
+FROM deonissv/base:latest
+
+WORKDIR /app
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY package.json ./
+COPY package-lock.json ./
+COPY tsconfig.base.json ./
+
+COPY packages/server packages/server
+COPY packages/shared packages/shared
+
+
+RUN npm ci --only=production
+RUN npm run server db:gen
+
+COPY --from=build /app/build ./build
+COPY --from=build /app/public  ./public
+
+COPY assets /app/assets
+RUN mkdir -p /app/proxy
+
+CMD ["node", "build/main.js", "&",  "nginx"]
