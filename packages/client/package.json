@@ -9,7 +9,7 @@
   "scripts": {
     "build": "npm run build:v",
     "build:w": "webpack --config webpack.config.js",
-    "build:v": "vite build",
+    "build:v": "vite build --mode production",
     "start": "vite preview",
     "dev": "vite",
     "test": "vitest run --config ../../vitest.config.ts",
