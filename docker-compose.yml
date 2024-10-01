@@ -2,7 +2,7 @@ services:
   db:
     build:
       context: .
-      dockerfile: ./Dockerfile.postgres
+      dockerfile: ./infra/Dockerfile.postgres
     container_name: tt-db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -17,7 +17,7 @@ services:
   monolith:
     build:
       context: .
-      dockerfile: ./Dockerfile.prod
+      dockerfile: ./infra/Dockerfile.prod
       args:
         - VITE_API_HOST=http://localhost:8080
     container_name: tt-monolith
@@ -35,7 +35,7 @@ services:
   nginx:
     build:
       context: .
-      dockerfile: ./Dockerfile.nginx
+      dockerfile: ./infra/Dockerfile.nginx
     container_name: tt-nginx
     volumes:
       - ./assets:/app/assets:rw

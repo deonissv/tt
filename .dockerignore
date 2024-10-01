@@ -8,3 +8,5 @@
 proxy/*
 
 **/node_modules
+
+logs
