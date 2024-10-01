@@ -80,7 +80,7 @@ class Loader {
       return null;
     });
     if (!container) {
-      Logger.log(`Empty container: ${meshURL}`);
+      Logger.warn(`Empty container: ${meshURL}`);
       return null;
     }
 

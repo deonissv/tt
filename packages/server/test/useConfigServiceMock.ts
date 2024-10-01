@@ -9,7 +9,7 @@ export default () => {
     SALT_ROUNDS: '7',
     JWT_SECRET: 'secret',
     JWT_EXPIRES_IN: '24h',
-    STATIC_HOST: 'localhost',
+    VITE_STATIC_HOST: 'localhost',
     NODE_ENV: 'test',
   };
 

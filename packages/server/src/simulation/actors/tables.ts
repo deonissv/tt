@@ -1,17 +1,7 @@
 import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
 
 import { CreatePlane, Mesh } from '@babylonjs/core';
-import {
-  CIRCLE_TABLE_MODEL,
-  CUSTOM_RECTANGLE_TABLE,
-  CUSTOM_SQUARE_TABLE,
-  GLASS_TABLE_MODEL,
-  HEX_TABLE_MODEL,
-  OCTAGON_TABLE,
-  POKER_TABLE,
-  RECTANGLE_TABLE,
-  SQUARE_TABLE_MODEL,
-} from '@shared/assets';
+
 import { ActorType } from '@shared/dto/states';
 import {
   CustomRectangleTableMixin,
@@ -25,20 +15,21 @@ import {
   SquareTableMixin,
 } from '@shared/playground';
 import type { Constructor } from '@shared/types';
+import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
 type TableCtor = Constructor<ServerBase>;
 
 export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<HexTable | null> {
-    const top = await Loader.loadMesh(HEX_TABLE_MODEL.top.meshURL);
+    const top = await Loader.loadMesh(AssetsManager.HEX_TABLE_MODEL.top.meshURL);
 
     const table = new this(
       {
         guid: '#HexTable',
         name: '#HexTable',
         type: ActorType.ACTOR,
-        transformation: HEX_TABLE_MODEL.transformation,
+        transformation: AssetsManager.HEX_TABLE_MODEL.transformation,
       },
       top,
     );
@@ -51,8 +42,8 @@ export class HexTable extends HexTableMixin<TableCtor>(ServerBase) {
 
 export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<CircleTable | null> {
-    const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);
-    const top = await Loader.loadMesh(CIRCLE_TABLE_MODEL.top.meshURL);
+    const glass = await Loader.loadMesh(AssetsManager.CIRCLE_TABLE_MODEL.glass.meshURL);
+    const top = await Loader.loadMesh(AssetsManager.CIRCLE_TABLE_MODEL.top.meshURL);
 
     if (!glass || !top) return null;
     [glass, top].forEach(mesh => mesh.setEnabled(true));
@@ -63,7 +54,7 @@ export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
         guid: '#CircleTable',
         name: '#CircleTable',
         type: ActorType.ACTOR,
-        transformation: CIRCLE_TABLE_MODEL.transformation,
+        transformation: AssetsManager.CIRCLE_TABLE_MODEL.transformation,
       },
       wrapper,
     );
@@ -76,7 +67,7 @@ export class CircleTable extends CircleTableMixin<TableCtor>(ServerBase) {
 
 export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<GlassTable | null> {
-    const [glassTop] = await Loader.loadModel(GLASS_TABLE_MODEL.glassTop);
+    const [glassTop] = await Loader.loadModel(AssetsManager.GLASS_TABLE_MODEL.glassTop);
 
     if (!glassTop) {
       return null;
@@ -92,7 +83,7 @@ export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
         guid: '#GlassTable',
         name: '#GlassTable',
         type: ActorType.ACTOR,
-        transformation: GLASS_TABLE_MODEL.transformation,
+        transformation: AssetsManager.GLASS_TABLE_MODEL.transformation,
       },
       wrapper,
     );
@@ -104,7 +95,7 @@ export class GlassTable extends GlassTableMixin<TableCtor>(ServerBase) {
 }
 export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<SquareTable | null> {
-    const model = await Loader.loadMesh(SQUARE_TABLE_MODEL.frame.meshURL);
+    const model = await Loader.loadMesh(AssetsManager.SQUARE_TABLE_MODEL.frame.meshURL);
     if (!model) return null;
 
     model.setEnabled(true);
@@ -114,7 +105,7 @@ export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
         guid: '#SquareTable',
         name: '#SquareTable',
         type: ActorType.ACTOR,
-        transformation: SQUARE_TABLE_MODEL.transformation,
+        transformation: AssetsManager.SQUARE_TABLE_MODEL.transformation,
       },
       model,
     );
@@ -127,7 +118,7 @@ export class SquareTable extends SquareTableMixin<TableCtor>(ServerBase) {
 
 export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<CustomRectangleTable | null> {
-    const tableFrame = await Loader.loadMesh(CUSTOM_RECTANGLE_TABLE.frame.meshURL);
+    const tableFrame = await Loader.loadMesh(AssetsManager.CUSTOM_RECTANGLE_TABLE.frame.meshURL);
     if (!tableFrame) return null;
 
     const plane = CreatePlane('plane', { width: 1.108891, height: 0.66187126 });
@@ -142,7 +133,7 @@ export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(S
         guid: '#CustomRectangleTable',
         name: '#CustomRectangleTable',
         type: ActorType.ACTOR,
-        transformation: CUSTOM_RECTANGLE_TABLE.transformation,
+        transformation: AssetsManager.CUSTOM_RECTANGLE_TABLE.transformation,
       },
       collider,
     );
@@ -155,14 +146,14 @@ export class CustomRectangleTable extends CustomRectangleTableMixin<TableCtor>(S
 
 export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<OctagonTable | null> {
-    const tableFrame = await Loader.loadMesh(OCTAGON_TABLE.leg.meshURL);
+    const tableFrame = await Loader.loadMesh(AssetsManager.OCTAGON_TABLE.leg.meshURL);
     if (!tableFrame) return null;
     const table = new this(
       {
         guid: '#OctagonTable',
         name: '#OctagonTable',
         type: ActorType.ACTOR,
-        transformation: OCTAGON_TABLE.transformation,
+        transformation: AssetsManager.OCTAGON_TABLE.transformation,
       },
       tableFrame,
     );
@@ -174,7 +165,7 @@ export class OctagonTable extends OctagonTableMixin<TableCtor>(ServerBase) {
 }
 export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<CustomSquareTable | null> {
-    const tableBox = await Loader.loadMesh(CUSTOM_SQUARE_TABLE.frame.meshURL);
+    const tableBox = await Loader.loadMesh(AssetsManager.CUSTOM_SQUARE_TABLE.frame.meshURL);
     if (!tableBox) return null;
 
     const plane = CreatePlane('CustomSquareTablePlane', { size: 0.8554 });
@@ -189,7 +180,7 @@ export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerB
         guid: '#CustomSquareTable',
         name: '#CustomSquareTable',
         type: ActorType.ACTOR,
-        transformation: CUSTOM_SQUARE_TABLE.transformation,
+        transformation: AssetsManager.CUSTOM_SQUARE_TABLE.transformation,
       },
       wrapper,
     );
@@ -202,7 +193,7 @@ export class CustomSquareTable extends CustomSquareTableMixin<TableCtor>(ServerB
 
 export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
   static async fromState(): Promise<RectangleTable | null> {
-    const tableFrame = await Loader.loadMesh(RECTANGLE_TABLE.frame.meshURL);
+    const tableFrame = await Loader.loadMesh(AssetsManager.RECTANGLE_TABLE.frame.meshURL);
     const felt = CreatePlane('felt', { width: 56.24, height: 36.33 });
     felt.rotation.x = Math.PI / 2;
     felt.position.y = 0.85;
@@ -227,7 +218,7 @@ export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
 
 export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {
   static async fromState<T extends PokerTable>(this: Constructor<T>): Promise<T | null> {
-    const frame = await Loader.loadMesh(POKER_TABLE.frame.meshURL);
+    const frame = await Loader.loadMesh(AssetsManager.POKER_TABLE.frame.meshURL);
     if (!frame) return null;
 
     const table = new this(
@@ -235,7 +226,7 @@ export class PokerTable extends PokerTableMixin<TableCtor>(ServerBase) {
         guid: '#PokerTable',
         name: '#PokerTable',
         type: ActorType.ACTOR,
-        transformation: POKER_TABLE.transformation,
+        transformation: AssetsManager.POKER_TABLE.transformation,
       },
       frame,
     );

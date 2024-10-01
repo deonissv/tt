@@ -1,17 +1,17 @@
 import { Mesh, StandardMaterial } from '@babylonjs/core';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
-import { getDieModel, ROUNDED_DIE } from '@shared/assets';
 import type { Die6RoundState, DieBaseState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { DieMixin } from '@shared/playground/actors/DieMixin';
 import type { Constructor } from '@shared/types';
+import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 
 export class ClientDie extends ClientBase<DieBaseState> {
   numFaces: number;
 
   static async fromState<T extends ClientDie>(this: Constructor<T>, state: DieBaseState): Promise<T | null> {
-    const modelProps = getDieModel(state);
+    const modelProps = AssetsManager.getDieModel(state);
     const [model, collider] = await Loader.loadModel(modelProps);
 
     if (!model) {
@@ -34,7 +34,7 @@ export class Die6Round extends DieMixin(ClientDie) {
   declare __state: Die6RoundState;
 
   static async fromState<T extends ClientDie>(this: Constructor<T>, state: Die6RoundState): Promise<T | null> {
-    const [model, collider] = await Loader.loadModel(ROUNDED_DIE);
+    const [model, collider] = await Loader.loadModel(AssetsManager.ROUNDED_DIE);
 
     if (!model) {
       return null;

@@ -5,18 +5,6 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
-import {
-  CIRCLE_TABLE_MODEL,
-  CUSTOM_RECTANGLE_TABLE,
-  CUSTOM_SQUARE_TABLE,
-  feltMaterialProps,
-  GLASS_TABLE_MODEL,
-  HEX_TABLE_MODEL,
-  OCTAGON_TABLE,
-  POKER_TABLE,
-  RECTANGLE_TABLE,
-  SQUARE_TABLE_MODEL,
-} from '@shared/assets';
 import type { TableState } from '@shared/dto/states';
 import { ActorType } from '@shared/dto/states';
 import {
@@ -32,12 +20,13 @@ import {
 } from '@shared/playground';
 import { getGlassMaterial } from '@shared/playground/materials/glassMaterial';
 import { degToRad } from '@shared/utils';
+import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 
 export class HexTable extends HexTableMixin(ClientBase) {
   static async fromState(): Promise<HexTable | null> {
-    const [leg, _] = await Loader.loadModel(HEX_TABLE_MODEL.leg);
-    const [top, __] = await Loader.loadModel(HEX_TABLE_MODEL.top);
+    const [leg, _] = await Loader.loadModel(AssetsManager.HEX_TABLE_MODEL.leg);
+    const [top, __] = await Loader.loadModel(AssetsManager.HEX_TABLE_MODEL.top);
 
     if (!top || !leg) return null;
 
@@ -55,7 +44,7 @@ export class HexTable extends HexTableMixin(ClientBase) {
         guid: '#HexTable',
         name: '#HexTable',
         type: ActorType.ACTOR,
-        transformation: HEX_TABLE_MODEL.transformation,
+        transformation: AssetsManager.HEX_TABLE_MODEL.transformation,
       },
       wrapper,
     );
@@ -69,9 +58,9 @@ export class HexTable extends HexTableMixin(ClientBase) {
 
 export class CircleTable extends CircleTableMixin(ClientBase) {
   static async fromState(): Promise<CircleTable | null> {
-    const glass = await Loader.loadMesh(CIRCLE_TABLE_MODEL.glass.meshURL);
-    const [legs] = await Loader.loadModel(CIRCLE_TABLE_MODEL.legs);
-    const [top] = await Loader.loadModel(CIRCLE_TABLE_MODEL.top);
+    const glass = await Loader.loadMesh(AssetsManager.CIRCLE_TABLE_MODEL.glass.meshURL);
+    const [legs] = await Loader.loadModel(AssetsManager.CIRCLE_TABLE_MODEL.legs);
+    const [top] = await Loader.loadModel(AssetsManager.CIRCLE_TABLE_MODEL.top);
 
     if (!glass || !legs || !top) return null;
     [glass, legs, top].forEach(mesh => mesh.setEnabled(true));
@@ -89,7 +78,7 @@ export class CircleTable extends CircleTableMixin(ClientBase) {
         guid: '#CircleTable',
         name: '#CircleTable',
         type: ActorType.ACTOR,
-        transformation: CIRCLE_TABLE_MODEL.transformation,
+        transformation: AssetsManager.CIRCLE_TABLE_MODEL.transformation,
       },
       wrapper,
     );
@@ -103,9 +92,9 @@ export class CircleTable extends CircleTableMixin(ClientBase) {
 
 export class GlassTable extends GlassTableMixin(ClientBase) {
   static async fromState(): Promise<GlassTable | null> {
-    const [metal] = await Loader.loadModel(GLASS_TABLE_MODEL.metal);
-    const [glassMid, _gCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassMid);
-    const [glassBottom, _gTopCollider] = await Loader.loadModel(GLASS_TABLE_MODEL.glassTop);
+    const [metal] = await Loader.loadModel(AssetsManager.GLASS_TABLE_MODEL.metal);
+    const [glassMid, _gCollider] = await Loader.loadModel(AssetsManager.GLASS_TABLE_MODEL.glassMid);
+    const [glassBottom, _gTopCollider] = await Loader.loadModel(AssetsManager.GLASS_TABLE_MODEL.glassTop);
 
     if (!metal || !glassMid || !glassBottom) {
       return null;
@@ -138,7 +127,7 @@ export class GlassTable extends GlassTableMixin(ClientBase) {
         guid: '#CustomSquareTable',
         name: '#CustomSquareTable',
         type: ActorType.ACTOR,
-        transformation: GLASS_TABLE_MODEL.transformation,
+        transformation: AssetsManager.GLASS_TABLE_MODEL.transformation,
       },
       wrapper,
     );
@@ -151,7 +140,7 @@ export class GlassTable extends GlassTableMixin(ClientBase) {
 }
 export class SquareTable extends SquareTableMixin(ClientBase) {
   static async fromState(): Promise<SquareTable | null> {
-    const [model, _] = await Loader.loadModel(SQUARE_TABLE_MODEL.frame);
+    const [model, _] = await Loader.loadModel(AssetsManager.SQUARE_TABLE_MODEL.frame);
     if (!model) return null;
 
     (model.material as StandardMaterial).diffuseColor = new Color3(0.5, 0, 0);
@@ -162,7 +151,7 @@ export class SquareTable extends SquareTableMixin(ClientBase) {
         guid: '#SquareTable',
         name: '#SquareTable',
         type: ActorType.ACTOR,
-        transformation: SQUARE_TABLE_MODEL.transformation,
+        transformation: AssetsManager.SQUARE_TABLE_MODEL.transformation,
       },
       model,
     );
@@ -175,8 +164,8 @@ export class SquareTable extends SquareTableMixin(ClientBase) {
 
 export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) {
   static async fromState(tableState: TableState): Promise<CustomRectangleTable | null> {
-    const [tableFrame, _] = await Loader.loadModel(CUSTOM_RECTANGLE_TABLE.frame);
-    const grid = await Loader.loadMesh(CUSTOM_RECTANGLE_TABLE.grid.meshURL);
+    const [tableFrame, _] = await Loader.loadModel(AssetsManager.CUSTOM_RECTANGLE_TABLE.frame);
+    const grid = await Loader.loadMesh(AssetsManager.CUSTOM_RECTANGLE_TABLE.grid.meshURL);
     if (!tableFrame || !grid) return null;
     const wrapper = new Mesh('rectangle_table_wrapper');
     [tableFrame, grid].forEach(mesh => mesh.setEnabled(true));
@@ -189,12 +178,12 @@ export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) 
     const plane = CreatePlane('plane', { width: 1.108891, height: 0.66187126 });
     plane.rotation.x = Math.PI / 2;
     plane.position.y = 0.3;
-    const planeMatetialProps = tableState.url ? { diffuseURL: tableState.url } : feltMaterialProps;
+    const planeMatetialProps = tableState.url ? { diffuseURL: tableState.url } : AssetsManager.feltMaterialProps;
     const planeMatetial = await Loader.loadModelMaterial(planeMatetialProps);
     planeMatetial.specularColor = Color3.Black();
     plane.material = planeMatetial;
     wrapper.addChild(plane);
-    wrapper.scaling = Vector3.FromArray(CUSTOM_RECTANGLE_TABLE.transformation.scale);
+    wrapper.scaling = Vector3.FromArray(AssetsManager.CUSTOM_RECTANGLE_TABLE.transformation.scale);
     wrapper.position.y = -23.2;
     const table = new this(
       {
@@ -211,8 +200,8 @@ export class CustomRectangleTable extends CustomRectangleTableMixin(ClientBase) 
 }
 export class OctagonTable extends OctagonTableMixin(ClientBase) {
   static async fromState(): Promise<OctagonTable | null> {
-    const [leg, _] = await Loader.loadModel(OCTAGON_TABLE.leg);
-    const [top, __] = await Loader.loadModel(OCTAGON_TABLE.top);
+    const [leg, _] = await Loader.loadModel(AssetsManager.OCTAGON_TABLE.leg);
+    const [top, __] = await Loader.loadModel(AssetsManager.OCTAGON_TABLE.top);
 
     if (!top || !leg) return null;
     [leg, top].forEach(mesh => mesh.setEnabled(true));
@@ -245,7 +234,7 @@ export class OctagonTable extends OctagonTableMixin(ClientBase) {
 }
 export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {
   static async fromState(tableState: TableState): Promise<CustomSquareTable | null> {
-    const [tableBox, _tableCollider] = await Loader.loadModel(CUSTOM_SQUARE_TABLE.frame);
+    const [tableBox, _tableCollider] = await Loader.loadModel(AssetsManager.CUSTOM_SQUARE_TABLE.frame);
     if (!tableBox) return null;
 
     const plane = CreatePlane('CustomSquareTablePlane', { size: 0.8554 });
@@ -267,7 +256,7 @@ export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {
         guid: '#CustomSquareTable',
         name: '#CustomSquareTable',
         type: ActorType.ACTOR,
-        transformation: CUSTOM_SQUARE_TABLE.transformation,
+        transformation: AssetsManager.CUSTOM_SQUARE_TABLE.transformation,
       },
       wrapper,
     );
@@ -281,10 +270,10 @@ export class CustomSquareTable extends CustomSquareTableMixin(ClientBase) {
 
 export class RectangleTable extends RectangleTableMixin(ClientBase) {
   static async fromState(): Promise<RectangleTable | null> {
-    const [tableFrame] = await Loader.loadModel(RECTANGLE_TABLE.frame);
+    const [tableFrame] = await Loader.loadModel(AssetsManager.RECTANGLE_TABLE.frame);
 
-    const handles = await Loader.loadMesh(RECTANGLE_TABLE.handles.meshURL);
-    const feltMaterial = await Loader.loadModelMaterial(feltMaterialProps);
+    const handles = await Loader.loadMesh(AssetsManager.RECTANGLE_TABLE.handles.meshURL);
+    const feltMaterial = await Loader.loadModelMaterial(AssetsManager.feltMaterialProps);
     if (!tableFrame || !handles) return null;
 
     const wrapper = new Mesh('rectangle_table_wrapper');
@@ -293,7 +282,7 @@ export class RectangleTable extends RectangleTableMixin(ClientBase) {
     felt.position.y = 0.85;
     [tableFrame, handles].forEach(mesh => mesh.setEnabled(true));
     [tableFrame, handles, felt].forEach(mesh => wrapper.addChild(mesh));
-    if (feltMaterialProps) {
+    if (AssetsManager.feltMaterialProps) {
       feltMaterial.specularColor = Color3.Black();
       felt.material = feltMaterial;
     }
@@ -313,8 +302,8 @@ export class RectangleTable extends RectangleTableMixin(ClientBase) {
 }
 export class PokerTable extends PokerTableMixin(ClientBase) {
   static async fromState(): Promise<PokerTable | null> {
-    const [frame, _] = await Loader.loadModel(POKER_TABLE.frame);
-    const [legs, __] = await Loader.loadModel(POKER_TABLE.legs);
+    const [frame, _] = await Loader.loadModel(AssetsManager.POKER_TABLE.frame);
+    const [legs, __] = await Loader.loadModel(AssetsManager.POKER_TABLE.legs);
 
     if (!frame || !legs) return null;
 

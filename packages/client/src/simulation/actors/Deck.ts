@@ -3,6 +3,7 @@ import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { CardGrid, DeckState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
+import { AssetsManager } from './AssetsManages';
 import { Card } from './Card';
 import { ClientBase } from './ClientBase';
 
@@ -17,7 +18,7 @@ export class Deck extends DeckMixin(ClientBase) {
   }
 
   static async fromState(state: DeckState): Promise<Deck | null> {
-    const model = await Card.loadCardModel();
+    const model = await Loader.loadMesh(AssetsManager.CARD_MODEL_URL);
 
     if (!model) {
       return null;

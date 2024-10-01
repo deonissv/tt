@@ -6,6 +6,7 @@ COPY package-lock.json ./
 
 COPY tsconfig.base.json ./
 COPY client.tsconfig.json tsconfig.json
+COPY .env ./.env
 
 COPY packages ./packages
 
@@ -36,4 +37,6 @@ COPY --from=build /app/public  ./public
 COPY assets /app/assets
 RUN mkdir -p /app/proxy
 
-CMD ["node", "build/main.js", "&",  "nginx"]
+RUN echo "nginx & node build/main.js" > /app/entry.sh
+
+CMD ["sh", "/app/entry.sh"]

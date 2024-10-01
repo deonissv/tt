@@ -9,6 +9,7 @@ export default defineConfig(({ mode, isPreview }) => {
 
   return {
     plugins: [react(), tsconfigPaths()],
+    envDir: path.resolve(__dirname, '..', '..'),
     publicDir: !isProduction || isPreview ? path.resolve(__dirname, '..', '..', 'assets') : false,
     build: {
       outDir: path.resolve(__dirname, '..', '..', 'public'),

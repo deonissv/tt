@@ -6,8 +6,8 @@ import { Logger } from '@nestjs/common';
 import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
+import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
-import { PROXY_PREFIX } from '@shared/constants';
 import type { SimulationState, SimulationStateSave } from '@shared/dto/states';
 import { hasProperty, isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
@@ -38,10 +38,15 @@ export class SimulationRoom {
   tickInterval: NodeJS.Timeout | undefined;
   closeTimeout: NodeJS.Timeout | undefined;
 
+  staticHost: string;
+  apiHost: string;
+  proxyHost: string;
+
   private static readonly logger = new Logger('SimulationRoom');
 
   constructor(
     private readonly roomsService: RoomsService,
+    private readonly configService: ConfigService,
     room: Room,
   ) {
     this.room = room;
@@ -49,6 +54,10 @@ export class SimulationRoom {
     this.cursors = new Map();
     this.wss = this.getServer();
     this.simSave = undefined;
+
+    this.staticHost = this.configService.getOrThrow<string>('VITE_STATIC_HOST');
+    const apiHost = this.configService.getOrThrow<string>('VITE_API_HOST');
+    this.proxyHost = `${apiHost}/proxy`;
 
     this.downloadProgress = {
       total: 0,
@@ -126,7 +135,8 @@ export class SimulationRoom {
 
   getSimulationState(): SimulationState {
     const simSave = this.simulation.toState();
-    const patchedState = SimulationRoom.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
+    const patchedState = this.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
+
     return {
       ...patchedState,
       downloadProgress: this.downloadProgress,
@@ -330,8 +340,8 @@ export class SimulationRoom {
    * @param item - The object or array to patch the state URLs in.
    * @returns The patched object or array.
    */
-  static patchStateURLs<T extends RecursiveType>(item: T): T {
-    if (isString(item) && item.startsWith('http') && !item.startsWith(PROXY_PREFIX)) {
+  patchStateURLs<T extends RecursiveType>(item: T): T {
+    if (isString(item) && item.startsWith('http') && !item.startsWith(`${this.staticHost}/assets`)) {
       return this.getAssetURL(item) as T;
     } else if (Array.isArray(item)) {
       return item.map(i => this.patchStateURLs(i)) as T;
@@ -353,7 +363,8 @@ export class SimulationRoom {
    * @param url - The resource URL.
    * @returns The asset URL.
    */
-  static getAssetURL(url: string) {
-    return `http://localhost:3000/proxy/${url}`;
+  getAssetURL(url: string) {
+    const uri = encodeURIComponent(url);
+    return `${this.proxyHost}/${this.room.code}/${uri}`;
   }
 }

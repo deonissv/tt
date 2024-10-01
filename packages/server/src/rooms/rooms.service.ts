@@ -4,6 +4,7 @@ import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SimulationRoom } from './simulation-room';
 
+import { ConfigService } from '@nestjs/config';
 import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
 import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
 import { Simulation } from '../simulation/simulation';
@@ -16,6 +17,7 @@ export class RoomsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly gameService: GamesService,
+    private readonly configService: ConfigService,
   ) {}
 
   /**
@@ -26,7 +28,7 @@ export class RoomsService {
    * @returns The code of the room.
    */
   startSimulationRoom(roomTable: Room, simSave?: SimulationStateSave, gameId?: number, gameVersion?: number): string {
-    const room = new SimulationRoom(this, roomTable);
+    const room = new SimulationRoom(this, this.configService, roomTable);
     try {
       room.init(simSave, gameId, gameVersion).catch(e => {
         this.logger.error((e as Error).message);
@@ -380,6 +382,10 @@ export class RoomsService {
       this.logger.warn(`Room not found with code: ${roomCode}`);
     }
     return room;
+  }
+
+  isRoomRunning(roomCode: string): boolean {
+    return RoomsService.hasRoom(roomCode);
   }
 
   /**

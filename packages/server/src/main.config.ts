@@ -4,7 +4,6 @@ import * as bodyParser from 'body-parser';
 
 export function mainConfig(app: INestApplication) {
   app.setGlobalPrefix('api/v1');
-  app.enableCors();
   app.useGlobalPipes(new ValidationPipe());
 
   app.use(bodyParser.json({ limit: '100mb' }));

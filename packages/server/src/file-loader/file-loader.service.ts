@@ -17,7 +17,7 @@ export class FileLoaderService {
   staticHost: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.staticHost = this.configService.getOrThrow<string>('STATIC_HOST');
+    this.staticHost = this.configService.getOrThrow<string>('VITE_STATIC_HOST');
   }
 
   static logger = new Logger('FileLoaderService');
@@ -35,7 +35,7 @@ export class FileLoaderService {
           return arrayBuffer;
         }
       } catch (e) {
-        FileLoaderService.logger.log(
+        FileLoaderService.logger.warn(
           `Failed attempt to fetch: ${url} - ${(e as Error).message.toString().slice(0, 100)}`,
         );
       }
@@ -65,10 +65,9 @@ export class FileLoaderService {
   }
 
   async load(url: string): Promise<FetchedFile | null> {
-    const patchedURL = url.replace('localhost', this.staticHost);
-    const fetched = await this.fetchFile(patchedURL);
+    const fetched = await this.fetchFile(url);
     if (!fetched) {
-      throw new Error(`Failed to load file: ${patchedURL}`);
+      throw new Error(`Failed to load file: ${url}`);
     }
     return fetched;
   }

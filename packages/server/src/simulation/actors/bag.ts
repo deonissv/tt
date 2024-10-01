@@ -1,5 +1,4 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { BAG_MODEL } from '@shared/assets';
 import type { BagState } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import type { Containable } from '@shared/playground/actions/Containable';
@@ -7,6 +6,7 @@ import { BagMixin } from '@shared/playground/actors/BagMixin';
 import type { Constructor } from '@shared/types';
 import { shuffle } from '@shared/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
+import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
 export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase) implements Containable {
@@ -32,7 +32,9 @@ export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase)
   }
 
   static async fromState(state: BagState): Promise<Bag | null> {
-    const colliderURL = state.model ? (state.model.colliderURL ?? state.model.meshURL) : BAG_MODEL.colliderURL;
+    const colliderURL = state.model
+      ? (state.model.colliderURL ?? state.model.meshURL)
+      : AssetsManager.BAG_MODEL.colliderURL;
 
     const model = await Loader.loadMesh(colliderURL);
 

@@ -1,9 +1,3 @@
-export const HOST = 'localhost';
-export const API_PORT = 3000;
-
-export const STATIC_HOST = `http://${HOST}:5500`;
-export const PROXY_PREFIX = `http://${HOST}:3000/?url=`;
-
 export const PRECISION_EPSILON = 0.005;
 
 export const CAMERA_DEFAULT_ALPHA = 0;
