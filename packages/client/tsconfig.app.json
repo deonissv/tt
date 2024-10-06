@@ -30,7 +30,8 @@
     "paths": {
       "@tt/dto": ["../libs/dto/src/index"],
       "@tt/states": ["../libs/states/src/index"],
-      "@components": [ "client/src/components/index" ],
+      "@tt/tts-save": ["../libs/tts-save/src/index"],
+      "@components": [ "client/src/components/index"],
       "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],
       "@client/*": [ "client/*" ],

@@ -1,9 +1,9 @@
 import { DEMO } from '@assets/demo';
 import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser';
-import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
 import { ActorType, TileStackState } from '@tt/states';
+import { ObjectState } from '@tt/tts-save';
 
 describe('TTSParser - parseTile', () => {
   let parser: TTSParserC;

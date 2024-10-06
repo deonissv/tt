@@ -1,10 +1,7 @@
-import type { ObjectState } from '@shared/tts-model/ObjectState';
+import type { CustomImageState, CustomMeshState, ObjectState, TransformState } from '@tt/tts-save';
 
 import type { Tuple } from '@babylonjs/core/types';
 import { hasProperty, isNumber, isObject, isTuple } from '@shared/guards';
-import type { CustomImageState } from '@shared/tts-model/CustomImageState';
-import type { CustomMeshState } from '@shared/tts-model/CustomMeshState';
-import type { TransformState } from '@shared/tts-model/TransformState';
 import type { DeepPartial, Defined, OptionalAllBut } from '@shared/types';
 import { degToRad } from '@shared/utils';
 import type {

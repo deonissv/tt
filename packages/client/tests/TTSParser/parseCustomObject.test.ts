@@ -1,9 +1,9 @@
 import { CHESS5 } from '@assets/chess5';
 import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser/TTSParser';
-import type { ActorState } from '@tt/states';
-import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
+import type { ActorState } from '@tt/states';
+import { ObjectState } from '@tt/tts-save';
 
 describe('TTSParser - parseCustomObject', () => {
   let parser: TTSParserC;
