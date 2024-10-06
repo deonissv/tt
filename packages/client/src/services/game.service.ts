@@ -1,8 +1,7 @@
+import { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@tt/dto';
 import axios from 'axios';
 import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
-
-import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
 
 export type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto };
 

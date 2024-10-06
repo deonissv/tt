@@ -2,8 +2,7 @@ import axios from 'axios';
 import { ENDPOINT } from '../config';
 import { getAccessToken, resetAccessToken, saveAccessToken } from '../utils';
 
-import type { AccessTokenDto, JWT, SignInDto } from '@shared/dto/auth';
-import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
+import type { AccessTokenDto, CreateUserDto, JWT, SignInDto, UpdateUserDto } from '@tt/dto';
 
 export const AuthService = {
   async signin(payload: SignInDto): Promise<AccessTokenDto> {

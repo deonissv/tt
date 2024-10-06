@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { getErrorMsg } from '@client/src/utils';
 import { PromiseModal, RoomCard, Spinner, useToast } from '@components';
 import { AuthService, RoomService } from '@services';
-import type { RoomPreviewDto } from '@shared/dto/rooms';
+import { RoomPreviewDto } from '@tt/dto';
 
 export const Saves: React.FC = (): React.ReactNode => {
   const { addToast } = useToast();

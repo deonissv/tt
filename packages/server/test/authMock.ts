@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
-import type { JWTPayload } from '@shared/dto/auth';
+import type { JWTPayload } from '@tt/dto';
 
 const jwtService = new JwtService({
   secret: 'secret',

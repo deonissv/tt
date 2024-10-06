@@ -15,6 +15,10 @@
     "sourceMap": true,    
     "declaration": false,
     "noEmit": true,
+    
+    // "noImplicitReturns": true,
+    // "alwaysStrict": true,
+    // "noImplicitThis": true,
 
     // client
     "noUnusedLocals": true,
@@ -23,8 +27,14 @@
     "strictFunctionTypes": true,
     "strictBindCallApply": true,
     "strictPropertyInitialization": false,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+
+    "baseUrl": "./",
     "paths": {
-      "@shared/*": ["packages/shared/src/*"]
+      "@tt/dto": ["libs/dto/src/index"],
+      "@shared/*": ["packages/shared/src/*"],
+      "@server/*": ["packages/server/*"],
     }
   },
   "exclude": ["node_modules", "packages/**/dist"]

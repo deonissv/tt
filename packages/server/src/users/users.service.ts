@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
-import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
+import type { CreateUserDto, UpdateUserDto } from '@tt/dto';
 
 @Injectable()
 export class UsersService {

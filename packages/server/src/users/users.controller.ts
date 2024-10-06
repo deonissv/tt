@@ -19,7 +19,7 @@ import { User } from '../decorators/user.decorator';
 import { PermissionsService } from '../permissions.service';
 import { UsersService } from './users.service';
 
-import { UpdateUserDto } from '@shared/dto/users';
+import { UpdateUserDto } from '@tt/dto';
 import { AuthService } from '../auth/auth.service';
 import { ValidatedUser } from '../auth/validated-user';
 

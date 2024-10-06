@@ -4,7 +4,7 @@ import request from 'supertest';
 
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
-import type { GamePreviewDto } from '@shared/dto/games';
+import { GamePreviewDto } from '@tt/dto';
 import type { Server } from 'net';
 import {
   authMockAdmin,

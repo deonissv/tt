@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { getErrorMsg } from '@client/src/utils';
 import { GameCard, PromiseModal, Spinner, useToast } from '@components';
 import { GameService, RoomService } from '@services';
-import type { GamePreviewDto } from '@shared/dto/games';
+import { GamePreviewDto } from '@tt/dto';
 import { useNavigate } from 'react-router-dom';
 
 export const GamesList = () => {

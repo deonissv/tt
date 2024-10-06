@@ -6,20 +6,6 @@ module.exports = {
     es2020: true,
   },
   parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: [
-      './packages/client/tsconfig.json',
-      './packages/client/tsconfig.node.json',
-      './packages/client/tsconfig.app.json',
-      './packages/server/tsconfig.json',
-      './packages/playground/tsconfig.app.json',
-      './packages/playground/tsconfig.json',
-      './packages/shared/tsconfig.json',
-    ],
-    tsconfigRootDir: __dirname,
-  },
   extends: [
     'eslint:recommended',
     'plugin:react/jsx-runtime',
@@ -29,7 +15,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended-type-checked',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs', '*.config.ts', '*.config.js', 'vitest*', './packages/playground'],
-  plugins: ['react-refresh', '@typescript-eslint'],
+  plugins: ['workspaces', 'react-refresh', '@typescript-eslint'],
   rules: {
     '@typescript-eslint/consistent-type-exports': 'error',
     '@typescript-eslint/consistent-type-imports': 'error',

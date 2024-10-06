@@ -3,9 +3,9 @@ import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { Tuple } from '@babylonjs/core/types';
-import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
 import type { SimulationState } from '@shared/dto/states';
 import { ServerAction, WS } from '@shared/ws';
+import { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import type { Dispatch, SetStateAction } from 'react';
 
 export const RoomService = {

@@ -4,7 +4,7 @@ import request from 'supertest';
 
 import type { User } from '@prisma/client';
 import { useApp } from '@server/test/useApp';
-import type { CreateUserDto } from '@shared/dto/users';
+import { CreateUserDto } from '@tt/dto';
 import type { Server } from 'net';
 import { useDatabaseMock } from '../../test/useDatabaseMock';
 import type { PrismaService } from '../prisma/prisma.service';

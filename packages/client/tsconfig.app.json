@@ -26,8 +26,9 @@
 
     "outDir": "./dist",
     "baseUrl": "../",
-    "rootDir": "../",
+    "rootDir": "../../",
     "paths": {
+      "@tt/dto": ["../libs/dto/src/index"],
       "@components": [ "client/src/components/index" ],
       "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],
@@ -35,6 +36,6 @@
       "@assets/*": [ "shared/tests/assets/*" ],
     }
   },
-  "include": ["./src/**/*", "../shared/src/**/*", "../shared/tests/assets/**/*"],
+  "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"],
 }

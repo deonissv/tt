@@ -1,7 +1,7 @@
 import { getErrorMsg } from '@client/src/utils';
 import { Button, Input, useToast } from '@components';
 import { AuthService } from '@services';
-import type { UpdateUserDto } from '@shared/dto/users';
+import { UpdateUserDto } from '@tt/dto';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
