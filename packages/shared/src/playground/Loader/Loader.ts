@@ -6,9 +6,9 @@ import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { OBJFileLoader } from '@babylonjs/loaders';
+import { Logger } from '@tt/logger';
 import { MimeType } from '@tt/mime-resolver';
 import type { Material, Model } from '@tt/states';
-import { Logger } from '../Logger';
 
 OBJFileLoader.SKIP_MATERIALS = true;
 

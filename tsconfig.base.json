@@ -38,6 +38,7 @@
       "@tt/states": ["libs/states/src/index"],
       "@tt/tts-save": ["libs/tts-save/src/index"],
       "@tt/mime-resolver": ["libs/mime-resolver/src/index"],
+      "@tt/logger": ["libs/logger/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }

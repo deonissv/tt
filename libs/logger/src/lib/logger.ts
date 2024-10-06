@@ -10,7 +10,7 @@ export interface ILogger {
   setLogLevels?(levels: LogLevel[]): any;
 }
 
-class LoggerC implements ILogger {
+class LoggerProxy implements ILogger {
   logger: ILogger;
 
   register(logger: ILogger) {
@@ -46,4 +46,4 @@ class LoggerC implements ILogger {
   }
 }
 
-export const Logger = new LoggerC();
+export const Logger = new LoggerProxy();

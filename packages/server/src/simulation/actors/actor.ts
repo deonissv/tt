@@ -1,6 +1,7 @@
-import type { ActorState } from '@tt/states';
-import { Logger, SharedBase } from '@shared/playground';
+import { SharedBase } from '@shared/playground';
 import { ActorMixin } from '@shared/playground/actors/ActorMixin';
+import { Logger } from '@tt/logger';
+import type { ActorState } from '@tt/states';
 import { ServerBase } from './serverBase';
 
 export class Actor extends ActorMixin(ServerBase<ActorState>) {

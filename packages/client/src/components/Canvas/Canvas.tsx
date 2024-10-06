@@ -6,12 +6,14 @@ import { Simulation } from '@client/src/simulation';
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
 import { RoomService } from '@services';
-import { Loader, Logger } from '@shared/playground';
+import { Loader } from '@shared/playground';
 import { debounce, degToRad, getB64URL } from '@shared/utils';
 import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
 import { RoomwDto } from '@tt/dto';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
 import { useNavigate } from 'react-router-dom';
+
+import { Logger } from '@tt/logger';
 
 export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.ReactNode => {
   const { addToast } = useToast();
