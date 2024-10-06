@@ -1,9 +1,9 @@
 import { Axis, Vector3, type Mesh } from '@babylonjs/core';
 import type { Containable } from '@shared/playground/actions/Containable';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';
-import { shuffle } from '@shared/utils';
 import { Loader } from '@tt/loader';
 import type { CardState, DeckState } from '@tt/states';
+import { shuffle } from '@tt/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';

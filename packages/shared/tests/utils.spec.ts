@@ -1,4 +1,4 @@
-import { getRandomInt } from '@shared/utils';
+import { getRandomInt } from '@tt/utils';
 
 describe('utils', () => {
   describe('getRandomInt', () => {

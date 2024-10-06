@@ -1,5 +1,5 @@
 import { Scene } from '@babylonjs/core/scene';
-import { UUIDv4 } from '@shared/utils';
+import { UUIDv4 } from '@tt/utils';
 import { SharedBase } from '../actors/SharedBase';
 
 const GET_GUID_ATTEMPTS = 1000000;

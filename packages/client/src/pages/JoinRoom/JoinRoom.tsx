@@ -1,5 +1,5 @@
 import { Button, Input } from '@components';
-import { isUUIDv4 } from '@shared/utils';
+import { isUUIDv4 } from '@tt/utils';
 import type React from 'react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';

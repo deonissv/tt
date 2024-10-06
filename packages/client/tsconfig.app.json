@@ -1,3 +1,4 @@
+
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
@@ -36,6 +37,7 @@
       "@tt/loader": ["../libs/loader/src/index"],
       "@tt/actions": ["../libs/actions/src/index"],
       "@tt/channel": ["../libs/channel/src/index"],
+      "@tt/utils": ["../libs/utils/src/index"],
       "@components": [ "client/src/components/index"],
       "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],

@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { getB64URL, wait } from '@shared/utils';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
+import { getB64URL, wait } from '@tt/utils';
 
 export interface FetchedFile {
   url: string;

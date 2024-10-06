@@ -1,9 +1,9 @@
 import { MUNCHKIN } from '@assets/munchkin';
 import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser';
-import { degToRad, omitKeys } from '@shared/utils';
 import type { ActorBaseState, CardState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
+import { degToRad, omitKeys } from '@tt/utils';
 
 describe('TTSParser - parseDeck', () => {
   let parser: TTSParserC;

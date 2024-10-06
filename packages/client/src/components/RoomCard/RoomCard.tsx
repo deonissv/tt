@@ -1,6 +1,6 @@
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
-import { isURL } from '@shared/utils';
 import { RoomPreviewDto } from '@tt/dto';
+import { isURL } from '@tt/utils';
 
 interface RoomCardProps {
   room: RoomPreviewDto;

@@ -1,7 +1,7 @@
 import { useToast } from '@components';
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 import { AuthService } from '@services';
-import { isURL } from '@shared/utils';
+import { isURL } from '@tt/utils';
 import type { ReactNode } from 'react';
 
 interface GameCardProps {

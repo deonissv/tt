@@ -16,10 +16,10 @@ import {
   SquareTableMixin,
 } from '@shared/playground';
 import { getGlassMaterial } from '@shared/playground/materials/glassMaterial';
-import { degToRad } from '@shared/utils';
 import { Loader } from '@tt/loader';
 import type { TableState } from '@tt/states';
 import { ActorType } from '@tt/states';
+import { degToRad } from '@tt/utils';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 

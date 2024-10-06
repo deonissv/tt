@@ -4,7 +4,7 @@ import { ServerActorBuilder } from '@server/src/simulation/serverActorBuilder';
 import { ActorType } from '@shared/dto/states';
 import { Loader, Logger, MimeDetector } from '@shared/playground';
 import { MimeType } from '@shared/playground/Loader';
-import { getB64URL } from '@shared/utils';
+import { getB64URL } from '@tt/utils';
 import { useCallback, useEffect, useRef } from 'react';
 import { Simulation } from './simulation';
 

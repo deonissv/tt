@@ -2,8 +2,8 @@ import { CATAN } from '@assets/catan';
 import { MUNCHKIN } from '@assets/munchkin';
 import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser';
-import { degToRad } from '@shared/utils';
 import { ObjectState } from '@tt/tts-save';
+import { degToRad } from '@tt/utils';
 
 describe('TTSParser - parseActorBase', () => {
   let parser: TTSParserC;

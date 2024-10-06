@@ -5,11 +5,11 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
-import { floatCompare, vecDelta } from '@shared/utils';
 import { Loader } from '@tt/loader';
 import { Logger } from '@tt/logger';
 import type { ActorState, TableState, Transformation, UnknownActorState } from '@tt/states';
 import { type ActorBaseState, type ActorStateUpdate } from '@tt/states';
+import { floatCompare, vecDelta } from '@tt/utils';
 
 export class SharedBase<T extends ActorBaseState = ActorBaseState> extends TransformNode {
   guid: string;

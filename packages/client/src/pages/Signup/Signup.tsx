@@ -1,7 +1,7 @@
 import { getErrorMsg } from '@client/src/utils';
 import { Button, Input, useToast } from '@components';
 import { AuthService } from '@services';
-import { isEmail } from '@shared/utils';
+import { isEmail } from '@tt/utils';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 

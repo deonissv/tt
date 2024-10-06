@@ -1,8 +1,8 @@
 import { CreateBox, Logger } from '@babylonjs/core';
 import { getPhSim } from '@server/test/testUtils';
-import { ActorType } from '@tt/states';
 import { initHavok } from '@shared/initHavok';
-import { wait } from '@shared/utils';
+import { ActorType } from '@tt/states';
+import { wait } from '@tt/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { Actor } from './actor';
 import { Bag } from './bag';

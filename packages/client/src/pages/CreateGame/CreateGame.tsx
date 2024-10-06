@@ -4,9 +4,9 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { TTSParser } from '@client/src/TTSParser';
 import { Button, DragDropLoader, Input, JsonTextArea, useToast } from '@components';
 import { GameService } from '@services';
-import { isURL } from '@shared/utils';
 import { GameDto, UpdateGameDto } from '@tt/dto';
 import { SimulationStateSave } from '@tt/states';
+import { isURL } from '@tt/utils';
 
 export const CreateGame = () => {
   const navigate = useNavigate();

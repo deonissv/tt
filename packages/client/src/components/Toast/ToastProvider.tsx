@@ -1,5 +1,5 @@
-import { UUIDv4 } from '@shared/utils';
 import { Logger } from '@tt/logger';
+import { UUIDv4 } from '@tt/utils';
 import type React from 'react';
 import { createContext, useCallback, useState } from 'react';
 import { Toast } from './Toast';
