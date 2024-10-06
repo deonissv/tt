@@ -1,4 +1,4 @@
-import type { ActorState } from '@shared/dto/states';
+import type { ActorState } from '@tt/states';
 import type { Constructor } from '@shared/types';
 import type { SharedBase } from './SharedBase';
 

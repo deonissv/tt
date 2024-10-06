@@ -1,5 +1,4 @@
-import type { TableState, TileState } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
+import type { TableState, TileState, UnknownActorState } from '@tt/states';
 import type { SharedBase } from '../actors';
 
 export abstract class ActorBuilder {

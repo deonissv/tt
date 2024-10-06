@@ -1,7 +1,7 @@
 import { CHESS5 } from '@assets/chess5';
 import { MUNCHKIN } from '@assets/munchkin';
 import { TTSParserC } from '@client/src/TTSParser';
-import type { TableState } from '@shared/dto/states';
+import type { TableState } from '@tt/states';
 import type { SaveState } from '@shared/tts-model/SaveState';
 
 describe('TTSParser - parseTable', () => {

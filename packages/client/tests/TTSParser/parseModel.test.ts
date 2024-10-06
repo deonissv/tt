@@ -1,6 +1,6 @@
 import { CHESS5 } from '@assets/chess5';
 import { TTSParserC } from '@client/src/TTSParser/TTSParser';
-import type { Model } from '@shared/dto/states';
+import type { Model } from '@tt/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 
 describe('TTSParser - parseModel', () => {

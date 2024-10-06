@@ -1,10 +1,10 @@
 import { Vector3, type Mesh } from '@babylonjs/core';
-import type { DieState } from '@shared/dto/states';
-import { DieFacesNumber } from '@shared/dto/states';
 import { Loader } from '@shared/playground';
 import { DieMixin } from '@shared/playground/actors/DieMixin';
 import type { Constructor } from '@shared/types';
 import { getRandomInt } from '@shared/utils';
+import type { DieState } from '@tt/states';
+import { DieFacesNumber } from '@tt/states';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

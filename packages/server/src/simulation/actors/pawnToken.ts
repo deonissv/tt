@@ -1,4 +1,4 @@
-import type { ActorBaseState, PawnTokenState } from '@shared/dto/states';
+import type { ActorBaseState, PawnTokenState } from '@tt/states';
 import { Loader } from '@shared/playground';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';

@@ -5,8 +5,8 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { TableState } from '@shared/dto/states';
-import { ActorType } from '@shared/dto/states';
+import type { TableState } from '@tt/states';
+import { ActorType } from '@tt/states';
 import {
   CustomRectangleTableMixin,
   CustomSquareTableMixin,

@@ -1,4 +1,4 @@
-import type { ActorState } from '@shared/dto/states';
+import type { ActorState } from '@tt/states';
 import { Logger, SharedBase } from '@shared/playground';
 import { ActorMixin } from '@shared/playground/actors/ActorMixin';
 import { ServerBase } from './serverBase';

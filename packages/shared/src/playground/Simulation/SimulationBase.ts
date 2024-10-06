@@ -9,9 +9,13 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
-import type { ActorStateUpdate, TableState } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states/simulation/SimulationState';
+import type {
+  ActorStateUpdate,
+  SimulationStateSave,
+  SimulationStateUpdate,
+  TableState,
+  UnknownActorState,
+} from '@tt/states';
 import { SharedBase } from '../actors/SharedBase';
 import type { ActorBuilder } from './ActorBuilder';
 import { EngineFactory } from './SimulationEngine';

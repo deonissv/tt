@@ -12,11 +12,10 @@ import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import type { Tuple } from '@babylonjs/core/types';
 import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '@shared/constants';
-import type { CardGrid } from '@shared/dto/states';
-import { ActorType, type SimulationStateSave } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
 import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+import type { CardGrid, UnknownActorState } from '@tt/states';
+import { ActorType, type SimulationStateSave } from '@tt/states';
 import { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 

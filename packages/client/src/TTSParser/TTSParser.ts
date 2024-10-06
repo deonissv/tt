@@ -1,9 +1,16 @@
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 
 import type { Tuple } from '@babylonjs/core/types';
+import { hasProperty, isNumber, isObject, isTuple } from '@shared/guards';
+import type { CustomImageState } from '@shared/tts-model/CustomImageState';
+import type { CustomMeshState } from '@shared/tts-model/CustomMeshState';
+import type { TransformState } from '@shared/tts-model/TransformState';
+import type { DeepPartial, Defined, OptionalAllBut } from '@shared/types';
+import { degToRad } from '@shared/utils';
 import type {
   ActorBaseState,
   CardState,
+  CustomImage,
   DeckState,
   DieActorType,
   DieBaseState,
@@ -12,8 +19,10 @@ import type {
   PawnTokenState,
   RotationValue,
   TableType,
+  TileStackState,
   Transformation,
-} from '@shared/dto/states';
+  UnknownActorState,
+} from '@tt/states';
 import {
   ActorType,
   DieFacesNumber,
@@ -23,16 +32,7 @@ import {
   type TableState,
   type TileState,
   type TileType,
-} from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import type { CustomImage } from '@shared/dto/states/actor/FlatActorState';
-import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { hasProperty, isNumber, isObject, isTuple } from '@shared/guards';
-import type { CustomImageState } from '@shared/tts-model/CustomImageState';
-import type { CustomMeshState } from '@shared/tts-model/CustomMeshState';
-import type { TransformState } from '@shared/tts-model/TransformState';
-import type { DeepPartial, Defined, OptionalAllBut } from '@shared/types';
-import { degToRad } from '@shared/utils';
+} from '@tt/states';
 import { ParserBase } from './ParserBase';
 
 type MinimalObjectState = OptionalAllBut<ObjectState, ['GUID', 'Name']>;

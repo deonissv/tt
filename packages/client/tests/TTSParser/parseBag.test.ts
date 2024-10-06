@@ -1,7 +1,7 @@
 import { DEMO } from '@assets/demo';
 import { TTSParserC } from '@client/src/TTSParser';
-import type { BagState } from '@shared/dto/states';
-import { ActorType } from '@shared/dto/states';
+import type { BagState } from '@tt/states';
+import { ActorType } from '@tt/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import type { DeepPartial } from '@shared/types';
 

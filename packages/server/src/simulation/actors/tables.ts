@@ -2,7 +2,7 @@ import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMi
 
 import { CreatePlane, Mesh } from '@babylonjs/core';
 
-import { ActorType } from '@shared/dto/states';
+import { ActorType } from '@tt/states';
 import {
   CustomRectangleTableMixin,
   CustomSquareTableMixin,

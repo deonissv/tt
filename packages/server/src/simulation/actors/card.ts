@@ -1,5 +1,5 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { CardState } from '@shared/dto/states';
+import type { CardState } from '@tt/states';
 import { Loader } from '@shared/playground';
 import { CardMixin } from '@shared/playground/actors/CardMixin';
 import type { Constructor } from '@shared/types';

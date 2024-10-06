@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
-import type { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
+import type { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
 import type { Server } from 'net';
 import { authMockAdmin } from '../../test/authMock';
 import type { PrismaService } from '../prisma/prisma.service';

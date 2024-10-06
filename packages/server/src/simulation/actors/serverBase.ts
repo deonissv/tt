@@ -10,8 +10,8 @@ import {
   type Mesh,
 } from '@babylonjs/core';
 import { PRECISION_EPSILON } from '@shared/constants';
-import type { DieBaseState } from '@shared/dto/states';
-import { ActorType, type ActorBaseState } from '@shared/dto/states';
+import type { DieBaseState } from '@tt/states';
+import { ActorType, type ActorBaseState } from '@tt/states';
 import type { SimulationSceneBase } from '@shared/playground';
 import { SharedBase } from '@shared/playground/actors/SharedBase';
 

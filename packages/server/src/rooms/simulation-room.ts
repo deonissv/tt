@@ -8,7 +8,7 @@ import type { RoomsService } from './rooms.service';
 
 import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
-import type { SimulationState, SimulationStateSave } from '@shared/dto/states';
+import type { SimulationState, SimulationStateSave } from '@tt/states';
 import { hasProperty, isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
 import { ClientAction, ServerAction, WS } from '@shared/ws';

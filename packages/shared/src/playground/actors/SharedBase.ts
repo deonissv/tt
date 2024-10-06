@@ -5,10 +5,9 @@ import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
-import type { ActorState, TableState, Transformation } from '@shared/dto/states';
-import { type ActorBaseState, type ActorStateUpdate } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import { floatCompare, vecDelta } from '@shared/utils';
+import type { ActorState, TableState, Transformation, UnknownActorState } from '@tt/states';
+import { type ActorBaseState, type ActorStateUpdate } from '@tt/states';
 import { Loader } from '../Loader';
 import { Logger } from '../Logger';
 

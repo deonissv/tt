@@ -1,7 +1,7 @@
 import { CATAN } from '@assets/catan';
 import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser/TTSParser';
-import type { TileState } from '@shared/dto/states';
+import type { TileState } from '@tt/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad } from '@shared/utils';
 

@@ -1,7 +1,7 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { getPhSim } from '@server/test/testUtils';
 import { PICK_HIGHT } from '@shared/constants';
-import { ActorType } from '@shared/dto/states';
+import { ActorType } from '@tt/states';
 import { initHavok } from '@shared/initHavok';
 import { wait } from '@shared/utils';
 import { Client } from '../rooms/client';

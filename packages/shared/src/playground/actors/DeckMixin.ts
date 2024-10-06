@@ -1,4 +1,4 @@
-import type { CardState, DeckState } from '@shared/dto/states';
+import type { CardState, DeckState } from '@tt/states';
 import type { Constructor } from '@shared/types';
 import type { SharedBase } from './SharedBase';
 

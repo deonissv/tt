@@ -6,7 +6,7 @@ import type { AbstractMesh } from '@babylonjs/core/Meshes/abstractMesh';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { OBJFileLoader } from '@babylonjs/loaders';
-import type { Material, Model } from '@shared/dto/states';
+import type { Material, Model } from '@tt/states';
 import { Logger } from '../Logger';
 import { MimeType } from './MimeTypes';
 

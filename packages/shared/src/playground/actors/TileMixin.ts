@@ -1,4 +1,4 @@
-import type { TileState } from '@shared/dto/states';
+import type { TileState } from '@tt/states';
 import type { Constructor } from '@shared/types';
 import type { SharedBase } from './SharedBase';
 

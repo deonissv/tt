@@ -1,6 +1,6 @@
 import { DEMO } from '@assets/demo';
 import { TTSParserC } from '@client/src/TTSParser';
-import { ActorType } from '@shared/dto/states';
+import { ActorType } from '@tt/states';
 
 describe('TTSParser - mapType', () => {
   let parser: TTSParserC;

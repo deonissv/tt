@@ -15,6 +15,8 @@
     "sourceMap": true,    
     "declaration": false,
     "noEmit": true,
+
+    "isolatedModules": false,
     
     // "noImplicitReturns": true,
     // "alwaysStrict": true,
@@ -33,6 +35,7 @@
     "baseUrl": "./",
     "paths": {
       "@tt/dto": ["libs/dto/src/index"],
+      "@tt/states": ["libs/states/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }

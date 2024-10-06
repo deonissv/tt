@@ -1,6 +1,5 @@
-import type { BagState } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
 import type { Constructor } from '@shared/types';
+import type { BagState, UnknownActorState } from '@tt/states';
 import type { SharedBase } from './SharedBase';
 
 export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) => {

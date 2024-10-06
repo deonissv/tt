@@ -1,6 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import type { DieBaseState } from './dto/states';
-import { ActorType, TileType, type Material, type Model, type Transformation } from './dto/states';
+import { ActorType, DieBaseState, Material, Model, TileType, Transformation } from '@tt/states';
 import { degToRad } from './utils';
 
 export const AssetManager = (staticHost: string) => {

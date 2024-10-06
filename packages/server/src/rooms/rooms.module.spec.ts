@@ -3,7 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import type { Room } from '@prisma/client';
 import { useApp } from '@server/test/useApp';
 import { useDatabaseMock } from '@server/test/useDatabaseMock';
-import type { SimulationStateSave } from '@shared/dto/states';
+import type { SimulationStateSave } from '@tt/states';
 import type { CreateRoomDto, RoomwDto } from '@tt/dto';
 import type { Server } from 'net';
 import request from 'supertest';

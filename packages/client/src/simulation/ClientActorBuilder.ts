@@ -1,5 +1,6 @@
-import type {
+import {
   ActorState,
+  ActorType,
   BagState,
   CardState,
   DeckState,
@@ -12,11 +13,11 @@ import type {
   Die8State,
   PawnTokenState,
   TableState,
+  TileStackState,
   TileState,
-} from '@shared/dto/states';
-import { ActorType } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import type { TileStackState } from '@shared/dto/states/actor/Stack';
+  UnknownActorState,
+} from '@tt/states';
+
 import { ActorBuilder } from '@shared/playground/Simulation/ActorBuilder';
 import type { ClientBase } from './actors';
 import {

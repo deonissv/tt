@@ -1,5 +1,5 @@
 import { Axis, Vector3, type Mesh } from '@babylonjs/core';
-import type { CardState, DeckState } from '@shared/dto/states';
+import type { CardState, DeckState } from '@tt/states';
 import { Loader } from '@shared/playground';
 import type { Containable } from '@shared/playground/actions/Containable';
 import { DeckMixin } from '@shared/playground/actors/DeckMixin';

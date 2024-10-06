@@ -5,7 +5,7 @@ import {
   type DeckState,
   type SimulationStateSave,
   type Transformation,
-} from '@shared/dto/states';
+} from '@tt/states';
 import { vecFloatCompare } from '@shared/utils';
 import { ServerAction } from '@shared/ws';
 import type { CursorsPld, RerenderDeckPld } from '@shared/ws/payloads';

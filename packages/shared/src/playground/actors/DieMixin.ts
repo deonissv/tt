@@ -1,5 +1,5 @@
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
-import type { DieBaseState } from '@shared/dto/states';
+import type { DieBaseState } from '@tt/states';
 import type { Constructor } from '@shared/types';
 import type { SharedBase } from './SharedBase';
 

@@ -1,7 +1,7 @@
 import { MUNCHKIN } from '@assets/munchkin';
 import type { Tuple } from '@babylonjs/core/types';
 import { TTSParserC } from '@client/src/TTSParser';
-import type { ActorBaseState, CardState } from '@shared/dto/states';
+import type { ActorBaseState, CardState } from '@tt/states';
 import type { ObjectState } from '@shared/tts-model/ObjectState';
 import { degToRad, omitKeys } from '@shared/utils';
 

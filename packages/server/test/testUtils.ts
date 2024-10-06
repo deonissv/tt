@@ -2,7 +2,7 @@ import { CreateBox, PhysicsMotionType } from '@babylonjs/core';
 import { ConsoleLogger } from '@nestjs/common';
 import { ServerBase } from '@server/src/simulation/actors';
 import { Simulation } from '@server/src/simulation/simulation';
-import { ActorType } from '@shared/dto/states';
+import { ActorType } from '@tt/states';
 import { execSync } from 'child_process';
 import type { StartedTestContainer } from 'testcontainers';
 import { GenericContainer } from 'testcontainers';

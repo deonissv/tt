@@ -1,6 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import type { SimulationState } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
+import type { SimulationState, UnknownActorState } from '@tt/states';
 import type ws from 'ws';
 import { type MessageEvent as me } from 'ws';
 import type { ClientAction, ServerAction, SimAction } from './actions';
