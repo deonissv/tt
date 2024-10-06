@@ -10,7 +10,6 @@ import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
 import { hasProperty, isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
-import { WS } from '@shared/ws';
 import {
   ClientAction,
   ClientActionMsg,
@@ -20,6 +19,7 @@ import {
   ServerAction,
   ServerActionMsg,
 } from '@tt/actions';
+import { Channel } from '@tt/channel';
 import type { SimulationState, SimulationStateSave } from '@tt/states';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
@@ -171,7 +171,7 @@ export class SimulationRoom {
 
       SimulationRoom.logger.log(`Sending room ${this.room.roomId} state.`);
       if (this.simulation)
-        WS.send(ws, [
+        Channel.send(ws, [
           {
             type: ServerAction.STATE,
             payload: this.getSimulationState(),
@@ -191,7 +191,7 @@ export class SimulationRoom {
    */
   private onMessage(event: WebSocket.MessageEvent, canClose: boolean) {
     SimulationRoom.logger.debug(`Received message: ${JSON.stringify(event.data)}`);
-    const actions = WS.read(event) as ClientActionMsg[];
+    const actions = Channel.read(event) as ClientActionMsg[];
 
     const cursorAction = actions.find(action => action.type === ClientAction.CURSOR);
     const cursorClient = this.clients.get(event.target)?.code;
@@ -287,7 +287,7 @@ export class SimulationRoom {
 
       if (actions && actions.length > 0) {
         SimulationRoom.logger.verbose(`Sending actions to [${client.code}]: ${JSON.stringify(actions)}`);
-        WS.send(ws, actions);
+        Channel.send(ws, actions);
       }
     });
   }
@@ -336,7 +336,7 @@ export class SimulationRoom {
   private broadcast(msg: MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {
       if (!exclude.includes(client)) {
-        WS.send(client, msg);
+        Channel.send(client, msg);
       }
     });
   }

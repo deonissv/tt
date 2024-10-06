@@ -41,6 +41,7 @@
       "@tt/logger": ["libs/logger/src/index"],
       "@tt/loader": ["libs/loader/src/index"],
       "@tt/actions": ["libs/actions/src/index"],
+      "@tt/channel": ["libs/channel/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }
