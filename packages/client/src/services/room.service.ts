@@ -3,7 +3,8 @@ import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
 
 import type { Tuple } from '@babylonjs/core/types';
-import { ServerAction, WS } from '@shared/ws';
+import { WS } from '@shared/ws';
+import { ServerAction } from '@tt/actions';
 import { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import type { SimulationState } from '@tt/states';
 import type { Dispatch, SetStateAction } from 'react';

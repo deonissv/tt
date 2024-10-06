@@ -8,12 +8,19 @@ import type { RoomsService } from './rooms.service';
 
 import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
-import type { SimulationState, SimulationStateSave } from '@tt/states';
 import { hasProperty, isObject, isString } from '@shared/guards';
 import type { RecursiveType } from '@shared/types';
-import { ClientAction, ServerAction, WS } from '@shared/ws';
-import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import type { ClientActionMsg } from '@shared/ws/ws';
+import { WS } from '@shared/ws';
+import {
+  ClientAction,
+  ClientActionMsg,
+  CursorsPld,
+  DownloadProgressPld,
+  MSG,
+  ServerAction,
+  ServerActionMsg,
+} from '@tt/actions';
+import type { SimulationState, SimulationStateSave } from '@tt/states';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';
@@ -270,7 +277,7 @@ export class SimulationRoom {
     const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
 
     this.clients.forEach((client, ws) => {
-      const actions = [] as WS.ServerActionMsg[];
+      const actions = [] as ServerActionMsg[];
       if (cursorsAction && Object.keys(cursorsAction).length > 1) {
         const clientCursors = structuredClone(cursorsAction);
         delete clientCursors.payload[client.code];
@@ -326,7 +333,7 @@ export class SimulationRoom {
    * @param msg - The message to broadcast.
    * @param exclude - An optional array of WebSocket instances to exclude from the broadcast.
    */
-  private broadcast(msg: WS.MSG, exclude: WebSocket[] = []) {
+  private broadcast(msg: MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {
       if (!exclude.includes(client)) {
         WS.send(client, msg);

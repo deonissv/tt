@@ -1,7 +1,6 @@
 import type { Tuple } from '@babylonjs/core';
 import { isContainable } from '@shared/playground/actions/Containable';
-import { ClientAction } from '@shared/ws';
-import type { ClientActionMsg } from '@shared/ws/ws';
+import { ClientAction, ClientActionMsg } from '@tt/actions';
 import type { Client } from '../rooms/client';
 import { Die10, Die12, Die20, Die4, Die6, Die6Round, Die8, type ServerBase } from './actors';
 

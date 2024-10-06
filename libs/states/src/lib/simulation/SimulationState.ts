@@ -1,4 +1,4 @@
-import type { DownloadProgressPld } from '@shared/ws/payloads';
+import type { DownloadProgressPld } from '@tt/actions';
 import type { ActorStateUpdate, TableState } from '../actor';
 import type { UnknownActorState } from '../ActorUnion';
 

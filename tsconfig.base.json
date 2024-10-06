@@ -40,6 +40,7 @@
       "@tt/mime-resolver": ["libs/mime-resolver/src/index"],
       "@tt/logger": ["libs/logger/src/index"],
       "@tt/loader": ["libs/loader/src/index"],
+      "@tt/actions": ["libs/actions/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }

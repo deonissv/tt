@@ -34,6 +34,7 @@
       "@tt/mime-resolver": ["../libs/mime-resolver/src/index"],
       "@tt/logger": ["../libs/logger/src/index"],
       "@tt/loader": ["../libs/loader/src/index"],
+      "@tt/actions": ["../libs/actions/src/index"],
       "@components": [ "client/src/components/index"],
       "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],

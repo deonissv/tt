@@ -1,8 +1,7 @@
 import type { Tuple } from '@babylonjs/core/types';
 import { AuthService, RoomService } from '@services';
-import { ClientAction, ServerAction, WS } from '@shared/ws';
-import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import type { ActionMsg, ClientActionMsg } from '@shared/ws/ws';
+import { WS } from '@shared/ws';
+import { ActionMsg, ClientAction, ClientActionMsg, CursorsPld, DownloadProgressPld, ServerAction } from '@tt/actions';
 import type { Dispatch, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 import type { ClientBase } from './actors';

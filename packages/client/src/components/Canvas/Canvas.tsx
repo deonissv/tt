@@ -7,7 +7,7 @@ import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
 import { RoomService } from '@services';
 import { debounce, degToRad, getB64URL } from '@shared/utils';
-import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
+import type { CursorsPld, DownloadProgressPld } from '@tt/actions';
 import { RoomwDto } from '@tt/dto';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
 import { useNavigate } from 'react-router-dom';
