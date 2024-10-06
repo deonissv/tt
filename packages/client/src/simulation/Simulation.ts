@@ -256,7 +256,7 @@ export class Simulation extends SimulationBase {
   handleMoveActor(guid: string, position: Tuple<number, 3>) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor) {
-      (actor as ClientBase).move(...position);
+      (actor as unknown as ClientBase).move(...position);
     }
   }
 

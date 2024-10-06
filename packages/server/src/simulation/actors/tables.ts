@@ -1,8 +1,5 @@
-import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
-
-import { CreatePlane, Mesh } from '@babylonjs/core';
-
 import {
+  CircleTableMixin,
   CustomRectangleTableMixin,
   CustomSquareTableMixin,
   GlassTableMixin,
@@ -11,10 +8,13 @@ import {
   PokerTableMixin,
   RectangleTableMixin,
   SquareTableMixin,
-} from '@shared/playground';
-import type { Constructor } from '@shared/types';
+} from '@tt/actors';
+
+import { CreatePlane, Mesh } from '@babylonjs/core';
+
 import { Loader } from '@tt/loader';
 import { ActorType } from '@tt/states';
+import { Constructor } from '@tt/utils';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

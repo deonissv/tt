@@ -9,7 +9,6 @@ import type { RoomsService } from './rooms.service';
 import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
 import { hasProperty, isObject, isString } from '@shared/guards';
-import type { RecursiveType } from '@shared/types';
 import {
   ClientAction,
   ClientActionMsg,
@@ -21,6 +20,7 @@ import {
 } from '@tt/actions';
 import { Channel } from '@tt/channel';
 import type { SimulationState, SimulationStateSave } from '@tt/states';
+import { RecursiveType } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';

@@ -1,6 +1,6 @@
 import { Scene } from '@babylonjs/core/scene';
+import { SharedBase } from '@tt/actors';
 import { UUIDv4 } from '@tt/utils';
-import { SharedBase } from '../actors/SharedBase';
 
 const GET_GUID_ATTEMPTS = 1000000;
 export class SimulationSceneBase extends Scene {

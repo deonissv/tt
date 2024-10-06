@@ -1,6 +1,6 @@
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { DieBaseState } from '@tt/states';
-import type { Constructor } from '@shared/types';
+import { Constructor } from '@tt/utils';
 import type { SharedBase } from './SharedBase';
 
 export const DieMixin = <T extends Constructor<SharedBase<DieBaseState>>>(Base: T) => {

@@ -1,4 +1,4 @@
-import { hasProperty, isObject } from '@shared/guards';
+import { hasProperty, isObject } from '@tt/utils';
 
 export interface Containable {
   get size(): number;

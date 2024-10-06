@@ -43,6 +43,7 @@
       "@tt/actions": ["libs/actions/src/index"],
       "@tt/channel": ["libs/channel/src/index"],
       "@tt/utils": ["libs/utils/src/index"],
+      "@tt/actors": ["libs/actors/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }

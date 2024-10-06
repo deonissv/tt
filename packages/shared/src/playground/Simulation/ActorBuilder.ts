@@ -1,5 +1,5 @@
+import type { SharedBase } from '@tt/actors';
 import type { TableState, TileState, UnknownActorState } from '@tt/states';
-import type { SharedBase } from '../actors';
 
 export abstract class ActorBuilder {
   abstract build(actorState: UnknownActorState): Promise<SharedBase | null>;

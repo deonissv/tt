@@ -1,5 +1,5 @@
 import type { CardState, DeckState } from '@tt/states';
-import type { Constructor } from '@shared/types';
+import { Constructor } from '@tt/utils';
 import type { SharedBase } from './SharedBase';
 
 export const DeckMixin = <T extends Constructor<SharedBase<DeckState>>>(Base: T) => {

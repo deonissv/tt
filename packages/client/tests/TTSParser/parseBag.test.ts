@@ -1,9 +1,9 @@
 import { DEMO } from '@assets/demo';
 import { TTSParserC } from '@client/src/TTSParser';
-import type { DeepPartial } from '@shared/types';
 import type { BagState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
+import { DeepPartial } from '@tt/utils';
 
 describe('TTSParser - parseBag', () => {
   let parser: TTSParserC;

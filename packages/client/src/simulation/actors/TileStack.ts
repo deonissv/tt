@@ -1,4 +1,4 @@
-import { TileStackMixin } from '@shared/playground/actors/TileStackMixin';
+import { TileStackMixin } from '@tt/actors';
 import type { TileStackState, TileState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ClientBase } from './ClientBase';

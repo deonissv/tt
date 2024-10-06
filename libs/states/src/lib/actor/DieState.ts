@@ -1,5 +1,5 @@
 import type { Tuple } from '@babylonjs/core/types';
-import type { ParseInt } from '@shared/types';
+import { ParseInt } from '@tt/utils';
 import type { ActorBaseState } from '../ActorBaseState';
 import type { DieActorType } from '../ActorType';
 import { ActorType } from '../ActorType';

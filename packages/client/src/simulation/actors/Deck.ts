@@ -1,6 +1,6 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { DeckMixin } from '@shared/playground/actors/DeckMixin';
+import { DeckMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { CardGrid, DeckState } from '@tt/states';
 import { AssetsManager } from './AssetsManages';

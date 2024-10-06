@@ -1,5 +1,5 @@
-import type { Constructor } from '@shared/types';
 import type { BagState, UnknownActorState } from '@tt/states';
+import { Constructor } from '@tt/utils';
 import type { SharedBase } from './SharedBase';
 
 export const BagMixin = <T extends Constructor<SharedBase<BagState>>>(Base: T) => {

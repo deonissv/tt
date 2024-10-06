@@ -16,7 +16,9 @@ import type {
   TableState,
   UnknownActorState,
 } from '@tt/states';
-import { SharedBase } from '../actors/SharedBase';
+
+import { SharedBase } from '@tt/actors';
+
 import type { ActorBuilder } from './ActorBuilder';
 import { EngineFactory } from './SimulationEngine';
 import type { SimulationSceneBase } from './SimulationSceneBase';

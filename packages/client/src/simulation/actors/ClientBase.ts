@@ -1,8 +1,8 @@
 import { Color3, type StandardMaterial } from '@babylonjs/core';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { SharedBase } from '@tt/actors';
 import type { ActorBaseState } from '@tt/states';
-import { SharedBase } from '@shared/playground/actors/SharedBase';
 
 export class ClientBase<T extends ActorBaseState = ActorBaseState> extends SharedBase<T> {
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {

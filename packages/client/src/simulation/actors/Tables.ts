@@ -1,11 +1,10 @@
-import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMixin';
-
-import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
+import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import {
+  CircleTableMixin,
   CustomRectangleTableMixin,
   CustomSquareTableMixin,
   GlassTableMixin,
@@ -14,14 +13,20 @@ import {
   PokerTableMixin,
   RectangleTableMixin,
   SquareTableMixin,
-} from '@shared/playground';
-import { getGlassMaterial } from '@shared/playground/materials/glassMaterial';
+} from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { TableState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { degToRad } from '@tt/utils';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
+
+const getGlassMaterial = () => {
+  const glassMaterial = new StandardMaterial('glass');
+  glassMaterial.alpha = 0.5;
+  glassMaterial.diffuseColor = new Color3(0, 0, 0.1);
+  return glassMaterial;
+};
 
 export class HexTable extends HexTableMixin(ClientBase) {
   static async fromState(): Promise<HexTable | null> {

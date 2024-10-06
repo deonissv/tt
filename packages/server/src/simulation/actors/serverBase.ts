@@ -10,10 +10,10 @@ import {
   type Mesh,
 } from '@babylonjs/core';
 import { PRECISION_EPSILON } from '@shared/constants';
+import type { SimulationSceneBase } from '@shared/playground';
+import { SharedBase } from '@tt/actors';
 import type { DieBaseState } from '@tt/states';
 import { ActorType, type ActorBaseState } from '@tt/states';
-import type { SimulationSceneBase } from '@shared/playground';
-import { SharedBase } from '@shared/playground/actors/SharedBase';
 
 export class ServerBase<T extends ActorBaseState = ActorBaseState> extends SharedBase<T> {
   defaultY: number;

@@ -24,7 +24,7 @@ export class Simulation extends SimulationBase {
   }
 
   get actors(): ServerBase[] {
-    return this.scene.actors as ServerBase[];
+    return this.scene.actors as unknown as ServerBase[];
   }
 
   initPhysics(gravity?: number) {
