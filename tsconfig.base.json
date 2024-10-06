@@ -37,6 +37,7 @@
       "@tt/dto": ["libs/dto/src/index"],
       "@tt/states": ["libs/states/src/index"],
       "@tt/tts-save": ["libs/tts-save/src/index"],
+      "@tt/mime-resolver": ["libs/mime-resolver/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }

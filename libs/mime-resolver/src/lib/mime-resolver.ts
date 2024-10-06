@@ -1,4 +1,4 @@
-import { MimePictures, MimeType } from './MimeTypes';
+import { MimePictures, MimeType } from './mime-types';
 
 // const WhiteSpaces = [
 //   0x20, // ' '
@@ -16,8 +16,8 @@ interface MimePattern {
   readonly pattern: MimeBytePattern;
 }
 
-class MimeDetector {
-  MimePatternMap: MimePattern[] = [
+export class MimeResolver {
+  static MimePatternMap: MimePattern[] = [
     // List from @see https://mimesniff.spec.whatwg.org/#matching-an-image-type-pattern
     {
       mime: MimeType.PNG,
@@ -41,18 +41,18 @@ class MimeDetector {
     // },
   ];
 
-  private numBytesNeeded = Math.max(...this.MimePatternMap.map(m => m.pattern.length));
+  private static numBytesNeeded = Math.max(...this.MimePatternMap.map(m => m.pattern.length));
 
-  matchPattern(bytes: Uint8Array, pattern: MimeBytePattern): boolean {
+  static matchPattern(bytes: Uint8Array, pattern: MimeBytePattern): boolean {
     return pattern.every((p, i) => !p || bytes[i] === p);
   }
 
-  isHtml(arrayBuffer: Uint8Array): boolean {
+  static isHtml(arrayBuffer: Uint8Array): boolean {
     const trimmed = arrayBuffer.toString().trim();
     return trimmed.startsWith('<!') || trimmed.startsWith('<html');
   }
 
-  isMime(bytes: Uint8Array, mime: MimePattern): boolean {
+  static isMime(bytes: Uint8Array, mime: MimePattern): boolean {
     switch (mime.mime) {
       case MimeType.HTML:
         return this.isHtml(bytes);
@@ -61,15 +61,13 @@ class MimeDetector {
     }
   }
 
-  getMime(arrayBuffer: ArrayBuffer): MimeType | undefined {
+  static getMime(arrayBuffer: ArrayBuffer): MimeType | undefined {
     const blob = arrayBuffer.slice(0, this.numBytesNeeded);
     const bytes = new Uint8Array(blob);
     return this.MimePatternMap.find(mime => this.isMime(bytes, mime))?.mime;
   }
 
-  isImage(mime: MimeType): boolean {
+  static isImage(mime: MimeType): boolean {
     return MimePictures.includes(mime);
   }
 }
-
-export default new MimeDetector();

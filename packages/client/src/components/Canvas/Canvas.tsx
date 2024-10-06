@@ -6,11 +6,11 @@ import { Simulation } from '@client/src/simulation';
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
 import { RoomService } from '@services';
-import { Loader, Logger, MimeDetector } from '@shared/playground';
-import { MimeType } from '@shared/playground/Loader';
+import { Loader, Logger } from '@shared/playground';
 import { debounce, degToRad, getB64URL } from '@shared/utils';
 import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
 import { RoomwDto } from '@tt/dto';
+import { MimeResolver, MimeType } from '@tt/mime-resolver';
 import { useNavigate } from 'react-router-dom';
 
 export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.ReactNode => {
@@ -45,7 +45,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
 
-      const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+      const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
       const b64 = getB64URL(arrayBuffer);
 
       Logger.log(`Fetched file: ${url}`);
