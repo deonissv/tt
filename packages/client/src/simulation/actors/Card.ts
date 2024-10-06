@@ -1,9 +1,9 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { CardGrid, CardState } from '@tt/states';
-import { Loader } from '@shared/playground';
 import { CardMixin } from '@shared/playground/actors/CardMixin';
 import { FlatMoodel } from '@shared/playground/actors/models';
+import { Loader } from '@tt/loader';
+import type { CardGrid, CardState } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 

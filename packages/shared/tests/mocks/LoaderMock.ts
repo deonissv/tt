@@ -1,7 +1,7 @@
 import { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import { CreateBox } from '@babylonjs/core/Meshes/Builders/boxBuilder';
-import type { Loader } from '@shared/playground';
+import type { Loader } from '@tt/loader';
 
 export const LoaderMock: Partial<typeof Loader> = {
   loadMesh: () => Promise.resolve(CreateBox('testMesh', { size: 1 })),

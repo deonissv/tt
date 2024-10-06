@@ -19,17 +19,17 @@ interface FetchedFile {
 
 export type FileFetcher = (url: string) => Promise<FetchedFile | null>;
 
-class Loader {
-  public Assets = new Map<string, Promise<FetchedFile | null>>();
-  fetchFile: FileFetcher = (_url: string) => {
+export class Loader {
+  public static Assets = new Map<string, Promise<FetchedFile | null>>();
+  static fetchFile: FileFetcher = (_url: string) => {
     throw new Error('FileFetcher should be registered');
   };
 
-  registartFileFetcher(fetcher: FileFetcher) {
+  static registartFileFetcher(fetcher: FileFetcher) {
     this.fetchFile = fetcher;
   }
 
-  _getModelExtension(mime: MimeType): string {
+  static _getModelExtension(mime: MimeType): string {
     // @TODO: add more extensions
     // type ModelExtentions = '.obj' | '.gltf' | '.glb';
 
@@ -40,7 +40,7 @@ class Loader {
     }
   }
 
-  async loadModel(model: Model): Promise<[Mesh | null, Mesh | null]> {
+  static async loadModel(model: Model): Promise<[Mesh | null, Mesh | null]> {
     Logger.log(`Loading model`);
     const modelMesh = await this.loadMesh(model.meshURL);
     Logger.log(`Loading collider: ${model.colliderURL}`);
@@ -54,7 +54,7 @@ class Loader {
     return [modelMesh, colliderMesh];
   }
 
-  async _loadMesh(meshURL: string): Promise<Mesh | null> {
+  static async _loadMesh(meshURL: string): Promise<Mesh | null> {
     const fetchedFile = await this.fetchFile(meshURL);
     if (!fetchedFile) {
       Logger.error(`Empty fetch response: ${meshURL}`);
@@ -99,7 +99,7 @@ class Loader {
     return mesh;
   }
 
-  async loadMesh(meshURL: string): Promise<Mesh | null> {
+  static async loadMesh(meshURL: string): Promise<Mesh | null> {
     Logger.log(`Loading mesh: ${meshURL}`);
     const mesh = await this._loadMesh(meshURL);
 
@@ -114,7 +114,7 @@ class Loader {
     return clonedMesh;
   }
 
-  async loadModelMaterial(modelMaterial: Material, name = ''): Promise<StandardMaterial> {
+  static async loadModelMaterial(modelMaterial: Material, name = ''): Promise<StandardMaterial> {
     Logger.log(`Loading material: ${JSON.stringify(modelMaterial)}`);
 
     const material = new StandardMaterial(name);
@@ -133,7 +133,7 @@ class Loader {
     return material;
   }
 
-  async _loadTexture(textureURL: string): Promise<Texture | null> {
+  static async _loadTexture(textureURL: string): Promise<Texture | null> {
     const fetchedFile = await this.fetchFile(textureURL);
     if (!fetchedFile) {
       return null;
@@ -141,7 +141,7 @@ class Loader {
     return new Texture(fetchedFile.url);
   }
 
-  async loadTexture(textureURL: string): Promise<Texture | null> {
+  static async loadTexture(textureURL: string): Promise<Texture | null> {
     Logger.log(`Loading texture: ${textureURL}`);
     const metarial = await this._loadTexture(textureURL);
     if (!metarial) {
@@ -152,9 +152,7 @@ class Loader {
     return metarial;
   }
 
-  private filterEmptyMeshes(meshes: AbstractMesh[]): AbstractMesh[] {
+  private static filterEmptyMeshes(meshes: AbstractMesh[]): AbstractMesh[] {
     return meshes.filter(mesh => mesh.getTotalVertices() > 0);
   }
 }
-
-export default new Loader();

@@ -1,5 +1,5 @@
+import { Loader } from '@tt/loader';
 import type { ActorBaseState, PawnTokenState } from '@tt/states';
-import { Loader } from '@shared/playground';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

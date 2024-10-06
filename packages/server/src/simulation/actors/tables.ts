@@ -2,19 +2,19 @@ import { CircleTableMixin } from '@shared/playground/actors/tables/CircleTableMi
 
 import { CreatePlane, Mesh } from '@babylonjs/core';
 
-import { ActorType } from '@tt/states';
 import {
   CustomRectangleTableMixin,
   CustomSquareTableMixin,
   GlassTableMixin,
   HexTableMixin,
-  Loader,
   OctagonTableMixin,
   PokerTableMixin,
   RectangleTableMixin,
   SquareTableMixin,
 } from '@shared/playground';
 import type { Constructor } from '@shared/types';
+import { Loader } from '@tt/loader';
+import { ActorType } from '@tt/states';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

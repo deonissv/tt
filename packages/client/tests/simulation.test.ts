@@ -1,7 +1,7 @@
 import { CreateBox, Mesh, NullEngine } from '@babylonjs/core';
 import { ClientBase } from '@client/src/simulation/actors';
+import { Loader } from '@tt/loader';
 import { ActorType } from '@tt/states';
-import { Loader } from '@shared/playground';
 import type { SimulationCallbacks } from '../src/simulation/Simulation';
 import { Simulation } from '../src/simulation/Simulation';
 import { SimulationScene } from '../src/simulation/SimulationScene';

@@ -1,6 +1,6 @@
-import type { TileState } from '@tt/states';
-import { Loader } from '@shared/playground';
 import { TileMixin } from '@shared/playground/actors/TileMixin';
+import { Loader } from '@tt/loader';
+import type { TileState } from '@tt/states';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

@@ -1,6 +1,6 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { Loader } from '@shared/playground';
 import { TileStackMixin } from '@shared/playground/actors/TileStackMixin';
+import { Loader } from '@tt/loader';
 import type { TileStackState, TileState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ServerActorBuilder } from '../serverActorBuilder';

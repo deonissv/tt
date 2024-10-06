@@ -1,7 +1,7 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { BagState, Model } from '@tt/states';
-import { Loader } from '@shared/playground';
 import { BagMixin } from '@shared/playground/actors/BagMixin';
+import { Loader } from '@tt/loader';
+import type { BagState, Model } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 

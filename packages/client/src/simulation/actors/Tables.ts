@@ -5,14 +5,11 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Vector3 } from '@babylonjs/core/Maths/math.vector';
 import { CreatePlane } from '@babylonjs/core/Meshes/Builders/planeBuilder';
 import { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { TableState } from '@tt/states';
-import { ActorType } from '@tt/states';
 import {
   CustomRectangleTableMixin,
   CustomSquareTableMixin,
   GlassTableMixin,
   HexTableMixin,
-  Loader,
   OctagonTableMixin,
   PokerTableMixin,
   RectangleTableMixin,
@@ -20,6 +17,9 @@ import {
 } from '@shared/playground';
 import { getGlassMaterial } from '@shared/playground/materials/glassMaterial';
 import { degToRad } from '@shared/utils';
+import { Loader } from '@tt/loader';
+import type { TableState } from '@tt/states';
+import { ActorType } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 

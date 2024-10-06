@@ -1,8 +1,8 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { CardState } from '@tt/states';
-import { Loader } from '@shared/playground';
 import { CardMixin } from '@shared/playground/actors/CardMixin';
 import type { Constructor } from '@shared/types';
+import { Loader } from '@tt/loader';
+import type { CardState } from '@tt/states';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
