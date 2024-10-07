@@ -1,8 +1,8 @@
-export { ActorState, ActorStateUpdate } from './ActorState';
-export { BagState } from './BagState';
-export { CardGrid, CardState } from './CardState';
-export { DeckState } from './DeckState';
-export {
+export type { ActorState, ActorStateUpdate } from './ActorState';
+export type { BagState } from './BagState';
+export type { CardGrid, CardState } from './CardState';
+export type { DeckState } from './DeckState';
+export type {
   Die10State,
   Die12State,
   Die20State,
@@ -18,8 +18,8 @@ export {
   RotationValue,
 } from './DieState';
 
-export { CustomImage } from './FlatActorState';
-export { PawnTokenState } from './PawnTokenState';
-export { StackBaseState, TileStackState } from './Stack';
-export { TableState } from './TableState';
-export { TileState } from './TileState';
+export type { CustomImage } from './FlatActorState';
+export type { PawnTokenState } from './PawnTokenState';
+export type { StackBaseState, TileStackState } from './Stack';
+export type { TableState } from './TableState';
+export type { TileState } from './TileState';

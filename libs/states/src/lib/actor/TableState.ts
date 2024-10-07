@@ -1,4 +1,4 @@
-import { TableType } from '../variants';
+import type { TableType } from '../variants';
 
 export interface TableState {
   type: TableType;

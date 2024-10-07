@@ -1,7 +1,7 @@
-import { ParseInt, Tuple } from '@tt/utils';
+import type { ParseInt, Tuple } from '@tt/utils';
 import type { ActorBaseState } from '../ActorBaseState';
 import type { DieActorType } from '../ActorType';
-import { ActorType } from '../ActorType';
+import type { ActorType } from '../ActorType';
 
 export type DieType = 4 | 6 | 8 | 10 | 12 | 20;
 

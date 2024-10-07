@@ -1,4 +1,4 @@
-import { OptionalAllBut } from '@tt/utils';
+import type { OptionalAllBut } from '@tt/utils';
 import type { ActorBaseState } from '../ActorBaseState';
 import type { ActorType } from '../ActorType';
 import type { UnknownActorState } from '../ActorUnion';

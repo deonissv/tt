@@ -1,1 +1,1 @@
-export { FileFetcher, Loader } from './lib/loader';
+export * from './lib';

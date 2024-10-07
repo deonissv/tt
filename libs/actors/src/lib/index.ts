@@ -1,4 +1,5 @@
-export { Containable, isContainable } from './actions';
+export type { Containable } from './actions';
+export { isContainable } from './actions';
 
 export {
   CircleTableMixin,
@@ -26,7 +27,8 @@ export {
   ROTATION_STEP,
 } from './defaults';
 export { DieMixin } from './DieMixin';
-export { FlatMoodel, TextureBounds } from './models';
+export type { TextureBounds } from './models';
+export { FlatMoodel } from './models';
 export { SharedBase } from './SharedBase';
 export { TileMixin } from './TileMixin';
 export { TileStackMixin } from './TileStackMixin';

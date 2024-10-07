@@ -1,1 +1,1 @@
-export { Channel } from './lib/channel';
+export * from './lib';

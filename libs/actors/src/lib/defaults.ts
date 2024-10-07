@@ -1,4 +1,4 @@
-import { Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
 
 export const DEFAULT_MASS = 1;
 export const DEFAULT_SCALE: Tuple<number, 3> = [1, 1, 1];

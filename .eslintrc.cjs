@@ -28,6 +28,8 @@ module.exports = {
       './libs/simulation/tsconfig.json',
       './libs/states/tsconfig.json',
       './libs/tts-parser/tsconfig.json',
+      './libs/tts-parser/tsconfig.lib.json',
+      './libs/tts-parser/tsconfig.spec.json',
       './libs/tts-save/tsconfig.json',
       './libs/utils/tsconfig.json',
     ],

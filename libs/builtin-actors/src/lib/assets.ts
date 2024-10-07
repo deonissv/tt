@@ -1,5 +1,7 @@
-import { ActorType, DieBaseState, Material, Model, TileType, Transformation } from '@tt/states';
-import { degToRad, Tuple } from '@tt/utils';
+import type { DieBaseState, Material, Model, Transformation } from '@tt/states';
+import { ActorType, TileType } from '@tt/states';
+import type { Tuple } from '@tt/utils';
+import { degToRad } from '@tt/utils';
 
 export const AssetManagerProxy = (staticHost: string) => {
   const assetsPath = `${staticHost}/assets`;

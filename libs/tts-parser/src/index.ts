@@ -1,1 +1,1 @@
-export * from './lib/tts-parser';
+export * from './lib/';

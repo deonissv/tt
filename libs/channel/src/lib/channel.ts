@@ -1,4 +1,4 @@
-import { MSG } from '@tt/actions';
+import type { MSG } from '@tt/actions';
 import type ws from 'ws';
 import { type MessageEvent as me } from 'ws';
 

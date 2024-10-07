@@ -1,6 +1,6 @@
 import type { ActorBaseState } from '../ActorBaseState';
 import type { ActorType } from '../ActorType';
-import { TileType } from '../variants';
+import type { TileType } from '../variants';
 import type { CustomImage } from './FlatActorState';
 
 export interface StackBaseState extends ActorBaseState, CustomImage {

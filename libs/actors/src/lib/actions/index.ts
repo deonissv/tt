@@ -1,1 +1,2 @@
-export { Containable, isContainable } from './Containable';
+export type { Containable } from './Containable';
+export { isContainable } from './Containable';

@@ -1,5 +1,5 @@
 import type { SimulationState, UnknownActorState } from '@tt/states';
-import { Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
 
 import type { ClientAction, ServerAction, SimAction } from './actions';
 import type {

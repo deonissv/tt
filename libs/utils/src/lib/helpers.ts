@@ -1,4 +1,4 @@
-import { Tuple } from './types';
+import type { Tuple } from './types';
 
 export const PRECISION_EPSILON = 0.001;
 export function floatCompare(a: number, b: number, epsilon = PRECISION_EPSILON): boolean {
@@ -28,10 +28,9 @@ export const vecFloatCompare = <N extends number>(
   b: Tuple<number, N>,
   epsilon = PRECISION_EPSILON,
 ): boolean => {
-  return Array.prototype.some.call(
-    a,
-    (v: number, i: number) => !floatCompare(v, b[i as keyof typeof b] as number, epsilon),
-  );
+  const aArr = a as number[];
+  const bArr = b as number[];
+  return aArr.some((v, i) => !floatCompare(v, bArr[i], epsilon));
 };
 
 /**
@@ -55,7 +54,7 @@ export function getRandomInt(min: number, max: number) {
  * @returns `true` if the string is a valid URL, `false` otherwise.
  */
 export const isURL = (urlString: string): boolean => {
-  let url;
+  let url: URL;
   try {
     url = new URL(urlString);
   } catch {

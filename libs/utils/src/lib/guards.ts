@@ -11,7 +11,7 @@ export const hasProperty = <K extends string>(object: object, key: K): object is
 };
 
 export const hasOwnProperty = <K extends string>(object: object, key: K): object is { [P in K]: unknown } => {
-  return Object.prototype.hasOwnProperty.call(object, key);
+  return Object.prototype.hasOwnProperty.call(object, key) as boolean;
 };
 
 export const isTuple = <T, N extends number>(array: T[], size: N): array is Tuple<T, N> => {

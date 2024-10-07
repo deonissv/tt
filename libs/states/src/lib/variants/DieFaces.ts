@@ -1,5 +1,6 @@
-import { DieType } from '../actor';
-import { ActorType, DieActorType } from '../ActorType';
+import type { DieType } from '../actor';
+import type { DieActorType } from '../ActorType';
+import { ActorType } from '../ActorType';
 
 export const DieFacesNumber: Record<DieActorType, DieType> = {
   [ActorType.DIE4]: 4,

@@ -1,1 +1,1 @@
-export { AssetManagerProxy } from './lib/assets';
+export * from './lib';

@@ -1,5 +1,5 @@
-import { ActorType } from './ActorType';
-import { Transformation } from './Transformation';
+import type { ActorType } from './ActorType';
+import type { Transformation } from './Transformation';
 
 export interface ActorBaseState {
   type: ActorType;

@@ -1,6 +1,5 @@
 export { hasOwnProperty, hasProperty, isArray, isNumber, isObject, isString, isTuple, isUnknownObject } from './guards';
 export {
-  DebouncedFunction,
   PRECISION_EPSILON,
   UUIDv4,
   debounce,
@@ -19,7 +18,8 @@ export {
   vecFloatCompare,
   wait,
 } from './helpers';
-export {
+export type { DebouncedFunction } from './helpers';
+export type {
   Constructor,
   DeepPartial,
   Defined,

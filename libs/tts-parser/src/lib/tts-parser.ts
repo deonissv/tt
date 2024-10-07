@@ -26,17 +26,8 @@ import {
   type TileState,
   type TileType,
 } from '@tt/states';
-import {
-  DeepPartial,
-  Defined,
-  degToRad,
-  hasProperty,
-  isNumber,
-  isObject,
-  isTuple,
-  OptionalAllBut,
-  Tuple,
-} from '@tt/utils';
+import type { DeepPartial, Defined, OptionalAllBut, Tuple } from '@tt/utils';
+import { degToRad, hasProperty, isNumber, isObject, isTuple } from '@tt/utils';
 import { ParserBase } from './parser-base';
 
 type MinimalObjectState = OptionalAllBut<ObjectState, ['GUID', 'Name']>;
