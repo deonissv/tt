@@ -1,23 +1,22 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
-import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-
-import { SimulationScene } from './SimulationScene';
-
-import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
-
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
+import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
+import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import type { Tuple } from '@babylonjs/core/types';
-import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '@shared/constants';
+
 import { Logger } from '@tt/logger';
 import { EngineFactory, SimulationBase, SimulationSceneBase } from '@tt/simulation';
 import type { CardGrid, UnknownActorState } from '@tt/states';
 import { ActorType, type SimulationStateSave } from '@tt/states';
+
+import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
 import { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
+import { SimulationScene } from './SimulationScene';
 
 export interface SimulationCallbacks {
   onPickItem: (deck: Deck) => void;

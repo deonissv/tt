@@ -1,6 +1,5 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { getPhSim } from '@server/test/testUtils';
-import { PICK_HIGHT } from '@shared/constants';
 import { initHavok } from '@shared/initHavok';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
@@ -9,6 +8,8 @@ import { ActionHandler } from './action-handler';
 import type { Card } from './actors';
 import { Actor, Deck, ServerBase, Tile, TileStack } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
+
+const PICK_HIGHT = 1;
 
 describe('handleAction', () => {
   let actionHandler: ActionHandler;
