@@ -8,6 +8,7 @@ COPY tsconfig.base.json ./
 COPY client.tsconfig.json tsconfig.json
 COPY .env ./.env
 
+COPY libs ./libs
 COPY packages ./packages
 
 RUN npm run i:all
@@ -24,9 +25,8 @@ COPY package.json ./
 COPY package-lock.json ./
 COPY tsconfig.base.json ./
 
+COPY libs ./libs
 COPY packages/server packages/server
-COPY packages/shared packages/shared
-
 
 RUN npm ci --only=production
 RUN npm run server db:gen
