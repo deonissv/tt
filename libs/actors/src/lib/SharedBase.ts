@@ -14,12 +14,8 @@ import type {
   Transformation,
   UnknownActorState,
 } from '@tt/states';
-import { floatCompare, Tuple, vecDelta } from '@tt/utils';
-
-export const DEFAULT_MASS = 1;
-export const DEFAULT_SCALE: Tuple<number, 3> = [1, 1, 1];
-export const DEFAULT_ROTATION: Tuple<number, 3> = [0, 0, 0];
-export const DEFAULT_POSITION: Tuple<number, 3> = [0, 0, 0];
+import { floatCompare, vecDelta } from '@tt/utils';
+import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from './defaults';
 
 export class SharedBase<T extends ActorBaseState = ActorBaseState> extends TransformNode {
   guid: string;

@@ -1,5 +1,5 @@
-import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import { CursorsPld, MsgMap, RerenderDeckPld, ServerAction, ServerActionMsg } from '@tt/actions';
+import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@tt/actors';
 import {
   ActorType,
   type ActorBaseState,
