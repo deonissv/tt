@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { getErrorMsg } from '@client/src/utils';
+import { RoomPreviewDto } from '@tt/dto';
+
 import { PromiseModal, RoomCard, Spinner, useToast } from '@components';
 import { AuthService, RoomService } from '@services';
-import { RoomPreviewDto } from '@tt/dto';
+import { getErrorMsg } from '../../utils';
 
 export const Saves: React.FC = (): React.ReactNode => {
   const { addToast } = useToast();

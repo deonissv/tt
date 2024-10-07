@@ -8,6 +8,9 @@
     "noFallthroughCasesInSwitch": false,
     "outDir": "./dist",
   },
-  "include": ["./../server/**/*",  "../shared/src/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "include": [],
+  "references": [
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.spec.json" }
+  ]
 }

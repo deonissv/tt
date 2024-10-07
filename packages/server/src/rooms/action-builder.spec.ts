@@ -1,8 +1,8 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
-import { getPhSim } from '@server/test/testUtils';
 import { MsgMap, ServerAction } from '@tt/actions';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
+import { getPhSim } from '../../test/testUtils';
 import type { Card } from '../simulation/actors';
 import { Actor, Deck, ServerBase } from '../simulation/actors';
 import { ServerActorBuilder } from '../simulation/serverActorBuilder';

@@ -1,14 +1,14 @@
 import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import type { Room } from '@prisma/client';
-import { useApp } from '@server/test/useApp';
-import { useDatabaseMock } from '@server/test/useDatabaseMock';
-import type { SimulationStateSave } from '@tt/states';
 import type { CreateRoomDto, RoomwDto } from '@tt/dto';
+import type { SimulationStateSave } from '@tt/states';
 import type { Server } from 'net';
 import request from 'supertest';
 import type { MockInstance } from 'vitest';
 import { authMockAdmin, authMockAdminToken, authMockUserToken } from '../../test/authMock';
+import { useApp } from '../../test/useApp';
+import { useDatabaseMock } from '../../test/useDatabaseMock';
 import type { PrismaService } from '../prisma/prisma.service';
 import { RoomsService } from './rooms.service';
 

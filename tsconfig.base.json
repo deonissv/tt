@@ -47,7 +47,6 @@
       "@tt/simulation": ["libs/simulation/src/index"],
       "@tt/builtin-actors": ["libs/builtin-actors/src/index"],
       "@tt/demo-saves": ["libs/demo-saves/src/index"],
-      "@server/*": ["packages/server/*"],
     }
   },
   "exclude": ["node_modules", "packages/**/dist"]

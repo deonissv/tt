@@ -3,10 +3,10 @@ import type { INestApplication } from '@nestjs/common';
 import { WebSocket } from 'ws';
 import { authMockAdminToken } from '../../test/authMock';
 
-import { wsConnect } from '@server/test/testUtils';
-import { useApp } from '@server/test/useApp';
-import { useDatabaseMock } from '@server/test/useDatabaseMock';
 import type { Server } from 'net';
+import { wsConnect } from '../../test/testUtils';
+import { useApp } from '../../test/useApp';
+import { useDatabaseMock } from '../../test/useDatabaseMock';
 
 const PORT = 3333;
 

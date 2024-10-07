@@ -3,8 +3,8 @@ import { Test } from '@nestjs/testing';
 import type { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { AppModule } from '@server/src/app.module';
 import type { Server } from 'net';
+import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/prisma/prisma.service';
 import useConfigServiceMock from './useConfigServiceMock';
 

@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { TTSParser } from '@client/src/TTSParser';
 import { Button, DragDropLoader, Input, JsonTextArea, useToast } from '@components';
 import { GameService } from '@services';
 import { GameDto, UpdateGameDto } from '@tt/dto';
 import { SimulationStateSave } from '@tt/states';
 import { isURL } from '@tt/utils';
+import { TTSParser } from '../../TTSParser';
 
 export const CreateGame = () => {
   const navigate = useNavigate();
