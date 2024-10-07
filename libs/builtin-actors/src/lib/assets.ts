@@ -1,7 +1,7 @@
 import { ActorType, DieBaseState, Material, Model, TileType, Transformation } from '@tt/states';
 import { degToRad, Tuple } from '@tt/utils';
 
-export const AssetManager = (staticHost: string) => {
+export const AssetManagerProxy = (staticHost: string) => {
   const assetsPath = `${staticHost}/assets`;
   const feltMaterialProps: Material = {
     diffuseURL: `${assetsPath}/felt_diff.png`,

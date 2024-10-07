@@ -1,4 +1,4 @@
 import { STATIC_HOST } from '@client/src/config';
-import { AssetManager as AssetManagerC } from '@shared/assets';
+import { AssetManagerProxy } from '@tt/builtin-actors';
 
-export const AssetsManager = AssetManagerC(STATIC_HOST);
+export const AssetsManager = AssetManagerProxy(STATIC_HOST);

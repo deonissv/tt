@@ -40,6 +40,7 @@
       "@tt/utils": ["../libs/utils/src/index"],
       "@tt/actors": ["../libs/actors/src/index"],
       "@tt/simulation": ["../libs/simulation/src/index"],
+      "@tt/builtin-actors": ["../libs/builtin-actors/src/index"],
       "@components": [ "client/src/components/index"],
       "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],
