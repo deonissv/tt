@@ -1,5 +1,6 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
-import { MsgMap, ServerAction } from '@tt/actions';
+import type { MsgMap } from '@tt/actions';
+import { ServerAction } from '@tt/actions';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
 import { getPhSim } from '../../test/testUtils';

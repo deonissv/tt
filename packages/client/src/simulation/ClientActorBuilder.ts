@@ -1,6 +1,5 @@
-import {
+import type {
   ActorState,
-  ActorType,
   BagState,
   CardState,
   DeckState,
@@ -17,6 +16,7 @@ import {
   TileState,
   UnknownActorState,
 } from '@tt/states';
+import { ActorType } from '@tt/states';
 
 import type { ClientBase } from './actors';
 import {

@@ -8,11 +8,12 @@ import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 
 import { Logger } from '@tt/logger';
-import { EngineFactory, SimulationBase, SimulationSceneBase } from '@tt/simulation';
+import type { SimulationSceneBase } from '@tt/simulation';
+import { EngineFactory, SimulationBase } from '@tt/simulation';
 import type { CardGrid, UnknownActorState } from '@tt/states';
 import { ActorType, type SimulationStateSave } from '@tt/states';
 
-import { Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
 import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
 import { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';

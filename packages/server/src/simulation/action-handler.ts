@@ -1,5 +1,6 @@
 import type { Tuple } from '@babylonjs/core';
-import { ClientAction, ClientActionMsg } from '@tt/actions';
+import type { ClientActionMsg } from '@tt/actions';
+import { ClientAction } from '@tt/actions';
 import { isContainable } from '@tt/actors';
 import type { Client } from '../rooms/client';
 import { Die10, Die12, Die20, Die4, Die6, Die6Round, Die8, type ServerBase } from './actors';

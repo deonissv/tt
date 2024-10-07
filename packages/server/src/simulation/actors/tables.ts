@@ -14,7 +14,7 @@ import { CreatePlane, Mesh } from '@babylonjs/core';
 
 import { Loader } from '@tt/loader';
 import { ActorType } from '@tt/states';
-import { Constructor } from '@tt/utils';
+import type { Constructor } from '@tt/utils';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

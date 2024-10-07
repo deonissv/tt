@@ -1,7 +1,8 @@
 import { AuthService, RoomService } from '@services';
-import { ActionMsg, ClientAction, ClientActionMsg, CursorsPld, DownloadProgressPld, ServerAction } from '@tt/actions';
+import type { ActionMsg, ClientActionMsg, CursorsPld, DownloadProgressPld } from '@tt/actions';
+import { ClientAction, ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
-import { Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
 import type { Dispatch, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 import type { ClientBase } from './actors';

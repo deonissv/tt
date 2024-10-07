@@ -2,7 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 
-import { GamePreviewDto } from '@tt/dto';
+import type { GamePreviewDto } from '@tt/dto';
 import type { Server } from 'net';
 import {
   authMockAdmin,

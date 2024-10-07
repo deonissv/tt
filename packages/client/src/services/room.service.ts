@@ -4,9 +4,9 @@ import { getAccessToken } from '../utils';
 
 import { ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
-import { RoomPreviewDto, RoomwDto } from '@tt/dto';
+import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import type { SimulationState } from '@tt/states';
-import { Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
 import type { Dispatch, SetStateAction } from 'react';
 
 export const RoomService = {

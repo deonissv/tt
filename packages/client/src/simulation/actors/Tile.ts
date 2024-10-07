@@ -1,5 +1,6 @@
 import type { Texture } from '@babylonjs/core';
-import { FlatMoodel, TextureBounds, TileMixin } from '@tt/actors';
+import type { TextureBounds } from '@tt/actors';
+import { FlatMoodel, TileMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { TileState } from '@tt/states';
 import { TileType } from '@tt/states';

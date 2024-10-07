@@ -3,7 +3,7 @@ import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 
 import type { User } from '@prisma/client';
-import { CreateUserDto } from '@tt/dto';
+import type { CreateUserDto } from '@tt/dto';
 import type { Server } from 'net';
 import { useApp } from '../../test/useApp';
 import { useDatabaseMock } from '../../test/useDatabaseMock';

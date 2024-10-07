@@ -1,4 +1,5 @@
-import { CursorsPld, MsgMap, RerenderDeckPld, ServerAction, ServerActionMsg } from '@tt/actions';
+import type { CursorsPld, MsgMap, RerenderDeckPld, ServerActionMsg } from '@tt/actions';
+import { ServerAction } from '@tt/actions';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@tt/actors';
 import {
   ActorType,

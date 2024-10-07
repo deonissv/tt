@@ -1,4 +1,4 @@
-import { AccessTokenDto } from '@tt/dto';
+import type { AccessTokenDto } from '@tt/dto';
 import { hasProperty, isObject } from '@tt/utils';
 import { AxiosError } from 'axios';
 

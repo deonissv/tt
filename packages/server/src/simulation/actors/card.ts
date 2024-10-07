@@ -2,7 +2,7 @@ import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { CardMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { CardState } from '@tt/states';
-import { Constructor } from '@tt/utils';
+import type { Constructor } from '@tt/utils';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

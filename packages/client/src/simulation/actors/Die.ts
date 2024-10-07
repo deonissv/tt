@@ -3,7 +3,7 @@ import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { DieMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { Die6RoundState, DieBaseState } from '@tt/states';
-import { Constructor } from '@tt/utils';
+import type { Constructor } from '@tt/utils';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 

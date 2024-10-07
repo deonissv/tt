@@ -3,7 +3,8 @@ import { DieMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { DieState } from '@tt/states';
 import { DieFacesNumber } from '@tt/states';
-import { Constructor, getRandomInt } from '@tt/utils';
+import type { Constructor } from '@tt/utils';
+import { getRandomInt } from '@tt/utils';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 

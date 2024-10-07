@@ -11,7 +11,7 @@ import {
 } from '@babylonjs/core';
 
 import { SharedBase } from '@tt/actors';
-import { SimulationSceneBase } from '@tt/simulation';
+import type { SimulationSceneBase } from '@tt/simulation';
 import type { DieBaseState } from '@tt/states';
 import { ActorType, type ActorBaseState } from '@tt/states';
 import { PRECISION_EPSILON } from '@tt/utils';
