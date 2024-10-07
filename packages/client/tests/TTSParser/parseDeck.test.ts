@@ -1,5 +1,5 @@
-import { MUNCHKIN } from '@assets/munchkin';
 import { TTSParserC } from '@client/src/TTSParser';
+import { MUNCHKIN } from '@tt/demo-saves';
 import type { ActorBaseState, CardState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, omitKeys, Tuple } from '@tt/utils';

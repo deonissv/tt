@@ -1,6 +1,5 @@
-import { CHESS5 } from '@assets/chess5';
-import { MUNCHKIN } from '@assets/munchkin';
 import { TTSParserC } from '@client/src/TTSParser';
+import { CHESS5, MUNCHKIN } from '@tt/demo-saves';
 import type { TableState } from '@tt/states';
 import { SaveState } from '@tt/tts-save';
 

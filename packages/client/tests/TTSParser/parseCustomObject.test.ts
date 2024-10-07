@@ -1,5 +1,5 @@
-import { CHESS5 } from '@assets/chess5';
 import { TTSParserC } from '@client/src/TTSParser/TTSParser';
+import { CHESS5 } from '@tt/demo-saves';
 import type { ActorState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';

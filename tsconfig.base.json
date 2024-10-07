@@ -46,6 +46,7 @@
       "@tt/actors": ["libs/actors/src/index"],
       "@tt/simulation": ["libs/simulation/src/index"],
       "@tt/builtin-actors": ["libs/builtin-actors/src/index"],
+      "@tt/demo-saves": ["libs/demo-saves/src/index"],
       "@shared/*": ["packages/shared/src/*"],
       "@server/*": ["packages/server/*"],
     }

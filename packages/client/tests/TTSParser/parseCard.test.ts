@@ -1,5 +1,5 @@
-import { DEMO } from '@assets/demo';
 import { TTSParserC } from '@client/src/TTSParser';
+import { DEMO } from '@tt/demo-saves';
 import type { CardState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';

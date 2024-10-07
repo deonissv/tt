@@ -1,5 +1,5 @@
-import { CATAN } from '@assets/catan';
 import { TTSParserC } from '@client/src/TTSParser/TTSParser';
+import { CATAN } from '@tt/demo-saves';
 import type { TileState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';

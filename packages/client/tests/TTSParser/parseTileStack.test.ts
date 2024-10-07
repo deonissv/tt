@@ -1,5 +1,5 @@
-import { DEMO } from '@assets/demo';
 import { TTSParserC } from '@client/src/TTSParser';
+import { DEMO } from '@tt/demo-saves';
 import { ActorType, TileStackState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';

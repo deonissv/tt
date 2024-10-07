@@ -1,6 +1,5 @@
-import { CATAN } from '@assets/catan';
-import { MUNCHKIN } from '@assets/munchkin';
 import { TTSParserC } from '@client/src/TTSParser';
+import { CATAN, MUNCHKIN } from '@tt/demo-saves';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';
 
