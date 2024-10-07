@@ -1,7 +1,6 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Tuple } from '@babylonjs/core/types';
 import { Simulation } from '@client/src/simulation';
 import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
@@ -9,7 +8,7 @@ import { RoomService } from '@services';
 import type { CursorsPld, DownloadProgressPld } from '@tt/actions';
 import { RoomwDto } from '@tt/dto';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
-import { debounce, degToRad, getB64URL } from '@tt/utils';
+import { debounce, degToRad, getB64URL, Tuple } from '@tt/utils';
 import { useNavigate } from 'react-router-dom';
 
 import { Loader } from '@tt/loader';

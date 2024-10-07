@@ -1,6 +1,5 @@
-import type { Tuple } from '@babylonjs/core/types';
 import { ActorType, DieBaseState, Material, Model, TileType, Transformation } from '@tt/states';
-import { degToRad } from '@tt/utils';
+import { degToRad, Tuple } from '@tt/utils';
 
 export const AssetManager = (staticHost: string) => {
   const assetsPath = `${staticHost}/assets`;

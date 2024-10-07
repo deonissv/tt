@@ -1,5 +1,5 @@
-import type { Tuple } from '@babylonjs/core/types';
 import { CardGrid, UnknownActorState } from '@tt/states';
+import { Tuple } from '@tt/utils';
 
 export interface DownloadProgressPld {
   loaded: number;

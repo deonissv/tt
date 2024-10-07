@@ -2,11 +2,11 @@ import axios from 'axios';
 import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
 
-import type { Tuple } from '@babylonjs/core/types';
 import { ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
 import { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import type { SimulationState } from '@tt/states';
+import { Tuple } from '@tt/utils';
 import type { Dispatch, SetStateAction } from 'react';
 
 export const RoomService = {

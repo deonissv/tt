@@ -1,6 +1,5 @@
 import type { CustomImageState, CustomMeshState, ObjectState, TransformState } from '@tt/tts-save';
 
-import type { Tuple } from '@babylonjs/core/types';
 import type {
   ActorBaseState,
   CardState,
@@ -27,7 +26,17 @@ import {
   type TileState,
   type TileType,
 } from '@tt/states';
-import { DeepPartial, Defined, degToRad, hasProperty, isNumber, isObject, isTuple, OptionalAllBut } from '@tt/utils';
+import {
+  DeepPartial,
+  Defined,
+  degToRad,
+  hasProperty,
+  isNumber,
+  isObject,
+  isTuple,
+  OptionalAllBut,
+  Tuple,
+} from '@tt/utils';
 import { ParserBase } from './ParserBase';
 
 type MinimalObjectState = OptionalAllBut<ObjectState, ['GUID', 'Name']>;
