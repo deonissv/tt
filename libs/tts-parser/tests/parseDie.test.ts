@@ -1,14 +1,12 @@
-import { TTSParserC } from '@client/src/TTSParser';
 import { DEMO } from '@tt/demo-saves';
 import type { Die4State, Die6State, Die8State } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseDie', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse demo die4', () => {
@@ -36,7 +34,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = parser.parseDieN(DEMO.DIE4 as unknown as ObjectState, ActorType.DIE4);
+    const result = TTSParser.parseDieN(DEMO.DIE4 as unknown as ObjectState, ActorType.DIE4);
     expect(result).toMatchObject(expected);
   });
 
@@ -73,7 +71,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = parser.parseDieN(DEMO.DIE6 as unknown as ObjectState, ActorType.DIE6);
+    const result = TTSParser.parseDieN(DEMO.DIE6 as unknown as ObjectState, ActorType.DIE6);
     expect(result).toMatchObject(expected);
   });
 
@@ -118,7 +116,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = parser.parseDieN(DEMO.DIE8 as unknown as ObjectState, ActorType.DIE8);
+    const result = TTSParser.parseDieN(DEMO.DIE8 as unknown as ObjectState, ActorType.DIE8);
     expect(result).toMatchObject(expected);
   });
 });

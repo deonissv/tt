@@ -1,14 +1,12 @@
-import { TTSParserC } from '@client/src/TTSParser';
 import { DEMO } from '@tt/demo-saves';
 import type { CardState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseCard', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse demo types', () => {
@@ -25,7 +23,7 @@ describe('TTSParser - parseCard', () => {
       sequence: 33,
     };
 
-    const result = parser.parseCard(DEMO.CARD as unknown as ObjectState);
+    const result = TTSParser.parseCard(DEMO.CARD as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 });

@@ -1,17 +1,15 @@
-import { TTSParserC } from '@client/src/TTSParser';
 import { CATAN, MUNCHKIN } from '@tt/demo-saves';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseActorBase', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should parse munchkin deck', () => {
-    const expected: ReturnType<typeof parser.parseActorBase> = {
+    const expected: ReturnType<typeof TTSParser.parseActorBase> = {
       guid: '482ca1',
       name: 'Deck',
       transformation: {
@@ -21,11 +19,11 @@ describe('TTSParser - parseActorBase', () => {
       },
       colorDiffuse: [0.713235259, 0.713235259, 0.713235259],
     };
-    expect(parser.parseActorBase(MUNCHKIN.DECK as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseActorBase(MUNCHKIN.DECK as unknown as ObjectState)).toEqual(expected);
   });
 
   it('should parse catan deck', () => {
-    const expected: ReturnType<typeof parser.parseActorBase> = {
+    const expected: ReturnType<typeof TTSParser.parseActorBase> = {
       guid: '162411',
       name: 'Deck',
       transformation: {
@@ -35,6 +33,6 @@ describe('TTSParser - parseActorBase', () => {
       },
       colorDiffuse: [0.713235259, 0.713235259, 0.713235259],
     };
-    expect(parser.parseActorBase(CATAN.DECK as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseActorBase(CATAN.DECK as unknown as ObjectState)).toEqual(expected);
   });
 });

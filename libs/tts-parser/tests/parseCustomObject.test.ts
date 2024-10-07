@@ -1,14 +1,12 @@
-import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import { CHESS5 } from '@tt/demo-saves';
 import type { ActorState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseCustomObject', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse a custom object with all properties', () => {
@@ -29,6 +27,6 @@ describe('TTSParser - parseCustomObject', () => {
       },
       colorDiffuse: [1.0, 1.0, 1.0],
     };
-    expect(parser.parseCustomObject(CHESS5.PAWN as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseCustomObject(CHESS5.PAWN as unknown as ObjectState)).toEqual(expected);
   });
 });

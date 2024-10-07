@@ -1,12 +1,11 @@
-import { TTSParserC } from '@client/src/TTSParser';
 import { DEMO } from '@tt/demo-saves';
 import { ActorType } from '@tt/states';
 
-describe('TTSParser - mapType', () => {
-  let parser: TTSParserC;
+import { TTSParser } from '../src';
 
+describe('TTSParser - mapType', () => {
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse demo types', () => {
@@ -33,17 +32,17 @@ describe('TTSParser - mapType', () => {
       ActorType.BAG,
     ];
 
-    const result = DEMO.OBJ.ObjectStates.map(obj => parser.mapType(obj.Name));
+    const result = DEMO.OBJ.ObjectStates.map(obj => TTSParser.mapType(obj.Name));
     expect(result).toEqual(expected);
   });
 
   it('should parse rounded dice', () => {
-    const result = parser.mapType('Die_6_Rounded');
+    const result = TTSParser.mapType('Die_6_Rounded');
     expect(result).toEqual(ActorType.DIE6ROUND);
   });
 
   it('should return null for unknown types', () => {
-    const result = parser.mapType('Unknown');
+    const result = TTSParser.mapType('Unknown');
     expect(result === null).toBeTruthy();
   });
 });

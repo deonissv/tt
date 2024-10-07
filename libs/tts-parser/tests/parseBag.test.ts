@@ -1,15 +1,14 @@
-import { TTSParserC } from '@client/src/TTSParser';
 import { DEMO } from '@tt/demo-saves';
 import type { BagState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { DeepPartial } from '@tt/utils';
 
-describe('TTSParser - parseBag', () => {
-  let parser: TTSParserC;
+import { TTSParser } from '../src';
 
+describe('TTSParser - parseBag', () => {
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse demo bag', () => {
@@ -31,7 +30,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = parser.parseBag(DEMO.BAG as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 
@@ -54,7 +53,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = parser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
 });

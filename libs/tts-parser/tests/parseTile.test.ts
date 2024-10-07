@@ -1,14 +1,12 @@
-import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import { CATAN } from '@tt/demo-saves';
 import type { TileState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, Tuple } from '@tt/utils';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseTile', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse catan box tile', () => {
@@ -27,7 +25,7 @@ describe('TTSParser - parseTile', () => {
       colorDiffuse: [1, 1, 1],
     };
 
-    const parsed = parser.parseTile(CATAN.LONGEST_ROAD as unknown as ObjectState);
+    const parsed = TTSParser.parseTile(CATAN.LONGEST_ROAD as unknown as ObjectState);
     expect(parsed !== null).toBeTruthy();
     expect(parsed).toStrictEqual(expected);
   });

@@ -1,14 +1,12 @@
-import { TTSParserC } from '@client/src/TTSParser';
 import { MUNCHKIN } from '@tt/demo-saves';
 import type { ActorBaseState, CardState } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
 import { degToRad, omitKeys, Tuple } from '@tt/utils';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseDeck', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse a deck  with all properties', () => {
@@ -98,7 +96,7 @@ describe('TTSParser - parseDeck', () => {
       ],
     };
 
-    const parsed = parser.parseDeck(MUNCHKIN.DECK as unknown as ObjectState)!;
+    const parsed = TTSParser.parseDeck(MUNCHKIN.DECK as unknown as ObjectState)!;
     expect(omitKeys(parsed, ['cards'])).toStrictEqual(omitKeys(expected, ['cards']));
 
     expected?.cards?.sort((a, b) => a.guid.localeCompare(b.guid));
@@ -110,6 +108,6 @@ describe('TTSParser - parseDeck', () => {
   });
 
   it('should return null for incorrect or malformed deck objects', () => {
-    expect(parser.parseDeck({} as unknown as ObjectState) === null).toBeTruthy();
+    expect(TTSParser.parseDeck({} as unknown as ObjectState) === null).toBeTruthy();
   });
 });

@@ -1,13 +1,11 @@
-import { TTSParserC } from '@client/src/TTSParser/TTSParser';
 import { CHESS5 } from '@tt/demo-saves';
 import type { Model } from '@tt/states';
 import { ObjectState } from '@tt/tts-save';
+import { TTSParser } from '../src';
 
 describe('TTSParser - parseModel', () => {
-  let parser: TTSParserC;
-
   beforeEach(() => {
-    parser = new TTSParserC();
+    TTSParser.reset();
   });
 
   it('should correctly parse pawn custom mesh model', () => {
@@ -16,6 +14,6 @@ describe('TTSParser - parseModel', () => {
       colliderURL: 'http://pastebin.com/raw.php?i=MyzfTvHM',
       diffuseURL: 'http://i.imgur.com/BU3le9N.jpg',
     };
-    expect(parser.parseModel(CHESS5.PAWN.CustomMesh as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseModel(CHESS5.PAWN.CustomMesh as unknown as ObjectState)).toEqual(expected);
   });
 });

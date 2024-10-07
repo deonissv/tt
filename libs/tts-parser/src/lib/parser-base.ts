@@ -1,18 +1,23 @@
 import { hasProperty, isNumber, isObject, isString, isURL } from '@tt/utils';
 
 export class ParserBase {
-  errors: string[] = [];
-  guids: string[] = [];
+  static errors: string[] = [];
+  static guids: string[] = [];
 
-  get isErrored(): boolean {
+  static get isErrored(): boolean {
     return this.errors.length > 0;
   }
 
-  get guid(): string | undefined {
+  static get guid(): string | undefined {
     return this.guids.at(-1);
   }
 
-  assert(condition: boolean, message?: string): boolean {
+  static reset(): void {
+    this.errors = [];
+    this.guids = [];
+  }
+
+  static assert(condition: boolean, message?: string): boolean {
     if (!condition) {
       if (message) this.errors.push(message);
       return false;
@@ -20,31 +25,35 @@ export class ParserBase {
     return true;
   }
 
-  hasProperty<T extends object, K extends string>(obj: T, name: K, message?: string): obj is T & { [P in K]: unknown } {
+  static hasProperty<T extends object, K extends string>(
+    obj: T,
+    name: K,
+    message?: string,
+  ): obj is T & { [P in K]: unknown } {
     return this.assert(hasProperty(obj, name), message);
   }
 
-  hasPropertyString<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
+  static hasPropertyString<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
     return hasProperty(obj, name) && isString(obj[name]);
   }
 
-  hasPropertyURL<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
+  static hasPropertyURL<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
     return this.hasPropertyString(obj, name) && isURL(obj[name]);
   }
 
-  isString(obj: unknown, message?: string): obj is string {
+  static isString(obj: unknown, message?: string): obj is string {
     return this.assert(isString(obj), message);
   }
 
-  isArray(obj: unknown, message?: string): obj is unknown[] {
+  static isArray(obj: unknown, message?: string): obj is unknown[] {
     return this.assert(Array.isArray(obj), message);
   }
 
-  isObject(obj: unknown, message?: string): obj is object {
+  static isObject(obj: unknown, message?: string): obj is object {
     return this.assert(isObject(obj), message);
   }
 
-  isPropertyString<T extends object, K extends keyof T>(
+  static isPropertyString<T extends object, K extends keyof T>(
     obj: T,
     name: K,
     message?: string,
@@ -52,11 +61,11 @@ export class ParserBase {
     return this.assert(isString(obj[name]), message);
   }
 
-  isURL(urlString: string, message?: string): boolean {
+  static isURL(urlString: string, message?: string): boolean {
     return this.assert(isURL(urlString), message);
   }
 
-  parseNumber(value: unknown): number | null {
+  static parseNumber(value: unknown): number | null {
     if (isNumber(value)) return value;
     if (isString(value)) {
       const candidate = parseInt(value);
@@ -65,7 +74,7 @@ export class ParserBase {
     return null;
   }
 
-  get errorsText() {
+  static get errorsText() {
     return {
       ERROR: 'Error',
       TALBE: {

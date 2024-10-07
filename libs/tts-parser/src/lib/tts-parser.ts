@@ -37,12 +37,12 @@ import {
   OptionalAllBut,
   Tuple,
 } from '@tt/utils';
-import { ParserBase } from './ParserBase';
+import { ParserBase } from './parser-base';
 
 type MinimalObjectState = OptionalAllBut<ObjectState, ['GUID', 'Name']>;
 
-export class TTSParserC extends ParserBase {
-  parse(tts: string): SimulationStateSave | null {
+export class TTSParser extends ParserBase {
+  static parse(tts: string): SimulationStateSave | null {
     try {
       const obj = JSON.parse(tts) as unknown;
       const save: SimulationStateSave = {
@@ -76,7 +76,7 @@ export class TTSParserC extends ParserBase {
     }
   }
 
-  parseObject = (objectState: unknown): UnknownActorState | null => {
+  static parseObject = (objectState: unknown): UnknownActorState | null => {
     if (!this.isObject(objectState, 'ERROR 4')) return null;
     if (!this.hasProperty(objectState, 'GUID', 'ERROR 5')) return null;
     if (!this.isPropertyString(objectState, 'GUID', 'ERROR 6')) return null;
@@ -94,7 +94,7 @@ export class TTSParserC extends ParserBase {
     return parsedObject;
   };
 
-  parseUnknownActorState(objectState: MinimalObjectState): UnknownActorState | null {
+  static parseUnknownActorState(objectState: MinimalObjectState): UnknownActorState | null {
     const type = this.mapType(objectState.Name);
     if (type === null) {
       this.errors.push(objectState.GUID);
@@ -127,7 +127,7 @@ export class TTSParserC extends ParserBase {
     }
   }
 
-  parseBuiltInActorState(objectState: MinimalObjectState, type: ActorType.PAWN_TOKEN): PawnTokenState | null {
+  static parseBuiltInActorState(objectState: MinimalObjectState, type: ActorType.PAWN_TOKEN): PawnTokenState | null {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
@@ -139,7 +139,7 @@ export class TTSParserC extends ParserBase {
     return pawnTokenState;
   }
 
-  parseActorBase(objectState: MinimalObjectState): Omit<ActorBaseState, 'type'> | null {
+  static parseActorBase(objectState: MinimalObjectState): Omit<ActorBaseState, 'type'> | null {
     const actorState: Omit<ActorBaseState, 'type'> = {
       guid: objectState.GUID,
       name: objectState.Name,
@@ -179,7 +179,7 @@ export class TTSParserC extends ParserBase {
     return actorState;
   }
 
-  parseModel(modelState: DeepPartial<CustomMeshState>): Model | null {
+  static parseModel(modelState: DeepPartial<CustomMeshState>): Model | null {
     if (!this.hasProperty(modelState, 'MeshURL', this.errorsText.MODEL.MESH.NO_URL)) return null;
     if (!this.isPropertyString(modelState, 'MeshURL', this.errorsText.MODEL.MESH.URL_INVALID)) return null;
     if (!this.isURL(modelState.MeshURL, this.errorsText.MODEL.MESH.URL_INVALID)) return null;
@@ -215,7 +215,7 @@ export class TTSParserC extends ParserBase {
     return model;
   }
 
-  parseTransform(transform: DeepPartial<TransformState>): Transformation | null {
+  static parseTransform(transform: DeepPartial<TransformState>): Transformation | null {
     const transformState: Transformation = {};
 
     if (!this.hasProperty(transform, 'posX', this.errorsText.TRANSFORM.NO_POS_X)) return null;
@@ -254,7 +254,7 @@ export class TTSParserC extends ParserBase {
     return transformState;
   }
 
-  parseCustomImage(customImage: DeepPartial<CustomImageState>): CustomImage | null {
+  static parseCustomImage(customImage: DeepPartial<CustomImageState>): CustomImage | null {
     if (!this.hasProperty(customImage, 'ImageURL', this.errorsText.CUSTOM_IMAGE.IMAGE_URL.NO_PROPERTY)) return null;
     if (!this.isPropertyString(customImage, 'ImageURL', this.errorsText.CUSTOM_IMAGE.IMAGE_URL.NOT_STRING)) return null;
     if (!this.isURL(customImage.ImageURL, this.errorsText.CUSTOM_IMAGE.IMAGE_URL.INVALID)) return null;
@@ -279,7 +279,7 @@ export class TTSParserC extends ParserBase {
     return flatActorState;
   }
 
-  parseTable = (tableObj: object): TableState | null => {
+  static parseTable = (tableObj: object): TableState | null => {
     if (!this.hasProperty(tableObj, 'Table', this.errorsText.TALBE.NO_TYPE_PROPERTY)) return null;
     if (!this.isPropertyString(tableObj, 'Table', this.errorsText.TALBE.TYPE_PROPERTY_NOT_STRING)) return null;
 
@@ -300,7 +300,7 @@ export class TTSParserC extends ParserBase {
     return tableState;
   };
 
-  mapTableType(type: string): TableType | null {
+  static mapTableType(type: string): TableType | null {
     // https://kb.tabletopsimulator.com/host-guides/tables/
     switch (type) {
       case 'Table_Circular':
@@ -325,7 +325,7 @@ export class TTSParserC extends ParserBase {
     return null;
   }
 
-  mapType(type: string): ActorType | null {
+  static mapType(type: string): ActorType | null {
     const loweredType = type.toLowerCase();
 
     const stack = loweredType.includes('stack');
@@ -359,7 +359,7 @@ export class TTSParserC extends ParserBase {
     return null;
   }
 
-  parseBag(objectState: MinimalObjectState): BagState | null {
+  static parseBag(objectState: MinimalObjectState): BagState | null {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
@@ -381,7 +381,7 @@ export class TTSParserC extends ParserBase {
     return bagState;
   }
 
-  parseCard(objectState: MinimalObjectState, deck?: MinimalObjectState): CardState | null {
+  static parseCard(objectState: MinimalObjectState, deck?: MinimalObjectState): CardState | null {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
@@ -428,7 +428,7 @@ export class TTSParserC extends ParserBase {
     return cardState;
   }
 
-  parseDeck(objectState: MinimalObjectState): DeckState | null {
+  static parseDeck(objectState: MinimalObjectState): DeckState | null {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
@@ -457,7 +457,7 @@ export class TTSParserC extends ParserBase {
     };
   }
 
-  parseTile(objectState: MinimalObjectState): TileState | null {
+  static parseTile(objectState: MinimalObjectState): TileState | null {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
@@ -477,7 +477,7 @@ export class TTSParserC extends ParserBase {
     return tileState;
   }
 
-  parseTileStack(objectState: MinimalObjectState): TileStackState | null {
+  static parseTileStack(objectState: MinimalObjectState): TileStackState | null {
     const tileState = this.parseTile(objectState);
     if (!tileState) {
       this.errors.push(objectState.GUID);
@@ -497,7 +497,7 @@ export class TTSParserC extends ParserBase {
     };
   }
 
-  parseCustomObject(objectState: MinimalObjectState): ActorState | null {
+  static parseCustomObject(objectState: MinimalObjectState): ActorState | null {
     if (!this.hasProperty(objectState, 'CustomMesh', this.errorsText.ACTOR.CUSTOM_MESH.NO_PROPERTY)) return null;
     if (!this.isObject(objectState.CustomMesh, this.errorsText.ACTOR.CUSTOM_MESH.NOT_OBJECT)) return null;
 
@@ -528,7 +528,7 @@ export class TTSParserC extends ParserBase {
     return actorState;
   }
 
-  parseDieN(objectState: ObjectState, dieType: DieActorType): DieState | null {
+  static parseDieN(objectState: ObjectState, dieType: DieActorType): DieState | null {
     const numFace = DieFacesNumber[dieType];
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
@@ -551,7 +551,7 @@ export class TTSParserC extends ParserBase {
     } as DieState;
   }
 
-  parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {
+  static parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
@@ -569,7 +569,7 @@ export class TTSParserC extends ParserBase {
     return dieState;
   }
 
-  parseRotatioValues(objectState: ObjectState): RotationValue[] | null {
+  static parseRotatioValues(objectState: ObjectState): RotationValue[] | null {
     if (!Object.hasOwnProperty.call(objectState, 'RotationValues')) {
       this.errors.push(objectState.GUID);
       return null;
@@ -593,7 +593,7 @@ export class TTSParserC extends ParserBase {
     return rotationValues;
   }
 
-  parseRotationValue(rotationValue: unknown, guid: string): RotationValue | null {
+  static parseRotationValue(rotationValue: unknown, guid: string): RotationValue | null {
     if (!isObject(rotationValue)) {
       this.errors.push(guid);
       return null;
@@ -646,5 +646,3 @@ export class TTSParserC extends ParserBase {
     return { rotation, value };
   }
 }
-
-export const TTSParser = new TTSParserC();
