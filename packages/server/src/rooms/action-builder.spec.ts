@@ -1,12 +1,12 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { getPhSim } from '@server/test/testUtils';
-import { initHavok } from '@shared/initHavok';
 import { MsgMap, ServerAction } from '@tt/actions';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
 import type { Card } from '../simulation/actors';
 import { Actor, Deck, ServerBase } from '../simulation/actors';
 import { ServerActorBuilder } from '../simulation/serverActorBuilder';
+import { initHavok } from '../utils';
 import { ActionBuilder } from './action-builder';
 
 describe('getSimActions', () => {

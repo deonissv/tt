@@ -1,9 +1,9 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { getPhSim } from '@server/test/testUtils';
-import { initHavok } from '@shared/initHavok';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
 import { Client } from '../rooms/client';
+import { initHavok } from '../utils';
 import { ActionHandler } from './action-handler';
 import type { Card } from './actors';
 import { Actor, Deck, ServerBase, Tile, TileStack } from './actors';

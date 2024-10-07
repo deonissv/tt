@@ -1,5 +1,5 @@
 vi.mock('@tt/loader', async () => {
-  const { LoaderMock } = await import('./mocks/LoaderMock');
+  const { LoaderMock } = await import('../../../test/LoaderMock');
   return {
     Loader: LoaderMock,
   };
