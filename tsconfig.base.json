@@ -37,5 +37,5 @@
       "@tt/*": ["libs/*/src/index"],
     }
   },
-  "exclude": ["node_modules", "packages/**/dist"]
+  "exclude": ["node_modules", "packages/**/dist", "libs/**/dist"],
 }
