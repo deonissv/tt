@@ -9,7 +9,6 @@ COPY tsconfig.base.json ./
 COPY server.tsconfig.json tsconfig.json
 
 COPY packages/server packages/server
-COPY packages/shared packages/shared
 
 RUN npm run i:all
 RUN npm run db:gen
