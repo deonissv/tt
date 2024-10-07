@@ -1,5 +1,5 @@
-import { hasProperty, isObject } from '@shared/guards';
 import { AccessTokenDto } from '@tt/dto';
+import { hasProperty, isObject } from '@tt/utils';
 import { AxiosError } from 'axios';
 
 export const fileToUrl = (file: File, type = 'application/octet-stream'): string => {

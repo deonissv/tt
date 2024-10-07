@@ -1,5 +1,4 @@
-import { hasProperty, isNumber, isObject, isString } from '@shared/guards';
-import { isURL } from '@tt/utils';
+import { hasProperty, isNumber, isObject, isString, isURL } from '@tt/utils';
 
 export class ParserBase {
   errors: string[] = [];
