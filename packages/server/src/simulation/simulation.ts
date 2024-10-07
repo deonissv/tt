@@ -3,8 +3,7 @@ import { NullEngine } from '@babylonjs/core/Engines/nullEngine';
 import { HavokPlugin, Vector3 } from '@babylonjs/core';
 import '@babylonjs/core/Helpers'; // createDefaultCameraOrLight
 import { Logger } from '@nestjs/common';
-import { SimulationBase } from '@shared/playground';
-import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+import { SimulationBase, SimulationSceneBase } from '@tt/simulation';
 import type { TableState, UnknownActorState } from '@tt/states';
 import { type SimulationStateSave } from '@tt/states';
 import type { ServerBase } from './actors';

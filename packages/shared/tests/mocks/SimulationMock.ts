@@ -4,6 +4,8 @@ import { HavokPlugin } from '@babylonjs/core/Physics/v2/Plugins/havokPlugin';
 import { Scene } from '@babylonjs/core/scene';
 import { initHavok } from '@shared/initHavok';
 
+import '@babylonjs/core/Physics/physicsEngineComponent'; // enablePhysics
+
 export const SimulationMock = (): (() => { scene: Scene; engine: NullEngine }) => {
   let engine: NullEngine;
   let scene: Scene;

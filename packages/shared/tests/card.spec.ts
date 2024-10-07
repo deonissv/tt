@@ -1,4 +1,4 @@
-vi.mock('@shared/playground/Loader', async () => {
+vi.mock('@tt/loader', async () => {
   const { LoaderMock } = await import('./mocks/LoaderMock');
   return {
     Loader: LoaderMock,

@@ -18,7 +18,6 @@ import {
   UnknownActorState,
 } from '@tt/states';
 
-import { ActorBuilder } from '@shared/playground/Simulation/ActorBuilder';
 import type { ClientBase } from './actors';
 import {
   Actor,
@@ -45,6 +44,8 @@ import {
   Tile,
   TileStack,
 } from './actors';
+
+import { ActorBuilder } from '@tt/simulation';
 
 export class ClientActorBuilderFactory extends ActorBuilder {
   async build(actorState: UnknownActorState): Promise<ClientBase | null> {

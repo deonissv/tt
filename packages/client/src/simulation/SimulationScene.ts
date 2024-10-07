@@ -17,7 +17,7 @@ import {
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
 } from '@shared/constants';
-import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+import { SimulationSceneBase } from '@tt/simulation';
 
 export class SimulationScene extends SimulationSceneBase {
   constructor(engine: AbstractEngine, leftHandedSystem = false) {

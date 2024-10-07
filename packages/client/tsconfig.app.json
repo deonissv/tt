@@ -39,6 +39,7 @@
       "@tt/channel": ["../libs/channel/src/index"],
       "@tt/utils": ["../libs/utils/src/index"],
       "@tt/actors": ["../libs/actors/src/index"],
+      "@tt/simulation": ["../libs/simulation/src/index"],
       "@components": [ "client/src/components/index"],
       "@services": [ "client/src/services/index" ],
       "@shared/*": [ "shared/src/*" ],

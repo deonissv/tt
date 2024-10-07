@@ -1,4 +1,4 @@
-import { ActorBuilder } from '@shared/playground/Simulation/ActorBuilder';
+import { ActorBuilder } from '@tt/simulation';
 import type {
   ActorState,
   BagState,

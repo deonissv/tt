@@ -4,7 +4,6 @@ import { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { TransformNode } from '@babylonjs/core/Meshes/transformNode';
 import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 
-import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
 import { Loader } from '@tt/loader';
 import { Logger } from '@tt/logger';
 import type {
@@ -15,7 +14,12 @@ import type {
   Transformation,
   UnknownActorState,
 } from '@tt/states';
-import { floatCompare, vecDelta } from '@tt/utils';
+import { floatCompare, Tuple, vecDelta } from '@tt/utils';
+
+export const DEFAULT_MASS = 1;
+export const DEFAULT_SCALE: Tuple<number, 3> = [1, 1, 1];
+export const DEFAULT_ROTATION: Tuple<number, 3> = [0, 0, 0];
+export const DEFAULT_POSITION: Tuple<number, 3> = [0, 0, 0];
 
 export class SharedBase<T extends ActorBaseState = ActorBaseState> extends TransformNode {
   guid: string;
