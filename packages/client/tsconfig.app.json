@@ -44,9 +44,7 @@
       "@tt/demo-saves": ["../libs/demo-saves/src/index"],
       "@components": [ "client/src/components/index"],
       "@services": [ "client/src/services/index" ],
-      "@shared/*": [ "shared/src/*" ],
       "@client/*": [ "client/*" ],
-      "@assets/*": [ "shared/tests/assets/*" ],
     }
   },
   "include": ["./src/**/*"],

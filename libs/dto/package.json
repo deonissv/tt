@@ -11,5 +11,9 @@
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/swagger": "^7.4.0",
+    "class-validator": "^0.14.1"
   }
 }
