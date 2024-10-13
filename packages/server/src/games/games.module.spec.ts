@@ -2,9 +2,7 @@ import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import request from 'supertest';
 
-import { useApp } from '@server/test/useApp';
-import { useDatabaseMock } from '@server/test/useDatabaseMock';
-import type { GamePreviewDto } from '@shared/dto/games';
+import type { GamePreviewDto } from '@tt/dto';
 import type { Server } from 'net';
 import {
   authMockAdmin,
@@ -14,6 +12,8 @@ import {
   authMockUser,
   authMockUserToken,
 } from '../../test/authMock';
+import { useApp } from '../../test/useApp';
+import { useDatabaseMock } from '../../test/useDatabaseMock';
 import type { PrismaService } from '../prisma/prisma.service';
 
 describe('GamesModule', () => {

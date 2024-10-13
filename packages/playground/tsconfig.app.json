@@ -8,7 +8,7 @@
 
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    // "isolatedModules": true,
     "jsx": "react-jsx",
 
     "noUnusedLocals": true,

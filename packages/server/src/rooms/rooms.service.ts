@@ -5,8 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { SimulationRoom } from './simulation-room';
 
 import { ConfigService } from '@nestjs/config';
-import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
-import { SimulationStateSave, SimulationStateUpdate } from '@shared/dto/states';
+import { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
+import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import { Simulation } from '../simulation/simulation';
 
 @Injectable()

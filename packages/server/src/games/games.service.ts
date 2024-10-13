@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { Game, GameVersion, Prisma } from '@prisma/client';
 
-import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@shared/dto/games';
-import { SimulationStateSave } from '@shared/dto/states';
+import { SimulationStateSave } from '@tt/states';
+import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@tt/dto';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()

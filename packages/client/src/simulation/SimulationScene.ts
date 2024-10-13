@@ -9,6 +9,7 @@ import { CameraWheelInput } from './cameraInputs/cameraWheelInput';
 import { HemisphericLight } from '@babylonjs/core/Lights/hemisphericLight';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 
+import { SimulationSceneBase } from '@tt/simulation';
 import {
   CAMERA_DEFAULT_ALPHA,
   CAMERA_DEFAULT_BETA,
@@ -16,8 +17,7 @@ import {
   CAMERA_DEFAULT_RADIUS,
   MOVE_SENSETIVITY,
   WHEEL_SENSETIVITY,
-} from '@shared/constants';
-import { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+} from '../config';
 
 export class SimulationScene extends SimulationSceneBase {
   constructor(engine: AbstractEngine, leftHandedSystem = false) {

@@ -1,24 +1,23 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
-import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-
-import { SimulationScene } from './SimulationScene';
-
-import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
-
 import type { ArcRotateCamera } from '@babylonjs/core/Cameras/arcRotateCamera';
+import { PointerEventTypes } from '@babylonjs/core/Events/pointerEvents';
+import { HighlightLayer } from '@babylonjs/core/Layers/highlightLayer';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
 import { Matrix, Vector3 } from '@babylonjs/core/Maths/math.vector';
 import type { Viewport } from '@babylonjs/core/Maths/math.viewport';
-import type { Tuple } from '@babylonjs/core/types';
-import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '@shared/constants';
-import type { CardGrid } from '@shared/dto/states';
-import { ActorType, type SimulationStateSave } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import { EngineFactory, Logger, SimulationBase } from '@shared/playground';
-import type { SimulationSceneBase } from '@shared/playground/Simulation/SimulationSceneBase';
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+
+import { Logger } from '@tt/logger';
+import type { SimulationSceneBase } from '@tt/simulation';
+import { EngineFactory, SimulationBase } from '@tt/simulation';
+import type { CardGrid, UnknownActorState } from '@tt/states';
+import { ActorType, type SimulationStateSave } from '@tt/states';
+
+import type { Tuple } from '@tt/utils';
+import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
 import { ClientBase, Deck } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
+import { SimulationScene } from './SimulationScene';
 
 export interface SimulationCallbacks {
   onPickItem: (deck: Deck) => void;
@@ -256,7 +255,7 @@ export class Simulation extends SimulationBase {
   handleMoveActor(guid: string, position: Tuple<number, 3>) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor) {
-      (actor as ClientBase).move(...position);
+      (actor as unknown as ClientBase).move(...position);
     }
   }
 

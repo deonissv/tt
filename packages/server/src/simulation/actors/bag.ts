@@ -1,10 +1,10 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { BagState } from '@shared/dto/states';
-import { Loader } from '@shared/playground';
-import type { Containable } from '@shared/playground/actions/Containable';
-import { BagMixin } from '@shared/playground/actors/BagMixin';
-import type { Constructor } from '@shared/types';
-import { shuffle } from '@shared/utils';
+import type { Containable } from '@tt/actors';
+import { BagMixin } from '@tt/actors';
+import { Loader } from '@tt/loader';
+import type { BagState } from '@tt/states';
+import type { Constructor } from '@tt/utils';
+import { shuffle } from '@tt/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';

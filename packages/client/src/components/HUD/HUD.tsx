@@ -2,9 +2,9 @@ import { Slider } from '@components';
 import ExitToApp from '@mui/icons-material/ExitToApp';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import { AuthService } from '@services';
-import { PICK_HIGHT, ROTATION_STEP } from '@shared/constants';
-import type { RoomwDto } from '@shared/dto/rooms';
-import { radToDeg } from '@shared/utils';
+import { PICK_HIGHT, ROTATION_STEP } from '@tt/actors';
+import { RoomwDto } from '@tt/dto';
+import { radToDeg } from '@tt/utils';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 

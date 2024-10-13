@@ -1,6 +1,6 @@
 import { StandardMaterial } from '@babylonjs/core';
-import type { ActorBaseState, PawnTokenState } from '@shared/dto/states';
-import { Loader } from '@shared/playground';
+import { Loader } from '@tt/loader';
+import type { ActorBaseState, PawnTokenState } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 

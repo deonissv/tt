@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@tt/dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ValidatedUser } from '../auth/validated-user';
 import type { AppAbility } from '../casl/casl-ability.factory';
@@ -20,9 +21,6 @@ import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
 import { User } from '../decorators/user.decorator';
 import { PermissionsService } from '../permissions.service';
 import { GamesService } from './games.service';
-
-import type { GameDto, GamePreviewDto } from '@shared/dto/games';
-import { CreateGameDto, UpdateGameDto } from '@shared/dto/games';
 
 @ApiTags('games')
 @Controller('games')

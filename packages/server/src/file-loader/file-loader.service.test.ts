@@ -1,5 +1,5 @@
 import type { ConfigService } from '@nestjs/config';
-import { MimeDetector, MimeType } from '@shared/playground';
+import { MimeResolver, MimeType } from '@tt/mime-resolver';
 import { vi } from 'vitest';
 import { FileLoaderService } from './file-loader.service';
 
@@ -25,7 +25,7 @@ describe('FileLoaderService', () => {
       arrayBuffer: vi.fn().mockResolvedValue(arrayBuffer),
     });
 
-    vi.spyOn(MimeDetector, 'getMime').mockReturnValue(MimeType.OBJ);
+    vi.spyOn(MimeResolver, 'getMime').mockReturnValue(MimeType.OBJ);
 
     const result = await service.load(url);
 
@@ -52,7 +52,7 @@ describe('FileLoaderService', () => {
       arrayBuffer: vi.fn().mockResolvedValue(arrayBuffer),
     });
 
-    vi.spyOn(MimeDetector, 'getMime').mockReturnValue(MimeType.OBJ);
+    vi.spyOn(MimeResolver, 'getMime').mockReturnValue(MimeType.OBJ);
 
     await service.load(url);
     await service.load(url);
@@ -70,7 +70,7 @@ describe('FileLoaderService', () => {
       arrayBuffer: vi.fn().mockResolvedValue(arrayBuffer),
     });
 
-    vi.spyOn(MimeDetector, 'getMime').mockReturnValue(MimeType.OBJ);
+    vi.spyOn(MimeResolver, 'getMime').mockReturnValue(MimeType.OBJ);
 
     const [result1, result2] = await Promise.all([service.load(url), service.load(url)]);
 

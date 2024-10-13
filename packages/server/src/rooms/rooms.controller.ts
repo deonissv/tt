@@ -16,7 +16,7 @@ import { User } from '../decorators/user.decorator';
 import { RoomsService } from './rooms.service';
 
 import { subject } from '@casl/ability';
-import { CreateRoomDto, RoomwDto } from '@shared/dto/rooms';
+import { CreateRoomDto, RoomwDto } from '@tt/dto';
 import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
 import { CheckPolicies, PoliciesGuard } from '../decorators/policies.decorator';
 import { PermissionsService } from '../permissions.service';

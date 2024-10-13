@@ -2,10 +2,11 @@ import axios from 'axios';
 import { ENDPOINT } from '../config';
 import { getAccessToken } from '../utils';
 
-import type { Tuple } from '@babylonjs/core/types';
-import type { RoomPreviewDto, RoomwDto } from '@shared/dto/rooms';
-import type { SimulationState } from '@shared/dto/states';
-import { ServerAction, WS } from '@shared/ws';
+import { ServerAction } from '@tt/actions';
+import { Channel } from '@tt/channel';
+import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
+import type { SimulationState } from '@tt/states';
+import type { Tuple } from '@tt/utils';
 import type { Dispatch, SetStateAction } from 'react';
 
 export const RoomService = {
@@ -68,7 +69,7 @@ export const RoomService = {
     return new Promise((resolve, reject) => {
       ws.onopen = () => {
         const progressListener = (event: MessageEvent) => {
-          const message = WS.read(event);
+          const message = Channel.read(event);
 
           message.forEach(action => {
             if (action.type == ServerAction.DOWNLOAD_PROGRESS) {
@@ -80,7 +81,7 @@ export const RoomService = {
         };
 
         const stateListener = (event: MessageEvent) => {
-          const message = WS.read(event);
+          const message = Channel.read(event);
 
           const action = message[0];
           if (action.type == ServerAction.STATE) {

@@ -1,15 +1,14 @@
-import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
+import type { CursorsPld, MsgMap, RerenderDeckPld, ServerActionMsg } from '@tt/actions';
+import { ServerAction } from '@tt/actions';
+import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@tt/actors';
 import {
   ActorType,
   type ActorBaseState,
   type DeckState,
   type SimulationStateSave,
   type Transformation,
-} from '@shared/dto/states';
-import { vecFloatCompare } from '@shared/utils';
-import { ServerAction } from '@shared/ws';
-import type { CursorsPld, RerenderDeckPld } from '@shared/ws/payloads';
-import type { MsgMap, ServerActionMsg } from '@shared/ws/ws';
+} from '@tt/states';
+import { vecFloatCompare } from '@tt/utils';
 import type { Simulation } from '../simulation/simulation';
 
 export class ActionBuilder {

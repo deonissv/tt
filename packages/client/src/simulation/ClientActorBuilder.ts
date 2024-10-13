@@ -12,12 +12,12 @@ import type {
   Die8State,
   PawnTokenState,
   TableState,
+  TileStackState,
   TileState,
-} from '@shared/dto/states';
-import { ActorType } from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { ActorBuilder } from '@shared/playground/Simulation/ActorBuilder';
+  UnknownActorState,
+} from '@tt/states';
+import { ActorType } from '@tt/states';
+
 import type { ClientBase } from './actors';
 import {
   Actor,
@@ -44,6 +44,8 @@ import {
   Tile,
   TileStack,
 } from './actors';
+
+import { ActorBuilder } from '@tt/simulation';
 
 export class ClientActorBuilderFactory extends ActorBuilder {
   async build(actorState: UnknownActorState): Promise<ClientBase | null> {

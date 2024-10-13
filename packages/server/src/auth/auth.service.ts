@@ -3,8 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-import type { AccessTokenDto, JWTPayload, SignInDto } from '@shared/dto/auth';
-import type { CreateUserDto } from '@shared/dto/users';
+import { AccessTokenDto, CreateUserDto, JWTPayload, SignInDto } from '@tt/dto';
 import { UsersService } from '../users/users.service';
 
 @Injectable()

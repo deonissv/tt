@@ -4,7 +4,8 @@
   "description": "",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "libs/*"
   ],
   "scripts": {
     "client": "npm -w ./packages/client run",
@@ -13,9 +14,13 @@
     "build": "npx concurrently \"npm run server build\" \"npm run client build:v\"",
     "start": "npx concurrently \"npm run client start\" \"npm run server start\"",
     "dev": "npx concurrently \"npm run client dev\" \"npm run server dev\" \"npm run shared dev\"",
-    "lint": "npm run lint --workspaces --if-present",
-    "format": "npm run format --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint -w ./packages/ --if-present",
+    "format": "npm run format -w ./packages/ --if-present",
+    "typecheck": "npm run typecheck -w ./packages/ --if-present",
+    "lint:lib": "npm run lint -w ./libs/ --if-present",
+    "format:lib": "npm run format -w ./libs/ --if-present",
+    "typecheck:lib": "npm run typecheck -w ./libs/ --if-present",
+    "test:lib": "npm run test -w ./libs/ --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run test",
@@ -40,6 +45,7 @@
     "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-react-hooks": "^4.6.2",
     "eslint-plugin-react-refresh": "^0.4.9",
+    "eslint-plugin-workspaces": "^0.10.1",
     "prettier": "^3.3.3",
     "run-script-webpack-plugin": "^0.2.0",
     "swc-loader": "^0.2.6",
@@ -48,6 +54,7 @@
     "typescript": "^5.5.4",
     "unplugin-swc": "^1.5.1",
     "vitest": "^2.0.5",
+    "vite-tsconfig-paths": "^4.3.2",
     "webpack-node-externals": "^3.0.0"
   },
   "overrides": {

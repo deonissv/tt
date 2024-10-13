@@ -1,0 +1,19 @@
+{
+  "name": "dto",
+  "version": "0.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "scripts": {
+    "test": "vitest run",
+    "test:w": "vitest",
+    "format": "prettier 'src/**/*.ts' --write",
+    "lint": "eslint --ext .ts src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nestjs/swagger": "^7.4.0",
+    "class-validator": "^0.14.1"
+  }
+}
