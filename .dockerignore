@@ -4,5 +4,9 @@
 
 **/dist
 **/build
+**/public
+proxy/*
 
 **/node_modules
+
+logs

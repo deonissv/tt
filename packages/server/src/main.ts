@@ -1,20 +1,22 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
+import type { INestApplication } from '@nestjs/common';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { initHavok } from '@shared/initHavok';
-import { Loader, Logger as PGLogger } from '@shared/playground';
+import { Loader } from '@tt/loader';
+import { Logger as TTLogger } from '@tt/logger';
 import { AppModule } from './app.module';
 import { FileLoaderService } from './file-loader/file-loader.service';
 import { mainConfig } from './main.config';
+import { initHavok } from './utils';
 
 declare const module: any;
 
 async function bootstrap() {
   await initHavok();
-  PGLogger.register(new Logger('Playground'));
+  TTLogger.register(new Logger('Playground'));
 
   const app = await NestFactory.create(AppModule, {
     logger: ['fatal', 'error', 'warn', 'log', 'debug', 'verbose'],
@@ -54,6 +56,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   await app.listen(configService.getOrThrow<string>('PORT'));
 
+  enableWatchMode(app);
+}
+
+const enableWatchMode = (app: INestApplication<any>) => {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (module.hot) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -61,5 +67,6 @@ async function bootstrap() {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     module.hot.dispose(() => app.close());
   }
-}
+};
+
 void bootstrap();

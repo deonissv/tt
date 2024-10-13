@@ -3,9 +3,9 @@
 import type { Tuple } from '@babylonjs/core';
 import { Logger, Mesh, Scene } from '@babylonjs/core';
 
-import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@shared/dto/states';
-import { initHavok } from '@shared/initHavok';
-import { Loader } from '@shared/playground';
+import { Loader } from '@tt/loader';
+import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@tt/states';
+import { initHavok } from '../utils';
 import { Actor } from './actors';
 import { Simulation } from './simulation';
 

@@ -1,22 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["vitest/globals"],
-    "module": "commonjs",
     "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "outDir": "./dist",
-    "baseUrl": "../",
-    "rootDir": "../",
-    "paths": {
-      "@shared/*": ["shared/src/*"],
-      "@server/*": ["server/*"]
-    }
   },
-  "include": ["./../server/**/*",  "../shared/src/**/*"],
-  "exclude": ["node_modules", "dist"],
+  "include": [],
+  "references": [
+    { "path": "./tsconfig.build.json" },
+    { "path": "./tsconfig.spec.json" }
+  ]
 }

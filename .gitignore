@@ -4,6 +4,10 @@
 
 **/dist
 **/build
+**/public
+proxy/*
 
 **/node_modules
 **/*.env*
+
+logs

@@ -1,4 +1,4 @@
-FROM node:22.1.0
+FROM node:22.9.0-alpine3.20
 
 WORKDIR /app
 
@@ -9,7 +9,6 @@ COPY tsconfig.base.json ./
 COPY server.tsconfig.json tsconfig.json
 
 COPY packages/server packages/server
-COPY packages/shared packages/shared
 
 RUN npm run i:all
 RUN npm run db:gen

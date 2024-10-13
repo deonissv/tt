@@ -11,6 +11,7 @@ import { MessagesModule } from './messages/messages.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RoomsModule } from './rooms/rooms.module';
 import { UsersModule } from './users/users.module';
+import { ProxyModule } from './proxy/proxy.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UsersModule } from './users/users.module';
     MessagesModule,
     EventsModule,
     FileLoaderModule,
+    ProxyModule,
   ],
   controllers: [AppController],
   providers: [AppService],

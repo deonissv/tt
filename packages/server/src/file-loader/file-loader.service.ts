@@ -1,8 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { MimeDetector } from '@shared/playground';
-import { MimeType } from '@shared/playground/Loader';
-import { getB64URL, wait } from '@shared/utils';
+import { MimeResolver, MimeType } from '@tt/mime-resolver';
+import { getB64URL, wait } from '@tt/utils';
 
 export interface FetchedFile {
   url: string;
@@ -17,7 +16,7 @@ export class FileLoaderService {
   staticHost: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.staticHost = this.configService.getOrThrow<string>('STATIC_HOST');
+    this.staticHost = this.configService.getOrThrow<string>('VITE_STATIC_HOST');
   }
 
   static logger = new Logger('FileLoaderService');
@@ -35,7 +34,7 @@ export class FileLoaderService {
           return arrayBuffer;
         }
       } catch (e) {
-        FileLoaderService.logger.log(
+        FileLoaderService.logger.warn(
           `Failed attempt to fetch: ${url} - ${(e as Error).message.toString().slice(0, 100)}`,
         );
       }
@@ -53,7 +52,7 @@ export class FileLoaderService {
           return null;
         }
 
-        const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+        const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
         const b64 = getB64URL(arrayBuffer);
 
         Logger.log(`Fetched file: ${url}`);
@@ -65,10 +64,9 @@ export class FileLoaderService {
   }
 
   async load(url: string): Promise<FetchedFile | null> {
-    const patchedURL = url.replace('localhost', this.staticHost);
-    const fetched = await this.fetchFile(patchedURL);
+    const fetched = await this.fetchFile(url);
     if (!fetched) {
-      throw new Error(`Failed to load file: ${patchedURL}`);
+      throw new Error(`Failed to load file: ${url}`);
     }
     return fetched;
   }

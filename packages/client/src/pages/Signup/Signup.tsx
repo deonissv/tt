@@ -1,9 +1,11 @@
-import { getErrorMsg } from '@client/src/utils';
-import { Button, Input, useToast } from '@components';
-import { AuthService } from '@services';
-import { isEmail } from '@shared/utils';
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+
+import { Button, Input, useToast } from '@components';
+import { AuthService } from '@services';
+import { isEmail } from '@tt/utils';
+import { getErrorMsg } from '../../utils';
 
 export const Signup: React.FC = (): React.ReactNode => {
   const navigate = useNavigate();

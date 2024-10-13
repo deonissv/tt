@@ -1,8 +1,8 @@
-import type { Tuple } from '@babylonjs/core/types';
 import { AuthService, RoomService } from '@services';
-import { ClientAction, ServerAction, WS } from '@shared/ws';
-import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import type { ActionMsg, ClientActionMsg } from '@shared/ws/ws';
+import type { ActionMsg, ClientActionMsg, CursorsPld, DownloadProgressPld } from '@tt/actions';
+import { ClientAction, ServerAction } from '@tt/actions';
+import { Channel } from '@tt/channel';
+import type { Tuple } from '@tt/utils';
 import type { Dispatch, SetStateAction } from 'react';
 import { Simulation } from './Simulation';
 import type { ClientBase } from './actors';
@@ -52,7 +52,7 @@ export class SimulationRoom {
     });
 
     if (SimulationRoom.actions.length > 0) {
-      WS.send(this.ws, SimulationRoom.actions);
+      Channel.send(this.ws, SimulationRoom.actions);
       this.lastUpdate = updateStringified;
       SimulationRoom.actions = [];
     }
@@ -116,7 +116,7 @@ export class SimulationRoom {
     };
 
     ws.addEventListener('message', event => {
-      const message = WS.read(event);
+      const message = Channel.read(event);
 
       message.forEach(action => {
         handleActtion(action);
@@ -196,15 +196,15 @@ export class SimulationRoom {
   };
 
   closeRoom() {
-    WS.send(this.ws, [{ type: ClientAction.CLOSE, payload: null }]);
+    Channel.send(this.ws, [{ type: ClientAction.CLOSE, payload: null }]);
   }
 
   onSetPickHeight(height: number) {
-    WS.send(this.ws, [{ type: ClientAction.SET_PICK_HEIGHT, payload: height }]);
+    Channel.send(this.ws, [{ type: ClientAction.SET_PICK_HEIGHT, payload: height }]);
   }
 
   onSetRotateStep(step: number) {
-    WS.send(this.ws, [{ type: ClientAction.SET_ROTATION_STEP, payload: step }]);
+    Channel.send(this.ws, [{ type: ClientAction.SET_ROTATION_STEP, payload: step }]);
   }
 
   destructor() {

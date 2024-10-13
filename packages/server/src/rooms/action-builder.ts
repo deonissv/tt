@@ -1,19 +1,15 @@
-import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@shared/defaults';
+import type { CursorsPld, MsgMap, RerenderDeckPld, ServerActionMsg } from '@tt/actions';
+import { ServerAction } from '@tt/actions';
+import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@tt/actors';
 import {
   ActorType,
   type ActorBaseState,
   type DeckState,
   type SimulationStateSave,
   type Transformation,
-} from '@shared/dto/states';
-import type { UnknownActorState } from '@shared/dto/states/actor/ActorUnion';
-import type { RecursiveObject } from '@shared/types';
-import { vecFloatCompare } from '@shared/utils';
-import { ServerAction } from '@shared/ws';
-import type { CursorsPld, RerenderDeckPld } from '@shared/ws/payloads';
-import type { MsgMap, ServerActionMsg } from '@shared/ws/ws';
+} from '@tt/states';
+import { vecFloatCompare } from '@tt/utils';
 import type { Simulation } from '../simulation/simulation';
-import { SimulationRoom } from './simulation-room';
 
 export class ActionBuilder {
   prevCursors: string | null = null;
@@ -88,17 +84,19 @@ export class ActionBuilder {
             type: ServerAction.SPAWN_PICKED_ACTOR,
             payload: {
               clientId: clientId,
-              state: SimulationRoom.patchStateURLs(
-                actorState as unknown as RecursiveObject,
-              ) as unknown as UnknownActorState,
+              state: actorState,
+              // state: SimulationRoom.patchStateURLs( @TODO
+              //   actorState as unknown as RecursiveObject,
+              // ) as unknown as UnknownActorState,
             },
           });
         } else {
           actions.push({
             type: ServerAction.SPAWN_ACTOR,
-            payload: SimulationRoom.patchStateURLs(
-              actorState as unknown as RecursiveObject,
-            ) as unknown as UnknownActorState,
+            payload: actorState,
+            // state: SimulationRoom.patchStateURLs( @TODO
+            //   actorState as unknown as RecursiveObject,
+            // ) as unknown as UnknownActorState,
           });
         }
 
@@ -171,7 +169,8 @@ export class ActionBuilder {
       return null;
 
     const rerenderPld = this.getRerenderDeckPld(currentState);
-    return SimulationRoom.patchStateURLs(rerenderPld as unknown as RecursiveObject) as unknown as RerenderDeckPld;
+    // return SimulationRoom.patchStateURLs(rerenderPld as unknown as RecursiveObject) as unknown as RerenderDeckPld; @TODO
+    return rerenderPld;
   }
 
   private getRerenderDeckPld(deckState: DeckState): RerenderDeckPld {

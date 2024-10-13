@@ -1,27 +1,26 @@
 import axios from 'axios';
-import { LOADER_URL } from '../config';
+import { ENDPOINT } from '../config';
 import { getAccessToken, resetAccessToken, saveAccessToken } from '../utils';
 
-import type { AccessTokenDto, JWT, SignInDto } from '@shared/dto/auth';
-import type { CreateUserDto, UpdateUserDto } from '@shared/dto/users';
+import type { AccessTokenDto, CreateUserDto, JWT, SignInDto, UpdateUserDto } from '@tt/dto';
 
 export const AuthService = {
   async signin(payload: SignInDto): Promise<AccessTokenDto> {
-    const response = await axios.post(LOADER_URL + 'auth/signin', payload);
+    const response = await axios.post(ENDPOINT + 'auth/signin', payload);
     const token = response.data as AccessTokenDto;
     saveAccessToken(token);
     return token;
   },
 
   async signup(payload: CreateUserDto): Promise<AccessTokenDto> {
-    const response = await axios.post(LOADER_URL + 'auth/signup', payload);
+    const response = await axios.post(ENDPOINT + 'auth/signup', payload);
     const token = response.data as AccessTokenDto;
     saveAccessToken(token);
     return token;
   },
 
   async updateUser(code: string, updateUser: UpdateUserDto): Promise<AccessTokenDto> {
-    const response = await axios.put(LOADER_URL + `users/${code}`, updateUser, {
+    const response = await axios.put(ENDPOINT + `users/${code}`, updateUser, {
       headers: {
         Authorization: `Bearer ${getAccessToken()}`,
       },

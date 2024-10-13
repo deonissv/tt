@@ -6,14 +6,14 @@ import { Logger } from '@nestjs/common';
 import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
+import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
-import { PROXY_PREFIX } from '@shared/constants';
-import type { SimulationState, SimulationStateSave } from '@shared/dto/states';
-import { hasProperty, isObject, isString } from '@shared/guards';
-import type { RecursiveType } from '@shared/types';
-import { ClientAction, ServerAction, WS } from '@shared/ws';
-import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import type { ClientActionMsg } from '@shared/ws/ws';
+import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG, ServerActionMsg } from '@tt/actions';
+import { ClientAction, ServerAction } from '@tt/actions';
+import { Channel } from '@tt/channel';
+import type { SimulationState, SimulationStateSave } from '@tt/states';
+import type { RecursiveType } from '@tt/utils';
+import { hasProperty, isObject, isString } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';
@@ -38,10 +38,15 @@ export class SimulationRoom {
   tickInterval: NodeJS.Timeout | undefined;
   closeTimeout: NodeJS.Timeout | undefined;
 
+  staticHost: string;
+  apiHost: string;
+  proxyHost: string;
+
   private static readonly logger = new Logger('SimulationRoom');
 
   constructor(
     private readonly roomsService: RoomsService,
+    private readonly configService: ConfigService,
     room: Room,
   ) {
     this.room = room;
@@ -49,6 +54,10 @@ export class SimulationRoom {
     this.cursors = new Map();
     this.wss = this.getServer();
     this.simSave = undefined;
+
+    this.staticHost = this.configService.getOrThrow<string>('VITE_STATIC_HOST');
+    const apiHost = this.configService.getOrThrow<string>('VITE_API_HOST');
+    this.proxyHost = `${apiHost}/proxy`;
 
     this.downloadProgress = {
       total: 0,
@@ -126,7 +135,8 @@ export class SimulationRoom {
 
   getSimulationState(): SimulationState {
     const simSave = this.simulation.toState();
-    const patchedState = SimulationRoom.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
+    const patchedState = this.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
+
     return {
       ...patchedState,
       downloadProgress: this.downloadProgress,
@@ -154,7 +164,7 @@ export class SimulationRoom {
 
       SimulationRoom.logger.log(`Sending room ${this.room.roomId} state.`);
       if (this.simulation)
-        WS.send(ws, [
+        Channel.send(ws, [
           {
             type: ServerAction.STATE,
             payload: this.getSimulationState(),
@@ -174,7 +184,7 @@ export class SimulationRoom {
    */
   private onMessage(event: WebSocket.MessageEvent, canClose: boolean) {
     SimulationRoom.logger.debug(`Received message: ${JSON.stringify(event.data)}`);
-    const actions = WS.read(event) as ClientActionMsg[];
+    const actions = Channel.read(event) as ClientActionMsg[];
 
     const cursorAction = actions.find(action => action.type === ClientAction.CURSOR);
     const cursorClient = this.clients.get(event.target)?.code;
@@ -260,7 +270,7 @@ export class SimulationRoom {
     const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
 
     this.clients.forEach((client, ws) => {
-      const actions = [] as WS.ServerActionMsg[];
+      const actions = [] as ServerActionMsg[];
       if (cursorsAction && Object.keys(cursorsAction).length > 1) {
         const clientCursors = structuredClone(cursorsAction);
         delete clientCursors.payload[client.code];
@@ -270,7 +280,7 @@ export class SimulationRoom {
 
       if (actions && actions.length > 0) {
         SimulationRoom.logger.verbose(`Sending actions to [${client.code}]: ${JSON.stringify(actions)}`);
-        WS.send(ws, actions);
+        Channel.send(ws, actions);
       }
     });
   }
@@ -316,10 +326,10 @@ export class SimulationRoom {
    * @param msg - The message to broadcast.
    * @param exclude - An optional array of WebSocket instances to exclude from the broadcast.
    */
-  private broadcast(msg: WS.MSG, exclude: WebSocket[] = []) {
+  private broadcast(msg: MSG, exclude: WebSocket[] = []) {
     this.wss.clients.forEach(client => {
       if (!exclude.includes(client)) {
-        WS.send(client, msg);
+        Channel.send(client, msg);
       }
     });
   }
@@ -330,8 +340,8 @@ export class SimulationRoom {
    * @param item - The object or array to patch the state URLs in.
    * @returns The patched object or array.
    */
-  static patchStateURLs<T extends RecursiveType>(item: T): T {
-    if (isString(item) && item.startsWith('http') && !item.startsWith(PROXY_PREFIX)) {
+  patchStateURLs<T extends RecursiveType>(item: T): T {
+    if (isString(item) && item.startsWith('http') && !item.startsWith(`${this.staticHost}/assets`)) {
       return this.getAssetURL(item) as T;
     } else if (Array.isArray(item)) {
       return item.map(i => this.patchStateURLs(i)) as T;
@@ -353,7 +363,8 @@ export class SimulationRoom {
    * @param url - The resource URL.
    * @returns The asset URL.
    */
-  static getAssetURL(url: string) {
-    return PROXY_PREFIX + url;
+  getAssetURL(url: string) {
+    const uri = encodeURIComponent(url);
+    return `${this.proxyHost}/${this.room.code}/${uri}`;
   }
 }

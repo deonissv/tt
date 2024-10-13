@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import { getErrorMsg } from '@client/src/utils';
+import { GamePreviewDto } from '@tt/dto';
+
 import { GameCard, PromiseModal, Spinner, useToast } from '@components';
 import { GameService, RoomService } from '@services';
-import type { GamePreviewDto } from '@shared/dto/games';
-import { useNavigate } from 'react-router-dom';
+import { getErrorMsg } from '../../utils';
 
 export const GamesList = () => {
   const { addToast } = useToast();

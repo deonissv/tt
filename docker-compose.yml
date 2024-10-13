@@ -2,37 +2,50 @@ services:
   db:
     build:
       context: .
-      dockerfile: ./Dockerfile.postgres
+      dockerfile: ./infra/Dockerfile.postgres
+    container_name: tt-db
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-    expose:
-      - 5432
     ports:
       - '5432:5432'
     env_file: .env
+    profiles:
+      - dev
+      - ''
+      - prod
 
-  server:
+  monolith:
     build:
       context: .
-      dockerfile: ./packages/server/Dockerfile
+      dockerfile: ./infra/Dockerfile.prod
+      args:
+        - VITE_API_HOST=http://localhost:8080
+    container_name: tt-monolith
     ports:
-      - '3000:3000'
+      - '8080:80'
     env_file: .env
     environment:
       - DATABASE_URL=postgresql://testuser:qwerty@db/testdb
-      - STATIC_HOST=client
+      - VITE_API_HOST=http://localhost:80
     depends_on:
       - db
+    profiles:
+      - prod
 
-  client:
+  nginx:
     build:
       context: .
-      dockerfile: ./packages/client/Dockerfile
+      dockerfile: ./infra/Dockerfile.nginx
+    container_name: tt-nginx
+    volumes:
+      - ./assets:/app/assets:rw
     ports:
-      - '5500:5500'
-    env_file: .env
-    depends_on:
-      - db
+      - '8080:80'
+    extra_hosts:    
+      - "host.docker.internal:host-gateway"
+    profiles:
+      - ''
+      - dev
 
 volumes:
   postgres_data:

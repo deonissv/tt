@@ -1,7 +1,7 @@
-import { Login } from '@client/src/pages';
 import type { IProps } from '@components';
 import { AuthService } from '@services';
 import { useCallback } from 'react';
+import { Login } from '../../pages';
 
 export const RequireAuth: React.FC<IProps> = ({ children }) => {
   const authorized = AuthService.authorized();

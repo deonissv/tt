@@ -1,11 +1,12 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import type { TileState } from '@shared/dto/states';
-import { ActorType } from '@shared/dto/states';
-import type { TileStackState } from '@shared/dto/states/actor/Stack';
-import { TileStackMixin } from '@shared/playground/actors/TileStackMixin';
+import { TileStackMixin } from '@tt/actors';
+import { Loader } from '@tt/loader';
+import type { TileStackState, TileState } from '@tt/states';
+import { ActorType } from '@tt/states';
 import { ServerActorBuilder } from '../serverActorBuilder';
+import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
-import { Tile } from './tile';
+import type { Tile } from './tile';
 
 export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
   size: number;
@@ -52,7 +53,8 @@ export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
   }
 
   static async fromState(state: TileStackState): Promise<TileStack | null> {
-    const tileModel = await Tile.getTileMesh(state.tileType);
+    const tileModel = await Loader.loadMesh(AssetsManager.getTileMesh(state.tileType));
+
     if (!tileModel) {
       return null;
     }

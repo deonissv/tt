@@ -1,10 +1,12 @@
-import type { TileState } from '@shared/dto/states';
-import { TileMixin } from '@shared/playground/actors/TileMixin';
+import { TileMixin } from '@tt/actors';
+import { Loader } from '@tt/loader';
+import type { TileState } from '@tt/states';
+import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
 export class Tile extends TileMixin(ServerBase<TileState>) {
   static async fromState(state: TileState): Promise<Tile | null> {
-    const tileModel = await this.getTileMesh(state.tileType);
+    const tileModel = await Loader.loadMesh(AssetsManager.getTileMesh(state.tileType));
     if (!tileModel) {
       return null;
     }

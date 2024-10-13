@@ -1,17 +1,18 @@
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-import type { Tuple } from '@babylonjs/core/types';
-import { Simulation } from '@client/src/simulation';
-import { SimulationRoom } from '@client/src/simulation/SimulationRoom';
+import type { CursorsPld, DownloadProgressPld } from '@tt/actions';
+import { RoomwDto } from '@tt/dto';
+import { MimeResolver, MimeType } from '@tt/mime-resolver';
+import { debounce, degToRad, getB64URL, Tuple } from '@tt/utils';
+
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
 import { RoomService } from '@services';
-import type { RoomwDto } from '@shared/dto/rooms';
-import { Loader, Logger, MimeDetector } from '@shared/playground';
-import { MimeType } from '@shared/playground/Loader';
-import { debounce, degToRad, getB64URL } from '@shared/utils';
-import type { CursorsPld, DownloadProgressPld } from '@shared/ws/payloads';
-import { useNavigate } from 'react-router-dom';
+import { Simulation, SimulationRoom } from '../../simulation';
+
+import { Loader } from '@tt/loader';
+import { Logger } from '@tt/logger';
 
 export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.ReactNode => {
   const { addToast } = useToast();
@@ -45,7 +46,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
 
-      const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+      const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
       const b64 = getB64URL(arrayBuffer);
 
       Logger.log(`Fetched file: ${url}`);

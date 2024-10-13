@@ -1,11 +1,11 @@
 import { Vector3, type Mesh } from '@babylonjs/core';
-import { getDieModel, ROUNDED_DIE } from '@shared/assets';
-import type { DieState } from '@shared/dto/states';
-import { DieFacesNumber } from '@shared/dto/states';
-import { Loader } from '@shared/playground';
-import { DieMixin } from '@shared/playground/actors/DieMixin';
-import type { Constructor } from '@shared/types';
-import { getRandomInt } from '@shared/utils';
+import { DieMixin } from '@tt/actors';
+import { Loader } from '@tt/loader';
+import type { DieState } from '@tt/states';
+import { DieFacesNumber } from '@tt/states';
+import type { Constructor } from '@tt/utils';
+import { getRandomInt } from '@tt/utils';
+import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
 const ROLL_IMPULSE_MIX = 450;
@@ -24,7 +24,7 @@ export class ServerDie extends ServerBase<DieState> {
   }
 
   static async fromState<T extends ServerDie>(this: Constructor<T>, state: DieState): Promise<T | null> {
-    const model = getDieModel(state);
+    const model = AssetsManager.getDieModel(state);
     const collider = await Loader.loadMesh(model.colliderURL);
     if (!collider) return null;
 
@@ -60,7 +60,7 @@ export class Die20 extends DieMixin(ServerDie) {}
 
 export class Die6Round extends DieMixin(ServerDie) {
   static async fromState<T extends ServerDie>(this: Constructor<T>, state: DieState): Promise<T | null> {
-    const model = await Loader.loadMesh(ROUNDED_DIE.colliderURL);
+    const model = await Loader.loadMesh(AssetsManager.ROUNDED_DIE.colliderURL);
 
     if (!model) return null;
 

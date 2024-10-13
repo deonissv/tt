@@ -1,8 +1,9 @@
-import { getErrorMsg } from '@client/src/utils';
-import { Button, Input, useToast } from '@components';
-import { AuthService } from '@services';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { Button, Input, useToast } from '@components';
+import { AuthService } from '@services';
+import { getErrorMsg } from '../../utils';
 
 const MIN_PASSWD_LENGTH = 8;
 

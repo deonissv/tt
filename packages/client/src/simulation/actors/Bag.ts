@@ -1,8 +1,8 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { BAG_MODEL } from '@shared/assets';
-import type { BagState, Model } from '@shared/dto/states';
-import { Loader } from '@shared/playground';
-import { BagMixin } from '@shared/playground/actors/BagMixin';
+import { BagMixin } from '@tt/actors';
+import { Loader } from '@tt/loader';
+import type { BagState, Model } from '@tt/states';
+import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 
 export class Bag extends BagMixin(ClientBase<BagState>) {
@@ -12,7 +12,7 @@ export class Bag extends BagMixin(ClientBase<BagState>) {
   }
 
   static async fromState(state: BagState): Promise<Bag | null> {
-    const modelState: Model = state.model ?? BAG_MODEL;
+    const modelState: Model = state.model ?? AssetsManager.BAG_MODEL;
     const [model, collider] = await Loader.loadModel(modelState);
 
     if (!model) {

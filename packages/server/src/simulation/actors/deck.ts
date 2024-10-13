@@ -1,10 +1,11 @@
 import { Axis, Vector3, type Mesh } from '@babylonjs/core';
-import type { CardState, DeckState } from '@shared/dto/states';
-import type { Containable } from '@shared/playground/actions/Containable';
-import { DeckMixin } from '@shared/playground/actors/DeckMixin';
-import { shuffle } from '@shared/utils';
+import type { Containable } from '@tt/actors';
+import { DeckMixin } from '@tt/actors';
+import { Loader } from '@tt/loader';
+import type { CardState, DeckState } from '@tt/states';
+import { shuffle } from '@tt/utils';
 import { ServerActorBuilder } from '../serverActorBuilder';
-import { Card } from './card';
+import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
 export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containable {
@@ -19,7 +20,7 @@ export class Deck extends DeckMixin(ServerBase<DeckState>) implements Containabl
   }
 
   static async fromState(state: DeckState): Promise<Deck | null> {
-    const model = await Card.loadCardModel();
+    const model = await Loader.loadMesh(AssetsManager.CARD_MODEL_URL);
 
     if (!model) {
       return null;
