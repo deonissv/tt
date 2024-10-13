@@ -20,6 +20,7 @@
     "lint:lib": "npm run lint -w ./libs/ --if-present",
     "format:lib": "npm run format -w ./libs/ --if-present",
     "typecheck:lib": "npm run typecheck -w ./libs/ --if-present",
+    "test:lib": "npm run test -w ./libs/ --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run test",
