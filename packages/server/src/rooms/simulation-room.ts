@@ -62,7 +62,7 @@ export class SimulationRoom {
     this.downloadProgress = {
       total: 0,
       loaded: 0,
-      succeded: 0,
+      succeeded: 0,
       failed: 0,
     };
   }
@@ -73,9 +73,9 @@ export class SimulationRoom {
    * @param simSave Optional simulation state save.
    */
   async init(simSave?: SimulationStateSave, gameId?: number, gameVersion?: number) {
-    SimulationRoom.logger.log(`Room ${this.room.roomId} initializig...`);
+    SimulationRoom.logger.log(`Room ${this.room.roomId} initializing...`);
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
-    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializig...`);
+    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializing...`);
     this.simulation = await Simulation.init(
       simSave ?? {},
       () => {
@@ -89,7 +89,7 @@ export class SimulationRoom {
         ]);
       },
       _actorState => {
-        this.downloadProgress.succeded++;
+        this.downloadProgress.succeeded++;
       },
       _actorState => {
         this.downloadProgress.failed++;
@@ -196,7 +196,7 @@ export class SimulationRoom {
       const closeAction = actions.find(action => action.type === ClientAction.CLOSE);
       if (closeAction) {
         this.closeRoom().catch(e => {
-          SimulationRoom.logger.error(`Failer to close room ${this.room.roomId}: ${e}`);
+          SimulationRoom.logger.error(`Failed to close room ${this.room.roomId}: ${e}`);
         });
         return;
       }
@@ -213,7 +213,7 @@ export class SimulationRoom {
    * @param event The WebSocket close event.
    */
   private onClose(event: WebSocket.CloseEvent) {
-    SimulationRoom.logger.log(`Client disconnectingfrom room ${this.room.roomId}`);
+    SimulationRoom.logger.log(`Client disconnecting from room ${this.room.roomId}`);
     const cursorClient = this.clients.get(event.target)?.code;
     if (cursorClient) {
       this.cursors.delete(cursorClient);
