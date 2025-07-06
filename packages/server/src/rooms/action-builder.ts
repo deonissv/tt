@@ -16,6 +16,10 @@ export class ActionBuilder {
   prevSimState: SimulationStateSave | null = null;
   sim: Simulation;
 
+  constructor(sim: Simulation) {
+    this.sim = sim;
+  }
+
   getActions(cursors: CursorsPld, simState: SimulationStateSave): ServerActionMsg[] | null {
     const actions: ServerActionMsg[] = [];
 

@@ -1,5 +1,5 @@
 import { AuthService, RoomService } from '@services';
-import type { ActionMsg, ClientActionMsg, CursorsPld, DownloadProgressPld } from '@tt/actions';
+import type { ActionMsg, ClientActionMsg, CursorsPld, DownloadProgress } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
 import type { Tuple } from '@tt/utils';
@@ -64,7 +64,7 @@ export class SimulationRoom {
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
     onRoomClosed: () => void,
-  ): Promise<[SimulationRoom, DownloadProgressPld]> {
+  ): Promise<[SimulationRoom, DownloadProgress]> {
     const [ws, simState] = await RoomService.connect(roomId, setDownloadProgress);
     const clientId = AuthService.getJWT()!.code;
 

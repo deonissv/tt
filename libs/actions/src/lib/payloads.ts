@@ -1,7 +1,7 @@
 import type { CardGrid, UnknownActorState } from '@tt/states';
 import type { Tuple } from '@tt/utils';
 
-export interface DownloadProgressPld {
+export interface DownloadProgress {
   loaded: number;
   total: number;
   succeeded: number;

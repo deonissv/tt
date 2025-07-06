@@ -3,7 +3,7 @@ export type { SimAction } from './actions';
 export type { ActionMsg, ClientActionMsg, MSG, MsgMap, ServerActionMsg } from './msg';
 export type {
   CursorsPld,
-  DownloadProgressPld,
+  DownloadProgress,
   DropActorPld,
   MoveClientActorPld,
   MoveServerActorPld,

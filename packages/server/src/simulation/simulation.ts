@@ -10,7 +10,7 @@ import type { ServerBase } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
 
 export class Simulation extends SimulationBase {
-  static actorBuilder = ServerActorBuilder;
+  actorBuilder = ServerActorBuilder;
   logger: Logger;
 
   constructor(initialState: SimulationStateSave) {
@@ -48,7 +48,7 @@ export class Simulation extends SimulationBase {
 
     if (stateSave.table) {
       try {
-        await this.tableFromState(stateSave.table);
+        await sim.tableFromState(stateSave.table);
       } catch (e) {
         sim.logger.error(`Failed to load table: ${String(e)}`);
       }
@@ -57,7 +57,7 @@ export class Simulation extends SimulationBase {
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
         try {
-          const actor = await this.actorFromState(actorState);
+          const actor = await sim.actorFromState(actorState);
           if (actor) {
             onSucceed?.(actorState);
           } else {
@@ -73,11 +73,11 @@ export class Simulation extends SimulationBase {
     return sim;
   }
 
-  static async actorFromState(actorState: UnknownActorState): Promise<ServerBase | null> {
+  async actorFromState(actorState: UnknownActorState): Promise<ServerBase | null> {
     return await this.actorBuilder.build(actorState);
   }
 
-  static async tableFromState(tableState: TableState): Promise<ServerBase | null> {
+  async tableFromState(tableState: TableState): Promise<ServerBase | null> {
     return await this.actorBuilder.buildTable(tableState);
   }
 

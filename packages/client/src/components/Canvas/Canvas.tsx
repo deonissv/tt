@@ -2,10 +2,11 @@ import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import type { CursorsPld, DownloadProgressPld } from '@tt/actions';
-import { RoomwDto } from '@tt/dto';
+import type { CursorsPld, DownloadProgress } from '@tt/actions';
+import type { RoomwDto } from '@tt/dto';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
-import { debounce, degToRad, getB64URL, Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
+import { debounce, degToRad, getB64URL } from '@tt/utils';
 
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
 import { RoomService } from '@services';
@@ -31,7 +32,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   const [cursor, setCursor] = useState<[number, number]>([0, 0]);
   const [cursors, setCursors] = useState<CursorsPld>({});
 
-  const init = useCallback(async (): Promise<[SimulationRoom, DownloadProgressPld] | null> => {
+  const init = useCallback(async (): Promise<[SimulationRoom, DownloadProgress] | null> => {
     RoomService.getRoom(roomCode)
       .then(r => {
         room.current = r;

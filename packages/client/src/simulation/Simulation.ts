@@ -32,7 +32,7 @@ export interface SimulationCallbacks {
 }
 
 export class Simulation extends SimulationBase {
-  static actorBuilder = ClientActorBuilder;
+  actorBuilder = ClientActorBuilder;
 
   private _hll: HighlightLayer;
   private _hoveredActor: ClientBase | null = null;
@@ -62,13 +62,13 @@ export class Simulation extends SimulationBase {
     const sim = new Simulation(scene, cbs);
 
     if (stateSave.table) {
-      await this.tableFromState(stateSave.table);
+      await sim.tableFromState(stateSave.table);
     }
 
     await Promise.all(
       (stateSave?.actorStates ?? []).map(async actorState => {
         try {
-          const actor = await this.actorFromState(actorState);
+          const actor = await sim.actorFromState(actorState);
           if (actor) {
             return actor;
           } else {

@@ -4,7 +4,7 @@ import type { Tuple } from '@tt/utils';
 import type { ClientAction, ServerAction, SimAction } from './actions';
 import type {
   CursorsPld,
-  DownloadProgressPld,
+  DownloadProgress,
   DropActorPld,
   MoveClientActorPld,
   MoveServerActorPld,
@@ -18,7 +18,7 @@ interface ActionPayloads {
   [ClientAction.NICKNAME]: string;
   [ServerAction.CLIENT_ID]: string;
   [ServerAction.STATE]: SimulationState;
-  [ServerAction.DOWNLOAD_PROGRESS]: DownloadProgressPld;
+  [ServerAction.DOWNLOAD_PROGRESS]: DownloadProgress;
 
   [ClientAction.MOVE_ACTOR]: MoveServerActorPld;
   [ServerAction.MOVE_ACTOR]: MoveClientActorPld;

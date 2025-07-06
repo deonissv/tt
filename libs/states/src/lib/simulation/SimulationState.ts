@@ -1,4 +1,4 @@
-import type { DownloadProgressPld } from '@tt/actions';
+import type { DownloadProgress } from '@tt/actions';
 import type { ActorStateUpdate, TableState } from '../actor';
 import type { UnknownActorState } from '../ActorUnion';
 
@@ -13,7 +13,7 @@ export interface SimulationStateSave extends SimulationStateBase {
 }
 
 export interface SimulationState extends SimulationStateSave {
-  downloadProgress: DownloadProgressPld;
+  downloadProgress: DownloadProgress;
 }
 
 export interface SimulationStateUpdate extends Omit<Partial<SimulationStateSave>, 'actorStates'> {

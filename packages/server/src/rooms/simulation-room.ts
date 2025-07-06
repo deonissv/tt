@@ -1,6 +1,6 @@
 import WebSocket from 'ws';
 
-import { Simulation } from '../simulation/simulation';
+import type { Simulation } from '../simulation/simulation';
 
 import { Logger } from '@nestjs/common';
 import { Client } from './client';
@@ -8,19 +8,21 @@ import type { RoomsService } from './rooms.service';
 
 import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
-import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG, ServerActionMsg } from '@tt/actions';
-import { ClientAction, ServerAction } from '@tt/actions';
+import type { ClientActionMsg, CursorsPld } from '@tt/actions';
+import { ClientAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
-import type { SimulationState, SimulationStateSave } from '@tt/states';
+import type { SimulationStateSave } from '@tt/states';
 import type { RecursiveType } from '@tt/utils';
 import { hasProperty, isObject, isString } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
-import { ActionBuilder } from './action-builder';
+import { SimulationBuilder } from './simulation-builder';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
 export class SimulationRoom {
+  private static readonly logger = new Logger('SimulationRoom');
+
   room: Room;
   simulation: Simulation;
   wss: WebSocket.Server;
@@ -29,10 +31,8 @@ export class SimulationRoom {
   cursors: Map<string, CursorsPld[keyof CursorsPld]>;
   simSave: SimulationStateSave | undefined;
 
-  actionBuilder = new ActionBuilder();
+  simulationBuilder: SimulationBuilder;
   actionsHandler = new ActionHandler();
-
-  downloadProgress: DownloadProgressPld;
 
   savingInterval: NodeJS.Timeout | undefined;
   tickInterval: NodeJS.Timeout | undefined;
@@ -42,8 +42,6 @@ export class SimulationRoom {
   apiHost: string;
   proxyHost: string;
 
-  private static readonly logger = new Logger('SimulationRoom');
-
   constructor(
     private readonly roomsService: RoomsService,
     private readonly configService: ConfigService,
@@ -52,19 +50,12 @@ export class SimulationRoom {
     this.room = room;
     this.clients = new Map();
     this.cursors = new Map();
-    this.wss = this.getServer();
+    this.wss = this.createWebSocketServer();
     this.simSave = undefined;
 
     this.staticHost = this.configService.getOrThrow<string>('VITE_STATIC_HOST');
     const apiHost = this.configService.getOrThrow<string>('VITE_API_HOST');
     this.proxyHost = `${apiHost}/proxy`;
-
-    this.downloadProgress = {
-      total: 0,
-      loaded: 0,
-      succeeded: 0,
-      failed: 0,
-    };
   }
 
   /**
@@ -74,73 +65,31 @@ export class SimulationRoom {
    */
   async init(simSave?: SimulationStateSave, gameId?: number, gameVersion?: number) {
     SimulationRoom.logger.log(`Room ${this.room.roomId} initializing...`);
-    this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
-    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializing...`);
-    this.simulation = await Simulation.init(
-      simSave ?? {},
-      () => {
-        this.downloadProgress.loaded++;
-
-        this.broadcast([
-          {
-            type: ServerAction.DOWNLOAD_PROGRESS,
-            payload: this.downloadProgress,
-          },
-        ]);
-      },
-      _actorState => {
-        this.downloadProgress.succeeded++;
-      },
-      _actorState => {
-        this.downloadProgress.failed++;
-      },
-    );
-    SimulationRoom.logger.log(`Room ${this.room.roomId} starting`);
+    this.simulationBuilder = new SimulationBuilder(simSave!);
+    this.simulation = await this.initSimulation();
+    SimulationRoom.logger.log(`Room ${this.room.roomId} initialized.`);
     this.simulation.start();
     SimulationRoom.logger.log(`Room ${this.room.roomId} started.`);
+    this.onSimulationInit(gameId, gameVersion);
+  }
 
-    this.actionBuilder.sim = this.simulation;
-
-    this.onSimulationInit(this.room, gameId, gameVersion);
-
-    SimulationRoom.logger.log(`Room ${this.room.roomId} initialized.`);
+  private async initSimulation() {
+    return await new Promise<Simulation>(resolve => {
+      this.simulationBuilder.onReady = simulation => {
+        resolve(simulation);
+      };
+    });
   }
 
   /**
    * Initializes the simulation room.
-   * Attaches an event listener to each client WebSocket to handle incoming messages.
-   * Sends the initial state to all clients.
    * Starts the saving and update intervals.
    */
-  private onSimulationInit(room: Room, gameId?: number, gameVersion?: number) {
-    for (const clientWs of this.clients.keys()) {
-      clientWs.onmessage = (event: WebSocket.MessageEvent) => {
-        this.onMessage(event, room.authorId === this.clients.get(clientWs)?.userId);
-      };
-    }
-
-    SimulationRoom.logger.log(`Sending state room ${this.room.roomId}.`);
-    this.broadcast([
-      {
-        type: ServerAction.STATE,
-        payload: this.getSimulationState(),
-      },
-    ]);
-
+  private onSimulationInit(gameId?: number, gameVersion?: number) {
     this.savingInterval = this.initSaving(gameId, gameVersion);
     this.tickInterval = this.initUpdate();
 
     SimulationRoom.logger.log(`Simulation ${this.room.roomId} initialized.`);
-  }
-
-  getSimulationState(): SimulationState {
-    const simSave = this.simulation.toState();
-    const patchedState = this.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
-
-    return {
-      ...patchedState,
-      downloadProgress: this.downloadProgress,
-    };
   }
 
   /**
@@ -148,33 +97,40 @@ export class SimulationRoom {
    *
    * @returns The WebSocket server instance.
    */
-  private getServer() {
+  private createWebSocketServer() {
     const wss = new WebSocket.Server({ noServer: true });
 
     wss.on('connection', (ws: WebSocket) => {
-      SimulationRoom.logger.log(`Client connecting to room ${this.room.roomId}`);
-      if (!hasProperty(ws, 'user') || !isObject(ws.user)) {
-        throw new Error('Unknown user connected');
-      }
-
-      const client = new Client(ws.user as ValidatedUser);
-      if (this.closeTimeout) clearTimeout(this.closeTimeout);
-
-      this.clients.set(ws, client);
-
-      SimulationRoom.logger.log(`Sending room ${this.room.roomId} state.`);
-      if (this.simulation)
-        Channel.send(ws, [
-          {
-            type: ServerAction.STATE,
-            payload: this.getSimulationState(),
-          },
-        ]);
-
-      ws.onmessage = event => this.onMessage(event, client.userId == this.room.authorId);
-      ws.onclose = event => this.onClose(event);
+      this.handleClientConnection(ws);
     });
+
     return wss;
+  }
+
+  private handleClientConnection(ws: WebSocket) {
+    SimulationRoom.logger.log(`Client connecting to room ${this.room.roomId}`);
+
+    if (!hasProperty(ws, 'user') || !isObject(ws.user)) {
+      throw new Error('Unknown user connected');
+    }
+
+    const user = ws.user as ValidatedUser;
+    Client.init(user, ws, this.simulationBuilder)
+      .then(client => {
+        this.clients.set(ws, client);
+        ws.onmessage = event => this.onMessage(event, client.userId === this.room.authorId);
+      })
+      .catch(e => SimulationRoom.logger.error(`Failed to initialize client: ${e}`));
+
+    this.resetCloseTimeout();
+
+    SimulationRoom.logger.log(`Sending room ${this.room.roomId} state.`);
+
+    ws.onclose = event => this.onClose(event);
+  }
+
+  private resetCloseTimeout() {
+    if (this.closeTimeout) clearTimeout(this.closeTimeout);
   }
 
   /**
@@ -238,17 +194,19 @@ export class SimulationRoom {
    * @returns {Promise<void>} A promise that resolves when the room is closed.
    */
   private async closeRoom() {
-    this.broadcast([
-      {
-        type: ServerAction.CLOSED,
-        payload: null,
-      },
-    ]);
+    this.clients.forEach(client => {
+      client.close();
+    });
+    this.clearIntervals();
 
-    if (this.tickInterval) clearInterval(this.tickInterval);
-    if (this.savingInterval) clearInterval(this.savingInterval);
     await this.roomsService.saveRoomState(this.room.code);
     this.wss.close();
+  }
+
+  private clearIntervals() {
+    if (this.tickInterval) clearInterval(this.tickInterval);
+    if (this.savingInterval) clearInterval(this.savingInterval);
+    if (this.closeTimeout) clearTimeout(this.closeTimeout);
   }
 
   /**
@@ -266,22 +224,8 @@ export class SimulationRoom {
       return acc;
     }, {});
 
-    const cursorsAction = this.actionBuilder.getCursorsAction(cursors);
-    const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
-
-    this.clients.forEach((client, ws) => {
-      const actions = [] as ServerActionMsg[];
-      if (cursorsAction && Object.keys(cursorsAction).length > 1) {
-        const clientCursors = structuredClone(cursorsAction);
-        delete clientCursors.payload[client.code];
-        actions.push(cursorsAction);
-      }
-      if (simActions) actions.push(...simActions);
-
-      if (actions && actions.length > 0) {
-        SimulationRoom.logger.verbose(`Sending actions to [${client.code}]: ${JSON.stringify(actions)}`);
-        Channel.send(ws, actions);
-      }
+    this.clients.forEach((client, _ws) => {
+      client.update(cursors);
     });
   }
 
@@ -318,20 +262,6 @@ export class SimulationRoom {
     return setInterval(() => {
       this.tick();
     }, this.room.stateTickDelay);
-  }
-
-  /**
-   * Broadcasts a message to all connected clients, excluding the ones specified in the `exclude` parameter.
-   *
-   * @param msg - The message to broadcast.
-   * @param exclude - An optional array of WebSocket instances to exclude from the broadcast.
-   */
-  private broadcast(msg: MSG, exclude: WebSocket[] = []) {
-    this.wss.clients.forEach(client => {
-      if (!exclude.includes(client)) {
-        Channel.send(client, msg);
-      }
-    });
   }
 
   /**

@@ -44,7 +44,7 @@ import type { SimulationSceneBase } from './SimulationSceneBase';
 // import '@babylonjs/core/Engines/WebGPU/Extensions/engine.videoTexture';
 
 export abstract class SimulationBase {
-  static actorBuilder: ActorBuilder;
+  actorBuilder: ActorBuilder;
   engine: AbstractEngine;
   scene: SimulationSceneBase;
   initialState: SimulationStateSave;
@@ -57,11 +57,11 @@ export abstract class SimulationBase {
     return await EngineFactory(canvas);
   }
 
-  static async actorFromState(actorState: UnknownActorState): Promise<SharedBase | null> {
+  async actorFromState(actorState: UnknownActorState): Promise<SharedBase | null> {
     return await this.actorBuilder.build(actorState);
   }
 
-  static async tableFromState(tableState: TableState): Promise<SharedBase | null> {
+  async tableFromState(tableState: TableState): Promise<SharedBase | null> {
     return await this.actorBuilder.buildTable(tableState);
   }
 
