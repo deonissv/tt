@@ -3,5 +3,14 @@
   "compilerOptions": {
     "outDir": "./dist",
   },
-  "include": ["./src/**/*.ts"],
+  "files": [],
+  "include": [],
+  "references": [
+    {
+      "path": "./tsconfig.lib.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
+    }
+  ]
 }
