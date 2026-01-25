@@ -6,8 +6,6 @@
   "license": "ISC",
   "main": "index.ts",
   "scripts": {
-    "test": "vitest run",
-    "test:w": "vitest",
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --noEmit"
