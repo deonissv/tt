@@ -29,7 +29,8 @@
     "db:init": "npm run db:gen && npm run db:push && npm run db:seed",
     "db:gen": "dotenv -e .env -- npm run server db:gen",
     "db:push": "dotenv -e .env -- npm run server db:push",
-    "db:seed": "dotenv -e .env -- npm run server db:seed"
+    "db:seed": "dotenv -e .env -- npm run server db:seed",
+    "docker:dev": "docker compose --profile dev up"
   },
   "devDependencies": {
     "@swc/core": "^1.7.4",
@@ -51,7 +52,7 @@
     "swc-loader": "^0.2.6",
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
-    "typescript": "^5.5.4",
+    "typescript": "^5.9.3",
     "unplugin-swc": "^1.5.1",
     "vitest": "^2.0.5",
     "vite-tsconfig-paths": "^4.3.2",
