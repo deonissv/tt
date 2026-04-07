@@ -4,10 +4,11 @@ import { GamesModule } from '../games/games.module';
 import { PermissionsService } from '../permissions.service';
 import { RoomsController } from './rooms.controller';
 import { RoomsService } from './rooms.service';
+import { AssetUrlService } from './asset-url.service';
 
 @Module({
   imports: [GamesModule],
-  providers: [RoomsService, PermissionsService, CaslAbilityFactory],
+  providers: [RoomsService, AssetUrlService, PermissionsService, CaslAbilityFactory],
   controllers: [RoomsController],
   exports: [RoomsService],
 })
