@@ -6,17 +6,16 @@ import { Logger } from '@nestjs/common';
 import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
-import type { ConfigService } from '@nestjs/config';
 import type { Room } from '@prisma/client';
 import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG, ServerActionMsg } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
 import type { SimulationState, SimulationStateSave } from '@tt/states';
-import type { RecursiveType } from '@tt/utils';
-import { hasProperty, isObject, isString } from '@tt/utils';
+import { hasProperty, isObject } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';
+import type { AssetUrlService } from './asset-url.service';
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -38,15 +37,11 @@ export class SimulationRoom {
   tickInterval: NodeJS.Timeout | undefined;
   closeTimeout: NodeJS.Timeout | undefined;
 
-  staticHost: string;
-  apiHost: string;
-  proxyHost: string;
-
   private static readonly logger = new Logger('SimulationRoom');
 
   constructor(
     private readonly roomsService: RoomsService,
-    private readonly configService: ConfigService,
+    private readonly assetUrlService: AssetUrlService,
     room: Room,
   ) {
     this.room = room;
@@ -54,10 +49,6 @@ export class SimulationRoom {
     this.cursors = new Map();
     this.wss = this.getServer();
     this.simSave = undefined;
-
-    this.staticHost = this.configService.getOrThrow<string>('VITE_STATIC_HOST');
-    const apiHost = this.configService.getOrThrow<string>('VITE_API_HOST');
-    this.proxyHost = `${apiHost}/proxy`;
 
     this.downloadProgress = {
       total: 0,
@@ -135,12 +126,12 @@ export class SimulationRoom {
 
   getSimulationState(): SimulationState {
     const simSave = this.simulation.toState();
-    const patchedState = this.patchStateURLs(simSave as unknown as RecursiveType) as SimulationStateSave;
+    const patchedState = this.assetUrlService.patchStateURLs(simSave, this.room.code);
 
     return {
       ...patchedState,
       downloadProgress: this.downloadProgress,
-    };
+    } satisfies SimulationState;
   }
 
   /**
@@ -213,7 +204,7 @@ export class SimulationRoom {
    * @param event The WebSocket close event.
    */
   private onClose(event: WebSocket.CloseEvent) {
-    SimulationRoom.logger.log(`Client disconnectingfrom room ${this.room.roomId}`);
+    SimulationRoom.logger.log(`Client disconnecting from room ${this.room.roomId}`);
     const cursorClient = this.clients.get(event.target)?.code;
     if (cursorClient) {
       this.cursors.delete(cursorClient);
@@ -332,39 +323,5 @@ export class SimulationRoom {
         Channel.send(client, msg);
       }
     });
-  }
-
-  /**
-   * Recursively patches the state URLs to make external assets accessible via proxy.
-   *
-   * @param item - The object or array to patch the state URLs in.
-   * @returns The patched object or array.
-   */
-  patchStateURLs<T extends RecursiveType>(item: T): T {
-    if (isString(item) && item.startsWith('http') && !item.startsWith(`${this.staticHost}/assets`)) {
-      return this.getAssetURL(item) as T;
-    } else if (Array.isArray(item)) {
-      return item.map(i => this.patchStateURLs(i)) as T;
-    } else if (isObject(item)) {
-      return Object.keys(item).reduce(
-        (acc, key) => ({
-          ...acc,
-          [key]: this.patchStateURLs(item[key]),
-        }),
-        {},
-      ) as T;
-    }
-    return item;
-  }
-
-  /**
-   * Returns the asset URL for the given resource.
-   *
-   * @param url - The resource URL.
-   * @returns The asset URL.
-   */
-  getAssetURL(url: string) {
-    const uri = encodeURIComponent(url);
-    return `${this.proxyHost}/${this.room.code}/${uri}`;
   }
 }

@@ -10,6 +10,7 @@ export default () => {
     JWT_SECRET: 'secret',
     JWT_EXPIRES_IN: '24h',
     VITE_STATIC_HOST: 'localhost',
+    VITE_API_HOST: 'localhost',
     NODE_ENV: 'test',
   };
 

@@ -1,6 +1,7 @@
 .idea
 .vscode
 .vite
+.claude
 
 **/dist
 **/build
@@ -11,3 +12,4 @@ proxy/*
 **/*.env*
 
 logs
+CLAUDE.md
