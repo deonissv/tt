@@ -18,7 +18,7 @@ export class ProxyService {
     }
   };
 
-  writeToFile = async (roomCode: string, url: string, buffer: Buffer) => {
+  writeToFile = async (roomCode: string, url: string, buffer: Uint8Array) => {
     const filename = encodeURIComponent(url);
     ProxyService.logger.log(`Transformed URL: ${filename}`);
 
@@ -34,7 +34,7 @@ export class ProxyService {
       const response = await fetch(url);
       const file = await response.arrayBuffer();
 
-      const buffer = Buffer.from(file);
+      const buffer = new Uint8Array(file);
       try {
         await this.writeToFile(roomCode, url, buffer);
       } catch (error) {

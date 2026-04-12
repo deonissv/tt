@@ -1,6 +1,5 @@
 import { ConsoleLogger } from '@nestjs/common';
 import type { StartedTestContainer } from 'testcontainers';
-import type { PrismaService } from '../src/prisma/prisma.service';
 import { getDatabaseUrl, prismaMigrate, startContainer } from './testUtils';
 
 const logger = new ConsoleLogger('DB Mock');
@@ -8,9 +7,7 @@ const logger = new ConsoleLogger('DB Mock');
 let container: StartedTestContainer;
 let dbUrl: string;
 
-const DBMockFactory = (): (() => PrismaService) => {
-  let prismaService: PrismaService;
-
+const DBMockFactory = (): (() => void) => {
   beforeAll(async () => {
     if (!container) {
       logger.log('Starting DB Mock...');
@@ -37,7 +34,7 @@ const DBMockFactory = (): (() => PrismaService) => {
     }
   });
 
-  return () => prismaService;
+  return () => void 0;
 };
 
 export const useDatabaseMock = DBMockFactory();

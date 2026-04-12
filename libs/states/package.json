@@ -8,6 +8,7 @@
   "scripts": {
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --build --noEmit"
+
   }
 }
