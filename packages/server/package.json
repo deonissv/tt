@@ -12,7 +12,7 @@
     "test": "vitest run --config ../../vitest.config.ts",
     "test:w": "vitest --config ../../vitest.config.ts",
     "test:e2e": "vitest run --config ../../vitest.e2e.config.ts",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --build --noEmit",
     "start": "npm run options -- node ../../build/main.js",
     "debug": "nest start --debug --watch -e 'node --experimental-require-module'",
     "db:gen": "prisma generate",
