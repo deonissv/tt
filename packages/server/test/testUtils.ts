@@ -1,52 +1,53 @@
 import { CreateBox, PhysicsMotionType } from '@babylonjs/core';
 import { ConsoleLogger } from '@nestjs/common';
 import { ActorType } from '@tt/states';
-import { execSync } from 'child_process';
-import type { StartedTestContainer } from 'testcontainers';
-import { GenericContainer } from 'testcontainers';
 import { WebSocket } from 'ws';
 import { ServerBase } from '../src/simulation/actors';
 import { Simulation } from '../src/simulation/simulation';
+import { GenericContainer, Wait } from 'testcontainers';
+import type { StartedTestContainer } from 'testcontainers';
+import { POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER } from './testProviderKeys';
 
-const logger = new ConsoleLogger('TestUtils');
+export const TEST_LOGGER = new ConsoleLogger('TestUtils');
 
-const POSTGRES_USER = 'test';
-const POSTGRES_PASSWORD = 'test';
-const POSTGRES_DB = 'testdb';
-const POSTGRES_SERVER = 'localhost';
-
-// TODO: re-write this when Prisma.io gets a programmatic migration API
-// https://github.com/prisma/prisma/issues/4703
-export function prismaMigrate(databaseUrl: string): void {
-  execSync('npx prisma db push --force-reset && npx prisma db seed', {
-    env: { ...process.env, DATABASE_URL: databaseUrl },
-  });
-}
-
-export async function startContainer(): Promise<StartedTestContainer | null> {
+export async function startContainer(): Promise<StartedTestContainer> {
   const container_name = 'postgres:14-alpine';
-  logger.log(`Starting ${container_name} container...`);
+
   const container = await new GenericContainer(container_name)
     .withExposedPorts(5432)
     .withEnvironment({
-      POSTGRES_USER: POSTGRES_USER,
-      POSTGRES_PASSWORD: POSTGRES_PASSWORD,
-      POSTGRES_DB: POSTGRES_DB,
-      POSTGRES_SERVER: POSTGRES_SERVER,
+      POSTGRES_USER,
+      POSTGRES_PASSWORD,
+      POSTGRES_DB,
+      POSTGRES_SERVER: 'localhost',
     })
-    .start()
-    .catch(e => {
-      logger.error('Failed to start container');
-      logger.error(e);
-      process.kill(process.pid, 'SIGTERM');
-      return null;
-    });
-  logger.log('Container started successfully');
+    // Mount PG data dir in RAM — zero disk I/O for cluster init and all queries.
+    .withTmpFs({ '/var/lib/postgresql/data': 'rw,size=512m' })
+    // Disable durability guarantees — safe for tests, eliminates fsync overhead.
+    .withCommand([
+      'postgres',
+      '-c',
+      'fsync=off',
+      '-c',
+      'synchronous_commit=off',
+      '-c',
+      'full_page_writes=off',
+      '-c',
+      'max_connections=200',
+    ])
+    // The postgres image prints this message twice: once for the init temp server,
+    // once for the final server. Wait for the second occurrence.
+    .withWaitStrategy(Wait.forLogMessage('database system is ready to accept connections', 2))
+    .withStartupTimeout(10_000)
+    // Keep the container alive across runs when TESTCONTAINERS_REUSE_ENABLE=true.
+    .withReuse()
+    .start();
+
   return container;
 }
 
 export function getDatabaseUrl(host: string, port: number): string {
-  return `postgresql://test:test@${host}:${port}/testdb`;
+  return `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${host}:${port}/${POSTGRES_DB}`;
 }
 
 export function getPhSim() {
