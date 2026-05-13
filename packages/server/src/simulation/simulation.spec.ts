@@ -178,7 +178,7 @@ describe('Simulation', () => {
       const sim = await Simulation.init(initialState);
       expect(sim.toStateUpdate(initialState)).toEqual({});
 
-      // phisics required
+      // physics required
       // const newState = { actorStates: [{ guid: 'actor1', transformation: { position: [1, 2, 3] } }] };
       // sim.update(newState);
       // sim.start();

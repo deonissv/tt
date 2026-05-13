@@ -28,7 +28,7 @@ export {
 } from './defaults';
 export { DieMixin } from './DieMixin';
 export type { TextureBounds } from './models';
-export { FlatMoodel } from './models';
+export { FlatModel } from './models';
 export { SharedBase } from './SharedBase';
 export { TileMixin } from './TileMixin';
 export { TileStackMixin } from './TileStackMixin';

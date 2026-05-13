@@ -12,9 +12,9 @@ export const CAMERA_DEFAULT_BETA = 1;
 export const CAMERA_DEFAULT_RADIUS = 25;
 export const CAMERA_DEFAULT_POSITION = 2;
 
-export const MOVE_SENSETIVITY = 0.7;
-export const WHEEL_SENSETIVITY = 0.5;
-export const MOUSE_MOVE_SENSETIVITY = 20;
+export const MOVE_SENSITIVITY = 0.7;
+export const WHEEL_SENSITIVITY = 0.5;
+export const MOUSE_MOVE_SENSITIVITY = 20;
 
 export const FLIP_KEYS = ['KeyF'];
 export const PICK_ITEM_KEYS = ['KeyG'];

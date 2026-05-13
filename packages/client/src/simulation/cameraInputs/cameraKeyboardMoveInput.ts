@@ -10,7 +10,7 @@ import type { Nullable } from '@babylonjs/core/types';
 export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
   camera: Nullable<ArcRotateCamera>;
 
-  private moveSensetivity;
+  private moveSensitivity;
 
   private keysUp = new Set(['KeyW']);
   private keysDown = new Set(['KeyS']);
@@ -21,8 +21,8 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
   private _observer: Nullable<Observer<KeyboardInfo>>;
   private _keys = new Set<string>();
 
-  constructor(moveSensetivity: number) {
-    this.moveSensetivity = moveSensetivity;
+  constructor(moveSensitivity: number) {
+    this.moveSensitivity = moveSensitivity;
   }
 
   getClassName(): string {
@@ -41,7 +41,7 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
 
       if (evt.metaKey) return;
 
-      if (this.__bindedKeyPressed(evt)) {
+      if (this.__boundKeyPressed(evt)) {
         if (evt.preventDefault && !noPreventDefault) evt.preventDefault();
 
         if (kbInfo.type === KeyboardEventTypes.KEYDOWN) {
@@ -53,7 +53,7 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
     });
   }
 
-  __bindedKeyPressed(evt: IKeyboardEvent) {
+  __boundKeyPressed(evt: IKeyboardEvent) {
     return (
       this.keysUp.has(evt.code) ||
       this.keysDown.has(evt.code) ||
@@ -75,32 +75,32 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
         switch (key) {
           case 'KeyW':
             {
-              const dz = this.moveSensetivity * Math.sin(this.camera!.alpha);
-              const dx = this.moveSensetivity * Math.cos(this.camera!.alpha);
+              const dz = this.moveSensitivity * Math.sin(this.camera!.alpha);
+              const dx = this.moveSensitivity * Math.cos(this.camera!.alpha);
               this.camera!.target.z -= dz;
               this.camera!.target.x -= dx;
             }
             break;
           case 'KeyS':
             {
-              const dz = this.moveSensetivity * Math.sin(this.camera!.alpha);
-              const dx = this.moveSensetivity * Math.cos(this.camera!.alpha);
+              const dz = this.moveSensitivity * Math.sin(this.camera!.alpha);
+              const dx = this.moveSensitivity * Math.cos(this.camera!.alpha);
               this.camera!.target.z += dz;
               this.camera!.target.x += dx;
             }
             break;
           case 'KeyA':
             {
-              const dz = this.moveSensetivity * Math.cos(this.camera!.alpha);
-              const dx = this.moveSensetivity * Math.sin(this.camera!.alpha);
+              const dz = this.moveSensitivity * Math.cos(this.camera!.alpha);
+              const dx = this.moveSensitivity * Math.sin(this.camera!.alpha);
               this.camera!.target.z += coef * dz;
               this.camera!.target.x -= coef * dx;
             }
             break;
           case 'KeyD':
             {
-              const dz = this.moveSensetivity * Math.cos(this.camera!.alpha);
-              const dx = this.moveSensetivity * Math.sin(this.camera!.alpha);
+              const dz = this.moveSensitivity * Math.cos(this.camera!.alpha);
+              const dx = this.moveSensitivity * Math.sin(this.camera!.alpha);
               this.camera!.target.z -= coef * dz;
               this.camera!.target.x += coef * dx;
             }

@@ -53,7 +53,7 @@ export class SimulationRoom {
     this.downloadProgress = {
       total: 0,
       loaded: 0,
-      succeded: 0,
+      succeeded: 0,
       failed: 0,
     };
   }
@@ -80,7 +80,7 @@ export class SimulationRoom {
         ]);
       },
       _actorState => {
-        this.downloadProgress.succeded++;
+        this.downloadProgress.succeeded++;
       },
       _actorState => {
         this.downloadProgress.failed++;
@@ -187,7 +187,7 @@ export class SimulationRoom {
       const closeAction = actions.find(action => action.type === ClientAction.CLOSE);
       if (closeAction) {
         this.closeRoom().catch(e => {
-          SimulationRoom.logger.error(`Failer to close room ${this.room.roomId}: ${e}`);
+          SimulationRoom.logger.error(`Failure to close room ${this.room.roomId}: ${e}`);
         });
         return;
       }

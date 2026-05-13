@@ -4,7 +4,7 @@ import type { Tuple } from '@tt/utils';
 export interface DownloadProgressPld {
   loaded: number;
   total: number;
-  succeded: number;
+  succeeded: number;
   failed: number;
 }
 

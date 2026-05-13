@@ -1,6 +1,6 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { CardMixin, FlatMoodel } from '@tt/actors';
+import { CardMixin, FlatModel } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { CardGrid, CardState } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
@@ -56,7 +56,7 @@ export class Card extends CardMixin(ClientBase<CardState>) {
     const ratio = faceTexture.getBaseSize().width / grid.cols / (faceTexture.getBaseSize().height / grid.rows);
     model.scaling.x = 1.6 * ratio;
 
-    return FlatMoodel(
+    return FlatModel(
       model,
       {
         texture: faceTexture,

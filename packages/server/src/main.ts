@@ -26,7 +26,7 @@ async function bootstrap() {
   mainConfig(app);
 
   const fileLoader = app.get(FileLoaderService);
-  Loader.registartFileFetcher(url => {
+  Loader.registerFileFetcher(url => {
     return fileLoader.load(url);
   });
 

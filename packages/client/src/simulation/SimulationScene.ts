@@ -15,8 +15,8 @@ import {
   CAMERA_DEFAULT_BETA,
   CAMERA_DEFAULT_POSITION,
   CAMERA_DEFAULT_RADIUS,
-  MOVE_SENSETIVITY,
-  WHEEL_SENSETIVITY,
+  MOVE_SENSITIVITY,
+  WHEEL_SENSITIVITY,
 } from '../config';
 
 export class SimulationScene extends SimulationSceneBase {
@@ -50,12 +50,12 @@ export class SimulationScene extends SimulationSceneBase {
     camera.upperBetaLimit = 1.3;
 
     camera.inputs.clear();
-    camera.inputs.add(new CameraKeyboardMoveInput(MOVE_SENSETIVITY));
+    camera.inputs.add(new CameraKeyboardMoveInput(MOVE_SENSITIVITY));
     camera.inputs.add(new CameraWheelInput());
     camera.inputs.add(new CameraPointersInput());
 
     camera.attachControl(canvas);
-    camera.wheelPrecision = WHEEL_SENSETIVITY;
+    camera.wheelPrecision = WHEEL_SENSITIVITY;
   }
 
   private initLight() {

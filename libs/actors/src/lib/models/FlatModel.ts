@@ -13,7 +13,7 @@ export interface TextureBounds {
   faceIndexCount: number;
 }
 
-export const FlatMoodel = (model: Mesh, faceTexture?: TextureBounds, backTexture?: TextureBounds): Mesh => {
+export const FlatModel = (model: Mesh, faceTexture?: TextureBounds, backTexture?: TextureBounds): Mesh => {
   const mat = new MultiMaterial('card');
 
   const baseMat = new StandardMaterial('material');

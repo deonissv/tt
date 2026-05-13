@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { permissions, roles } from './permitions';
+import { permissions, roles } from './permissions';
 
 let prisma: PrismaClient;
 

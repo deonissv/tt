@@ -1,7 +1,7 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { inject } from 'vitest';
-import { permissions, roles } from '../prisma/permitions';
+import { permissions, roles } from '../prisma/permissions';
 import { Client as PgClient } from 'pg';
 
 let prisma: PrismaClient;
