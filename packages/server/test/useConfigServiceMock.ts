@@ -6,7 +6,7 @@ export default () => {
   counter++;
   const env: Record<string, string> = {
     PORT: (11000 + counter).toString(),
-    SALT_ROUNDS: '7',
+    SALT_ROUNDS: '1',
     JWT_SECRET: 'secret',
     JWT_EXPIRES_IN: '24h',
     VITE_STATIC_HOST: 'localhost',

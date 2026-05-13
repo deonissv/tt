@@ -23,6 +23,7 @@
     "test:lib": "npm run test -w ./libs/ --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:e2e": "npm run test:e2e --workspaces --if-present",
+    "test:e2e:fast": "npm run test:e2e:fast --workspaces --if-present",
     "check": "npm run typecheck && npm run lint && npm run test",
     "clean": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find . -name 'dist' -type d -prune -exec rm -rf '{}' + && find . -name 'build' -type d -prune -exec rm -rf '{}' +",
     "i:all": "npm i && npm install --workspaces  --if-present",
