@@ -3,6 +3,6 @@ export interface CustomDeckState {
   BackURL: string;
   NumWidth?: number;
   NumHeight?: number;
-  BackIsHidden: boolean; //Back of cards becames the hidden card when in a hand
+  BackIsHidden: boolean; //Back of cards becomes the hidden card when in a hand
   UniqueBack: boolean; //Each back is a unique card just like the front
 }

@@ -1,6 +1,6 @@
 import type { Texture } from '@babylonjs/core';
 import type { TextureBounds } from '@tt/actors';
-import { FlatMoodel, TileMixin } from '@tt/actors';
+import { FlatModel, TileMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { TileState } from '@tt/states';
 import { TileType } from '@tt/states';
@@ -70,7 +70,7 @@ export class Tile extends TileMixin(ClientBase) {
     const faceTextureBounds = Tile.getTextureBounds(faceTexture, vertStart, vertCount, 24, 6);
     const backTextureBounds = Tile.getTextureBounds(backTexture, vertStart, vertCount, 30, 6);
 
-    return FlatMoodel(model, faceTextureBounds, backTextureBounds);
+    return FlatModel(model, faceTextureBounds, backTextureBounds);
   }
 
   static async getHexTileModel(faceURL: string, backURL?: string) {
@@ -88,7 +88,7 @@ export class Tile extends TileMixin(ClientBase) {
     const faceTextureBounds = Tile.getTextureBounds(faceTexture, vertStart, vertCount, 36, 18);
     const backTextureBounds = Tile.getTextureBounds(backTexture, vertStart, vertCount, 54, 18);
 
-    return FlatMoodel(model, faceTextureBounds, backTextureBounds);
+    return FlatModel(model, faceTextureBounds, backTextureBounds);
   }
 
   static async getCircleTileModel(faceURL: string, backURL?: string) {
@@ -106,6 +106,6 @@ export class Tile extends TileMixin(ClientBase) {
     const faceTextureBounds = Tile.getTextureBounds(faceTexture, vertStart, vertCount, 192, 96);
     const backTextureBounds = Tile.getTextureBounds(backTexture, vertStart, vertCount, 288, 96);
 
-    return FlatMoodel(model, faceTextureBounds, backTextureBounds);
+    return FlatModel(model, faceTextureBounds, backTextureBounds);
   }
 }

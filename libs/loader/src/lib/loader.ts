@@ -25,13 +25,13 @@ export class Loader {
     throw new Error('FileFetcher should be registered');
   };
 
-  static registartFileFetcher(fetcher: FileFetcher) {
+  static registerFileFetcher(fetcher: FileFetcher) {
     this.fetchFile = fetcher;
   }
 
   static _getModelExtension(mime: MimeType): string {
     // @TODO: add more extensions
-    // type ModelExtentions = '.obj' | '.gltf' | '.glb';
+    // type ModelExtensions = '.obj' | '.gltf' | '.glb';
 
     switch (mime) {
       case MimeType.OBJ:
@@ -66,15 +66,15 @@ export class Loader {
       return null;
     }
 
-    const extention = this._getModelExtension(fetchedFile.mime);
-    Logger.log(`Extention found: ${meshURL} - ${extention}`);
+    const extension = this._getModelExtension(fetchedFile.mime);
+    Logger.log(`Extension found: ${meshURL} - ${extension}`);
 
     const container = await SceneLoader.LoadAssetContainerAsync(
       '',
       fetchedFile.url,
       undefined,
       undefined,
-      extention,
+      extension,
     ).catch(e => {
       Logger.error(`Failed to load asset container: ${meshURL} - ${(e as Error).toString().slice(0, 100)}`);
       return null;
@@ -143,13 +143,13 @@ export class Loader {
 
   static async loadTexture(textureURL: string): Promise<Texture | null> {
     Logger.log(`Loading texture: ${textureURL}`);
-    const metarial = await this._loadTexture(textureURL);
-    if (!metarial) {
+    const material = await this._loadTexture(textureURL);
+    if (!material) {
       return null;
     }
 
-    metarial.name = textureURL;
-    return metarial;
+    material.name = textureURL;
+    return material;
   }
 
   private static filterEmptyMeshes(meshes: AbstractMesh[]): AbstractMesh[] {

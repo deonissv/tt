@@ -13,7 +13,7 @@ Logger.register(console);
 const App = () => {
   const canvas = useRef<HTMLCanvasElement>(null);
 
-  Loader.registartFileFetcher(async (url: string) => {
+  Loader.registerFileFetcher(async (url: string) => {
     const response = await fetch(url);
     const arrayBuffer = await response.arrayBuffer();
 
@@ -276,7 +276,7 @@ const App = () => {
       .catch(console.error);
   }, [init]);
 
-  return <canvas ref={canvas} className="w-full h-full !border-0 !hover:border-0 !foucs:border-0" />;
+  return <canvas ref={canvas} className="w-full h-full !border-0 !hover:border-0 !focus:border-0" />;
 };
 
 export default App;

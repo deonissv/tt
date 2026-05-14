@@ -181,8 +181,8 @@ export class TTSParser extends ParserBase {
 
     if (
       this.hasProperty(modelState, 'ColliderURL') &&
-      this.isPropertyString(modelState, 'ColliderURL', this.errorsText.MODEL.COLLDER.URL_NOT_STRING) &&
-      this.isURL(modelState.ColliderURL, this.errorsText.MODEL.COLLDER.URL_INVALID)
+      this.isPropertyString(modelState, 'ColliderURL', this.errorsText.MODEL.COLLIDER.URL_NOT_STRING) &&
+      this.isURL(modelState.ColliderURL, this.errorsText.MODEL.COLLIDER.URL_INVALID)
     ) {
       model.colliderURL = modelState.ColliderURL;
     }
@@ -271,8 +271,8 @@ export class TTSParser extends ParserBase {
   }
 
   static parseTable = (tableObj: object): TableState | null => {
-    if (!this.hasProperty(tableObj, 'Table', this.errorsText.TALBE.NO_TYPE_PROPERTY)) return null;
-    if (!this.isPropertyString(tableObj, 'Table', this.errorsText.TALBE.TYPE_PROPERTY_NOT_STRING)) return null;
+    if (!this.hasProperty(tableObj, 'Table', this.errorsText.TABLE.NO_TYPE_PROPERTY)) return null;
+    if (!this.isPropertyString(tableObj, 'Table', this.errorsText.TABLE.TYPE_PROPERTY_NOT_STRING)) return null;
 
     const type = this.mapTableType(tableObj.Table);
     if (type === null) return null;
@@ -281,8 +281,8 @@ export class TTSParser extends ParserBase {
 
     if (hasProperty(tableObj, 'TableURL')) {
       if (
-        this.isPropertyString(tableObj, 'TableURL', this.errorsText.TALBE.TABLE_URL_NOT_STRING) &&
-        this.isURL(tableObj.TableURL, this.errorsText.TALBE.TABLE_URL_INVALID)
+        this.isPropertyString(tableObj, 'TableURL', this.errorsText.TABLE.TABLE_URL_NOT_STRING) &&
+        this.isURL(tableObj.TableURL, this.errorsText.TABLE.TABLE_URL_INVALID)
       ) {
         tableState.url = tableObj.TableURL;
       }
@@ -524,7 +524,7 @@ export class TTSParser extends ParserBase {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
-    const rotationValues = this.parseRotatioValues(objectState) as Tuple<RotationValue, typeof numFace>;
+    const rotationValues = this.parseRotationValues(objectState) as Tuple<RotationValue, typeof numFace>;
     if (!rotationValues) {
       this.errors.push(objectState.GUID);
       return null;
@@ -546,7 +546,7 @@ export class TTSParser extends ParserBase {
     const actorBase = this.parseActorBase(objectState);
     if (!actorBase) return null;
 
-    const rotationValues = this.parseRotatioValues(objectState);
+    const rotationValues = this.parseRotationValues(objectState);
     if (!rotationValues) {
       this.errors.push(objectState.GUID);
       return null;
@@ -560,7 +560,7 @@ export class TTSParser extends ParserBase {
     return dieState;
   }
 
-  static parseRotatioValues(objectState: ObjectState): RotationValue[] | null {
+  static parseRotationValues(objectState: ObjectState): RotationValue[] | null {
     if (!Object.hasOwnProperty.call(objectState, 'RotationValues')) {
       this.errors.push(objectState.GUID);
       return null;

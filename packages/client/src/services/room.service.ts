@@ -73,9 +73,9 @@ export const RoomService = {
 
           message.forEach(action => {
             if (action.type == ServerAction.DOWNLOAD_PROGRESS) {
-              const succeded = action.payload.succeded;
+              const succeeded = action.payload.succeeded;
               const total = action.payload.total;
-              setDownloadProgress(_ => [succeded, total]);
+              setDownloadProgress(_ => [succeeded, total]);
             }
           });
         };
@@ -87,7 +87,7 @@ export const RoomService = {
           if (action.type == ServerAction.STATE) {
             const simState = action.payload;
 
-            setDownloadProgress([simState.downloadProgress.succeded, simState.downloadProgress.total]);
+            setDownloadProgress([simState.downloadProgress.succeeded, simState.downloadProgress.total]);
 
             ws.removeEventListener('message', stateListener);
             ws.removeEventListener('message', progressListener);

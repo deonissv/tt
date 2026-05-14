@@ -5,7 +5,7 @@ export type OptionalAllBut<T, K extends keyof T | (keyof T)[]> = K extends keyof
     ? Required<Pick<T, K[number]>> & Omit<Partial<T>, K[number]>
     : never;
 
-export type Optinal<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
+export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type DeepPartial<T> = T extends object
   ? {
       [P in keyof T]?: DeepPartial<T[P]>;
@@ -42,7 +42,7 @@ export type RequireAtLeastOne<T, U extends (keyof T)[]> = Omit<T, U[number]> &
 
 export type Constructor<T> = new (...args: any[]) => T;
 
-export type ParammedConstructor<T extends abstract new (...args: any) => any> = new (
+export type ParameterizedConstructor<T extends abstract new (...args: any) => any> = new (
   ...args: ConstructorParameters<T>
 ) => T;
 

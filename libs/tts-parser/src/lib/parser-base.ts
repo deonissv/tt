@@ -77,7 +77,7 @@ export class ParserBase {
   static get errorsText() {
     return {
       ERROR: 'Error',
-      TALBE: {
+      TABLE: {
         NO_TYPE_PROPERTY: 'Table has no type property',
         TYPE_PROPERTY_NOT_STRING: 'Table type property is not a string',
         TABLE_URL_NOT_STRING: 'Table url is not a string',
@@ -91,7 +91,7 @@ export class ParserBase {
           URL_NOT_STRING: `Actor ${this.guid} model mesh url is not a string`,
           URL_INVALID: `Actor ${this.guid} model mesh url is not a valid URL`,
         },
-        COLLDER: {
+        COLLIDER: {
           URL_NOT_STRING: `Actor ${this.guid} model collider url is not a string`,
           URL_INVALID: `Actor ${this.guid} model collider url is not a valid URL`,
         },

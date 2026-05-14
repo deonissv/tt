@@ -86,9 +86,9 @@ export const AssetManagerProxy = (staticHost: string) => {
       meshURL: `${assetsPath}/OctagonTable_wood1992.obj`,
       diffuseURL: `${assetsPath}/wood_diff.png`,
       specularURL: `${assetsPath}/wood_spec.png`,
-      // diffuseURL: `${statisHost}/OctagonTable_diff.png`,
-      // normalURL: `${statisHost}/OctagonTable_nrm.png`,
-      // specularURL: `${statisHost}/OctagonTable_spec.png`,
+      // diffuseURL: `${staticHost}/OctagonTable_diff.png`,
+      // normalURL: `${staticHost}/OctagonTable_nrm.png`,
+      // specularURL: `${staticHost}/OctagonTable_spec.png`,
     },
   };
 
@@ -114,9 +114,9 @@ export const AssetManagerProxy = (staticHost: string) => {
     } satisfies Transformation,
     frame: {
       meshURL: `${assetsPath}/TableSquare.obj`,
-      //   diffuseURL: `${statisHost}/table_square_myMaterial1_Diffuse.png`,
-      //   normalURL: `${statisHost}/table_square_myMaterial1_Normal.png`,
-      //   specularURL: `${statisHost}/table_square_myMaterial1_Spec_Gloss.png`,
+      //   diffuseURL: `${staticHost}/table_square_myMaterial1_Diffuse.png`,
+      //   normalURL: `${staticHost}/table_square_myMaterial1_Normal.png`,
+      //   specularURL: `${staticHost}/table_square_myMaterial1_Spec_Gloss.png`,
       diffuseURL: `${assetsPath}/Table02_diff.png`,
       specularURL: `${assetsPath}/Table02_spec.png`,
       normalURL: `${assetsPath}/Table02_nrm.png`,
@@ -176,9 +176,9 @@ export const AssetManagerProxy = (staticHost: string) => {
       meshURL: `${assetsPath}/HexagonTable_wood.obj`,
       diffuseURL: `${assetsPath}/wood_diff.png`,
       specularURL: `${assetsPath}/wood_spec.png`,
-      // diffuseURL: `${statisHost}/HexagonTable_diff.png`,
-      // normalURL: `${statisHost}/HexagonTable_nrm.png`,
-      // specularURL: `${statisHost}/HexagonTable_spec.png`,
+      // diffuseURL: `${staticHost}/HexagonTable_diff.png`,
+      // normalURL: `${staticHost}/HexagonTable_nrm.png`,
+      // specularURL: `${staticHost}/HexagonTable_spec.png`,
     },
   };
 

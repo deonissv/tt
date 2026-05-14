@@ -1,6 +1,6 @@
 import { subject } from '@casl/ability';
 import type { Game, Room } from '@prisma/client';
-import { permissions } from '../../prisma/permitions';
+import { permissions } from '../../prisma/permissions';
 import { authMockAdmin } from '../../test/authMock';
 import type { UserWithPermissions } from './casl-ability.factory';
 import { CaslAbilityFactory } from './casl-ability.factory';

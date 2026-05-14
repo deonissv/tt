@@ -42,7 +42,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
         return null;
       });
 
-    Loader.registartFileFetcher(async (url: string) => {
+    Loader.registerFileFetcher(async (url: string) => {
       const response = await fetch(url);
       const arrayBuffer = await response.arrayBuffer();
 
@@ -143,7 +143,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
 
         loaded.current = true;
 
-        if (downloadProgress && downloadProgress.succeded !== downloadProgress.total) {
+        if (downloadProgress && downloadProgress.succeeded !== downloadProgress.total) {
           addToast(
             `Failed to load ${downloadProgress.failed}/${downloadProgress.total} assets. Try to restart the room`,
           );
