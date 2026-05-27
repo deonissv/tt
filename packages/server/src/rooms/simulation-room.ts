@@ -4,18 +4,23 @@ import { Simulation } from '../simulation/simulation';
 
 import { Logger } from '@nestjs/common';
 import { Client } from './client';
-import type { RoomsService } from './rooms.service';
 
 import type { Room } from '@prisma/client';
 import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG, ServerActionMsg } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
-import type { SimulationState, SimulationStateSave } from '@tt/states';
+import type { SimulationState, SimulationStateSave, SimulationStateUpdate } from '@tt/states';
 import { hasProperty, isObject } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';
 import type { AssetUrlService } from './asset-url.service';
+
+export interface SimulationRoomPersistence {
+  saveRoomState(code: string): Promise<void>;
+  saveRoomGameLoad(code: string, gameId: number, gameVersion: number): Promise<void>;
+  saveRoomProgressUpdate(code: string, update: SimulationStateUpdate): Promise<void>;
+}
 
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
@@ -40,14 +45,13 @@ export class SimulationRoom {
   private static readonly logger = new Logger('SimulationRoom');
 
   constructor(
-    private readonly roomsService: RoomsService,
+    private readonly persistence: SimulationRoomPersistence,
     private readonly assetUrlService: AssetUrlService,
     room: Room,
   ) {
     this.room = room;
     this.clients = new Map();
     this.cursors = new Map();
-    this.wss = this.getServer();
     this.simSave = undefined;
 
     this.downloadProgress = {
@@ -63,10 +67,11 @@ export class SimulationRoom {
    *
    * @param simSave Optional simulation state save.
    */
-  async init(simSave?: SimulationStateSave, gameId?: number, gameVersion?: number) {
-    SimulationRoom.logger.log(`Room ${this.room.roomId} initializig...`);
+  async init(simSave?: SimulationStateSave, gameId?: number, gameVersion?: number, wss?: WebSocket.Server) {
+    SimulationRoom.logger.log(`Room ${this.room.roomId} initializing...`);
+    this.wss = wss ?? this.getServer();
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
-    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializig...`);
+    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializing...`);
     this.simulation = await Simulation.init(
       simSave ?? {},
       () => {
@@ -238,7 +243,7 @@ export class SimulationRoom {
 
     if (this.tickInterval) clearInterval(this.tickInterval);
     if (this.savingInterval) clearInterval(this.savingInterval);
-    await this.roomsService.saveRoomState(this.room.code);
+    await this.persistence.saveRoomState(this.room.code);
     this.wss.close();
   }
 
@@ -284,7 +289,7 @@ export class SimulationRoom {
   private initSaving(gameId?: number, gameVersion?: number): NodeJS.Timeout {
     SimulationRoom.logger.log('Saving interval started');
     if (gameId && gameVersion) {
-      this.roomsService.saveRoomGameLoad(this.room.code, gameId, gameVersion).catch(e => {
+      this.persistence.saveRoomGameLoad(this.room.code, gameId, gameVersion).catch(e => {
         SimulationRoom.logger.error(`Failed to save game load for room ${this.room.roomId}: ${e}`);
       });
     }
@@ -293,7 +298,7 @@ export class SimulationRoom {
       const simUpdate = this.simulation.toStateUpdate(this.simSave);
       if (simUpdate.actorStates?.length && simUpdate.actorStates.length > 0) {
         SimulationRoom.logger.log(`Saving room ${this.room.roomId} update ${JSON.stringify(simUpdate)}`);
-        await this.roomsService.saveRoomProgressUpdate(this.room.code, simUpdate);
+        await this.persistence.saveRoomProgressUpdate(this.room.code, simUpdate);
       }
       this.simSave = simSave;
     }, this.room.savingDelay);

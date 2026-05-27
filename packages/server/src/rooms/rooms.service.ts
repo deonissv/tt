@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import type { Prisma, Room } from '@prisma/client';
 import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { SimulationRoom } from './simulation-room';
+import { SimulationRoom, SimulationRoomPersistence } from './simulation-room';
 
 import { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
 import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
@@ -11,7 +11,7 @@ import { AssetUrlService } from './asset-url.service';
 import { RoomRegistry } from './room-registry';
 
 @Injectable()
-export class RoomsService {
+export class RoomsService implements SimulationRoomPersistence {
   private readonly logger = new Logger('RoomsService');
 
   constructor(
