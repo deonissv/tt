@@ -5,6 +5,7 @@ import { authMockAdmin } from '../../test/authMock';
 import { useApp } from '../../test/useApp';
 import { useDatabaseMock } from '../../test/useDatabaseMock';
 import type { PrismaService } from '../prisma/prisma.service';
+import { RoomRegistry } from './room-registry';
 import { RoomsService } from './rooms.service';
 import type { SimulationRoom } from './simulation-room';
 
@@ -13,10 +14,12 @@ describe('RoomsService', () => {
   let prismaService: PrismaService;
   let app: INestApplication<Server>;
   let roomsService: RoomsService;
+  let roomRegistry: RoomRegistry;
 
   beforeAll(async () => {
     [app, prismaService] = await useApp();
     roomsService = app.get<RoomsService>(RoomsService);
+    roomRegistry = app.get(RoomRegistry);
   });
 
   afterAll(async () => {
@@ -311,7 +314,7 @@ describe('RoomsService', () => {
         },
       });
 
-      vi.spyOn(RoomsService.rooms, 'get').mockReturnValue({
+      vi.spyOn(roomRegistry, 'get').mockReturnValue({
         simulation: {
           toState: () => simState2,
         },
