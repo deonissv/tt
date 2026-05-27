@@ -39,9 +39,7 @@ export class Deck extends DeckMixin(ClientBase) {
       this.setEnabled(false);
     }
 
-    if (!grid) {
-      grid = this.items.at(-1)!;
-    }
+    grid ??= this.items.at(-1)!;
     const cardModel = Card.getCardModel(this.model, faceTexture, backTexture, grid);
     this.__model = cardModel;
 

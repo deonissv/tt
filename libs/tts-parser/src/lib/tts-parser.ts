@@ -94,15 +94,15 @@ export class TTSParser extends ParserBase {
 
     switch (type) {
       case ActorType.BAG:
-        return this.parseBag(objectState as ObjectState);
+        return this.parseBag(objectState);
       case ActorType.CARD:
-        return this.parseCard(objectState as ObjectState);
+        return this.parseCard(objectState);
       case ActorType.TILE:
-        return this.parseTile(objectState as ObjectState);
+        return this.parseTile(objectState);
       case ActorType.TILE_STACK:
-        return this.parseTileStack(objectState as ObjectState);
+        return this.parseTileStack(objectState);
       case ActorType.DECK:
-        return this.parseDeck(objectState as ObjectState);
+        return this.parseDeck(objectState);
       case ActorType.DIE6ROUND:
       case ActorType.DIE4:
       case ActorType.DIE6:
@@ -112,9 +112,9 @@ export class TTSParser extends ParserBase {
       case ActorType.DIE20:
         return this.parseDieN(objectState as ObjectState, type);
       case ActorType.ACTOR:
-        return this.parseCustomObject(objectState as ObjectState) as unknown as ActorState;
+        return this.parseCustomObject(objectState);
       case ActorType.PAWN_TOKEN:
-        return this.parseBuiltInActorState(objectState, type) as unknown as ActorState;
+        return this.parseBuiltInActorState(objectState, type);
     }
   }
 

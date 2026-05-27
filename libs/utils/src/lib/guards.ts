@@ -6,11 +6,11 @@ export const isArray = <T>(arr: unknown): arr is T[] => Array.isArray(arr);
 export const isObject = (obj: unknown): obj is object => Boolean(obj) && typeof obj === 'object' && !Array.isArray(obj);
 export const isUnknownObject = (obj: unknown): obj is UnknownObject => isObject(obj);
 
-export const hasProperty = <K extends string>(object: object, key: K): object is { [P in K]: unknown } => {
+export const hasProperty = <K extends string>(object: object, key: K): object is Record<K, unknown> => {
   return key in object;
 };
 
-export const hasOwnProperty = <K extends string>(object: object, key: K): object is { [P in K]: unknown } => {
+export const hasOwnProperty = <K extends string>(object: object, key: K): object is Record<K, unknown> => {
   return Object.prototype.hasOwnProperty.call(object, key);
 };
 

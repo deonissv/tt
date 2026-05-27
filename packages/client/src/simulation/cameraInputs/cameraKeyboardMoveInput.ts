@@ -33,7 +33,7 @@ export class CameraKeyboardMoveInput implements ICameraInput<ArcRotateCamera> {
     return 'keyboard';
   }
 
-  attachControl(noPreventDefault?: boolean | undefined): void {
+  attachControl(noPreventDefault?: boolean): void {
     this._scene = this.camera!.getScene();
 
     this._observer = this._scene.onKeyboardObservable.add(kbInfo => {

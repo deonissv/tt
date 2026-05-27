@@ -1,1 +1,1 @@
-export * from './SimulationState';
+export type * from './SimulationState';

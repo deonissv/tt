@@ -29,15 +29,15 @@ export class ParserBase {
     obj: T,
     name: K,
     message?: string,
-  ): obj is T & { [P in K]: unknown } {
+  ): obj is T & Record<K, unknown> {
     return this.assert(hasProperty(obj, name), message);
   }
 
-  static hasPropertyString<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
+  static hasPropertyString<T extends object, K extends string>(obj: T, name: K): obj is T & Record<K, string> {
     return hasProperty(obj, name) && isString(obj[name]);
   }
 
-  static hasPropertyURL<T extends object, K extends string>(obj: T, name: K): obj is T & { [P in K]: string } {
+  static hasPropertyURL<T extends object, K extends string>(obj: T, name: K): obj is T & Record<K, string> {
     return this.hasPropertyString(obj, name) && isURL(obj[name]);
   }
 
@@ -57,7 +57,7 @@ export class ParserBase {
     obj: T,
     name: K,
     message?: string,
-  ): obj is T & { [P in K]: string } {
+  ): obj is T & Record<K, string> {
     return this.assert(isString(obj[name]), message);
   }
 
