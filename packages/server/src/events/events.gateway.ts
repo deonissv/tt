@@ -8,7 +8,7 @@ import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'ws';
 import { AuthService } from '../auth/auth.service';
 import { JwtStrategy } from '../auth/jwt.strategy';
-import { RoomsService } from '../rooms/rooms.service';
+import { RoomRegistry } from '../rooms/room-registry';
 
 /**
  * Aborts the WebSocket handshake with the given code and message.
@@ -55,6 +55,7 @@ export class EventsGateway implements OnGatewayInit {
     private readonly adapterHost: HttpAdapterHost,
     private readonly authService: AuthService,
     private readonly jwtStrategy: JwtStrategy,
+    private readonly roomRegistry: RoomRegistry,
   ) {}
 
   afterInit(_wss: Server) {
@@ -77,19 +78,19 @@ export class EventsGateway implements OnGatewayInit {
         }
 
         const roomId = this.getRoomUrl(request);
-        if (!roomId || !RoomsService.hasRoom(roomId)) {
+        if (!roomId || !this.roomRegistry.has(roomId)) {
           abortHandshake(socket, 400, 'No room found');
           return new BadRequestException('no room found');
         }
 
-        const wss = RoomsService.getRoom(roomId)!.wss;
+        const wss = this.roomRegistry.get(roomId)!.wss;
         wss.handleUpgrade(request, socket, head, ws => {
           Object.assign(ws, { user: validatedUser });
           wss.emit('connection', ws, request);
         });
 
         wss.on('close', _ws => {
-          RoomsService.deleteRoom(roomId);
+          this.roomRegistry.delete(roomId);
         });
       } catch (e) {
         EventsGateway.logger.error(e);

@@ -8,16 +8,17 @@ import { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
 import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import { Simulation } from '../simulation/simulation';
 import { AssetUrlService } from './asset-url.service';
+import { RoomRegistry } from './room-registry';
 
 @Injectable()
 export class RoomsService {
   private readonly logger = new Logger('RoomsService');
-  static rooms = new Map<string, SimulationRoom>();
 
   constructor(
     private readonly prismaService: PrismaService,
     private readonly gameService: GamesService,
     private readonly assetUrlService: AssetUrlService,
+    private readonly roomRegistry: RoomRegistry,
   ) {}
 
   /**
@@ -36,7 +37,7 @@ export class RoomsService {
     } catch (e) {
       this.logger.error((e as Error).message);
     }
-    RoomsService.setRoom(room);
+    this.roomRegistry.set(room);
     return roomTable.code;
   }
 
@@ -157,7 +158,7 @@ export class RoomsService {
    * @throws BadRequestException if the room is already started or not found.
    */
   async resumeRoom(roomCode: string): Promise<string> {
-    if (RoomsService.hasRoom(roomCode)) {
+    if (this.roomRegistry.has(roomCode)) {
       throw new BadRequestException('Room already started');
     }
 
@@ -287,7 +288,7 @@ export class RoomsService {
     this.logger.log(`Saving state for room with code: ${roomCode}`);
 
     const room = await this.findRoomByCode(roomCode);
-    const simulationRoom = RoomsService.getRoom(roomCode);
+    const simulationRoom = this.roomRegistry.get(roomCode);
 
     if (!room || !simulationRoom) {
       this.logger.warn(`Room not found with code: ${roomCode}`);
@@ -352,7 +353,7 @@ export class RoomsService {
    * @throws BadRequestException - If the room is currently running.
    */
   async deleteRoom(roomCode: string) {
-    if (RoomsService.hasRoom(roomCode)) {
+    if (this.roomRegistry.has(roomCode)) {
       throw new BadRequestException('Room is running');
     }
 
@@ -385,44 +386,6 @@ export class RoomsService {
   }
 
   isRoomRunning(roomCode: string): boolean {
-    return RoomsService.hasRoom(roomCode);
-  }
-
-  /**
-   * Sets the specified room in the RoomsService.
-   *
-   * @param room - The room to be set.
-   */
-  static setRoom(room: SimulationRoom) {
-    RoomsService.rooms.set(room.room.code, room);
-  }
-
-  /**
-   * Retrieves a simulation room by its room code.
-   *
-   * @param roomCode - The code of the room to retrieve.
-   * @returns The simulation room associated with the given room code, or undefined if not found.
-   */
-  static getRoom(roomCode: string): SimulationRoom | undefined {
-    return RoomsService.rooms.get(roomCode);
-  }
-
-  /**
-   * Deletes a room from the RoomsService.
-   *
-   * @param roomCode - The code of the room to delete.
-   */
-  static deleteRoom(roomCode: string) {
-    RoomsService.rooms.delete(roomCode);
-  }
-
-  /**
-   * Checks if a room with the specified room code exists.
-   *
-   * @param roomCode - The code of the room to check.
-   * @returns `true` if the room exists, `false` otherwise.
-   */
-  static hasRoom(roomCode: string): boolean {
-    return RoomsService.rooms.has(roomCode);
+    return this.roomRegistry.has(roomCode);
   }
 }
