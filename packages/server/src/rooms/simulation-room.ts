@@ -1,6 +1,7 @@
 import WebSocket from 'ws';
 
-import { Simulation } from '../simulation/simulation';
+import type { Simulation } from '../simulation/simulation';
+import { SimulationFactory } from '../simulation/simulation.factory';
 
 import { Logger } from '@nestjs/common';
 import { Client } from './client';
@@ -30,6 +31,7 @@ export class SimulationRoom {
 
   actionBuilder = new ActionBuilder();
   actionsHandler = new ActionHandler();
+  simulationFactory = new SimulationFactory();
 
   downloadProgress: DownloadProgressPld;
 
@@ -67,7 +69,7 @@ export class SimulationRoom {
     SimulationRoom.logger.log(`Room ${this.room.roomId} initializig...`);
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
     SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializig...`);
-    this.simulation = await Simulation.init(
+    this.simulation = await this.simulationFactory.create(
       simSave ?? {},
       () => {
         this.downloadProgress.loaded++;
