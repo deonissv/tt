@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/dot-notation */
 import type { Tuple } from '@babylonjs/core';
-import { Logger, Mesh, Scene } from '@babylonjs/core';
+import { Logger, Mesh } from '@babylonjs/core';
 
 import { Loader } from '@tt/loader';
 import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@tt/states';
 import { initHavok } from '../utils';
 import { Actor } from './actors';
 import { Simulation } from './simulation';
+import { SimulationFactory } from './simulation.factory';
 
 describe('Simulation', () => {
+  const factory = new SimulationFactory();
+
   beforeAll(async () => {
     Logger.LogLevels = 0;
 
@@ -26,91 +29,6 @@ describe('Simulation', () => {
     });
   });
 
-  describe('init', () => {
-    it('Simulation init creates scene and sets left handed system', async () => {
-      const initialState = { leftHandedSystem: false };
-      const sim = await Simulation.init(initialState, vi.fn());
-
-      expect(sim['scene'] instanceof Scene).toBe(true);
-      expect(sim['scene'].useRightHandedSystem).toBe(true);
-
-      const leftHandedState = { leftHandedSystem: true };
-      const sim2 = await Simulation.init(leftHandedState, vi.fn());
-      expect(sim2['scene'].useRightHandedSystem).toBe(false);
-    });
-
-    it('Simulation init calls onModelLoaded for each loaded actor', async () => {
-      const mockOnModelLoaded = vi.fn();
-      const initialState: { actorStates: ActorState[] } = {
-        actorStates: [
-          {
-            type: 0,
-            guid: '1',
-            name: '',
-            model: {
-              meshURL: '',
-            },
-          },
-          {
-            type: 0,
-            guid: '2',
-            name: '',
-            model: {
-              meshURL: '',
-            },
-          },
-        ],
-      };
-      await Simulation.init(initialState, mockOnModelLoaded);
-
-      expect(mockOnModelLoaded).toHaveBeenCalledTimes(2);
-    });
-
-    it('Simulation init calls onSucceed for successfully loaded actors', async () => {
-      const mockOnSucceed = vi.fn();
-      const initialState = {
-        actorStates: [
-          {
-            type: 0,
-            guid: '1',
-            name: '',
-            model: {
-              meshURL: '',
-            },
-          },
-        ],
-      };
-      vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
-        return Promise.resolve(new Actor(state, new Mesh('testMesh')));
-      });
-
-      await Simulation.init(initialState, vi.fn(), mockOnSucceed);
-
-      expect(mockOnSucceed).toHaveBeenCalledTimes(1);
-    });
-
-    it('Simulation init calls onFailed for failed actors', async () => {
-      const mockOnFailed = vi.fn();
-      const initialState = {
-        actorStates: [
-          {
-            type: 0,
-            guid: '1',
-            name: '',
-            model: {
-              meshURL: '',
-            },
-          },
-        ],
-      };
-      vi.spyOn(Loader, 'loadModel').mockReturnValueOnce(Promise.resolve([null, null]));
-      vi.spyOn(Actor, 'fromState').mockReturnValueOnce(Promise.resolve(null));
-      await Simulation.init(initialState, vi.fn(), vi.fn(), mockOnFailed);
-
-      expect(mockOnFailed).toHaveBeenCalledTimes(1);
-    });
-  });
-
   // describe('update', () => {
   //   it('updates actors based on state', async () => {
   //     const initialState: SimulationStateSave = {
@@ -124,7 +42,7 @@ describe('Simulation', () => {
   //     vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
   //       return Promise.resolve(new Actor(state, new Mesh('testMesh')));
   //     });
-  //     const sim = await Simulation.init(initialState);
+  //     const sim = await factory.create(initialState);
   //     const simActor = sim['scene'].meshes.find(m => (m.parent! as Actor).guid === initialState.actorStates![0].guid)
   //       ?.parent;
   //     expect(simActor?.['__targetPosition']).toEqual(null);
@@ -146,7 +64,7 @@ describe('Simulation', () => {
   //   vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
   //     return Promise.resolve(new Actor(state, new Mesh('testMesh')));
   //   });
-  //   const sim = await Simulation.init(initialState);
+  //   const sim = await factory.create(initialState);
   //   const simActor = sim['scene'].meshes.find(m => m.name === 'model')?.parent;
   //   expect(simActor?.['__targetPosition']).toEqual(null);
 
@@ -175,7 +93,7 @@ describe('Simulation', () => {
       vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
         return Promise.resolve(new Actor(state, new Mesh('testMesh')));
       });
-      const sim = await Simulation.init(initialState);
+      const sim = await factory.create(initialState);
       expect(sim.toStateUpdate(initialState)).toEqual({});
 
       // physics required
@@ -516,7 +434,7 @@ describe('Simulation', () => {
     //   vi.spyOn(Actor, 'fromState').mockImplementation((state: ActorState) => {
     //     return Promise.resolve(new Actor(state, new Mesh('testMesh')));
     //   });
-    //   const sim = await Simulation.init(initialState);
+    //   const sim = await factory.create(initialState);
 
     //   const expected: SimulationStateSave = {
     //     table: {
@@ -889,7 +807,7 @@ describe('Simulation', () => {
         actorStates: [],
         leftHandedSystem: false,
       };
-      const sim = await Simulation.init(initialState);
+      const sim = await factory.create(initialState);
       expect(sim.toState()).toEqual(initialState);
     });
 
@@ -903,7 +821,7 @@ describe('Simulation', () => {
           url: 'https://example.com',
         },
       };
-      const sim = await Simulation.init(initialState);
+      const sim = await factory.create(initialState);
       expect(sim.toState()).toEqual({
         actorStates: [],
         leftHandedSystem: false,

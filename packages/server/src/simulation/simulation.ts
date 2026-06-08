@@ -18,6 +18,8 @@ export class Simulation extends SimulationBase {
     this.engine = new NullEngine();
     this.scene = new SimulationSceneBase(this.engine);
     this.initialState = initialState;
+    this.scene.useRightHandedSystem =
+      initialState?.leftHandedSystem === undefined ? true : !initialState.leftHandedSystem;
     this.scene.createDefaultCameraOrLight(false, false, false);
     this.logger = new Logger(Simulation.name);
   }
@@ -32,45 +34,6 @@ export class Simulation extends SimulationBase {
 
     hk.setVelocityLimits(50, 200);
     this.scene.enablePhysics(gravityVec, hk);
-  }
-
-  static async init(
-    stateSave: SimulationStateSave,
-    onModelLoaded?: () => void,
-    onSucceed?: (ActorState) => void,
-    onFailed?: (ActorState) => void,
-  ): Promise<Simulation> {
-    const sim = new Simulation(stateSave);
-    sim.logger.log('Simulation instance created');
-
-    sim.scene.useRightHandedSystem = stateSave?.leftHandedSystem === undefined ? true : !stateSave.leftHandedSystem;
-    sim.initPhysics(stateSave?.gravity);
-
-    if (stateSave.table) {
-      try {
-        await this.tableFromState(stateSave.table);
-      } catch (e) {
-        sim.logger.error(`Failed to load table: ${String(e)}`);
-      }
-    }
-
-    await Promise.all(
-      (stateSave?.actorStates ?? []).map(async actorState => {
-        try {
-          const actor = await this.actorFromState(actorState);
-          if (actor) {
-            onSucceed?.(actorState);
-          } else {
-            onFailed?.(actorState);
-          }
-          onModelLoaded?.();
-        } catch (e) {
-          onFailed?.(actorState);
-          sim.logger.error(`Failed to load actor ${actorState.guid}: ${String(e)}`);
-        }
-      }),
-    );
-    return sim;
   }
 
   static async actorFromState(actorState: UnknownActorState): Promise<ServerBase | null> {
