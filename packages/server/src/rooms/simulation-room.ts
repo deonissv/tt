@@ -1,7 +1,7 @@
-import WebSocket from 'ws';
+import type WebSocket from 'ws';
 
 import type { Simulation } from '../simulation/simulation';
-import { SimulationFactory } from '../simulation/simulation.factory';
+import type { SimulationFactory } from '../simulation/simulation.factory';
 
 import { Logger } from '@nestjs/common';
 import { Client } from './client';
@@ -14,7 +14,7 @@ import { Channel } from '@tt/channel';
 import type { SimulationState, SimulationStateSave } from '@tt/states';
 import { hasProperty, isObject } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
-import { ActionHandler } from '../simulation/action-handler';
+import type { ActionHandler } from '../simulation/action-handler';
 import { ActionBuilder } from './action-builder';
 import type { AssetUrlService } from './asset-url.service';
 
@@ -30,8 +30,6 @@ export class SimulationRoom {
   simSave: SimulationStateSave | undefined;
 
   actionBuilder = new ActionBuilder();
-  actionsHandler = new ActionHandler();
-  simulationFactory = new SimulationFactory();
 
   downloadProgress: DownloadProgressPld;
 
@@ -44,12 +42,15 @@ export class SimulationRoom {
   constructor(
     private readonly roomsService: RoomsService,
     private readonly assetUrlService: AssetUrlService,
+    private readonly actionsHandler: ActionHandler,
+    private readonly simulationFactory: SimulationFactory,
+    wss: WebSocket.Server,
     room: Room,
   ) {
     this.room = room;
     this.clients = new Map();
     this.cursors = new Map();
-    this.wss = this.getServer();
+    this.wss = wss;
     this.simSave = undefined;
 
     this.downloadProgress = {
@@ -66,9 +67,9 @@ export class SimulationRoom {
    * @param simSave Optional simulation state save.
    */
   async init(simSave?: SimulationStateSave, gameId?: number, gameVersion?: number) {
-    SimulationRoom.logger.log(`Room ${this.room.roomId} initializig...`);
+    SimulationRoom.logger.log(`Room ${this.room.roomId} initializing...`);
     this.downloadProgress.total = simSave?.actorStates?.length ?? 0;
-    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializig...`);
+    SimulationRoom.logger.log(`Simulation ${this.room.roomId} initializing...`);
     this.simulation = await this.simulationFactory.create(
       simSave ?? {},
       () => {
@@ -137,14 +138,11 @@ export class SimulationRoom {
   }
 
   /**
-   * Creates and returns a WebSocket server for the simulation room.
-   *
-   * @returns The WebSocket server instance.
+   * Starts listening for client connections on the WebSocket server.
+   * Kept separate from the constructor so construction stays side-effect free.
    */
-  private getServer() {
-    const wss = new WebSocket.Server({ noServer: true });
-
-    wss.on('connection', (ws: WebSocket) => {
+  listen(): void {
+    this.wss.on('connection', (ws: WebSocket) => {
       SimulationRoom.logger.log(`Client connecting to room ${this.room.roomId}`);
       if (!hasProperty(ws, 'user') || !isObject(ws.user)) {
         throw new Error('Unknown user connected');
@@ -167,7 +165,6 @@ export class SimulationRoom {
       ws.onmessage = event => this.onMessage(event, client.userId == this.room.authorId);
       ws.onclose = event => this.onClose(event);
     });
-    return wss;
   }
 
   /**
