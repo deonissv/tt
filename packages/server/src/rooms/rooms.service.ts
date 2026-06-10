@@ -2,13 +2,12 @@ import { BadRequestException, Injectable, Logger, NotFoundException } from '@nes
 import type { Prisma, Room } from '@prisma/client';
 import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { SimulationRoom } from './simulation-room';
 
 import { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
 import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
 import { Simulation } from '../simulation/simulation';
-import { AssetUrlService } from './asset-url.service';
 import { RoomRegistry } from './room-registry';
+import { SimulationRoomFactory } from './simulation-room.factory';
 
 @Injectable()
 export class RoomsService {
@@ -17,8 +16,8 @@ export class RoomsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly gameService: GamesService,
-    private readonly assetUrlService: AssetUrlService,
     private readonly roomRegistry: RoomRegistry,
+    private readonly simulationRoomFactory: SimulationRoomFactory,
   ) {}
 
   /**
@@ -29,7 +28,7 @@ export class RoomsService {
    * @returns The code of the room.
    */
   startSimulationRoom(roomTable: Room, simSave?: SimulationStateSave, gameId?: number, gameVersion?: number): string {
-    const room = new SimulationRoom(this, this.assetUrlService, roomTable);
+    const room = this.simulationRoomFactory.create(this, roomTable);
     try {
       room.init(simSave, gameId, gameVersion).catch(e => {
         this.logger.error((e as Error).message);
