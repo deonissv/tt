@@ -8,7 +8,7 @@ import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
 import type { Room } from '@prisma/client';
-import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG, ServerActionMsg } from '@tt/actions';
+import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
 import type { SimulationState, SimulationStateSave } from '@tt/states';
@@ -260,15 +260,9 @@ export class SimulationRoom {
     const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
 
     this.clients.forEach((client, ws) => {
-      const actions = [] as ServerActionMsg[];
-      if (cursorsAction && Object.keys(cursorsAction).length > 1) {
-        const clientCursors = structuredClone(cursorsAction);
-        delete clientCursors.payload[client.code];
-        actions.push(cursorsAction);
-      }
-      if (simActions) actions.push(...simActions);
+      const actions = client.prepareMessage(cursorsAction, simActions);
 
-      if (actions && actions.length > 0) {
+      if (actions.length > 0) {
         SimulationRoom.logger.verbose(`Sending actions to [${client.code}]: ${JSON.stringify(actions)}`);
         Channel.send(ws, actions);
       }
