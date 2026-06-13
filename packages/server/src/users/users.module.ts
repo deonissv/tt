@@ -1,10 +1,11 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { CaslModule } from '../casl/casl.module';
+import { TokenModule } from '../token/token.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [CaslModule, forwardRef(() => import('../auth/auth.module').then(m => m.AuthModule))],
+  imports: [CaslModule, TokenModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

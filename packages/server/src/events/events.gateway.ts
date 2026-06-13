@@ -6,9 +6,9 @@ import { HttpAdapterHost } from '@nestjs/core';
 import type { OnGatewayInit } from '@nestjs/websockets';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server } from 'ws';
-import { AuthService } from '../auth/auth.service';
 import { JwtStrategy } from '../auth/jwt.strategy';
 import { RoomRegistry } from '../rooms/room-registry';
+import { TokenService } from '../token/token.service';
 
 /**
  * Aborts the WebSocket handshake with the given code and message.
@@ -53,7 +53,7 @@ export class EventsGateway implements OnGatewayInit {
 
   constructor(
     private readonly adapterHost: HttpAdapterHost,
-    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private readonly jwtStrategy: JwtStrategy,
     private readonly roomRegistry: RoomRegistry,
   ) {}
@@ -71,7 +71,7 @@ export class EventsGateway implements OnGatewayInit {
       }
 
       try {
-        const verifiedToken = await this.authService.verifyAsync(token);
+        const verifiedToken = await this.tokenService.verifyAsync(token);
         const validatedUser = this.jwtStrategy.validate(verifiedToken);
         if (!validatedUser) {
           abortHandshake(socket, 500, 'Token is damaged');
