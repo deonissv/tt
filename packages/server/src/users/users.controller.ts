@@ -1,15 +1,5 @@
 import { subject } from '@casl/ability';
-import {
-  Body,
-  Controller,
-  Delete,
-  ForbiddenException,
-  forwardRef,
-  Inject,
-  Param,
-  Put,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Param, Put, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import type { AppAbility } from '../casl/casl-ability.factory';
@@ -20,8 +10,8 @@ import { PermissionsService } from '../permissions.service';
 import { UsersService } from './users.service';
 
 import { UpdateUserDto } from '@tt/dto';
-import { AuthService } from '../auth/auth.service';
 import { ValidatedUser } from '../auth/validated-user';
+import { TokenService } from '../token/token.service';
 
 @ApiTags('users')
 @Controller('users')
@@ -30,7 +20,7 @@ export class UsersController {
     private readonly usersService: UsersService,
     private readonly permissionsService: PermissionsService,
     private readonly caslAbilityFactory: CaslAbilityFactory,
-    @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
   ) {}
 
   @ApiBearerAuth('JWT')
@@ -73,6 +63,6 @@ export class UsersController {
     }
 
     const updatedUser = await this.usersService.update(user.userId, updateUserDto);
-    return this.authService.generateToken(updatedUser);
+    return this.tokenService.generateToken(updatedUser);
   }
 }

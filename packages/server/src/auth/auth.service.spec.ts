@@ -3,6 +3,7 @@ import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { configServiceMock } from '../../test/configServiceMock';
 import type { PrismaService } from '../prisma/prisma.service';
+import { TokenService } from '../token/token.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
 
@@ -39,7 +40,8 @@ describe('AuthService', () => {
       secret: 'secret',
       signOptions: { expiresIn: '7d' },
     });
-    authService = new AuthService(new UsersService(db as unknown as PrismaService, configServiceMock), jwtService);
+    const tokenService = new TokenService(jwtService);
+    authService = new AuthService(new UsersService(db as unknown as PrismaService, configServiceMock), tokenService);
   });
 
   afterEach(() => {
@@ -48,25 +50,6 @@ describe('AuthService', () => {
 
   it('should be defined', () => {
     expect(authService).toBeDefined();
-  });
-
-  describe('generateToken', () => {
-    it('should return a token', () => {
-      const signMock = vi.spyOn(JwtService.prototype, 'sign').mockReturnValue('token');
-
-      const token = authService.generateToken(user);
-
-      expect(token).toBeDefined();
-      expect(token.access_token).toBeDefined();
-      expect(signMock).toHaveBeenCalledWith({
-        email: 'email',
-        sub: 1,
-        username: 'username',
-        avatar_url: 'avatarUrl',
-        code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
-        role: 2,
-      });
-    });
   });
 
   describe('validateUser', () => {
