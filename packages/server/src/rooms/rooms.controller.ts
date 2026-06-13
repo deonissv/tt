@@ -27,6 +27,7 @@ export class RoomsController {
   constructor(
     private roomService: RoomsService,
     private readonly permissionsService: PermissionsService,
+    private readonly caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
   @ApiBearerAuth('JWT')
@@ -57,7 +58,7 @@ export class RoomsController {
   @Delete(':code')
   async delete(@User() user: ValidatedUser, @Param('code') code: string) {
     const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
-    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+    const ability = this.caslAbilityFactory.createForUser(userWithPermissions);
 
     const room = await this.roomService.findRoomByCode(code).catch(() => {
       throw new NotFoundException('Room not found');

@@ -7,11 +7,8 @@ import { PrismaService } from './prisma/prisma.service';
 @Injectable()
 export class PermissionsService {
   permissions = new Map<number, Permission[]>();
-  prismaService: PrismaService;
 
-  constructor() {
-    this.prismaService = new PrismaService();
-  }
+  constructor(private readonly prismaService: PrismaService) {}
 
   async getPermissionsByRoleId(roleId: number): Promise<Permission[]> {
     let permissions = this.permissions.get(roleId);

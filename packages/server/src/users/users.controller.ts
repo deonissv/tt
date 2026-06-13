@@ -29,6 +29,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly permissionsService: PermissionsService,
+    private readonly caslAbilityFactory: CaslAbilityFactory,
     @Inject(forwardRef(() => AuthService)) private readonly authService: AuthService,
   ) {}
 
@@ -44,7 +45,7 @@ export class UsersController {
     }
 
     const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
-    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+    const ability = this.caslAbilityFactory.createForUser(userWithPermissions);
 
     if (!ability.can('delete', subject('User', userToDelete))) {
       throw new ForbiddenException('Cannot update the user');
@@ -65,7 +66,7 @@ export class UsersController {
     }
 
     const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
-    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+    const ability = this.caslAbilityFactory.createForUser(userWithPermissions);
 
     if (!ability.can('update', subject('User', userToUpdate))) {
       throw new ForbiddenException('Cannot delete the user');

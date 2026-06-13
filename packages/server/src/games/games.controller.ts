@@ -28,6 +28,7 @@ export class GamesController {
   constructor(
     private readonly gamesService: GamesService,
     private readonly permissionsService: PermissionsService,
+    private readonly caslAbilityFactory: CaslAbilityFactory,
   ) {}
 
   @ApiBearerAuth('JWT')
@@ -78,7 +79,7 @@ export class GamesController {
   @Put(':code')
   async update(@User() user: ValidatedUser, @Param('code') code: string, @Body() updateGameDto: UpdateGameDto) {
     const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
-    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+    const ability = this.caslAbilityFactory.createForUser(userWithPermissions);
 
     const game = await this.gamesService.findUniqueByCode(code);
     if (!game) {
@@ -99,7 +100,7 @@ export class GamesController {
   @Delete(':code')
   async delete(@User() user: ValidatedUser, @Param('code') code: string) {
     const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
-    const ability = new CaslAbilityFactory().createForUser(userWithPermissions);
+    const ability = this.caslAbilityFactory.createForUser(userWithPermissions);
 
     const game = await this.gamesService.findUniqueByCode(code);
     if (!game) {
