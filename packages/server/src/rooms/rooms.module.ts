@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { CaslModule } from '../casl/casl.module';
 import { GamesModule } from '../games/games.module';
-import { PermissionsService } from '../permissions.service';
 import { ActionHandler } from '../simulation/action-handler';
 import { SimulationFactory } from '../simulation/simulation.factory';
 import { RoomsController } from './rooms.controller';
@@ -11,12 +10,10 @@ import { InMemoryRoomRegistry, RoomRegistry } from './room-registry';
 import { SimulationRoomFactory } from './simulation-room.factory';
 
 @Module({
-  imports: [GamesModule],
+  imports: [GamesModule, CaslModule],
   providers: [
     RoomsService,
     AssetUrlService,
-    PermissionsService,
-    CaslAbilityFactory,
     ActionHandler,
     SimulationRoomFactory,
     SimulationFactory,

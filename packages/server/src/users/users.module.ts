@@ -1,13 +1,12 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { CaslAbilityFactory } from '../casl/casl-ability.factory';
-import { PermissionsService } from '../permissions.service';
+import { CaslModule } from '../casl/casl.module';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
-  imports: [forwardRef(() => import('../auth/auth.module').then(m => m.AuthModule))],
+  imports: [CaslModule, forwardRef(() => import('../auth/auth.module').then(m => m.AuthModule))],
   controllers: [UsersController],
-  providers: [UsersService, PermissionsService, CaslAbilityFactory],
+  providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}
