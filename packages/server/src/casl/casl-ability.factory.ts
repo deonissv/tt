@@ -4,14 +4,15 @@ import { createMongoAbility } from '@casl/ability';
 import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import type { ValidatedUser } from '../auth/validated-user';
+import { PermissionsService } from '../permissions.service';
 
 export const Actions = ['read', 'manage', 'create', 'update', 'delete'] as const;
 export const Subjects = ['Game', 'User', 'Room', 'all'] as const;
 
-export type Abilities = [
-  (typeof Actions)[number],
-  (typeof Subjects)[number] | ForcedSubject<Exclude<(typeof Subjects)[number], 'all'>>,
-];
+export type Action = (typeof Actions)[number];
+export type Subject = (typeof Subjects)[number];
+
+export type Abilities = [Action, Subject | ForcedSubject<Exclude<Subject, 'all'>>];
 
 export type AppAbility = MongoAbility<Abilities>;
 export type UserWithPermissions = ValidatedUser & {
@@ -20,6 +21,19 @@ export type UserWithPermissions = ValidatedUser & {
 
 @Injectable()
 export class CaslAbilityFactory {
+  constructor(private readonly permissionsService: PermissionsService) {}
+
+  /**
+   * Loads the permissions for a request-scoped user and builds their ability.
+   *
+   * @param user - The authenticated (JWT-validated) user.
+   * @returns The ability object for the user.
+   */
+  async createForRequestUser(user: ValidatedUser): Promise<AppAbility> {
+    const userWithPermissions = await this.permissionsService.getUserWithPermissions(user);
+    return this.createForUser(userWithPermissions);
+  }
+
   /**
    * Creates an ability object for the specified user.
    *
@@ -29,8 +43,8 @@ export class CaslAbilityFactory {
   createForUser(user: UserWithPermissions) {
     const rules = user.Role.Permissions.map(permission => {
       const rule: RawRuleOf<AppAbility> = {
-        action: permission.action as (typeof Actions)[number],
-        subject: permission.subject as (typeof Subjects)[number],
+        action: permission.action as Action,
+        subject: permission.subject as Subject,
         conditions: permission.conditions
           ? (JSON.parse(
               JSON.stringify(permission.conditions).replace('"${ userId }"', user.userId.toString()),

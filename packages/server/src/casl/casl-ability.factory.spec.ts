@@ -2,8 +2,11 @@ import { subject } from '@casl/ability';
 import type { Game, Room } from '@prisma/client';
 import { permissions } from '../../prisma/permissions';
 import { authMockAdmin } from '../../test/authMock';
+import type { PermissionsService } from '../permissions.service';
 import type { UserWithPermissions } from './casl-ability.factory';
 import { CaslAbilityFactory } from './casl-ability.factory';
+
+const permissionsServiceMock = {} as PermissionsService;
 
 const userFactory = (roleId: number): UserWithPermissions => {
   return {
@@ -21,30 +24,30 @@ describe('CaslAbilityFactory', () => {
 
   describe('should be defined', () => {
     it('for admin', () => {
-      expect(new CaslAbilityFactory()?.createForUser(admin)).toBeDefined();
+      expect(new CaslAbilityFactory(permissionsServiceMock)?.createForUser(admin)).toBeDefined();
     });
 
     it('for user', () => {
-      expect(new CaslAbilityFactory()?.createForUser(user)).toBeDefined();
+      expect(new CaslAbilityFactory(permissionsServiceMock)?.createForUser(user)).toBeDefined();
     });
   });
 
   describe('Games resource', () => {
     describe('Admin role', () => {
       it('should allow managing Game', () => {
-        const ability = new CaslAbilityFactory().createForUser(admin);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(admin);
         expect(ability.can('manage', 'Game')).toBeTruthy();
       });
     });
 
     describe('User role', () => {
       it('should allow creating Game', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('create', 'Game')).toBeTruthy();
       });
 
       it('should allow reading Game', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('read', 'Game')).toBeTruthy();
       });
 
@@ -60,7 +63,7 @@ describe('CaslAbilityFactory', () => {
           deletedAt: new Date(),
         };
 
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('update', subject('Game', game))).toBeTruthy();
       });
 
@@ -76,7 +79,7 @@ describe('CaslAbilityFactory', () => {
           deletedAt: new Date(),
         };
 
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('delete', subject('Game', game))).toBeTruthy();
       });
 
@@ -92,7 +95,7 @@ describe('CaslAbilityFactory', () => {
           deletedAt: new Date(),
         };
 
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('update', subject('Game', game))).toBeTruthy();
       });
 
@@ -108,14 +111,14 @@ describe('CaslAbilityFactory', () => {
           deletedAt: new Date(),
         };
 
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('delete', subject('Game', game))).toBeTruthy();
       });
     });
 
     describe('Guest role', () => {
       it('should allow reading Game', () => {
-        const ability = new CaslAbilityFactory().createForUser(guest);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(guest);
         expect(ability.can('read', 'Game')).toBeTruthy();
       });
     });
@@ -124,33 +127,33 @@ describe('CaslAbilityFactory', () => {
   describe('Users resource', () => {
     describe('Admin role', () => {
       it('should allow managing User', () => {
-        const ability = new CaslAbilityFactory().createForUser(admin);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(admin);
         expect(ability.can('manage', 'User')).toBeTruthy();
       });
     });
 
     describe('User role', () => {
       it('should allow creating User', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('create', 'User')).toBeTruthy();
       });
       it('should allow reading User', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('read', 'User')).toBeTruthy();
       });
       it('should allow updating self', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('update', subject('User', user))).toBeTruthy();
       });
       it('should allow deleting self', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('delete', subject('User', user))).toBeTruthy();
       });
     });
 
     describe('Guest role', () => {
       it('should allow reading User', () => {
-        const ability = new CaslAbilityFactory().createForUser(guest);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(guest);
         expect(ability.can('read', 'User')).toBeTruthy();
       });
     });
@@ -159,18 +162,18 @@ describe('CaslAbilityFactory', () => {
   describe('Rooms resource', () => {
     describe('Admin role', () => {
       it('should allow managing Room', () => {
-        const ability = new CaslAbilityFactory().createForUser(admin);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(admin);
         expect(ability.can('manage', 'Room')).toBeTruthy();
       });
     });
 
     describe('User role', () => {
       it('should allow creating Room', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('create', 'Room')).toBeTruthy();
       });
       it('should allow reading Room', () => {
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('read', 'Room')).toBeTruthy();
       });
       it('should allow deleting own Room', () => {
@@ -183,7 +186,7 @@ describe('CaslAbilityFactory', () => {
           type: 1,
         };
 
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('delete', subject('Room', room))).toBeTruthy();
       });
       it('should allow deleting not own Room', () => {
@@ -196,14 +199,14 @@ describe('CaslAbilityFactory', () => {
           type: 1,
         };
 
-        const ability = new CaslAbilityFactory().createForUser(user);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(user);
         expect(ability.can('delete', subject('Room', room))).toBeFalsy();
       });
     });
 
     describe('Guest role', () => {
       it('should allow reading Room', () => {
-        const ability = new CaslAbilityFactory().createForUser(guest);
+        const ability = new CaslAbilityFactory(permissionsServiceMock).createForUser(guest);
         expect(ability.can('read', 'Room')).toBeTruthy();
       });
     });

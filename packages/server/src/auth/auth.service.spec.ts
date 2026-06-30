@@ -1,8 +1,9 @@
-import { JwtService } from '@nestjs/jwt';
+import { BadRequestException } from '@nestjs/common';
+import { Test } from '@nestjs/testing';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { configServiceMock } from '../../test/configServiceMock';
-import type { PrismaService } from '../prisma/prisma.service';
+import type { Mock } from 'vitest';
+
 import { TokenService } from '../token/token.service';
 import { UsersService } from '../users/users.service';
 import { AuthService } from './auth.service';
@@ -18,30 +19,29 @@ const user: User = {
   roleId: 2,
 };
 
-const usersArray: User[] = [user];
-const useDb = () => ({
-  user: {
-    findMany: vi.fn().mockResolvedValue(usersArray),
-    findUnique: vi.fn().mockResolvedValue(user),
-    findFirst: vi.fn().mockResolvedValue(user),
-    create: vi.fn().mockResolvedValue(user),
-    update: vi.fn().mockResolvedValue(user),
-    delete: vi.fn().mockResolvedValue(user),
-  },
-});
-
 describe('AuthService', () => {
   let authService: AuthService;
-  let db = useDb();
+  let usersServiceMock: { findOneByEmail: Mock; create: Mock };
+  let tokenServiceMock: { generateToken: Mock };
 
-  beforeEach(() => {
-    db = useDb();
-    const jwtService = new JwtService({
-      secret: 'secret',
-      signOptions: { expiresIn: '7d' },
-    });
-    const tokenService = new TokenService(jwtService);
-    authService = new AuthService(new UsersService(db as unknown as PrismaService, configServiceMock), tokenService);
+  beforeEach(async () => {
+    usersServiceMock = {
+      findOneByEmail: vi.fn().mockResolvedValue(user),
+      create: vi.fn().mockResolvedValue(user),
+    };
+    tokenServiceMock = {
+      generateToken: vi.fn().mockReturnValue({ access_token: 'token' }),
+    };
+
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        { provide: UsersService, useValue: usersServiceMock },
+        { provide: TokenService, useValue: tokenServiceMock },
+      ],
+    }).compile();
+
+    authService = moduleRef.get(AuthService);
   });
 
   afterEach(() => {
@@ -56,48 +56,38 @@ describe('AuthService', () => {
     it('should return a user', async () => {
       const compareMock = vi.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
 
-      const user = await authService.validateUser('email', 'password');
-      expect(user).toBeDefined();
-      expect(user).toEqual(user);
+      const result = await authService.validateUser('email', 'password');
 
-      expect(compareMock).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(user);
+      expect(usersServiceMock.findOneByEmail).toHaveBeenCalledWith('email');
       expect(compareMock).toHaveBeenCalledWith('password', 'passwordHash');
     });
 
     it('should throw an error if user not found', async () => {
-      db.user.findFirst.mockResolvedValueOnce(null);
+      usersServiceMock.findOneByEmail.mockResolvedValueOnce(null);
       await expect(authService.validateUser('email', 'password')).rejects.toThrow('Wrong email or password');
     });
 
     it('should throw an error if password is wrong', async () => {
+      vi.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(false));
       await expect(authService.validateUser('email', 'password')).rejects.toThrow('Wrong email or password');
     });
   });
 
   describe('signup', () => {
     it('should return an access token', async () => {
-      vi.spyOn(UsersService.prototype, 'emailExists').mockResolvedValue(false);
-      const signMock = vi.spyOn(JwtService.prototype, 'sign').mockReturnValue('token');
+      const dto = { email: 'email', username: 'username', password: 'password', avatarUrl: 'avatarUrl' };
 
-      const token = await authService.signup({
-        email: 'email',
-        username: 'username',
-        password: 'password',
-        avatarUrl: 'avatarUrl',
-      });
+      const token = await authService.signup(dto);
 
-      expect(token).toMatchObject({ access_token: 'token' });
-      expect(signMock).toHaveBeenCalledWith({
-        email: 'email',
-        sub: 1,
-        username: 'username',
-        avatar_url: 'avatarUrl',
-        code: '6b23c425-1bbb-4f0e-adba-8db0ddd56f27',
-        role: 2,
-      });
+      expect(token).toEqual({ access_token: 'token' });
+      expect(usersServiceMock.create).toHaveBeenCalledWith(dto);
+      expect(tokenServiceMock.generateToken).toHaveBeenCalledWith(user);
     });
 
     it('should throw if user exists', async () => {
+      usersServiceMock.create.mockRejectedValueOnce(new BadRequestException('Email already exists'));
+
       await expect(
         authService.signup({
           email: 'email1',

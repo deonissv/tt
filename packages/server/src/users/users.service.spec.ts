@@ -1,9 +1,13 @@
+import { ConfigService } from '@nestjs/config';
+import { Test } from '@nestjs/testing';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import { UsersService } from '../users/users.service';
 
 import { configServiceMock } from '../../test/configServiceMock';
-import type { PrismaService } from '../prisma/prisma.service';
+import type { ValidatedUser } from '../auth/validated-user';
+import { PolicyControlService } from '../casl/policy-control.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { UsersService } from '../users/users.service';
 
 const user: User = {
   userId: 1,
@@ -15,6 +19,8 @@ const user: User = {
   deletedAt: null,
   roleId: 2,
 };
+
+const actor: ValidatedUser = { userId: 1, username: 'username', code: user.code, roleId: 2 };
 
 const usersArray: User[] = [user];
 const useDb = () => ({
@@ -28,13 +34,25 @@ const useDb = () => ({
   },
 });
 
-describe('AuthService', () => {
+const policyControlMock: Pick<PolicyControlService, 'authorize'> = {
+  authorize: vi.fn().mockResolvedValue(undefined),
+};
+
+describe('UsersService', () => {
   let usersService: UsersService;
   let db = useDb();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     db = useDb();
-    usersService = new UsersService(db as unknown as PrismaService, configServiceMock);
+    const moduleRef = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        { provide: PrismaService, useValue: db },
+        { provide: ConfigService, useValue: configServiceMock },
+        { provide: PolicyControlService, useValue: policyControlMock },
+      ],
+    }).compile();
+    usersService = moduleRef.get(UsersService);
   });
 
   afterEach(() => {
@@ -85,7 +103,7 @@ describe('AuthService', () => {
   describe('update', () => {
     it('should update a user', async () => {
       vi.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('passwordHash'));
-      await usersService.update(1, {
+      await usersService.update(actor, user.code, {
         username: 'username',
         avatarUrl: 'avatarUrl',
         password: 'password',
@@ -104,7 +122,7 @@ describe('AuthService', () => {
 
   describe('delete', () => {
     it('should delete a user', async () => {
-      await usersService.delete(1);
+      await usersService.delete(actor, user.code);
 
       expect(db.user.delete).toHaveBeenCalledWith({
         where: { userId: 1 },

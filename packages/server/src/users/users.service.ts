@@ -1,9 +1,11 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 
 import type { CreateUserDto, UpdateUserDto } from '@tt/dto';
+import type { ValidatedUser } from '../auth/validated-user';
+import { PolicyControlService } from '../casl/policy-control.service';
 
 @Injectable()
 export class UsersService {
@@ -12,6 +14,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly policyControl: PolicyControlService,
   ) {}
 
   /**
@@ -83,16 +86,24 @@ export class UsersService {
   }
 
   /**
-   * Updates a user with the specified user ID.
+   * Updates the authenticated user, after authorizing them to update the user
+   * identified by `code`. Mutates the caller's own record.
    *
-   * @param userId - The ID of the user to update.
+   * @param actor - The authenticated user performing the update.
+   * @param code - The code of the user the update is authorized against.
    * @param updateUserDto - The data to update the user with.
    * @returns A promise that resolves to the updated user.
    */
-  async update(userId: number, updateUserDto: UpdateUserDto) {
-    this.logger.log(`Updating user with ID: ${userId}`);
+  async update(actor: ValidatedUser, code: string, updateUserDto: UpdateUserDto) {
+    const target = await this.findUniqueByCode(code);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+    await this.policyControl.authorize(actor, 'update', 'User', target);
+
+    this.logger.log(`Updating user with ID: ${actor.userId}`);
     const updatedUser = await this.prisma.user.update({
-      where: { userId },
+      where: { userId: actor.userId },
       data: {
         username: updateUserDto?.username,
         avatarUrl: updateUserDto?.avatarUrl,
@@ -104,14 +115,22 @@ export class UsersService {
   }
 
   /**
-   * Deletes a user by their ID.
+   * Deletes the authenticated user, after authorizing them to delete the user
+   * identified by `code`. Mutates the caller's own record.
    *
-   * @param userId - The ID of the user to delete.
+   * @param actor - The authenticated user performing the deletion.
+   * @param code - The code of the user the deletion is authorized against.
    * @returns A promise that resolves to the deleted user.
    */
-  async delete(userId: number) {
-    this.logger.log(`Deleting user with ID: ${userId}`);
-    const deletedUser = await this.prisma.user.delete({ where: { userId } });
+  async delete(actor: ValidatedUser, code: string) {
+    const target = await this.findUniqueByCode(code);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+    await this.policyControl.authorize(actor, 'delete', 'User', target);
+
+    this.logger.log(`Deleting user with ID: ${actor.userId}`);
+    const deletedUser = await this.prisma.user.delete({ where: { userId: actor.userId } });
     this.logger.log(`User deleted: ${deletedUser?.code}`);
     return deletedUser;
   }
