@@ -5,6 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 
 import { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
 import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
+import type { ValidatedUser } from '../auth/validated-user';
+import { PolicyControlService } from '../casl/policy-control.service';
 import { Simulation } from '../simulation/simulation';
 import { RoomRegistry } from './room-registry';
 import { SimulationRoomFactory } from './simulation-room.factory';
@@ -18,6 +20,7 @@ export class RoomsService {
     private readonly gameService: GamesService,
     private readonly roomRegistry: RoomRegistry,
     private readonly simulationRoomFactory: SimulationRoomFactory,
+    private readonly policyControl: PolicyControlService,
   ) {}
 
   /**
@@ -131,7 +134,7 @@ export class RoomsService {
     }));
   }
 
-  async findRoom(roomCode: string): Promise<RoomwDto> {
+  async findRoom(user: ValidatedUser, roomCode: string): Promise<RoomwDto> {
     const room = await this.prismaService.room
       .findUnique({
         where: {
@@ -145,6 +148,8 @@ export class RoomsService {
     if (!room) {
       throw new NotFoundException('Room not found');
     }
+
+    await this.policyControl.authorize(user, 'read', 'Room', room);
 
     return room;
   }
@@ -345,13 +350,22 @@ export class RoomsService {
   }
 
   /**
-   * Removes a room with the specified room code.
-   * If the room is currently running, a BadRequestException is thrown.
+   * Removes a room with the specified room code, after authorizing the caller to
+   * delete that specific room. If the room is currently running, a
+   * BadRequestException is thrown.
    *
+   * @param user - The authenticated user.
    * @param roomCode - The code of the room to be removed.
+   * @throws NotFoundException - If the room does not exist.
    * @throws BadRequestException - If the room is currently running.
    */
-  async deleteRoom(roomCode: string) {
+  async deleteRoom(user: ValidatedUser, roomCode: string) {
+    const room = await this.findRoomByCode(roomCode).catch(() => null);
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+    await this.policyControl.authorize(user, 'delete', 'Room', room);
+
     if (this.roomRegistry.has(roomCode)) {
       throw new BadRequestException('Room is running');
     }

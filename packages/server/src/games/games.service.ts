@@ -1,15 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { Game, GameVersion, Prisma } from '@prisma/client';
 
 import { SimulationStateSave } from '@tt/states';
 import type { CreateGameDto, GameDto, GamePreviewDto, UpdateGameDto } from '@tt/dto';
+import type { ValidatedUser } from '../auth/validated-user';
+import { PolicyControlService } from '../casl/policy-control.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class GamesService {
   private readonly logger = new Logger('GamesService');
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly policyControl: PolicyControlService,
+  ) {}
 
   /**
    * Creates a new game.
@@ -94,6 +99,23 @@ export class GamesService {
 
     this.logger.log(`Found game with code: ${code}`);
     return GamesService.toGameDto(game);
+  }
+
+  /**
+   * Loads a game by code and authorizes the caller to read it. The game is
+   * fetched once and returned, so the read authorization adds no extra query.
+   *
+   * @param user - The authenticated user.
+   * @param code - The code of the game.
+   * @returns The game.
+   */
+  async get(user: ValidatedUser, code: string): Promise<GameDto> {
+    const game = await this.findUniqueByCode(code);
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+    await this.policyControl.authorize(user, 'read', 'Game', game);
+    return game;
   }
 
   /**
@@ -212,18 +234,25 @@ export class GamesService {
   }
 
   /**
-   * Updates a game with the specified code.
+   * Updates a game with the specified code, after authorizing the caller to
+   * update that specific game.
    *
-   * @param authorId - The ID of the author who owns the game.
+   * @param user - The authenticated user.
    * @param code - The code of the game to update.
    * @param updateGameDto - The DTO containing the updated game data.
    * @returns The updated game preview.
    */
-  async update(authorId: number, code: string, updateGameDto: UpdateGameDto): Promise<GamePreviewDto> {
+  async update(user: ValidatedUser, code: string, updateGameDto: UpdateGameDto): Promise<GamePreviewDto> {
+    const game = await this.findUniqueByCode(code);
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+    await this.policyControl.authorize(user, 'update', 'Game', game);
+
     this.logger.log(`Updating game with code: ${code}`);
     const preview = updateGameDto.content
-      ? await this._updateFull(authorId, code, updateGameDto)
-      : await this._updatePreview(authorId, code, updateGameDto);
+      ? await this._updateFull(code, updateGameDto)
+      : await this._updatePreview(code, updateGameDto);
     this.logger.log(`Game with code ${code} updated`);
     return GamesService.toGamePreviewDto(preview);
   }
@@ -231,15 +260,14 @@ export class GamesService {
   /**
    * Updates the game preview with the specified code.
    *
-   * @param authorId - The ID of the author who owns the game.
    * @param code - The code of the game preview to update.
    * @param updateGameDto - The DTO containing the updated game information.
    * @returns The updated game object.
    */
-  async _updatePreview(authorId: number, code: string, updateGameDto: UpdateGameDto) {
+  async _updatePreview(code: string, updateGameDto: UpdateGameDto) {
     this.logger.log(`Updating game preview with code: ${code}`);
     const updatedGame = await this.prisma.game.update({
-      where: { code, authorId },
+      where: { code },
       data: {
         name: updateGameDto.name,
         description: updateGameDto.description,
@@ -251,18 +279,17 @@ export class GamesService {
   }
 
   /**
-   * Updates a game with the provided code and author ID.
+   * Updates a game with the provided code, including a new content version.
    *
-   * @param authorId - The ID of the game author.
    * @param code - The code of the game to update.
    * @param updateGameDto - The DTO containing the updated game data.
    * @returns The updated game.
    */
-  async _updateFull(authorId: number, code: string, updateGameDto: UpdateGameDto) {
+  async _updateFull(code: string, updateGameDto: UpdateGameDto) {
     this.logger.log(`Updating game with code: ${code}`);
     const content = JSON.parse(updateGameDto.content!) as Prisma.JsonObject;
     const updatedGame = await this.prisma.game.update({
-      where: { code, authorId },
+      where: { code },
       include: { GameVersion: true },
       data: {
         name: updateGameDto.name,
@@ -280,12 +307,20 @@ export class GamesService {
   }
 
   /**
-   * Deletes a game with the specified code.
+   * Deletes a game with the specified code, after authorizing the caller to
+   * delete that specific game.
    *
+   * @param user - The authenticated user.
    * @param code - The code of the game to delete.
    * @returns The deleted game.
    */
-  async delete(code: string) {
+  async delete(user: ValidatedUser, code: string) {
+    const game = await this.findUniqueByCode(code);
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+    await this.policyControl.authorize(user, 'delete', 'Game', game);
+
     this.logger.log(`Deleting game with code: ${code}`);
     const deletedGame = await this.prisma.game.delete({ where: { code } });
     this.logger.log(`Game with code ${code} deleted`);

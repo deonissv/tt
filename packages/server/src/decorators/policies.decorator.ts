@@ -1,10 +1,9 @@
 import type { CanActivate, ExecutionContext } from '@nestjs/common';
 import { Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { User } from '@prisma/client';
+import type { ValidatedUser } from '../auth/validated-user';
 import type { AppAbility } from '../casl/casl-ability.factory';
 import { CaslAbilityFactory } from '../casl/casl-ability.factory';
-import { PermissionsService } from '../permissions.service';
 
 interface IPolicyHandler {
   handle(ability: AppAbility): boolean;
@@ -28,20 +27,18 @@ export class PoliciesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory,
-    private permissionsService: PermissionsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const policyHandlers = this.reflector.get<PolicyHandler[]>(CHECK_POLICIES, context.getHandler()) || [];
 
-    const { user: currentUser } = context.switchToHttp().getRequest<{ user: User }>();
+    const { user: currentUser } = context.switchToHttp().getRequest<{ user?: ValidatedUser }>();
 
     if (!currentUser) {
       return false;
     }
 
-    const currentUserWithPermissions = await this.permissionsService.getUserWithPermissions(currentUser);
-    const ability = this.caslAbilityFactory.createForUser(currentUserWithPermissions);
+    const ability = await this.caslAbilityFactory.createForRequestUser(currentUser);
     return policyHandlers.every(handler => this.execPolicyHandler(handler, ability));
   }
 
