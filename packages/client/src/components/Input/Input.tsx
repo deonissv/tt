@@ -32,7 +32,7 @@ export interface InputProps extends IProps {
   value?: string | number;
   error?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  valitaion?: (value?: string | number) => boolean;
+  validation?: (value?: string | number) => boolean;
 }
 
 export const Input: React.FC<InputProps> = ({
@@ -44,7 +44,7 @@ export const Input: React.FC<InputProps> = ({
   onChange,
   className,
   error,
-  valitaion,
+  validation,
 }): React.ReactNode => {
   const [isValid, setIsValid] = useState(true);
 
@@ -57,7 +57,7 @@ export const Input: React.FC<InputProps> = ({
   };
 
   const showRed = () => {
-    const valid = valitaion ? valitaion(value) : true;
+    const valid = validation ? validation(value) : true;
     return !!error || !isValid || !valid;
   };
 

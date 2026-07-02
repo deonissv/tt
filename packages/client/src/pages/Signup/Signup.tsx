@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-
 import { Button, Input, useToast } from '@components';
 import { AuthService } from '@services';
 import { isEmail } from '@tt/utils';
@@ -51,7 +50,7 @@ export const Signup: React.FC = (): React.ReactNode => {
               type="email"
               required
               value={email}
-              onChange={e => setEmail((e.target as HTMLInputElement).value)}
+              onChange={e => setEmail(e.target.value)}
             />
             <Input
               label="Password"
@@ -59,7 +58,7 @@ export const Signup: React.FC = (): React.ReactNode => {
               type="password"
               required
               value={password}
-              onChange={e => setPassword((e.target as HTMLInputElement).value)}
+              onChange={e => setPassword(e.target.value)}
             />
           </div>
           <div className="p-3 w-1/2">
@@ -69,7 +68,7 @@ export const Signup: React.FC = (): React.ReactNode => {
               type="text"
               required
               value={username}
-              onChange={e => setUsername((e.target as HTMLInputElement).value)}
+              onChange={e => setUsername(e.target.value)}
             />
             <Input
               label="Repeat password"
@@ -78,7 +77,7 @@ export const Signup: React.FC = (): React.ReactNode => {
               required
               error={password !== rePassword}
               value={rePassword}
-              onChange={e => setRePassword((e.target as HTMLInputElement).value)}
+              onChange={e => setRePassword(e.target.value)}
             />
           </div>
         </div>

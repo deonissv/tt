@@ -1,6 +1,6 @@
 import { Button, Input, useToast } from '@components';
 import { AuthService } from '@services';
-import { UpdateUserDto } from '@tt/dto';
+import type { UpdateUserDto } from '@tt/dto';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getErrorMsg } from '../../utils';
@@ -46,14 +46,14 @@ export const Profile = () => {
               placeholder="Username"
               type="text"
               value={username}
-              onChange={e => setUsername((e.target as HTMLInputElement).value)}
+              onChange={e => setUsername(e.target.value)}
             />
             <Input
               label="Password"
               placeholder="Password"
               type="password"
               value={password}
-              onChange={e => setPassword((e.target as HTMLInputElement).value)}
+              onChange={e => setPassword(e.target.value)}
             />
             <div className="mt-3 flex flex-col justify-center">
               <Button onClick={onModify}>

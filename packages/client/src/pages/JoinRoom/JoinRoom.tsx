@@ -21,8 +21,8 @@ export const JoinRoom: React.FC = (): React.ReactNode => {
           placeholder="Enter room code"
           type="text"
           value={roomCode}
-          onChange={e => setRoomCode((e.target as HTMLInputElement).value)}
-          valitaion={value => value === undefined || value === '' || (typeof value === 'string' && isUUIDv4(value))}
+          onChange={e => setRoomCode(e.target.value)}
+          validation={value => value === undefined || value === '' || (typeof value === 'string' && isUUIDv4(value))}
         />
         <Button className="w-full" onClick={onJoinRoom}>
           <p className="font-bold uppercase tracking-wide text-sm">Join Room</p>

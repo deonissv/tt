@@ -5,7 +5,7 @@ import { ValidatedUser } from '../auth/validated-user';
 import { User } from '../decorators/user.decorator';
 import { RoomsService } from './rooms.service';
 
-import { CreateRoomDto, RoomwDto } from '@tt/dto';
+import { CreateRoomDto, RoomDto } from '@tt/dto';
 
 @ApiTags('rooms')
 @Controller('rooms')
@@ -22,7 +22,7 @@ export class RoomsController {
   @ApiBearerAuth('JWT')
   @UseGuards(JwtAuthGuard)
   @Get(':code')
-  async getRoom(@User() user: ValidatedUser, @Param('code') code: string): Promise<RoomwDto> {
+  async getRoom(@User() user: ValidatedUser, @Param('code') code: string): Promise<RoomDto> {
     return await this.roomService.findRoom(user, code);
   }
 

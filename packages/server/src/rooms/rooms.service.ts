@@ -4,7 +4,7 @@ import { GamesService } from '../games/games.service';
 import { PrismaService } from '../prisma/prisma.service';
 
 import { SimulationStateSave, SimulationStateUpdate } from '@tt/states';
-import type { RoomPreviewDto, RoomwDto } from '@tt/dto';
+import type { RoomPreviewDto, RoomDto } from '@tt/dto';
 import type { ValidatedUser } from '../auth/validated-user';
 import { PolicyControlService } from '../casl/policy-control.service';
 import { Simulation } from '../simulation/simulation';
@@ -134,7 +134,7 @@ export class RoomsService {
     }));
   }
 
-  async findRoom(user: ValidatedUser, roomCode: string): Promise<RoomwDto> {
+  async findRoom(user: ValidatedUser, roomCode: string): Promise<RoomDto> {
     const room = await this.prismaService.room
       .findUnique({
         where: {

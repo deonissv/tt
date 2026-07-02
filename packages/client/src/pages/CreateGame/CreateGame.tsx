@@ -3,8 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 import { Button, DragDropLoader, Input, JsonTextArea, useToast } from '@components';
 import { GameService } from '@services';
-import { GameDto, UpdateGameDto } from '@tt/dto';
-import { SimulationStateSave } from '@tt/states';
+import type { GameDto, UpdateGameDto } from '@tt/dto';
+import type { SimulationStateSave } from '@tt/states';
 import { TTSParser } from '@tt/tts-parser';
 import { isURL } from '@tt/utils';
 
@@ -38,7 +38,7 @@ export const CreateGame = () => {
         })
         .catch(e => addToast(`Failed to load games: ${e}`));
     }
-  }, []);
+  }, [addToast, gameCode, setGameValues]);
 
   const parseGameText = (text: string): SimulationStateSave => {
     const ttsGame = TTSParser.parse(text);
@@ -121,26 +121,20 @@ export const CreateGame = () => {
       <div className="bg-light-blue p-11 w-[1000px]">
         <h4 className="text-center !text-2xl !font-bold mb-6">{newGame ? 'Add game' : 'Modify game'}</h4>
         <div className="p-3">
-          <Input
-            label="Name"
-            placeholder="Name"
-            required
-            value={name}
-            onChange={e => setName((e.target as HTMLInputElement).value)}
-          />
+          <Input label="Name" placeholder="Name" required value={name} onChange={e => setName(e.target.value)} />
           <Input
             label="Description"
             placeholder="Description"
             required
             value={description}
-            onChange={e => setDescription((e.target as HTMLInputElement).value)}
+            onChange={e => setDescription(e.target.value)}
           />
           <Input
             label="Banner"
             placeholder="Banner"
             value={bannerUrl}
-            onChange={e => setBannerUrl((e.target as HTMLInputElement).value)}
-            valitaion={value => value == undefined || value == '' || (typeof value == 'string' && isURL(value))}
+            onChange={e => setBannerUrl(e.target.value)}
+            validation={value => value == undefined || value == '' || (typeof value == 'string' && isURL(value))}
           />
           {content ? (
             <JsonTextArea jsonContent={content} setJsonContent={setContent} />

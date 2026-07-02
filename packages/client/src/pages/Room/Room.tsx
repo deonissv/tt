@@ -11,7 +11,7 @@ export const Room: React.FC = (): React.ReactNode => {
       navigate('/not-found');
     }
     return roomCode!;
-  }, []);
+  }, [navigate, roomCode]);
 
   return <Canvas roomCode={roomCodeGuard()} />;
 };
