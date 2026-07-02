@@ -1,7 +1,7 @@
 import type { INestApplication } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
 import type { Room } from '@prisma/client';
-import type { CreateRoomDto, RoomwDto } from '@tt/dto';
+import type { CreateRoomDto, RoomDto } from '@tt/dto';
 import type { SimulationStateSave } from '@tt/states';
 import type { Server } from 'net';
 import request from 'supertest';
@@ -298,7 +298,7 @@ describe('Rooms', () => {
       expect(response.body).toMatchObject({
         authorId: user.userId,
       });
-      expect((response.body as RoomwDto).code).toBeTypeOf('string');
+      expect((response.body as RoomDto).code).toBeTypeOf('string');
     });
 
     it('should return 400 if room does not exist', async () => {

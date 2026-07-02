@@ -3,13 +3,13 @@ import ExitToApp from '@mui/icons-material/ExitToApp';
 import RoomPreferencesIcon from '@mui/icons-material/RoomPreferences';
 import { AuthService } from '@services';
 import { PICK_HIGHT, ROTATION_STEP } from '@tt/actors';
-import { RoomwDto } from '@tt/dto';
+import type { RoomDto } from '@tt/dto';
 import { radToDeg } from '@tt/utils';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export interface HUDProps {
-  room?: RoomwDto;
+  room?: RoomDto;
   onCloseRoom: () => void;
   onSetPickHeight: (height: number) => void;
   onSetRotateStep: (step: number) => void;
@@ -29,24 +29,33 @@ export const HUD: React.FC<HUDProps> = ({ onCloseRoom, room, onSetPickHeight, on
     setSimOptions(prev => !prev);
   }, []);
 
-  const onBgClick = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    if (e.target !== e.currentTarget) return;
-    toggleOptions();
-  }, []);
+  const onBgClick = useCallback(
+    (e: React.MouseEvent<HTMLElement>) => {
+      if (e.target !== e.currentTarget) return;
+      toggleOptions();
+    },
+    [toggleOptions],
+  );
 
   const onLeaveRoom = useCallback(() => {
     navigate('/games');
-  }, []);
+  }, [navigate]);
 
-  const onSetPickHeightChange = useCallback((value: number) => {
-    setPickHeight(value);
-    onSetPickHeight(value);
-  }, []);
+  const onSetPickHeightChange = useCallback(
+    (value: number) => {
+      setPickHeight(value);
+      onSetPickHeight(value);
+    },
+    [setPickHeight, onSetPickHeight],
+  );
 
-  const onSetRotateStepChange = useCallback((value: number) => {
-    setRotateStep(value);
-    onSetRotateStep(value);
-  }, []);
+  const onSetRotateStepChange = useCallback(
+    (value: number) => {
+      setRotateStep(value);
+      onSetRotateStep(value);
+    },
+    [setRotateStep, onSetRotateStep],
+  );
 
   return (
     <>

@@ -3,9 +3,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { CursorsPld, DownloadProgressPld } from '@tt/actions';
-import { RoomwDto } from '@tt/dto';
+import type { RoomDto } from '@tt/dto';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
-import { debounce, degToRad, getB64URL, Tuple } from '@tt/utils';
+import type { Tuple } from '@tt/utils';
+import { debounce, degToRad, getB64URL } from '@tt/utils';
 
 import { HUD, ProgressLoader, Spinner, useToast } from '@components';
 import { RoomService } from '@services';
@@ -24,55 +25,22 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   const screenCursors = useRef<CursorsPld>({});
   const simulation = useRef<Simulation>();
   const loaded = useRef(false);
-  const room = useRef<RoomwDto>();
+  const room = useRef<RoomDto>();
 
   const [downloadProgress, setDownloadProgress] = useState<Tuple<number, 2> | null>(null);
 
   const [cursor, setCursor] = useState<[number, number]>([0, 0]);
   const [cursors, setCursors] = useState<CursorsPld>({});
 
-  const init = useCallback(async (): Promise<[SimulationRoom, DownloadProgressPld] | null> => {
-    RoomService.getRoom(roomCode)
-      .then(r => {
-        room.current = r;
-      })
-      .catch(_ => {
-        addToast(`Failed to get room preview`);
-        navigate('/games');
-        return null;
-      });
+  const onRoomClosed = useCallback(() => {
+    addToast('Room has been closed');
+    navigate('/games');
+  }, [addToast, navigate]);
 
-    Loader.registerFileFetcher(async (url: string) => {
-      const response = await fetch(url);
-      const arrayBuffer = await response.arrayBuffer();
-
-      const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
-      const b64 = getB64URL(arrayBuffer);
-
-      Logger.log(`Fetched file: ${url}`);
-      return { url: b64, mime };
-    });
-
-    const rv = await SimulationRoom.init(
-      canvas.current!,
-      roomCode,
-      setCursors,
-      setDownloadProgress,
-      onRoomClosed,
-    ).catch(() => {
-      addToast(`Failed to initialize room`);
-      navigate('/games');
-      return null;
-    });
-
-    // import('@babylonjs/inspector')
-    //   .then(inspector => inspector.Inspector.Show(rv![0].simulation.scene, {}))
-    //   .catch(e => {
-    //     console.error(e);
-    //   });
-
-    return rv;
-  }, [roomCode]);
+  const onCloseRoom = useCallback(() => {
+    simulationRoom.current?.closeRoom();
+    onRoomClosed();
+  }, [simulationRoom, onRoomClosed]);
 
   const updateCursors = useCallback(
     (cursor: Tuple<number, 2>, cursors: CursorsPld, screenCursors: React.MutableRefObject<CursorsPld>) => {
@@ -86,22 +54,12 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
           },
           {
             [clientId.current]: cursor,
-          } as CursorsPld,
+          },
         );
       }
     },
     [],
   );
-
-  const onRoomClosed = useCallback(() => {
-    addToast('Room has been closed');
-    navigate('/games');
-  }, [addToast, navigate]);
-
-  const onCloseRoom = useCallback(() => {
-    simulationRoom.current?.closeRoom();
-    onRoomClosed();
-  }, [simulationRoom, onRoomClosed]);
 
   const onSetPickHeight = useMemo(
     () =>
@@ -120,6 +78,49 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   );
 
   useEffect(() => {
+    const init = async (): Promise<[SimulationRoom, DownloadProgressPld] | null> => {
+      RoomService.getRoom(roomCode)
+        .then(r => {
+          room.current = r;
+        })
+        .catch(_ => {
+          addToast(`Failed to get room preview`);
+          navigate('/games');
+          return null;
+        });
+
+      Loader.registerFileFetcher(async (url: string) => {
+        const response = await fetch(url);
+        const arrayBuffer = await response.arrayBuffer();
+
+        const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
+        const b64 = getB64URL(arrayBuffer);
+
+        Logger.log(`Fetched file: ${url}`);
+        return { url: b64, mime };
+      });
+
+      const rv = await SimulationRoom.init(
+        canvas.current!,
+        roomCode,
+        setCursors,
+        setDownloadProgress,
+        onRoomClosed,
+      ).catch(() => {
+        addToast(`Failed to initialize room`);
+        navigate('/games');
+        return null;
+      });
+
+      // import('@babylonjs/inspector')
+      //   .then(inspector => inspector.Inspector.Show(rv![0].simulation.scene, {}))
+      //   .catch(e => {
+      //     console.error(e);
+      //   });
+
+      return rv;
+    };
+
     init()
       .then(rv => {
         if (!rv) return;
@@ -156,7 +157,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
         };
       })
       .catch(() => addToast(`Failed to join room`));
-  }, []);
+  }, [addToast, navigate, onRoomClosed, roomCode]);
 
   useEffect(() => {
     return () => {

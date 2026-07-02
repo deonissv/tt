@@ -50,7 +50,7 @@ export const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
           type="email"
           required
           value={email}
-          onChange={e => setEmail((e.target as HTMLInputElement).value)}
+          onChange={e => setEmail(e.target.value)}
         />
         <Input
           label="Password"
@@ -58,7 +58,7 @@ export const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
           type="password"
           required
           value={password}
-          onChange={e => setPassword((e.target as HTMLInputElement).value)}
+          onChange={e => setPassword(e.target.value)}
         />
         <Button className="mr-2" onClick={onRegisterSubmit}>
           <p className="font-bold uppercase tracking-wide text-sm">Login</p>

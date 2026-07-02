@@ -15,7 +15,7 @@
     "test": "vitest run --config ../../vitest.config.ts",
     "test:w": "vitest --config ../../vitest.config.ts",
     "format": "prettier 'src/**/*.ts' --write",
-    "lint": "eslint --ext .ts src",
+    "lint": "eslint --ext .ts,.tsx src",
     "typecheck": "tsc --noEmit --project tsconfig.app.json "
   },
   "devDependencies": {

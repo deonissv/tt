@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { GamePreviewDto } from '@tt/dto';
+import type { GamePreviewDto } from '@tt/dto';
 
 import { GameCard, PromiseModal, Spinner, useToast } from '@components';
 import { GameService, RoomService } from '@services';
@@ -27,7 +27,7 @@ export const GamesList = () => {
 
   useEffect(() => {
     loadGamesPreviews().catch(e => addToast(`Error loading game previews: ${e}`));
-  }, []);
+  }, [addToast, loadGamesPreviews]);
 
   const onCreateRoom = async (gameCode: string) => {
     try {

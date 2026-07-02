@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { RoomPreviewDto } from '@tt/dto';
+import type { RoomPreviewDto } from '@tt/dto';
 
 import { PromiseModal, RoomCard, Spinner, useToast } from '@components';
 import { AuthService, RoomService } from '@services';
@@ -22,7 +22,7 @@ export const Saves: React.FC = (): React.ReactNode => {
 
   useEffect(() => {
     loadPreviews().catch(e => addToast(`Failed load save previews: ${getErrorMsg(e)}`));
-  }, []);
+  }, [addToast, loadPreviews]);
 
   const { openModal, Modal } = PromiseModal({
     title: 'Confirm Delete',
