@@ -7,11 +7,13 @@ import { getPhSim } from '../../test/testUtils';
 import type { Card } from '../simulation/actors';
 import { Actor, Deck, ServerBase } from '../simulation/actors';
 import { ServerActorBuilder } from '../simulation/serverActorBuilder';
+import type { Simulation } from '../simulation/simulation';
 import { initHavok } from '../utils';
 import { ActionBuilder } from './action-builder';
 
 describe('getSimActions', () => {
   let actionBuilder: ActionBuilder;
+  let sim: Simulation;
 
   beforeAll(async () => {
     Logger.LogLevels = 0;
@@ -23,8 +25,12 @@ describe('getSimActions', () => {
     actionBuilder = new ActionBuilder();
   });
 
+  afterEach(() => {
+    sim.dispose();
+  });
+
   it('returns ACTOR_MOVE actions', async () => {
-    const sim = getPhSim();
+    sim = getPhSim();
     new ServerBase(
       {
         type: ActorType.ACTOR,
@@ -46,7 +52,6 @@ describe('getSimActions', () => {
     const state = sim.toState();
 
     const actions = actionBuilder.getSimActions(state);
-    sim.stop();
 
     expect(actions.length).toBe(1);
     const move_action = actions[0] as MsgMap[ServerAction.MOVE_ACTOR];
@@ -58,7 +63,7 @@ describe('getSimActions', () => {
   });
 
   it('returns SPAWN_ACTOR actions', async () => {
-    const sim = getPhSim();
+    sim = getPhSim();
 
     const initState = sim.toState();
     actionBuilder.prevSimState = initState;
@@ -81,7 +86,6 @@ describe('getSimActions', () => {
 
     const state = sim.toState();
     const actions = actionBuilder.getSimActions(state);
-    sim.stop();
 
     expect(sim.actors.length).toBe(1);
     expect(actions.map(a => a.type)).toContain(ServerAction.SPAWN_ACTOR);
@@ -100,7 +104,7 @@ describe('getSimActions', () => {
   });
 
   it('returns SPAWN_ACTOR actions', async () => {
-    const sim = getPhSim();
+    sim = getPhSim();
     const initState = sim.toState();
     actionBuilder.prevSimState = initState;
     actionBuilder.sim = sim;
@@ -123,7 +127,6 @@ describe('getSimActions', () => {
     const state = sim.toState();
     const actions = actionBuilder.getSimActions(state);
 
-    sim.stop();
     const spawnAction = actions.find(action => action.type === ServerAction.SPAWN_ACTOR)!;
     expect(spawnAction.payload.transformation!.position![0]).toBeCloseTo(3);
     expect(spawnAction.payload.transformation!.position![1]).toBeCloseTo(0.55);
@@ -140,7 +143,7 @@ describe('getSimActions', () => {
       );
     });
 
-    const sim = getPhSim();
+    sim = getPhSim();
 
     sim.start();
     await wait(100);
@@ -186,7 +189,6 @@ describe('getSimActions', () => {
 
     const state = sim.toState();
     const actions = actionBuilder.getSimActions(state);
-    sim.stop();
 
     const renderActior = actions.find(action => action.type === ServerAction.RERENDER_DECK);
     expect(renderActior).toBeDefined();

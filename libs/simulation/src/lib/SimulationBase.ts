@@ -73,8 +73,16 @@ export abstract class SimulationBase {
     });
   }
 
-  stop() {
+  /**
+   * Stops the render loop and releases the scene, physics world and engine.
+   * The instance must not be used afterwards.
+   */
+  dispose() {
     this.engine.stopRenderLoop();
+    // Scene.dispose() also disposes the physics engine (and its Havok world)
+    // via the physics scene component registered by enablePhysics.
+    this.scene.dispose();
+    this.engine.dispose();
   }
 
   /**

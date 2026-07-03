@@ -834,6 +834,34 @@ describe('Simulation', () => {
     });
   });
 
+  describe('dispose', () => {
+    it('stops the render loop so frames stop advancing', async () => {
+      const sim = await factory.create({ actorStates: [] });
+      let frames = 0;
+      sim.scene.onAfterRenderObservable.add(() => frames++);
+      sim.start();
+      await vi.waitFor(() => expect(frames).toBeGreaterThan(0));
+
+      sim.dispose();
+
+      const framesAfterDispose = frames;
+      await new Promise(resolve => setTimeout(resolve, 100));
+      expect(frames).toBe(framesAfterDispose);
+      expect(sim.engine.activeRenderLoops.length).toBe(0);
+    });
+
+    it('disposes the scene, physics world and engine', async () => {
+      const sim = await factory.create({ actorStates: [] });
+      expect(sim.scene.getPhysicsEngine()).not.toBeNull();
+
+      sim.dispose();
+
+      expect(sim.scene.isDisposed).toBe(true);
+      expect(sim.scene.getPhysicsEngine()).toBeNull();
+      expect(sim.engine.isDisposed).toBe(true);
+    });
+  });
+
   describe('mergeStateDelta', () => {
     it('merges leftHandedSystem, gravity', () => {
       const state = { leftHandedSystem: false, gravity: 9.81 };

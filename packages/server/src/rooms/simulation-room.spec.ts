@@ -238,6 +238,7 @@ describe('SimulationRoom', () => {
     });
 
     it('closes the room when its author sends CLOSE', async () => {
+      room.simulation = getPhSim();
       const socket = connect(user); // user.userId === roomTable.authorId -> allowed to close
 
       socket.onmessage?.({
@@ -258,6 +259,57 @@ describe('SimulationRoom', () => {
       });
 
       expect(saveRoomState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('closeRoom', () => {
+    function sendClose(socket: FakeSocket) {
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.CLOSE, payload: null }]),
+      });
+    }
+
+    it('stops the render loop and disposes the simulation', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+
+      sendClose(socket);
+
+      await vi.waitFor(() => expect(sim.scene.isDisposed).toBe(true));
+      expect(saveRoomState).toHaveBeenCalledWith(roomTable.code);
+      expect(sim.engine.isDisposed).toBe(true);
+      expect(sim.engine.activeRenderLoops.length).toBe(0);
+    });
+
+    it('saves the room state before disposing the simulation', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      let disposedWhenSaved: boolean | undefined;
+      saveRoomState.mockImplementation(() => {
+        disposedWhenSaved = sim.scene.isDisposed;
+      });
+      const socket = connect(user);
+
+      sendClose(socket);
+
+      await vi.waitFor(() => expect(sim.scene.isDisposed).toBe(true));
+      expect(disposedWhenSaved).toBe(false);
+    });
+
+    it('disposes the simulation when an empty room times out', async () => {
+      vi.useFakeTimers();
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+
+      socket.onclose?.({ target: socket });
+      await vi.runOnlyPendingTimersAsync();
+
+      expect(saveRoomState).toHaveBeenCalledWith(roomTable.code);
+      expect(sim.scene.isDisposed).toBe(true);
+      expect(sim.engine.isDisposed).toBe(true);
     });
   });
 

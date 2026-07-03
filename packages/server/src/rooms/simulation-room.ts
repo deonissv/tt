@@ -223,7 +223,8 @@ export class SimulationRoom {
   }
 
   /**
-   * Closes the room by clearing intervals, saving room state, and closing the WebSocket server.
+   * Closes the room by clearing intervals, saving room state, stopping and disposing
+   * the simulation, and closing the WebSocket server.
    *
    * @returns {Promise<void>} A promise that resolves when the room is closed.
    */
@@ -237,7 +238,10 @@ export class SimulationRoom {
 
     if (this.tickInterval) clearInterval(this.tickInterval);
     if (this.savingInterval) clearInterval(this.savingInterval);
+    if (this.closeTimeout) clearTimeout(this.closeTimeout);
+
     await this.roomsService.saveRoomState(this.room.code);
+    this.simulation.dispose();
     this.wss.close();
   }
 
