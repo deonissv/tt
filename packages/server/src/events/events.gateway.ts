@@ -1,7 +1,7 @@
 import * as http from 'node:http';
 import type internal from 'node:stream';
 
-import { BadRequestException, Logger, UnauthorizedException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { HttpAdapterHost } from '@nestjs/core';
 import type { OnGatewayInit } from '@nestjs/websockets';
 import { WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
@@ -59,7 +59,6 @@ export class EventsGateway implements OnGatewayInit {
   ) {}
 
   afterInit(_wss: Server) {
-    _wss.setMaxListeners(255);
     const httpServer = (this.adapterHost ? this.adapterHost.httpAdapter.getHttpServer() : this.server) as http.Server;
     httpServer.removeAllListeners('upgrade');
     httpServer.on('upgrade', async (request, socket, head) => {
@@ -75,12 +74,13 @@ export class EventsGateway implements OnGatewayInit {
         const validatedUser = this.jwtStrategy.validate(verifiedToken);
         if (!validatedUser) {
           abortHandshake(socket, 500, 'Token is damaged');
+          return;
         }
 
         const roomId = this.getRoomUrl(request);
         if (!roomId || !this.roomRegistry.has(roomId)) {
           abortHandshake(socket, 400, 'No room found');
-          return new BadRequestException('no room found');
+          return;
         }
 
         const wss = this.roomRegistry.get(roomId)!.wss;
@@ -88,14 +88,9 @@ export class EventsGateway implements OnGatewayInit {
           Object.assign(ws, { user: validatedUser });
           wss.emit('connection', ws, request);
         });
-
-        wss.on('close', _ws => {
-          this.roomRegistry.delete(roomId);
-        });
       } catch (e) {
         EventsGateway.logger.error(e);
         abortHandshake(socket, 401, 'Unauthorized');
-        return new UnauthorizedException();
       }
     });
   }

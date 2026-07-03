@@ -39,7 +39,6 @@ export class RoomsService {
     } catch (e) {
       this.logger.error((e as Error).message);
     }
-    this.roomRegistry.set(room);
     return roomTable.code;
   }
 

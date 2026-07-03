@@ -12,6 +12,7 @@ import { ActionHandler } from '../simulation/action-handler';
 import { SimulationFactory } from '../simulation/simulation.factory';
 import { initHavok } from '../utils';
 import { AssetUrlService } from './asset-url.service';
+import { InMemoryRoomRegistry, RoomRegistry } from './room-registry';
 import { RoomsService } from './rooms.service';
 import type { SimulationRoom } from './simulation-room';
 import { SimulationRoomFactory } from './simulation-room.factory';
@@ -41,6 +42,7 @@ describe('SimulationRoom', () => {
   const otherUser: ValidatedUser = { userId: 2, username: 'bob', code: 'bob-code', roleId: 0 };
 
   let factory: SimulationRoomFactory;
+  let registry: RoomRegistry;
   let roomsService: RoomsService;
   let saveRoomState: ReturnType<typeof vi.fn>;
   let actionsHandler: ActionHandler;
@@ -61,6 +63,7 @@ describe('SimulationRoom', () => {
         SimulationRoomFactory,
         ActionHandler,
         SimulationFactory,
+        { provide: RoomRegistry, useClass: InMemoryRoomRegistry },
         { provide: AssetUrlService, useValue: { patchStateURLs: (state: unknown) => state } },
         {
           provide: RoomsService,
@@ -74,6 +77,7 @@ describe('SimulationRoom', () => {
     }).compile();
 
     factory = moduleRef.get(SimulationRoomFactory);
+    registry = moduleRef.get(RoomRegistry);
     actionsHandler = moduleRef.get(ActionHandler);
     simulationFactory = moduleRef.get(SimulationFactory);
     roomsService = moduleRef.get(RoomsService);
@@ -246,6 +250,18 @@ describe('SimulationRoom', () => {
       });
 
       await vi.waitFor(() => expect(saveRoomState).toHaveBeenCalledWith(roomTable.code));
+    });
+
+    it('removes the room from the registry when it closes', async () => {
+      expect(registry.get(roomTable.code)).toBe(room);
+      const socket = connect(user);
+
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.CLOSE, payload: null }]),
+      });
+
+      await vi.waitFor(() => expect(registry.get(roomTable.code)).toBeUndefined());
     });
 
     it('ignores CLOSE from a non-author client', () => {
