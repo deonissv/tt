@@ -60,7 +60,7 @@ describe('CaslModule', () => {
       );
     });
 
-    it('caches permissions per role instead of re-querying', async () => {
+    it('caches permissions per role within the TTL instead of re-querying', async () => {
       const first = await permissionsService.getPermissionsByRoleId(authMockUser.roleId);
       expect(first.length).toBeGreaterThan(0);
 
@@ -75,6 +75,40 @@ describe('CaslModule', () => {
 
       const second = await permissionsService.getPermissionsByRoleId(authMockUser.roleId);
       expect(second).toEqual(first);
+    });
+
+    it('picks up a DB permission change once the TTL expires, without a restart', async () => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      try {
+        const first = await permissionsService.getPermissionsByRoleId(authMockUser.roleId);
+        expect(first.length).toBeGreaterThan(0);
+
+        await prismaService.permission.deleteMany({
+          where: { roleId: authMockUser.roleId },
+        });
+
+        // Still inside the TTL: the stale value is served.
+        expect(await permissionsService.getPermissionsByRoleId(authMockUser.roleId)).toEqual(first);
+
+        // Jump well past any reasonable cache TTL.
+        vi.setSystemTime(Date.now() + 60 * 60 * 1000);
+
+        expect(await permissionsService.getPermissionsByRoleId(authMockUser.roleId)).toHaveLength(0);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('re-queries immediately after explicit invalidation', async () => {
+      const first = await permissionsService.getPermissionsByRoleId(authMockUser.roleId);
+      expect(first.length).toBeGreaterThan(0);
+
+      await prismaService.permission.deleteMany({
+        where: { roleId: authMockUser.roleId },
+      });
+      permissionsService.invalidate(authMockUser.roleId);
+
+      expect(await permissionsService.getPermissionsByRoleId(authMockUser.roleId)).toHaveLength(0);
     });
   });
 
