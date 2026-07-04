@@ -122,6 +122,88 @@ describe('Rooms', () => {
       expect(response.status).toBe(HttpStatus.OK);
     });
 
+    it('should list a newly created room', async () => {
+      await setupTestData();
+
+      const createResponse = await request(app.getHttpServer())
+        .post('/rooms')
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockAdminToken}`)
+        .send({ gameCode: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7' } satisfies CreateRoomDto);
+
+      expect(createResponse.status).toBe(HttpStatus.CREATED);
+
+      const createdRoom = await prismaService.room.findFirstOrThrow({
+        where: { authorId: authMockAdmin.userId },
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/rooms/user/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockAdminToken}`);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual([
+        {
+          roomCode: createdRoom.code,
+          gameCode: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          gameName: 'name',
+          gameBannerUrl: 'url',
+        },
+      ]);
+    });
+
+    it('should skip rooms without game progress', async () => {
+      await setupTestData();
+
+      await prismaService.room.createMany({
+        data: [
+          { roomId: 1, code: '11111111-0a62-442c-a4b2-c22e8ae35cb7', authorId: 0, type: 1 },
+          { roomId: 2, code: '22222222-0a62-442c-a4b2-c22e8ae35cb7', authorId: 0, type: 1 },
+        ],
+      });
+
+      await prismaService.roomProgress.create({
+        data: {
+          roomId: 1,
+          RoomProgressGameLoad: {
+            create: { gameId: 1, gameVersion: 1 },
+          },
+        },
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/rooms/user/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockAdminToken}`);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual([
+        {
+          roomCode: '11111111-0a62-442c-a4b2-c22e8ae35cb7',
+          gameCode: '4dbab385-0a62-442c-a4b2-c22e8ae35cb7',
+          gameName: 'name',
+          gameBannerUrl: 'url',
+        },
+      ]);
+    });
+
+    it('should return an empty list if none of the rooms have game progress', async () => {
+      await setupTestData();
+
+      await prismaService.room.create({
+        data: { roomId: 1, code: '11111111-0a62-442c-a4b2-c22e8ae35cb7', authorId: 0, type: 1 },
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/rooms/user/${authMockAdmin.code}`)
+        .set('Accept', 'application/json')
+        .set('Authorization', `Bearer ${authMockAdminToken}`);
+
+      expect(response.status).toBe(HttpStatus.OK);
+      expect(response.body).toEqual([]);
+    });
+
     it('should return 400 if user does not exist', async () => {
       const response = await request(app.getHttpServer())
         .get('/rooms/user/nonexistent')
