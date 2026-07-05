@@ -8,13 +8,8 @@ export function floatCompare(a: number, b: number, epsilon = PRECISION_EPSILON):
 export const range = (start = 0, end: number, step = 1): number[] => {
   return Array.from({ length: Math.floor((end - start) / step) }, (_, i) => start + i * step);
 };
-export const omitKeys = <T extends object>(obj: T, keys: (keyof T)[]): any => {
-  return Object.values(obj).reduce((acc, key: keyof T) => {
-    if (!keys.includes(key)) {
-      Object.assign(acc, obj[key]);
-    }
-    return acc as object;
-  }, {});
+export const omitKeys = <T extends object, K extends keyof T>(obj: T, keys: K[]): Omit<T, K> => {
+  return Object.fromEntries(Object.entries(obj).filter(([key]) => !keys.includes(key as K))) as Omit<T, K>;
 };
 
 export const radToDeg = (rad: number): number => rad * (180 / Math.PI);
