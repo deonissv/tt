@@ -125,7 +125,7 @@ export class RoomsService {
       throw new BadRequestException('User not found');
     }
 
-    return usersRooms.Rooms.map(room => ({
+    return usersRooms.Rooms.filter(room => room.RoomProgressGameLoad.length > 0).map(room => ({
       roomCode: room.code,
       gameCode: room.RoomProgressGameLoad[0].GameVersion.Game.code,
       gameName: room.RoomProgressGameLoad[0].GameVersion.Game.name,
