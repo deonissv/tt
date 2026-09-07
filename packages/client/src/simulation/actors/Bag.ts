@@ -1,16 +1,9 @@
-import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { BagMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { BagState, Model } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 
-export class Bag extends BagMixin(ClientBase<BagState>) {
-  constructor(state: BagState, model: Mesh, colliderMesh?: Mesh) {
-    super(state, model, colliderMesh);
-    this.items = state.containedObjects;
-  }
-
+export class Bag extends ClientBase<BagState> {
   static async fromState(state: BagState): Promise<Bag | null> {
     const modelState: Model = state.model ?? AssetsManager.BAG_MODEL;
     const [model, collider] = await Loader.loadModel(modelState);

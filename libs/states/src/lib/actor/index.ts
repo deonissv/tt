@@ -1,4 +1,5 @@
 export type { ActorState, ActorStateUpdate } from './ActorState';
+export { applyActorStateUpdate } from './ActorState';
 export type { BagState } from './BagState';
 export type { CardGrid, CardState } from './CardState';
 export type { DeckState } from './DeckState';

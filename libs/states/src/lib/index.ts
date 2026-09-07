@@ -25,6 +25,7 @@ export type {
   TileStackState,
   TileState,
 } from './actor';
+export { applyActorStateUpdate } from './actor';
 export type * from './simulation';
 
 export { DieFacesNumber, TileType } from './variants';
