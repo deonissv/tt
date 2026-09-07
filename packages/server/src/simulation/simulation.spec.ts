@@ -4,7 +4,7 @@ import type { Tuple } from '@babylonjs/core';
 import { Logger, Mesh } from '@babylonjs/core';
 
 import { Loader } from '@tt/loader';
-import { type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@tt/states';
+import { ActorType, type ActorState, type SimulationStateSave, type SimulationStateUpdate } from '@tt/states';
 import { initHavok } from '../utils';
 import { Actor } from './actors';
 import { Simulation } from './simulation';
@@ -854,6 +854,91 @@ describe('Simulation', () => {
       };
       const mergedState = Simulation.mergeStateDelta(initialState, delta);
       expect(mergedState.actorStates![0].transformation?.position).toEqual([1, 2, 3]);
+    });
+
+    it.each(['position', 'rotation', 'scale'] as const)(
+      'preserves unchanged transforms when merging a generated %s update',
+      async component => {
+        const initialState: SimulationStateSave = {
+          actorStates: [
+            {
+              type: ActorType.ACTOR,
+              guid: 'actor',
+              name: 'Actor',
+              model: { meshURL: 'actor.obj' },
+              transformation: {
+                position: [1, 2, 3],
+                rotation: [0.2, 0.3, 0.4],
+                scale: [2, 3, 4],
+              },
+            },
+          ],
+        };
+        vi.spyOn(Actor, 'fromState').mockImplementation(state => {
+          return Promise.resolve(new Actor(state, new Mesh('testMesh')));
+        });
+        const sim = await factory.create(initialState);
+
+        try {
+          const before = sim.toState();
+          const original = structuredClone(before);
+          sim.actors[0].update({ guid: 'actor', transformation: { [component]: [4, 5, 6] } });
+          const update = sim.toStateUpdate(before);
+          const originalUpdate = structuredClone(update);
+
+          expect(update.actorStates).toHaveLength(1);
+          const merged = Simulation.mergeStateDelta(before, update);
+
+          expect(merged.actorStates![0].transformation).toEqual({
+            ...before.actorStates![0].transformation,
+            [component]: [4, 5, 6],
+          });
+          expect(before).toEqual(original);
+          expect(update).toEqual(originalUpdate);
+        } finally {
+          sim.scene.dispose();
+          sim.engine.dispose();
+        }
+      },
+    );
+
+    it('merges variant-specific actor fields through the portable state helper', () => {
+      const initialState: SimulationStateSave = {
+        actorStates: [
+          {
+            type: ActorType.DECK,
+            guid: 'deck',
+            name: 'Deck',
+            cards: [
+              {
+                type: ActorType.CARD,
+                guid: 'card',
+                name: 'Card',
+                faceURL: 'face.png',
+                backURL: 'back.png',
+                rows: 1,
+                cols: 1,
+                sequence: 0,
+              },
+            ],
+          },
+        ],
+      };
+      const delta: SimulationStateUpdate = {
+        actorStates: [
+          {
+            type: ActorType.DECK,
+            guid: 'deck',
+            name: 'Renamed deck',
+            cards: [],
+          },
+        ],
+      };
+
+      const mergedState = Simulation.mergeStateDelta(initialState, delta);
+
+      expect(mergedState.actorStates![0]).toMatchObject({ name: 'Renamed deck', cards: [] });
+      expect(initialState.actorStates![0]).toMatchObject({ name: 'Deck', cards: [{ guid: 'card' }] });
     });
 
     it('keeps unchanged actor states', () => {

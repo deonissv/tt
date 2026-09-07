@@ -1,9 +1,11 @@
 import type { Tuple } from '@babylonjs/core';
 import type { ClientActionMsg } from '@tt/actions';
 import { ClientAction } from '@tt/actions';
-import { isContainable } from '@tt/actors';
+import { can, Capability } from '@tt/rules';
+import type { UnknownActorState } from '@tt/states';
 import type { Client } from '../rooms/client';
-import { Die10, Die12, Die20, Die4, Die6, Die6Round, Die8, type ServerBase } from './actors';
+import type { ServerBase } from './actors';
+import { flip, move, pick, pickItem, release, roll, rotate, shuffle } from './behaviors';
 
 export class ActionHandler {
   actors: ServerBase[] = [];
@@ -53,74 +55,56 @@ export class ActionHandler {
     }
   }
 
+  private findCapableActor(guid: string, capability: Capability): ServerBase | undefined {
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (!actor) return undefined;
+
+    const state = actor.toState() as UnknownActorState;
+    return can(state, capability, { code: this.client.code }) ? actor : undefined;
+  }
+
   handlePickItem(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && isContainable(actor)) {
-      actor.pickItem(this.client.code, this.client.pickHeight);
-    }
+    const actor = this.findCapableActor(guid, Capability.Container);
+    if (actor) void pickItem(actor, this.client.code, this.client.pickHeight);
   }
 
   handlePickActor(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && typeof actor.pick == 'function') {
-      actor.pick(this.client.code, this.client.pickHeight);
-    }
+    const actor = this.findCapableActor(guid, Capability.Pickable);
+    if (actor) pick(actor, this.client.code, this.client.pickHeight);
   }
 
   handleReleaseActor(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor && typeof actor.release == 'function') {
-      actor.release();
-    }
+    if (actor) release(actor);
   }
 
   handleMoveActor(guid: string, position: Tuple<number, 2>) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor && typeof actor.move == 'function') {
-      actor.move(...position);
-    }
+    if (actor) move(actor, ...position);
   }
   handleRoll(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (
-      (actor instanceof Die4 ||
-        actor instanceof Die6 ||
-        actor instanceof Die8 ||
-        actor instanceof Die10 ||
-        actor instanceof Die12 ||
-        actor instanceof Die20 ||
-        actor instanceof Die6Round) &&
-      typeof actor.roll === 'function'
-    )
-      actor.roll();
+    const actor = this.findCapableActor(guid, Capability.Rollable);
+    if (actor) roll(actor);
   }
 
   handleShuffle(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && isContainable(actor) && typeof actor.shuffle == 'function') {
-      actor.shuffle();
-    }
+    const actor = this.findCapableActor(guid, Capability.Shuffleable);
+    if (actor) shuffle(actor);
   }
 
   handleFlip(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && typeof actor.flip == 'function') {
-      actor.flip();
-    }
+    const actor = this.findCapableActor(guid, Capability.Flippable);
+    if (actor) flip(actor);
   }
 
   handleRotateCW(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && typeof actor.rotateCW == 'function') {
-      actor.rotateCW(this.client.rotationStep);
-    }
+    const actor = this.findCapableActor(guid, Capability.Rotatable);
+    if (actor) rotate(actor, this.client.rotationStep);
   }
 
   handleRotateCCW(guid: string) {
-    const actor = this.actors.find(a => a.guid === guid);
-    if (actor && typeof actor.rotateCCW == 'function') {
-      actor.rotateCCW(this.client.rotationStep);
-    }
+    const actor = this.findCapableActor(guid, Capability.Rotatable);
+    if (actor) rotate(actor, -this.client.rotationStep);
   }
 
   handleSetPickHeight(height: number) {

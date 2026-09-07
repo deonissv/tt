@@ -1,0 +1,17 @@
+{
+  "name": "rules",
+  "version": "0.0.0",
+  "description": "Portable actor rules and selectors",
+  "author": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "scripts": {
+    "format": "prettier 'src/**/*.ts' 'tests/**/*.ts' --write",
+    "lint": "eslint --ext .ts src tests",
+    "test": "vitest run",
+    "typecheck": "tsc --build --noEmit"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.5"
+  }
+}

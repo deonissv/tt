@@ -1,16 +1,12 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
-import { TileStackMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
-import type { TileStackState, TileState } from '@tt/states';
-import { ActorType } from '@tt/states';
-import { ServerActorBuilder } from '../serverActorBuilder';
+import { containerSize } from '@tt/rules';
+import type { TileStackState } from '@tt/states';
+import { pickItem } from '../behaviors/container';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
-import type { Tile } from './tile';
 
-export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
-  size: number;
-
+export class TileStack extends ServerBase<TileStackState> {
   constructor(state: TileStackState, modelMesh: Mesh, colliderMesh?: Mesh) {
     modelMesh.scaling.y = state.size;
 
@@ -19,37 +15,14 @@ export class TileStack extends TileStackMixin(ServerBase<TileStackState>) {
     }
 
     super(state, modelMesh, colliderMesh);
-    this.size = state.size;
   }
 
-  async pickItem(clientId: string, pickHeight: number): Promise<Tile | null> {
-    if (this.size < 2) {
-      return null;
-    }
+  get size(): number {
+    return containerSize(this.toState()) ?? 0;
+  }
 
-    const tileState = {
-      ...this.__state,
-      guid: this.scene.getUniqueGUID(),
-      type: ActorType.TILE,
-      transformation: this.transformation,
-    } satisfies TileState;
-
-    tileState.transformation.position[1] += 1;
-    tileState.transformation.scale[1] /= this.size;
-
-    const newTile = await ServerActorBuilder.buildTile(tileState);
-
-    newTile?.pick(clientId, pickHeight);
-
-    this.size -= 1;
-
-    this.model.scaling.y = this.size;
-    if (this.__collider) {
-      this.__collider.scaling.y = this.size;
-      this._forceUpdate();
-    }
-
-    return newTile;
+  async pickItem(clientId: string, pickHeight: number): Promise<ServerBase | null> {
+    return pickItem(this, clientId, pickHeight);
   }
 
   static async fromState(state: TileStackState): Promise<TileStack | null> {

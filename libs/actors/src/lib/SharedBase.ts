@@ -6,13 +6,14 @@ import type { PhysicsBody } from '@babylonjs/core/Physics/v2/physicsBody';
 
 import { Loader } from '@tt/loader';
 import { Logger } from '@tt/logger';
-import type {
-  ActorBaseState,
-  ActorState,
-  ActorStateUpdate,
-  TableState,
-  Transformation,
-  UnknownActorState,
+import {
+  applyActorStateUpdate,
+  type ActorBaseState,
+  type ActorState,
+  type ActorStateUpdate,
+  type TableState,
+  type Transformation,
+  type UnknownActorState,
 } from '@tt/states';
 import { floatCompare, vecDelta } from '@tt/utils';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from './defaults';
@@ -196,6 +197,10 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     };
   }
 
+  updateState(update: ActorStateUpdate): void {
+    this.__state = applyActorStateUpdate(this.__state as UnknownActorState, update) as T;
+  }
+
   toStateUpdate(actorState?: ActorBaseState): ActorStateUpdate | null {
     const currentState = this.toState();
 
@@ -294,23 +299,5 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
     if (actorStateUpdate.transformation?.position) {
       this.position = new Vector3(...actorStateUpdate.transformation.position);
     }
-  }
-
-  static applyStateUpdate(actorState: UnknownActorState, actorStateUpdate: ActorStateUpdate): UnknownActorState {
-    const mergedScale = actorStateUpdate.transformation?.scale ?? actorState.transformation?.scale;
-    const mergedPosition = actorStateUpdate.transformation?.position ?? actorState.transformation?.position;
-    const mergedRotation = actorStateUpdate.transformation?.rotation ?? actorState.transformation?.rotation;
-
-    const rv = structuredClone(actorState);
-
-    if (mergedScale !== undefined || mergedPosition !== undefined || mergedRotation !== undefined) {
-      rv.transformation = {
-        scale: mergedScale,
-        rotation: mergedRotation,
-        position: mergedPosition,
-      };
-    }
-
-    return rv;
   }
 }
