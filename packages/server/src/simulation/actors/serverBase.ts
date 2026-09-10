@@ -5,15 +5,16 @@ import {
   PhysicsShapeMesh,
   Quaternion,
   ShapeCastResult,
+  Vector2,
   Vector3,
   type Mesh,
-  type Vector2,
 } from '@babylonjs/core';
 
 import { SharedBase } from '@tt/actors';
 import type { SimulationSceneBase } from '@tt/simulation';
-import type { ActorBaseState } from '@tt/states';
-import { flip, move, pick, release, rotate } from '../behaviors/transform';
+import type { DieBaseState } from '@tt/states';
+import { ActorType, type ActorBaseState } from '@tt/states';
+import { PRECISION_EPSILON } from '@tt/utils';
 
 export class ServerBase<T extends ActorBaseState = ActorBaseState> extends SharedBase<T> {
   defaultY: number;
@@ -90,6 +91,58 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     }
   }
 
+  getNewTargetRotation() {
+    const currentRotation = this.absoluteRotationQuaternion.toEulerAngles();
+    const state = this.__state as unknown as DieBaseState;
+
+    const rotationVariants =
+      this.__state.type === ActorType.DIE4 ||
+      this.__state.type === ActorType.DIE6 ||
+      this.__state.type === ActorType.DIE8 ||
+      this.__state.type === ActorType.DIE10 ||
+      this.__state.type === ActorType.DIE12 ||
+      this.__state.type === ActorType.DIE20 ||
+      this.__state.type === ActorType.DIE6ROUND
+        ? state.rotationValues.map(rv => rv.rotation)
+        : [Vector3.Up().asArray()];
+
+    const rotation = rotationVariants.reduce(
+      (closest, rotation) => {
+        const distance = Vector3.DistanceSquared(currentRotation, Vector3.FromArray(rotation));
+        return distance < closest.distance ? { rotation, distance } : closest;
+      },
+      { rotation: null as number[] | null, distance: Infinity },
+    ).rotation;
+
+    const rv = rotation ? Vector3.FromArray(rotation) : Vector3.Up();
+    return rv;
+  }
+
+  alignToAxis(quaternion: Quaternion, targetAxis: Vector3) {
+    const currentAxis = new Vector3(0, 1, 0).applyRotationQuaternion(quaternion);
+    targetAxis.normalize();
+
+    if (Vector3.Distance(currentAxis, targetAxis) < PRECISION_EPSILON) {
+      return quaternion;
+    }
+
+    if (Vector3.Distance(currentAxis, targetAxis.scale(-1)) < PRECISION_EPSILON) {
+      const perpendicularAxis = Vector3.Cross(currentAxis, new Vector3(1, 0, 0));
+      if (perpendicularAxis.length() < PRECISION_EPSILON) {
+        perpendicularAxis.copyFromFloats(0, 0, 1);
+      }
+      return Quaternion.RotationAxis(perpendicularAxis, Math.PI).multiply(quaternion);
+    }
+
+    const rotationAxis = Vector3.Cross(currentAxis, targetAxis).normalize();
+    const rotationAngle = Math.acos(Vector3.Dot(currentAxis, targetAxis));
+
+    const correction = Quaternion.RotationAxis(rotationAxis, rotationAngle);
+    const result = correction.multiply(quaternion);
+
+    return result.normalize();
+  }
+
   get hk(): HavokPlugin {
     return this.scene._physicsEngine?.getPhysicsPlugin() as HavokPlugin;
   }
@@ -99,15 +152,36 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
   }
 
   pick(clientId: string, pickHeight: number) {
-    pick(this, clientId, pickHeight);
+    if (this.picked) return;
+
+    this.body.setLinearVelocity(Vector3.Zero());
+    this.body.setAngularVelocity(Vector3.Zero());
+    this.pickHeight = pickHeight;
+
+    this.__targetPosition = new Vector2(this.position.x, this.position.z);
+
+    const rotation = this.absoluteRotationQuaternion;
+
+    this.__targetRotation =
+      this.__state.type === ActorType.CARD || this.__state.type === ActorType.DECK
+        ? rotation
+        : this.alignToAxis(rotation, this.getNewTargetRotation());
+
+    this.picked = clientId;
+    this.body.setCollisionCallbackEnabled(false);
+    this.body.shape!.isTrigger = true;
   }
 
   release() {
-    release(this);
+    this.picked = null;
+    this.pickHeight = 0;
+    this.__targetPosition = null;
+    this.body.setCollisionCallbackEnabled(true);
+    this.body.shape!.isTrigger = false;
   }
 
   move(dx: number, dy: number) {
-    move(this, dx, dy);
+    this.__targetPosition?.addInPlaceFromFloats(dx, dy);
   }
 
   getFlipOffset() {
@@ -119,15 +193,22 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
   }
 
   flip() {
-    flip(this);
+    const rotationAxis = Vector3.Right().applyRotationQuaternion(this.absoluteRotationQuaternion);
+    const flipRotation = Quaternion.RotationAxis(rotationAxis, Math.PI);
+    this.__targetRotation = this.absoluteRotationQuaternion.multiply(flipRotation);
+    this.flipped = !this.flipped;
   }
 
   rotateCW(rotationAngle: number) {
-    rotate(this, rotationAngle);
+    const currentUp = Vector3.Up().applyRotationQuaternion(this.absoluteRotationQuaternion);
+    const rotationQuaternion = Quaternion.RotationAxis(currentUp, rotationAngle);
+    this.__targetRotation = this.absoluteRotationQuaternion.multiply(rotationQuaternion);
   }
 
   rotateCCW(rotationAngle: number) {
-    rotate(this, -rotationAngle);
+    const currentUp = Vector3.Up().applyRotationQuaternion(this.absoluteRotationQuaternion);
+    const rotationQuaternion = Quaternion.RotationAxis(currentUp, -1 * rotationAngle);
+    this.__targetRotation = this.absoluteRotationQuaternion.multiply(rotationQuaternion);
   }
 
   lock() {

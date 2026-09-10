@@ -1,3 +1,6 @@
+export type { Containable } from './actions';
+export { isContainable } from './actions';
+
 export {
   CircleTableMixin,
   CustomRectangleTableMixin,
@@ -11,7 +14,9 @@ export {
 } from './tables';
 
 export { ActorMixin } from './ActorMixin';
+export { BagMixin } from './BagMixin';
 export { CardMixin } from './CardMixin';
+export { DeckMixin } from './DeckMixin';
 export {
   DEFAULT_MASS,
   DEFAULT_POSITION,
@@ -21,7 +26,9 @@ export {
   PICK_HIGHT,
   ROTATION_STEP,
 } from './defaults';
+export { DieMixin } from './DieMixin';
 export type { TextureBounds } from './models';
 export { FlatModel } from './models';
 export { SharedBase } from './SharedBase';
 export { TileMixin } from './TileMixin';
+export { TileStackMixin } from './TileStackMixin';

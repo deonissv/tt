@@ -1,5 +1,6 @@
 import { Mesh, StandardMaterial } from '@babylonjs/core';
 import { Color3 } from '@babylonjs/core/Maths/math.color';
+import { DieMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
 import type { Die6RoundState, DieBaseState } from '@tt/states';
 import type { Constructor } from '@tt/utils';
@@ -21,15 +22,15 @@ export class ClientDie extends ClientBase<DieBaseState> {
   }
 }
 
-export class Die4 extends ClientDie {}
-export class Die6 extends ClientDie {}
-export class Die8 extends ClientDie {}
+export class Die4 extends DieMixin(ClientDie) {}
+export class Die6 extends DieMixin(ClientDie) {}
+export class Die8 extends DieMixin(ClientDie) {}
 
-export class Die10 extends ClientDie {}
-export class Die12 extends ClientDie {}
-export class Die20 extends ClientDie {}
+export class Die10 extends DieMixin(ClientDie) {}
+export class Die12 extends DieMixin(ClientDie) {}
+export class Die20 extends DieMixin(ClientDie) {}
 
-export class Die6Round extends ClientDie {
+export class Die6Round extends DieMixin(ClientDie) {
   declare __state: Die6RoundState;
 
   static async fromState<T extends ClientDie>(this: Constructor<T>, state: Die6RoundState): Promise<T | null> {

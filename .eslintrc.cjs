@@ -25,9 +25,6 @@ module.exports = {
       './libs/loader/tsconfig.json',
       './libs/logger/tsconfig.json',
       './libs/mime-resolver/tsconfig.json',
-      './libs/rules/tsconfig.json',
-      './libs/rules/tsconfig.lib.json',
-      './libs/rules/tsconfig.spec.json',
       './libs/simulation/tsconfig.json',
       './libs/states/tsconfig.json',
       './libs/tts-parser/tsconfig.json',
@@ -68,17 +65,6 @@ module.exports = {
     'no-debugger': 'error',
   },
   overrides: [
-    {
-      files: ['libs/rules/**/*.ts'],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: ['@babylonjs/*', '@tt/actors', '@tt/loader', '**/packages/client/**', '**/packages/server/**'],
-          },
-        ],
-      },
-    },
     {
       files: ['packages/server/**/*.{ts,tsx}'],
       rules: {

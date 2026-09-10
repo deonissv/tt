@@ -1,17 +1,34 @@
+import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+import type { Containable } from '@tt/actors';
+import { BagMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
-import { containerSize } from '@tt/rules';
 import type { BagState } from '@tt/states';
-import { pickItem, shuffle } from '../behaviors/container';
+import type { Constructor } from '@tt/utils';
+import { shuffle } from '@tt/utils';
+import { ServerActorBuilder } from '../serverActorBuilder';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
-export class Bag extends ServerBase<BagState> {
-  get size(): number {
-    return containerSize(this.toState()) ?? 0;
+export class Bag extends BagMixin<Constructor<ServerBase<BagState>>>(ServerBase) implements Containable {
+  constructor(state: BagState, model: Mesh, colliderMesh?: Mesh) {
+    super(state, model, colliderMesh);
+    this.items = state.containedObjects;
   }
 
   async pickItem(clientId: string, pickHeight: number): Promise<ServerBase | null> {
-    return pickItem(this, clientId, pickHeight);
+    if (this.size < 1) {
+      return null;
+    }
+
+    const item = this.items.pop()!;
+
+    item.transformation = this.transformation;
+    item.transformation.position![1] += 1;
+
+    const newActor = await ServerActorBuilder.build(item);
+    newActor?.pick(clientId, pickHeight);
+
+    return newActor;
   }
 
   static async fromState(state: BagState): Promise<Bag | null> {
@@ -29,6 +46,6 @@ export class Bag extends ServerBase<BagState> {
   }
 
   shuffle() {
-    shuffle(this);
+    shuffle(this.items);
   }
 }

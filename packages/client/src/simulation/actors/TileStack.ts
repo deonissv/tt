@@ -1,19 +1,10 @@
-import type { Mesh } from '@babylonjs/core/Meshes/mesh';
+import { TileStackMixin } from '@tt/actors';
 import type { TileStackState, TileState } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { ClientBase } from './ClientBase';
 import { Tile } from './Tile';
 
-export class TileStack extends ClientBase<TileStackState> {
-  constructor(state: TileStackState, model: Mesh) {
-    model.scaling.y = state.size;
-    super(state, model);
-  }
-
-  get size(): number {
-    return this.__state.size;
-  }
-
+export class TileStack extends TileStackMixin(ClientBase<TileStackState>) {
   static async fromState(state: TileStackState): Promise<TileStack | null> {
     const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
     if (!tileModel) {
@@ -37,9 +28,8 @@ export class TileStack extends ClientBase<TileStackState> {
 
     tileState.transformation!.position![0] -= 4;
     const newTile = await Tile.fromState(tileState);
-    const size = this.size - 1;
-    this.updateState({ guid: this.guid, size });
-    this.model.scaling.y = size;
+    this.size -= 1;
+    this.model.scaling.y = this.size;
 
     return newTile;
   }

@@ -9,16 +9,15 @@ import '@babylonjs/loaders/OBJ/objFileLoader';
 
 import '@babylonjs/core/Engines/WebGPU/Extensions';
 
-import {
-  applyActorStateUpdate,
-  type ActorStateUpdate,
-  type SimulationStateSave,
-  type SimulationStateUpdate,
-  type TableState,
-  type UnknownActorState,
+import type {
+  ActorStateUpdate,
+  SimulationStateSave,
+  SimulationStateUpdate,
+  TableState,
+  UnknownActorState,
 } from '@tt/states';
 
-import type { SharedBase } from '@tt/actors';
+import { SharedBase } from '@tt/actors';
 
 import type { ActorBuilder } from './ActorBuilder';
 import { EngineFactory } from './SimulationEngine';
@@ -141,7 +140,7 @@ export abstract class SimulationBase {
         if (!update) {
           return actorState;
         }
-        return applyActorStateUpdate(actorState, update);
+        return SharedBase.applyStateUpdate(actorState, update);
       });
     }
 
