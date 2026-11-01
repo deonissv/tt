@@ -10,3 +10,5 @@ proxy/*
 **/node_modules
 
 logs
+playwright-report
+test-results

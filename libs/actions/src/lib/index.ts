@@ -8,6 +8,7 @@ export type {
   MoveClientActorPld,
   MoveServerActorPld,
   RerenderDeckPld,
+  RerenderTileStackPld,
   RotateClientActorPld,
   SpawnPickedActorPld,
 } from './payloads';

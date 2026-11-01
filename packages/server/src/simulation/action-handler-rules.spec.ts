@@ -2,7 +2,7 @@ import { ActorType, type ActorState, type BagState, type UnknownActorState } fro
 import type { Client } from '../rooms/client';
 import { ActionHandler } from './action-handler';
 import type { ServerBase } from './actors';
-import { pick, pickItem, shuffle } from './behaviors';
+import { move, pick, pickItem, release, shuffle } from './behaviors';
 
 vi.mock('./behaviors', () => ({
   flip: vi.fn(),
@@ -94,5 +94,29 @@ describe('ActionHandler portable rules', () => {
     handler.handleShuffle('bag');
 
     expect(shuffle).toHaveBeenCalledWith(actor);
+  });
+
+  it.each([null, 'another-player'])('rejects moving and releasing a pawn held by %s', holder => {
+    const actor = runtimeActor(actorState());
+    actor.picked = holder;
+    handler.actors = [actor];
+
+    handler.handleMoveActor('actor', [1, 2]);
+    handler.handleReleaseActor('actor');
+
+    expect(move).not.toHaveBeenCalled();
+    expect(release).not.toHaveBeenCalled();
+  });
+
+  it('allows the holding player to move and release the actor', () => {
+    const actor = runtimeActor(actorState());
+    actor.picked = player.code;
+    handler.actors = [actor];
+
+    handler.handleMoveActor('actor', [1, 2]);
+    handler.handleReleaseActor('actor');
+
+    expect(move).toHaveBeenCalledWith(actor, 1, 2);
+    expect(release).toHaveBeenCalledWith(actor);
   });
 });

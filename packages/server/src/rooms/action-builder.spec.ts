@@ -1,7 +1,7 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import type { MsgMap } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
-import { ActorType } from '@tt/states';
+import { ActorType, type DeckState, type TileStackState } from '@tt/states';
 import { wait } from '@tt/utils';
 import { getPhSim } from '../../test/testUtils';
 import type { Card } from '../simulation/actors';
@@ -9,6 +9,58 @@ import { Actor, Deck, ServerBase } from '../simulation/actors';
 import { ServerActorBuilder } from '../simulation/serverActorBuilder';
 import { initHavok } from '../utils';
 import { ActionBuilder } from './action-builder';
+
+it('broadcasts a tile stack size change to players already in the room', () => {
+  const stack: TileStackState = {
+    guid: 'stack',
+    name: 'Stack',
+    type: ActorType.TILE_STACK,
+    tileType: 0,
+    faceURL: 'face.png',
+    size: 3,
+  };
+  const builder = new ActionBuilder();
+  builder.sim = { actors: [] } as unknown as typeof builder.sim;
+  builder.prevSimState = { actorStates: [stack] };
+
+  expect(builder.getSimActions({ actorStates: [{ ...stack, size: 2 }] })).toContainEqual({
+    type: 'RERENDER_TILE_STACK',
+    payload: { guid: 'stack', size: 2 },
+  });
+});
+
+describe('empty deck rerender', () => {
+  const before: DeckState = {
+    guid: 'deck',
+    name: 'Deck',
+    type: ActorType.DECK,
+    cards: [
+      {
+        guid: 'last-card',
+        name: 'Last card',
+        type: ActorType.CARD,
+        faceURL: 'face.png',
+        backURL: 'back.png',
+        cols: 1,
+        rows: 1,
+        sequence: 0,
+      },
+    ],
+  };
+
+  it('emits a zero-size rerender when the final card is drawn', () => {
+    expect(new ActionBuilder().getDeckRerender(before, { ...before, cards: [] })).toEqual({
+      guid: 'deck',
+      grid: { faceURL: 'face.png', backURL: 'back.png', cols: 1, rows: 1, sequence: 0 },
+      size: 0,
+    });
+  });
+
+  it('does not rerender an unchanged empty deck', () => {
+    const empty = { ...before, cards: [] };
+    expect(new ActionBuilder().getDeckRerender(empty, empty)).toBeNull();
+  });
+});
 
 describe('getSimActions', () => {
   let actionBuilder: ActionBuilder;

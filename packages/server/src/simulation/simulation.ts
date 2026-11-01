@@ -47,7 +47,7 @@ export class Simulation extends SimulationBase {
   toState(): SimulationStateSave {
     return {
       ...this.initialState,
-      actorStates: this.actors.map(actor => actor.toState() as UnknownActorState),
+      actorStates: this.actors.map(actor => ({ ...actor.toState(), sleeping: actor.sleeping }) as UnknownActorState),
     };
   }
 }

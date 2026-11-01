@@ -12,3 +12,10 @@ proxy/*
 **/*.env*
 
 logs
+playwright-report/
+test-results/
+packages/visual-tests/*.tsbuildinfo
+
+# Temporary screenshot references for comparing players in the same run.
+packages/visual-tests/baselines/**/__runtime__-*.png
+packages/visual-tests/baselines/**/-runtime--*.png

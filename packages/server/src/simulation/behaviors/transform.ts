@@ -72,13 +72,11 @@ export function move(actor: ServerBase, dx: number, dy: number): void {
 }
 
 export function flip(actor: ServerBase): void {
-  const axis = Vector3.Right().applyRotationQuaternion(actor.absoluteRotationQuaternion);
-  const rotation = Quaternion.RotationAxis(axis, Math.PI);
+  const rotation = Quaternion.RotationAxis(Vector3.Right(), Math.PI);
   actor.__targetRotation = actor.absoluteRotationQuaternion.multiply(rotation);
   actor.flipped = !actor.flipped;
 }
 
 export function rotate(actor: ServerBase, angle: number): void {
-  const up = Vector3.Up().applyRotationQuaternion(actor.absoluteRotationQuaternion);
-  actor.__targetRotation = actor.absoluteRotationQuaternion.multiply(Quaternion.RotationAxis(up, angle));
+  actor.__targetRotation = actor.absoluteRotationQuaternion.multiply(Quaternion.RotationAxis(Vector3.Up(), angle));
 }

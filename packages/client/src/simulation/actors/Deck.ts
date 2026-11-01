@@ -7,8 +7,13 @@ import { Card } from './Card';
 import { ClientBase } from './ClientBase';
 
 export class Deck extends ClientBase<DeckState> {
-  constructor(state: DeckState, model: Mesh, faceTexture: Texture, backTexture: Texture) {
+  constructor(state: DeckState, model: Mesh, faceTexture: Texture | null, backTexture: Texture | null) {
     super(state, model);
+    if (state.cards.length === 0) {
+      this.setEnabled(false);
+      return;
+    }
+    if (!faceTexture || !backTexture) throw new Error('Non-empty decks require card textures');
     this.renderDeck(faceTexture, backTexture, state.cards.at(-1)!, state.cards.length);
   }
 
@@ -18,6 +23,8 @@ export class Deck extends ClientBase<DeckState> {
     if (!model) {
       return null;
     }
+
+    if (state.cards.length === 0) return new Deck(state, model, null, null);
 
     const faceTexture = await Loader.loadTexture(state.cards.at(-1)!.faceURL);
     const backTexture = await Loader.loadTexture(state.cards.at(0)!.backURL);
@@ -37,6 +44,10 @@ export class Deck extends ClientBase<DeckState> {
   }
 
   async rerenderDeck(grid: CardGrid, size: number) {
+    if (size === 0) {
+      this.setEnabled(false);
+      return;
+    }
     const faceTexture = await Loader.loadTexture(grid.faceURL);
     const backTexture = await Loader.loadTexture(grid.backURL);
 

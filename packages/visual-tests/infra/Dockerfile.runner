@@ -1,0 +1,18 @@
+FROM mcr.microsoft.com/playwright:v1.63.0-noble@sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27
+
+WORKDIR /work
+
+# Match the Mesa version already supplied by the pinned browser image.
+RUN mesa_version="$(dpkg-query -W -f='${Version}' libegl-mesa0)" \
+  && apt-get update \
+  && apt-get install --yes --no-install-recommends "mesa-vulkan-drivers=${mesa_version}" \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY package-lock.json ./
+RUN playwright_version="$(node -p "require('./package-lock.json').packages['node_modules/playwright'].version")" \
+  && npm install --prefix /opt/playwright --ignore-scripts --no-save --package-lock=false --no-audit --no-fund "playwright@${playwright_version}" \
+  && rm package-lock.json
+
+ENV PATH="/opt/playwright/node_modules/.bin:${PATH}"
+ENV CI=1
+CMD ["playwright", "run-server", "--host", "0.0.0.0", "--port", "3000", "--unsafe"]

@@ -1,0 +1,31 @@
+{
+  "name": "@tt/visual-tests",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Visual regression tests for the Tabletop application",
+  "scripts": {
+    "lint": "eslint --no-ignore --ext .ts,.mts,.mjs,.cjs,.cts assertions fixtures prepare scenarios setup support test.ts global-setup.ts playwright.config.ts vitest.config.ts",
+    "format": "prettier --write \"{assertions,fixtures,prepare,scenarios,setup,support}/**/*.{ts,mts,mjs,cjs,cts,css,json,md}\" *.ts *.json .eslintrc.cjs",
+    "typecheck": "tsc --noEmit --project tsconfig.json",
+    "test": "vitest run --config vitest.config.ts",
+    "test:visual": "playwright test",
+    "test:visual:update": "cross-env UPDATE_VISUAL_BASELINES=1 playwright test --project=chromium-webgl --grep @behavior:render",
+    "test:visual:ui": "cross-env VISUAL_MODE=ui playwright test --ui-host=127.0.0.1 --ui-port=9323 --update-snapshots=none",
+    "test:visual:dev": "cross-env VISUAL_MODE=dev playwright test --ui-host=127.0.0.1 --ui-port=9323 --update-snapshots=none",
+    "test:visual:debug": "cross-env VISUAL_MODE=headed playwright test --debug=inspector",
+    "test:visual:report": "playwright show-report ../../playwright-report/visual/canonical",
+    "prepare:targets": "playwright test --config prepare/playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "^22.0.2",
+    "@types/pngjs": "^6.0.5",
+    "@types/ws": "^8.5.12",
+    "cross-env": "^7.0.3",
+    "pngjs": "^7.0.0",
+    "typescript": "^6.0.0",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^2.0.5",
+    "ws": "^8.18.0"
+  }
+}

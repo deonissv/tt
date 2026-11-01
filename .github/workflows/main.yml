@@ -1,13 +1,27 @@
-name: main CI
+name: CI
 
 on:
   push:
     branches: ['main']
   pull_request:
-    branches: ['main']
+  workflow_dispatch:
+  schedule:
+    - cron: '17 2 * * *'
+
+permissions:
+  contents: read
+
+env:
+  VISUAL_MODE: canonical
+  COMPOSE_PROJECT_NAME: tt-visual-${{ github.run_id }}
+
+concurrency:
+  group: ci-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  checks:
+    name: Lint, types, and unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,14 +35,95 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build --if-present
+
+  build:
+    name: Build application
+    needs: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+      # The web Dockerfile runs the root npm run build for every CI event.
+      # Browser images and image exports are needed only for visual test runs.
+      - name: Build application and optional browser image with layer cache
+        uses: docker/bake-action@v7
+        with:
+          source: .
+          files: packages/visual-tests/infra/docker-compose.yml
+          targets: |
+            web
+            ${{ github.event_name != 'push' && 'runner' || '' }}
+          load: ${{ github.event_name != 'push' }}
+          set: |
+            *.context=.
+            web.cache-from=type=gha,scope=visual-web
+            web.cache-to=type=gha,scope=visual-web,mode=max
+            runner.cache-from=type=gha,scope=visual-runner
+            runner.cache-to=type=gha,scope=visual-runner,mode=max
+      - name: Export visual test images
+        if: github.event_name != 'push'
+        shell: bash
+        run: |
+          docker save "${COMPOSE_PROJECT_NAME}-web" "${COMPOSE_PROJECT_NAME}-runner" | gzip -1 > "${RUNNER_TEMP}/visual-stack.tar.gz"
+      - name: Upload visual test images
+        if: github.event_name != 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-images-${{ github.run_id }}
+          path: ${{ runner.temp }}/visual-stack.tar.gz
+          compression-level: 0
+          overwrite: true
+          if-no-files-found: error
+          retention-days: 1
+
+  visual-regression:
+    name: Visual regression (${{ matrix.shard }}/5)
+    if: github.event_name != 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.9.0'
+          cache: npm
+      - run: npm ci
+      - name: Download visual test images
+        uses: actions/download-artifact@v4
+        with:
+          name: visual-images-${{ github.run_id }}
+          path: ${{ runner.temp }}/visual-images
+      - name: Load visual test images
+        run: docker load --input "${RUNNER_TEMP}/visual-images/visual-stack.tar.gz"
+      - name: Run visual regression shard
+        run: npm run test:visual -- --shard=${{ matrix.shard }}/5
+        env:
+          VISUAL_SKIP_BUILD: '1'
+      - name: Upload visual diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-regression-${{ github.run_id }}-shard-${{ matrix.shard }}
+          overwrite: true
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
 
   e2e:
+    if: >-
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'pull_request' && github.base_ref == 'main')
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js 22.x
@@ -38,4 +133,4 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run db:gen
-      - run: npm run test:e2e -ws --if-present --  --shard=${{ matrix.shard }}/${{ strategy.job-total }} --no-file-parallelism --testTimeout=3000000 --hookTimeout=6000000 --teardownTimeout=6000000
+      - run: npm run test:e2e -ws --if-present -- --no-file-parallelism --testTimeout=3000000 --hookTimeout=6000000 --teardownTimeout=6000000
