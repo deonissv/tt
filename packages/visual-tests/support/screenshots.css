@@ -1,0 +1,4 @@
+/* Remote pointer markers identify players and are not part of the 3D scene. */
+div.w-3.h-3.fixed.pointer-events-none {
+  visibility: hidden !important;
+}

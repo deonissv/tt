@@ -34,6 +34,7 @@ export enum ServerAction {
   DROP_ACTOR = 'DROP_ACTOR', // spawning actor that is present in original state save. e.g. dropping item deck / state
   REMOVE_ACTOR = 'REMOVE_ACTOR',
   RERENDER_DECK = 'RERENDER_DECK',
+  RERENDER_TILE_STACK = 'RERENDER_TILE_STACK',
 }
 
 export type SimAction = ClientAction | ServerAction;

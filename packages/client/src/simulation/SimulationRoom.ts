@@ -107,6 +107,10 @@ export class SimulationRoom {
           sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size);
           break;
         }
+        case ServerAction.RERENDER_TILE_STACK: {
+          sim.handleTileStackRerender(action.payload.guid, action.payload.size);
+          break;
+        }
         case ServerAction.CLOSED: {
           ws.close();
           onRoomClosed();

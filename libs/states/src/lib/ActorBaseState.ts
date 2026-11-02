@@ -10,4 +10,6 @@ export interface ActorBaseState {
   mass?: number;
   colorDiffuse?: number[]; // default: [1, 1, 1]
   locked?: boolean;
+  /** Preserve resting physics contacts when restoring a saved simulation. */
+  sleeping?: boolean;
 }

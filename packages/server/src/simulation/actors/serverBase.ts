@@ -1,4 +1,5 @@
 import type { HavokPlugin } from '@babylonjs/core';
+import type { HavokPhysicsWithBindings, HP_BodyId } from '@babylonjs/havok';
 import {
   PhysicsBody,
   PhysicsMotionType,
@@ -32,7 +33,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
   constructor(state: T, modelMesh: Mesh, colliderMesh?: Mesh) {
     super(state, modelMesh, colliderMesh);
 
-    const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, false, this._scene);
+    const body = new PhysicsBody(this, PhysicsMotionType.DYNAMIC, state.sleeping === true, this._scene);
     body.shape = new PhysicsShapeMesh(this.__model, this._scene);
     body.shape.material.restitution = 0;
 
@@ -92,6 +93,14 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
 
   get hk(): HavokPlugin {
     return this.scene._physicsEngine?.getPhysicsPlugin() as HavokPlugin;
+  }
+
+  get sleeping(): boolean {
+    // Babylon exposes startAsleep but not the current activation state. Keep
+    // the Havok body lookup here so snapshots record real sleep, not velocity.
+    const havok = global.havok as HavokPhysicsWithBindings;
+    const data = this.body._pluginData as { hpBodyId: HP_BodyId };
+    return havok.HP_Body_GetActivationState(data.hpBodyId)[1] === havok.ActivationState.INACTIVE;
   }
 
   get scene(): SimulationSceneBase {

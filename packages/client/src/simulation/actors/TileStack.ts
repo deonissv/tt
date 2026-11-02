@@ -14,6 +14,11 @@ export class TileStack extends ClientBase<TileStackState> {
     return this.__state.size;
   }
 
+  rerenderStack(size: number): void {
+    this.updateState({ guid: this.guid, size });
+    this.model.scaling.y = size;
+  }
+
   static async fromState(state: TileStackState): Promise<TileStack | null> {
     const tileModel = await Tile.getTileModel(state.tileType, state.faceURL, state.backURL);
     if (!tileModel) {

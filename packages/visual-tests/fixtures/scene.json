@@ -1,0 +1,2031 @@
+{
+  "leftHandedSystem": true,
+  "gravity": 4.9,
+  "table": {
+    "type": "Rectangle"
+  },
+  "actorStates": [
+    {
+      "type": 1,
+      "guid": "7a0b0b",
+      "name": "Bag",
+      "transformation": {
+        "position": [-12, 4, -8],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.7058823, 0.366520882, 0],
+      "containedObjects": [
+        {
+          "type": 2,
+          "guid": "406fad",
+          "name": "Card",
+          "transformation": {
+            "position": [-14.8040123, 3.01959586, 6.96366549],
+            "rotation": [6.263359134821801, 3.14097932743735, 0.03929972729467566],
+            "scale": [1, 1, 1]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 33
+        },
+        {
+          "type": 2,
+          "guid": "90d5b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-13.866168, 3.04656029, 15.0014954],
+            "rotation": [6.282663855158968, 0.0005925588287396973, 0.003845064695379485],
+            "scale": [1, 1, 1]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 18
+        }
+      ],
+      "locked": false,
+      "model": {
+        "meshURL": "http://visual-assets.invalid/assets/Cube.obj"
+      }
+    },
+    {
+      "type": 4,
+      "guid": "7b4f3e",
+      "name": "Custom_Tile",
+      "transformation": {
+        "position": [-6, 4, -8],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [1, 1, 1],
+      "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+      "widthScale": 0,
+      "tileType": 0,
+      "locked": false
+    },
+    {
+      "type": 0,
+      "guid": "3b9ed5",
+      "name": "Custom_Model",
+      "transformation": {
+        "position": [0, 4, -8],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [1, 0.544700563, 0.188214511],
+      "model": {
+        "meshURL": "http://visual-assets.invalid/assets/Cube.obj",
+        "colliderURL": "http://visual-assets.invalid/assets/Cube.obj"
+      },
+      "locked": false
+    },
+    {
+      "guid": "cabfb6",
+      "name": "Die_6",
+      "transformation": {
+        "position": [6, 4, -8],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [1, 1, 1],
+      "type": 7,
+      "rotationValues": [
+        {
+          "rotation": [-1.5707963267948966, 0, 0],
+          "value": 1
+        },
+        {
+          "rotation": [0, 0, 0],
+          "value": 2
+        },
+        {
+          "rotation": [0, 0, -1.5707963267948966],
+          "value": 3
+        },
+        {
+          "rotation": [0, 0, 1.5707963267948966],
+          "value": 4
+        },
+        {
+          "rotation": [0, 0, -3.141592653589793],
+          "value": 5
+        },
+        {
+          "rotation": [1.5707963267948966, 0, 0],
+          "value": 6
+        }
+      ],
+      "locked": false
+    },
+    {
+      "guid": "60c5a3",
+      "name": "Die_4",
+      "transformation": {
+        "position": [12, 4, -8],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.149030268, 0.301973075, 0.4431491],
+      "type": 6,
+      "rotationValues": [
+        {
+          "rotation": [0.3141592653589793, -4.2062434973063345, -2.0943951023931953],
+          "value": 1
+        },
+        {
+          "rotation": [-1.5707963267948966, -1.0471975511965976, 0],
+          "value": 2
+        },
+        {
+          "rotation": [0.3141592653589793, -2.111848394913139, 0],
+          "value": 3
+        },
+        {
+          "rotation": [0.3141592653589793, 0, -4.1887902047863905],
+          "value": 4
+        }
+      ],
+      "locked": false
+    },
+    {
+      "guid": "bef483",
+      "name": "Die_8",
+      "transformation": {
+        "position": [-12, 4, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.5647112, 0.08235737, 0.08235737],
+      "type": 8,
+      "rotationValues": [
+        {
+          "rotation": [-0.5759586531581288, 0, 1.5707963267948966],
+          "value": 1
+        },
+        {
+          "rotation": [-0.5759586531581288, 0, 3.141592653589793],
+          "value": 2
+        },
+        {
+          "rotation": [0.5759586531581288, 3.141592653589793, -3.141592653589793],
+          "value": 3
+        },
+        {
+          "rotation": [0.5759586531581288, 3.141592653589793, 1.5707963267948966],
+          "value": 4
+        },
+        {
+          "rotation": [0.5759586531581288, 3.141592653589793, -1.5707963267948966],
+          "value": 5
+        },
+        {
+          "rotation": [0.5759586531581288, 3.141592653589793, 0],
+          "value": 6
+        },
+        {
+          "rotation": [-0.5759586531581288, 0, 0],
+          "value": 7
+        },
+        {
+          "rotation": [-0.5759586531581288, 0, -1.5707963267948966],
+          "value": 8
+        }
+      ],
+      "locked": false
+    },
+    {
+      "guid": "4290d0",
+      "name": "Die_10",
+      "transformation": {
+        "position": [-6, 4, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.07451411, 0.415692329, 0.172554553],
+      "type": 9,
+      "rotationValues": [
+        {
+          "rotation": [-0.6632251157578453, 0, 4.084070449666731],
+          "value": 1
+        },
+        {
+          "rotation": [0.6632251157578453, 3.141592653589793, -4.066617157146788],
+          "value": 2
+        },
+        {
+          "rotation": [-0.6632251157578453, 0, 0.3490658503988659],
+          "value": 3
+        },
+        {
+          "rotation": [0.6632251157578453, 3.141592653589793, -0.29670597283903605],
+          "value": 4
+        },
+        {
+          "rotation": [-0.6632251157578453, 0, 1.5707963267948966],
+          "value": 5
+        },
+        {
+          "rotation": [0.6632251157578453, 3.141592653589793, -2.8099800957108707],
+          "value": 6
+        },
+        {
+          "rotation": [-0.6632251157578453, 0, 5.358160803622591],
+          "value": 7
+        },
+        {
+          "rotation": [0.6632251157578453, 3.141592653589793, -5.305800926062762],
+          "value": 8
+        },
+        {
+          "rotation": [-0.6632251157578453, 0, 2.8448866807507573],
+          "value": 9
+        },
+        {
+          "rotation": [0.6632251157578453, 3.141592653589793, -1.5707963267948966],
+          "value": 10
+        }
+      ],
+      "locked": false
+    },
+    {
+      "guid": "f80f30",
+      "name": "Die_12",
+      "transformation": {
+        "position": [0, 4, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.8156889, 0.5098095, 0.117652006],
+      "type": 10,
+      "rotationValues": [
+        {
+          "rotation": [0.47123889803846897, 0, 1.2566370614359172],
+          "value": 1
+        },
+        {
+          "rotation": [0.47123889803846897, 0, 2.5132741228718345],
+          "value": 2
+        },
+        {
+          "rotation": [0.47123889803846897, 0, -1.2566370614359172],
+          "value": 3
+        },
+        {
+          "rotation": [-0.47123889803846897, 3.141592653589793, 3.141592653589793],
+          "value": 4
+        },
+        {
+          "rotation": [1.5707963267948966, 3.141592653589793, 0],
+          "value": 5
+        },
+        {
+          "rotation": [0.47123889803846897, 0, -2.5132741228718345],
+          "value": 6
+        },
+        {
+          "rotation": [-0.47123889803846897, 3.141592653589793, 0.6283185307179586],
+          "value": 7
+        },
+        {
+          "rotation": [-1.5707963267948966, 3.141592653589793, 0],
+          "value": 8
+        },
+        {
+          "rotation": [0.47123889803846897, 0, 0],
+          "value": 9
+        },
+        {
+          "rotation": [-0.47123889803846897, 3.141592653589793, 1.8849555921538759],
+          "value": 10
+        },
+        {
+          "rotation": [-0.47123889803846897, 1.8849555921538759, -0.6283185307179586],
+          "value": 11
+        },
+        {
+          "rotation": [-0.47123889803846897, 0.6283185307179586, -1.8849555921538759],
+          "value": 12
+        }
+      ],
+      "locked": false
+    },
+    {
+      "type": 12,
+      "guid": "51d35d",
+      "name": "Custom_Tile_Stack",
+      "transformation": {
+        "position": [6, 4, 0],
+        "rotation": [0, 0, 0],
+        "scale": [0.692878, 1, 0.692878]
+      },
+      "colorDiffuse": [1, 1, 1],
+      "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+      "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+      "widthScale": 0,
+      "tileType": 2,
+      "size": 10,
+      "locked": false
+    },
+    {
+      "guid": "a0a9cc",
+      "name": "Die_20",
+      "transformation": {
+        "position": [12, 4, 0],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.517652631, 0.105887152, 0.6196126],
+      "type": 11,
+      "rotationValues": [
+        {
+          "rotation": [-0.19198621771937624, 1.0471975511965976, 0.29670597283903605],
+          "value": 1
+        },
+        {
+          "rotation": [0.9075712110370514, -1.0471975511965976, -0.29670597283903605],
+          "value": 2
+        },
+        {
+          "rotation": [-0.19198621771937624, -3.141592653589793, 1.5707963267948966],
+          "value": 3
+        },
+        {
+          "rotation": [-0.19198621771937624, -3.141592653589793, 2.827433388230814],
+          "value": 4
+        },
+        {
+          "rotation": [-0.19198621771937624, -1.0471975511965976, 4.084070449666731],
+          "value": 5
+        },
+        {
+          "rotation": [-0.19198621771937624, -3.141592653589793, 5.340707511102648],
+          "value": 6
+        },
+        {
+          "rotation": [0.9075712110370514, -1.0471975511965976, 0.9599310885968813],
+          "value": 7
+        },
+        {
+          "rotation": [0.9075712110370514, -1.0471975511965976, 3.4557519189487724],
+          "value": 8
+        },
+        {
+          "rotation": [0.9075712110370514, -1.0471975511965976, 2.2165681500327987],
+          "value": 9
+        },
+        {
+          "rotation": [0.9075712110370514, -3.141592653589793, -1.5707963267948966],
+          "value": 10
+        },
+        {
+          "rotation": [5.375614096142535, 0, 1.5707963267948966],
+          "value": 11
+        },
+        {
+          "rotation": [5.340707511102648, -4.1887902047863905, -0.9075712110370514],
+          "value": 12
+        },
+        {
+          "rotation": [-0.9075712110370514, -4.1887902047863905, 0.3141592653589793],
+          "value": 13
+        },
+        {
+          "rotation": [5.358160803622591, 2.0943951023931953, 4.066617157146788],
+          "value": 14
+        },
+        {
+          "rotation": [0.19198621771937624, 2.0943951023931953, -4.084070449666731],
+          "value": 15
+        },
+        {
+          "rotation": [0.19198621771937624, 0, 0.9424777960769379],
+          "value": 16
+        },
+        {
+          "rotation": [0.19198621771937624, -2.0943951023931953, -0.29670597283903605],
+          "value": 17
+        },
+        {
+          "rotation": [0.19198621771937624, 0, -1.5707963267948966],
+          "value": 18
+        },
+        {
+          "rotation": [-0.9075712110370514, -4.1887902047863905, -3.4557519189487724],
+          "value": 19
+        },
+        {
+          "rotation": [0.19198621771937624, 0, -2.827433388230814],
+          "value": 20
+        }
+      ],
+      "locked": false
+    },
+    {
+      "guid": "987a8f",
+      "name": "Die_6_Rounded",
+      "transformation": {
+        "position": [-12, 4, 8],
+        "rotation": [0, 0, 0],
+        "scale": [1.25, 1.25, 1.25]
+      },
+      "colorDiffuse": [0.0588639081, 0.0541051775, 0.0541051775],
+      "type": 5,
+      "rotationValues": [
+        {
+          "rotation": [0, 0, 0],
+          "value": 1
+        },
+        {
+          "rotation": [1.5707963267948966, 0, 0],
+          "value": 2
+        },
+        {
+          "rotation": [0, 0, 1.5707963267948966],
+          "value": 3
+        },
+        {
+          "rotation": [0, 0, -1.5707963267948966],
+          "value": 4
+        },
+        {
+          "rotation": [-1.5707963267948966, 0, 0],
+          "value": 5
+        },
+        {
+          "rotation": [0, 0, -3.141592653589793],
+          "value": 6
+        }
+      ],
+      "locked": false
+    },
+    {
+      "type": 13,
+      "guid": "29a87f",
+      "name": "PlayerPawn",
+      "transformation": {
+        "position": [-6, 4, 8],
+        "rotation": [0, 0, 0],
+        "scale": [1.25, 1.25, 1.25]
+      },
+      "colorDiffuse": [0, 0.1724138, 1],
+      "locked": false
+    },
+    {
+      "type": 2,
+      "guid": "8ac7c6",
+      "name": "Card",
+      "transformation": {
+        "position": [0, 4, 8],
+        "rotation": [0, 0, 0],
+        "scale": [1.25768793, 1, 1.25768793]
+      },
+      "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+      "locked": false,
+      "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+      "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+      "cols": 10,
+      "rows": 7,
+      "sequence": 7
+    },
+    {
+      "type": 3,
+      "guid": "fb31d5",
+      "name": "Deck",
+      "transformation": {
+        "position": [6, 4, 8],
+        "rotation": [0, 0, 0],
+        "scale": [1.25768793, 1, 1.25768793]
+      },
+      "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+      "cards": [
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.48945355, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.96881, 2.30410075, -11.5854492],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.8517227, 2.41480136, -12.340126],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9197731, 1.21926236, -12.0966492],
+            "rotation": [-5.427126372004426e-6, 3.1414038438713123, -1.856135825427027e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9894333, 2.42272687, -11.8007336],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.1909, 1.03692663, -7.446745],
+            "rotation": [7.395810295298376e-6, 3.162456651080691, 1.3399569855310241e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9205666, 2.304101, -12.0478287],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.82192, 2.42272735, -11.8928776],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "f5f6eb",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.22138739, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "3cff90",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.25511241, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.47491932, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.22138739, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.43726158, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.25511241, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.25511241, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.71997, 2.4749186, -11.5393333],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.43726158, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.71997, 2.41480112, -11.5393333],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.82192, 1.26659226, -11.8928776],
+            "rotation": [-3.2011596239496384e-6, 3.154470094236735, -7.682454602079297e-7],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.24580121, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.4241128, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.94717, 2.42272639, -11.5359726],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "b4a52c",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 1.19441128, -11.7947159],
+            "rotation": [2.8785857248410664e-5, 3.154470094236735, -4.3800119682933934e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.43726158, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-33.0217476, 2.42272687, -11.8002739],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.47491932, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9205666, 2.47491884, -12.0478287],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2551537, 2.25511241, -7.30689573],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.42272735, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.7848549, 2.24580073, -11.5384064],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-33.0217476, 2.42272687, -11.8002739],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.81729, 2.30410075, -11.5379486],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.4241128, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.4241128, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.24580121, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.42272735, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [5.03395653, 1.19076192, 2.3117106],
+            "rotation": [-5.4595891470256706e-5, 4.71244134026225, -6.019605159944628e-6],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "7e4c73",
+          "name": "Card",
+          "transformation": {
+            "position": [-41.0226135, 1.19439638, -11.7827168],
+            "rotation": [-2.421431145174001e-5, 3.154717529564791, -3.369811068822531e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.8498535, 2.42272639, -11.5373573],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9197731, 2.45035076, -12.0966492],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.8517227, 2.47491884, -12.340126],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.43726158, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "5618de",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2716064, 2.25511241, -7.24579573],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.4241128, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.22138739, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.31341243, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.94717, 2.24580073, -11.5359726],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.9366837, 1.03169906, -12.0517416],
+            "rotation": [2.0323407760498704e-6, 3.154470094236735, -1.4196438322551797e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.25511241, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-33.0217476, 2.245801, -11.8002739],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.94717, 2.24580073, -11.5359726],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.94717, 2.42272639, -11.5359726],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.94717, 2.24580073, -11.5359726],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.20267, 1.25558317, -7.368459],
+            "rotation": [0.0008330036942616755, 3.1624571921327593, 0.001139555488290232],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9213562, 2.245801, -11.998888],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.42272735, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.22138739, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9205666, 2.42272687, -12.0478287],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.94717, 2.42272639, -11.5359726],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.27647734, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "ea4f28",
+          "name": "Card",
+          "transformation": {
+            "position": [-1.15271831, 1.19076622, 2.73065782],
+            "rotation": [1.925491754149363e-6, 4.712413414994217, -2.424117468692208e-6],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.43726158, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.30410123, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.43726158, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2716064, 2.43726158, -7.24579573],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.8517227, 2.212076, -12.340126],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.25511241, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.43726158, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2028465, 2.25511241, -7.368339],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "5a5ee4",
+          "name": "Card",
+          "transformation": {
+            "position": [-33.0217476, 1.19440722, -11.8002739],
+            "rotation": [2.150140098397146e-5, 3.1414038438713123, -2.788960257771062e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-41.00133, 2.42272639, -11.5849915],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-33.0217476, 2.245801, -11.8002739],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "2a059e",
+          "name": "Card",
+          "transformation": {
+            "position": [-33.0217476, 2.245801, -11.8002739],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "b832be",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.25511241, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "7e23c1",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2716064, 1.20045519, -7.24579573],
+            "rotation": [-5.468311587042145e-7, 3.162456651080691, -2.1458322069242034e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.9205666, 2.276477, -12.0478287],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.8431435, 1.03170264, -12.24132],
+            "rotation": [1.6141731692276368e-6, 3.141404158030578, -1.0828102074400495e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.25511241, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.88229, 2.4749186, -11.5368977],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "f51b72",
+          "name": "Card",
+          "transformation": {
+            "position": [-44.2551537, 2.43726158, -7.30689573],
+            "rotation": [3.669760247384208e-9, 3.162456651080691, 1.2089140000998608e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 0
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.43726158, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.43726158, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "ebc906",
+          "name": "Card",
+          "transformation": {
+            "position": [-32.8517227, 2.304101, -12.340126],
+            "rotation": [2.3563257214988023e-8, 3.1414038438713123, -4.203790873374969e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 2
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.81729, 2.41480112, -11.5379486],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.82192, 2.24580121, -11.8928776],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.42272735, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.45035124, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.5280571, 1.03592408, -2.26494455],
+            "rotation": [0.00013803210406089717, 3.163107327279127, 6.282214904115477],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "08b75f",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.80099, 2.24580121, -11.7947159],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 1.202099, -1.58825946],
+            "rotation": [1.536066543608237e-5, 3.163121289913143, -1.5583347771647536e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.24580121, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        },
+        {
+          "type": 2,
+          "guid": "47bb7a",
+          "name": "Card",
+          "transformation": {
+            "position": [-40.82744, 1.03170216, -11.5878553],
+            "rotation": [1.6985441305982946e-6, 3.154717529564791, -1.1322069540076352e-5],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "b657ea",
+          "name": "Card",
+          "transformation": {
+            "position": [-45.7186661, 2.25511241, -1.58825946],
+            "rotation": [6.46858391926365e-9, 3.163121289913143, -5.379146642548571e-10],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 3
+        },
+        {
+          "type": 2,
+          "guid": "8dca5c",
+          "name": "Card",
+          "transformation": {
+            "position": [-41.00115, 2.24580073, -11.7337265],
+            "rotation": [1.6917832486748445e-8, 3.154717529564791, 1.327643595155754e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 4
+        },
+        {
+          "type": 2,
+          "guid": "0762b5",
+          "name": "Card",
+          "transformation": {
+            "position": [-36.79529, 2.30410123, -11.8440914],
+            "rotation": [-1.113610819893486e-9, 3.154470094236735, -6.112673620576748e-9],
+            "scale": [1.25768793, 1, 1.25768793]
+          },
+          "colorDiffuse": [0.713235259, 0.713235259, 0.713235259],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "backURL": "http://visual-assets.invalid/assets/wood_diff.png",
+          "cols": 10,
+          "rows": 7,
+          "sequence": 1
+        }
+      ],
+      "locked": false
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import type {
   MoveClientActorPld,
   MoveServerActorPld,
   RerenderDeckPld,
+  RerenderTileStackPld,
   RotateClientActorPld,
   SpawnPickedActorPld,
 } from './payloads';
@@ -44,6 +45,7 @@ interface ActionPayloads {
   [ServerAction.DROP_ACTOR]: DropActorPld;
   [ServerAction.REMOVE_ACTOR]: string;
   [ServerAction.RERENDER_DECK]: RerenderDeckPld;
+  [ServerAction.RERENDER_TILE_STACK]: RerenderTileStackPld;
 }
 
 export type MsgMap = {

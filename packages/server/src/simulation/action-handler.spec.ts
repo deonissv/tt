@@ -1,4 +1,5 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
+import { ClientAction } from '@tt/actions';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
 import { getPhSim } from '../../test/testUtils';
@@ -155,6 +156,45 @@ describe('handleAction', () => {
       const state = sim.toState();
       const box = state.actorStates!.find(actor => actor.guid === 'box');
       expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+    });
+  });
+
+  describe('releaseHeld', () => {
+    it('releases only the actors held by the given client', async () => {
+      const sim = getPhSim();
+      new ServerBase(
+        {
+          type: ActorType.ACTOR,
+          guid: 'box',
+          name: 'box',
+          transformation: { position: [0, 0.6, 0] },
+          model: { meshURL: '' },
+        },
+        CreateBox('box', { size: 1 }),
+      );
+      new ServerBase(
+        {
+          type: ActorType.ACTOR,
+          guid: 'other',
+          name: 'other',
+          transformation: { position: [3, 0.6, 0] },
+          model: { meshURL: '' },
+        },
+        CreateBox('other', { size: 1 }),
+      );
+      sim.start();
+      const holder = new Client({ code: 'holder', roleId: 1, userId: 1, username: 'holder' });
+      const other = new Client({ code: 'other', roleId: 1, userId: 2, username: 'other' });
+
+      await wait(100);
+      actionHandler.handleActions([{ type: ClientAction.PICK_ACTOR, payload: 'box' }], sim.actors, holder);
+      // Simulate another player holding the second actor.
+      sim.actors.find(actor => actor.guid === 'other')!.picked = other.code;
+
+      actionHandler.releaseHeld(holder, sim.actors);
+
+      expect(sim.actors.find(actor => actor.guid === 'box')!.picked).toBeNull();
+      expect(sim.actors.find(actor => actor.guid === 'other')!.picked).toBe(other.code);
     });
   });
 

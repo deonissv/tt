@@ -1,4 +1,4 @@
-import { Logger } from '@babylonjs/core';
+import { CreateBox, Logger } from '@babylonjs/core';
 import { Logger as NestLogger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { Room } from '@prisma/client';
@@ -9,6 +9,7 @@ import { ActorType } from '@tt/states';
 import { getPhSim } from '../../test/testUtils';
 import type { ValidatedUser } from '../auth/validated-user';
 import { ActionHandler } from '../simulation/action-handler';
+import { ServerBase } from '../simulation/actors';
 import { SimulationFactory } from '../simulation/simulation.factory';
 import { initHavok } from '../utils';
 import { AssetUrlService } from './asset-url.service';
@@ -190,6 +191,46 @@ describe('SimulationRoom', () => {
       socket.onclose?.({ target: socket });
 
       expect(room.cursors.has(user.code)).toBe(false);
+    });
+
+    it('releases the actor a disconnecting client holds', () => {
+      room.simulation = getPhSim();
+      new ServerBase(
+        { type: ActorType.ACTOR, guid: 'box', name: 'box', model: { meshURL: '' } },
+        CreateBox('box', { size: 1 }),
+      );
+      const socket = connect(user);
+
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.PICK_ACTOR, payload: 'box' }]),
+      });
+      const box = room.simulation.actors.find(actor => actor.guid === 'box');
+      expect(box?.picked).toBe(user.code);
+
+      socket.onclose?.({ target: socket });
+
+      expect(room.simulation.actors.find(actor => actor.guid === 'box')?.picked).toBeNull();
+    });
+
+    it('leaves actors held by other clients alone when one disconnects', () => {
+      room.simulation = getPhSim();
+      new ServerBase(
+        { type: ActorType.ACTOR, guid: 'box', name: 'box', model: { meshURL: '' } },
+        CreateBox('box', { size: 1 }),
+      );
+      const socket = connect(user);
+      const otherSocket = connect(otherUser);
+
+      otherSocket.onmessage?.({
+        target: otherSocket,
+        data: JSON.stringify([{ type: ClientAction.PICK_ACTOR, payload: 'box' }]),
+      });
+      const box = room.simulation.actors.find(actor => actor.guid === 'box');
+      expect(box?.picked).toBe(otherUser.code);
+
+      socket.onclose?.({ target: socket });
+      expect(box?.picked).toBe(otherUser.code);
     });
 
     it('schedules a room close once the last client leaves', () => {

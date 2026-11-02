@@ -8,6 +8,8 @@ rename _example-env_ to _.env_
 docker compose up --build
 ```
 
+The visual regression stack uses a separate Compose project.
+
 ## Manual
 
 ### Requirements:
@@ -54,3 +56,15 @@ npm run start
 - **castles** - Castles of Burgundy
 - **chess5** - 5 mas chess
 - **demo** - demo game with supported objects
+
+## Visual regression tests
+
+The pinned Chromium/WebGL suite lives in the private workspace
+[`packages/visual-tests`](packages/visual-tests). Validation history is recorded in
+[the run record](packages/visual-tests/baselines/repeatability.md).
+
+With your normal Nginx/database containers and local frontend/backend running,
+use `npm run test:visual:dev` and enable **Watch all** in Playwright UI. This
+uses the host Playwright browser after `npx playwright install chromium`.
+`npm run test:visual` and CI manage their own isolated production application,
+database, and browser.

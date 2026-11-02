@@ -204,9 +204,11 @@ export class SimulationRoom {
    */
   private onClose(event: WebSocket.CloseEvent) {
     SimulationRoom.logger.log(`Client disconnecting from room ${this.room.roomId}`);
-    const cursorClient = this.clients.get(event.target)?.code;
-    if (cursorClient) {
-      this.cursors.delete(cursorClient);
+    const disconnectingClient = this.clients.get(event.target);
+    if (disconnectingClient) {
+      this.cursors.delete(disconnectingClient.code);
+      // A held actor must fall back to the table instead of staying suspended.
+      if (this.simulation) this.actionsHandler.releaseHeld(disconnectingClient, this.simulation.actors);
     }
     this.clients.delete(event.target);
 

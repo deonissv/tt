@@ -127,6 +127,17 @@ export class ActionBuilder {
             payload: deckRerender,
           });
         }
+
+        if (
+          prevActorState.type === ActorType.TILE_STACK &&
+          actorState.type === ActorType.TILE_STACK &&
+          prevActorState.size !== actorState.size
+        ) {
+          actions.push({
+            type: ServerAction.RERENDER_TILE_STACK,
+            payload: { guid, size: actorState.size },
+          });
+        }
       }
     });
 
@@ -168,14 +179,16 @@ export class ActionBuilder {
     )
       return null;
 
-    const rerenderPld = this.getRerenderDeckPld(currentState);
+    const rerenderPld = this.getRerenderDeckPld(currentState, prevState);
     // return SimulationRoom.patchStateURLs(rerenderPld as unknown as RecursiveObject) as unknown as RerenderDeckPld; @TODO
     return rerenderPld;
   }
 
-  private getRerenderDeckPld(deckState: DeckState): RerenderDeckPld {
-    const faceCard = deckState.cards.at(-1)!;
-    const backCard = deckState.cards.at(0)!;
+  private getRerenderDeckPld(deckState: DeckState, previousState: DeckState): RerenderDeckPld {
+    // A transition to zero cards still needs a rerender to hide the old mesh.
+    // Retain its previous grid metadata when there are no current card faces.
+    const faceCard = deckState.cards.at(-1) ?? previousState.cards.at(-1)!;
+    const backCard = deckState.cards.at(0) ?? previousState.cards.at(0)!;
 
     return {
       guid: deckState.guid,

@@ -40,3 +40,8 @@ export interface RerenderDeckPld {
   grid: CardGrid;
   size: number;
 }
+
+export interface RerenderTileStackPld {
+  guid: string;
+  size: number;
+}

@@ -15,7 +15,7 @@ import { ActorType, type SimulationStateSave } from '@tt/states';
 
 import type { Tuple } from '@tt/utils';
 import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
-import { ClientBase, Deck } from './actors';
+import { ClientBase, Deck, TileStack } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 import { SimulationScene } from './SimulationScene';
 
@@ -281,5 +281,10 @@ export class Simulation extends SimulationBase {
   handleDeckRerender(guid: string, grid: CardGrid, size: number) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor instanceof Deck) void actor.rerenderDeck(grid, size);
+  }
+
+  handleTileStackRerender(guid: string, size: number) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor instanceof TileStack) actor.rerenderStack(size);
   }
 }

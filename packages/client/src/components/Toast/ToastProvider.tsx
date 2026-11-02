@@ -20,20 +20,23 @@ export const ToastContext = createContext<ToastContextType | undefined>(undefine
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
 
-  const addToast = (message: string) => {
+  const addToast = useCallback((message: string) => {
     setToasts(prevToasts => {
       const newToasts = [...prevToasts, { id: UUIDv4(), message }];
       return newToasts.slice(-MAX_TOASTS);
     });
-  };
+  }, []);
 
   const removeToast = (id: string) => {
     setToasts(prevToasts => prevToasts.filter(toast => toast.id !== id));
   };
 
-  const toastLog = useCallback((...args: unknown[]) => {
-    addToast(args.join(' '));
-  }, []);
+  const toastLog = useCallback(
+    (...args: unknown[]) => {
+      addToast(args.join(' '));
+    },
+    [addToast],
+  );
 
   Logger.register({
     fatal: toastLog,

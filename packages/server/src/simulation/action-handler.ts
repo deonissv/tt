@@ -75,12 +75,18 @@ export class ActionHandler {
 
   handleReleaseActor(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor) release(actor);
+    if (actor?.picked === this.client.code) release(actor);
+  }
+
+  releaseHeld(client: Client, actors: ServerBase[]): void {
+    for (const actor of actors) {
+      if (actor.picked === client.code) release(actor);
+    }
   }
 
   handleMoveActor(guid: string, position: Tuple<number, 2>) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor) move(actor, ...position);
+    if (actor?.picked === this.client.code) move(actor, ...position);
   }
   handleRoll(guid: string) {
     const actor = this.findCapableActor(guid, Capability.Rollable);
