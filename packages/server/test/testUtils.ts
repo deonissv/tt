@@ -4,13 +4,13 @@ import { ActorType } from '@tt/states';
 import { WebSocket } from 'ws';
 import { ServerBase } from '../src/simulation/actors';
 import { Simulation } from '../src/simulation/simulation';
-import { GenericContainer, Wait } from 'testcontainers';
 import type { StartedTestContainer } from 'testcontainers';
 import { POSTGRES_DB, POSTGRES_PASSWORD, POSTGRES_USER } from './testProviderKeys';
 
 export const TEST_LOGGER = new ConsoleLogger('TestUtils');
 
 export async function startContainer(): Promise<StartedTestContainer> {
+  const { GenericContainer, Wait } = await import('testcontainers');
   const container_name = 'postgres:14-alpine';
 
   const container = await new GenericContainer(container_name)

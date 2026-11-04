@@ -94,9 +94,9 @@ describe('handleAction', () => {
   });
 
   describe('RELEASE_ACTOR', () => {
-    it('should do nothing on release of non picked actor', async () => {
+    it('should do nothing on release of non picked actor', () => {
       const sim = getPhSim();
-      new ServerBase(
+      const box = new ServerBase(
         {
           type: ActorType.ACTOR,
           guid: 'box',
@@ -106,7 +106,6 @@ describe('handleAction', () => {
         },
         CreateBox('box', { size: 1 }),
       );
-      sim.start();
       actionHandler.actors = sim.actors;
       actionHandler.client = new Client({
         code: 'client',
@@ -116,13 +115,17 @@ describe('handleAction', () => {
       });
       actionHandler.client.pickHeight = PICK_HIGHT;
 
-      await wait(100);
-      actionHandler.handleReleaseActor('box');
-      await wait(100);
+      const before = sim.toState();
+      const collisionCallback = vi.spyOn(box.body, 'setCollisionCallbackEnabled');
 
-      const state = sim.toState();
-      const box = state.actorStates!.find(actor => actor.guid === 'box');
-      expect(box!.transformation!.position![1]).toBeCloseTo(0.55);
+      try {
+        actionHandler.handleReleaseActor('box');
+
+        expect(sim.toState()).toEqual(before);
+        expect(collisionCallback).not.toHaveBeenCalled();
+      } finally {
+        sim.engine.dispose();
+      }
     });
 
     it('should return to previous state after pick - release', async () => {

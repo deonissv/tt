@@ -1,0 +1,101 @@
+name: Mutation tests
+
+on:
+  push:
+    branches: ['main']
+  schedule:
+    - cron: '37 2 * * *'
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: Mutation scope
+        type: choice
+        options:
+          - full
+          - incremental
+          - smoke
+        default: full
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mutation-${{ github.ref }}-${{ github.event_name == 'schedule' && 'full' || github.event_name == 'push' && 'incremental' || inputs.scope }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: Guard nightly run
+    # Only the scheduled nightly full run is conditional: pushes to main always
+    # run incrementally, and manual dispatch always runs what was asked for.
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.guard.outputs.skip }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skip when no commit landed since the previous nightly
+        id: guard
+        run: |
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+          age_hours=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 3600 ))
+          echo "HEAD commit is ${age_hours}h old"
+          if [ "$age_hours" -ge 24 ]; then
+            echo "::notice::No commits on main since the previous nightly run — skipping today's full run."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  mutation:
+    name: Mutation tests
+    needs: guard
+    # Run when the guard job was skipped (push or manual dispatch) or when it
+    # decided there were new commits. A failed guard never starts the run.
+    if: >-
+      ${{ !cancelled() &&
+          (needs.guard.result == 'skipped' ||
+           (needs.guard.result == 'success' && needs.guard.outputs.skip != 'true')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      MUTATION_SCOPE: ${{ github.event_name == 'schedule' && 'full' || github.event_name == 'push' && 'incremental' || inputs.scope }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: npm
+      - run: npm ci
+      - run: npm run db:gen
+      - name: Compute mutation cache fingerprint
+        if: env.MUTATION_SCOPE != 'smoke'
+        id: fingerprint
+        env:
+          FINGERPRINT: ${{ hashFiles('package-lock.json', 'package.json', 'stryker*.json', 'stryker*.cjs', 'vitest*.ts', 'tsconfig*.json', 'libs/**/tsconfig*.json', 'packages/**/tsconfig*.json', 'packages/visual-tests/fixtures/**/*.json', 'static/**/*.json', 'libs/demo-saves/src/**/*.obj.ts', '!**/node_modules/**') }}
+        run: echo "value=$FINGERPRINT" >> "$GITHUB_OUTPUT"
+      - name: Restore and save complete mutation results
+        if: env.MUTATION_SCOPE != 'smoke'
+        uses: actions/cache@v4
+        with:
+          path: reports/mutation/incremental.json
+          key: mutation-v1-${{ runner.os }}-${{ github.ref_name }}-${{ steps.fingerprint.outputs.value }}-${{ github.run_id }}
+          restore-keys: |
+            mutation-v1-${{ runner.os }}-${{ github.ref_name }}-${{ steps.fingerprint.outputs.value }}-
+      - name: Run mutation smoke
+        if: env.MUTATION_SCOPE == 'smoke'
+        run: npm run test:mutation:smoke
+      - name: Run incremental mutation tests
+        if: env.MUTATION_SCOPE == 'incremental'
+        run: npm run test:mutation:incremental -- --concurrency 2 --testRunnerNodeArgs=--max-old-space-size=1536 --reporters progress,clear-text,html,json,event-recorder
+      - name: Run full mutation tests
+        if: env.MUTATION_SCOPE == 'full'
+        run: npm run test:mutation -- --incremental --force --concurrency 2 --testRunnerNodeArgs=--max-old-space-size=1536 --reporters progress,clear-text,html,json,event-recorder
+      - name: Upload mutation reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-${{ env.MUTATION_SCOPE }}-${{ github.run_id }}
+          path: |
+            reports/mutation/
+          if-no-files-found: warn
+          retention-days: 7

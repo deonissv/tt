@@ -1,0 +1,40 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "vitest": {
+    "configFile": "vitest.mutation.config.ts"
+  },
+  "mutate": [
+    "libs/*/src/**/*.{ts,tsx}",
+    "packages/{client,server}/src/**/*.{ts,tsx}",
+    "packages/visual-tests/{assertions,fixtures,prepare,support}/**/*.ts",
+    "!libs/demo-saves/src/**/*.obj.ts",
+    "!**/*.{spec,test}.ts",
+    "!**/*.d.ts"
+  ],
+  "concurrency": 2,
+  "reporters": ["progress", "clear-text", "html", "json"],
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation.json"
+  },
+  "incrementalFile": "reports/mutation/incremental.json",
+  "thresholds": {
+    "high": 80,
+    "low": 60,
+    "break": 0
+  },
+  "ignorePatterns": [
+    "proxy/**",
+    "assets/**",
+    "**/public/**",
+    "**/dist/**",
+    "**/build/**",
+    "reports/**",
+    "playwright-report/**",
+    "test-results/**",
+    "packages/visual-tests/baselines/**"
+  ]
+}

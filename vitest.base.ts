@@ -13,6 +13,7 @@ export default defineConfig({
   },
   plugins: [
     swc.vite({
+      exclude: ['**/node_modules/**', '**/stryker-setup-*.js'],
       module: { type: 'es6' },
     }),
     tsconfigPaths(),

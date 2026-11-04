@@ -35,6 +35,15 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - name: Run mutation smoke
+        run: npm run test:mutation:smoke
+      - name: Upload mutation smoke reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutation-smoke-${{ github.run_id }}
+          path: reports/mutation/smoke/
+          retention-days: 7
 
   build:
     name: Build application

@@ -21,7 +21,7 @@
     "format:lib": "npm run format -w ./libs/ --if-present",
     "typecheck:lib": "npm run typecheck -w ./libs/ --if-present",
     "test:lib": "npm run test -w ./libs/ --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test:unit",
     "test:visual": "npm run test:visual --workspace=@tt/visual-tests --",
     "test:visual:update": "npm run test:visual:update --workspace=@tt/visual-tests --",
     "test:visual:ui": "npm run test:visual:ui --workspace=@tt/visual-tests --",
@@ -38,9 +38,16 @@
     "db:push": "dotenv -e .env -- npm run server db:push",
     "db:seed": "dotenv -e .env -- npm run server db:seed",
     "docker:dev": "docker compose --profile dev up",
-    "test:all": "vitest run --config vitest.all.config.ts"
+    "test:unit": "vitest run --config vitest.mutation.config.ts",
+    "test:all": "vitest run --config vitest.all.config.ts",
+    "test:mutation": "stryker run",
+    "test:mutation:dry-run": "stryker run --dryRunOnly",
+    "test:mutation:incremental": "stryker run --incremental",
+    "test:mutation:smoke": "stryker run stryker.smoke.config.cjs"
   },
   "devDependencies": {
+    "@stryker-mutator/core": "9.6.1",
+    "@stryker-mutator/vitest-runner": "9.6.1",
     "@swc/core": "^1.7.4",
     "@types/node": "^22.0.2",
     "@types/ws": "^8.5.12",
@@ -77,6 +84,9 @@
     },
     "@nestjs/swagger": {
       "js-yaml": "^5.5.0"
+    },
+    "typed-rest-client": {
+      "qs": "^6.17.1"
     },
     "uuid": "^11.1.1"
   }
