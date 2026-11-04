@@ -68,3 +68,10 @@ use `npm run test:visual:dev` and enable **Watch all** in Playwright UI. This
 uses the host Playwright browser after `npx playwright install chromium`.
 `npm run test:visual` and CI manage their own isolated production application,
 database, and browser.
+
+Local managed runs require `flock` on PATH, provided by `util-linux` on Linux.
+Runs using the same Compose project wait for an exclusive lock before any Docker
+command and hold it through teardown. `VISUAL_LOCK_TIMEOUT_MS` sets the wait limit
+in milliseconds, defaulting to one hour. Locking is skipped when `CI` or
+`GITHUB_RUN_ID` is set, and in attached dev/headed modes. A missing `flock` or a
+lock timeout fails setup without touching Docker.

@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { acquireStackLock } from './stack-lock.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 
@@ -19,11 +20,17 @@ async function prepare(environment) {
   process.env.VISUAL_STACK_CONFIG = JSON.stringify(environment);
   const { mode } = environment;
   const attached = mode === 'dev' || mode === 'headed';
+  let releaseStackLock;
+  let ownsStack = false;
   let stopped = false;
   const cleanup = async () => {
     if (stopped) return;
     stopped = true;
-    if (!attached) await teardown();
+    try {
+      if (ownsStack) await teardown();
+    } finally {
+      await releaseStackLock?.();
+    }
   };
   fs.mkdirSync(path.join(root, 'test-results'), { recursive: true });
   const startup = new AbortController();
@@ -44,6 +51,13 @@ async function prepare(environment) {
       }
       return cleanup;
     }
+    // Local runs of the same Compose project share a stack. CI isolates its
+    // projects per run and must not wait for a host lock.
+    if (!process.env.CI && !process.env.GITHUB_RUN_ID) {
+      releaseStackLock = await acquireStackLock(environment.projectName, { signal: startup.signal });
+    }
+    startup.signal.throwIfAborted();
+    ownsStack = true;
     await compose(['down', '--volumes', '--remove-orphans'], { signal: startup.signal });
     // CI loads images from its cached Bake step; local runs build the stack here.
     const skipBuild = process.env.VISUAL_SKIP_BUILD === '1';
@@ -117,9 +131,15 @@ function docker(args, { capture = false, signal } = {}) {
     child.stderr?.on('data', chunk => {
       errors += chunk;
     });
-    child.on('error', reject);
+    // Aborting reports an error before the process closes. Keep ownership
+    // until Docker has actually stopped, before cleanup can release the lock.
+    let failure;
+    child.on('error', error => {
+      failure = error;
+    });
     child.on('close', (code, signal) => {
-      if (code === 0) resolve(output);
+      if (failure) reject(failure);
+      else if (code === 0) resolve(output);
       else reject(new Error(`docker ${args.join(' ')} failed (${signal ?? code}). ${errors}`));
     });
   });
