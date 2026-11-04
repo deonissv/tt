@@ -172,7 +172,7 @@ describe('visible action assertions', () => {
   it('finishes outstanding captures before propagating a screenshot failure', async () => {
     const { page, screenshot } = fixture();
     const error = new Error('first screenshot failed');
-    let finish!: (value: Buffer) => void;
+    let finish!: (value: Awaited<ReturnType<typeof screenshot>>) => void;
     screenshot.mockRejectedValueOnce(error).mockReturnValueOnce(new Promise(resolve => (finish = resolve)));
     const capturing = captureCanvases([page, page]).catch((failure: unknown) => failure);
     const finished = vi.fn();

@@ -12,6 +12,6 @@
     "typecheck": "tsc --build --noEmit"
   },
   "devDependencies": {
-    "vitest": "^2.0.5"
+    "vitest": "^4.1.12"
   }
 }

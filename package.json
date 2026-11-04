@@ -37,7 +37,8 @@
     "db:gen": "dotenv -e .env -- npm run server db:gen",
     "db:push": "dotenv -e .env -- npm run server db:push",
     "db:seed": "dotenv -e .env -- npm run server db:seed",
-    "docker:dev": "docker compose --profile dev up"
+    "docker:dev": "docker compose --profile dev up",
+    "test:all": "vitest run --config vitest.all.config.ts"
   },
   "devDependencies": {
     "@swc/core": "^1.7.4",
@@ -45,6 +46,7 @@
     "@types/ws": "^8.5.12",
     "@typescript-eslint/eslint-plugin": "^8.59.4",
     "@typescript-eslint/parser": "^8.59.4",
+    "chokidar": "^4.0.3",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "eslint": "^8.57.0",
@@ -60,14 +62,22 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths-webpack-plugin": "^4.1.0",
     "typescript": "^6.0.0",
-    "unplugin-swc": "^1.5.1",
-    "vitest": "^2.0.5",
+    "unplugin-swc": "1.5.9",
+    "vitest": "^4.1.12",
     "vite-tsconfig-paths": "^4.3.2",
-    "webpack-node-externals": "^3.0.0"
+    "webpack-node-externals": "^3.0.0",
+    "vite": "^6.4.5"
   },
   "overrides": {
     "eslint": {
       "file-entry-cache": "^8.0.0"
-    }
+    },
+    "@nestjs/platform-express": {
+      "multer": "^2.5.0"
+    },
+    "@nestjs/swagger": {
+      "js-yaml": "^5.5.0"
+    },
+    "uuid": "^11.1.1"
   }
 }

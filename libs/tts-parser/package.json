@@ -11,9 +11,8 @@
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --build --noEmit"
-
   },
   "devDependencies": {
-    "vitest": "^2.0.5"
+    "vitest": "^4.1.12"
   }
 }

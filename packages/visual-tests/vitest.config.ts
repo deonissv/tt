@@ -11,9 +11,9 @@ export default defineConfig({
   plugins: [tsconfigPaths({ projects: [path.resolve(packageRoot, '../../tsconfig.base.json')] })],
   test: {
     name: 'visual-unit',
+    sequence: { groupOrder: 2 },
     include: ['**/*.test.ts', '**/*.test.mjs'],
     // Each worker loads Playwright; bound concurrent cold imports on busy hosts.
-    minWorkers: 1,
     maxWorkers: 4,
   },
 });

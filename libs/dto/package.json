@@ -9,10 +9,9 @@
     "format": "prettier 'src/**/*.ts' --write",
     "lint": "eslint --ext .ts src",
     "typecheck": "tsc --build --noEmit"
-
   },
   "dependencies": {
-    "@nestjs/swagger": "^7.4.0",
+    "@nestjs/swagger": "^11.4.7",
     "class-validator": "^0.14.1"
   }
 }
