@@ -22,6 +22,19 @@ describe('CaslAbilityFactory', () => {
   const user = userFactory(2);
   const guest = userFactory(3);
 
+  describe('createForRequestUser', () => {
+    it('loads the request user permissions and builds the ability from them', async () => {
+      const permissionsService = { getUserWithPermissions: vi.fn().mockResolvedValue(guest) };
+      const factory = new CaslAbilityFactory(permissionsService as unknown as PermissionsService);
+
+      const ability = await factory.createForRequestUser(guest);
+
+      expect(permissionsService.getUserWithPermissions).toHaveBeenCalledWith(guest);
+      expect(ability.can('read', 'Game')).toBe(true);
+      expect(ability.can('manage', 'Game')).toBe(false);
+    });
+  });
+
   describe('should be defined', () => {
     it('for admin', () => {
       expect(new CaslAbilityFactory(permissionsServiceMock)?.createForUser(admin)).toBeDefined();

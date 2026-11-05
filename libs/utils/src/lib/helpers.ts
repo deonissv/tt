@@ -108,6 +108,10 @@ export const UUIDv4 = () => {
   );
 };
 
+interface NodeBufferConstructor {
+  from: (value: ArrayBuffer) => { toString: (encoding: 'base64') => string };
+}
+
 /**
  * Converts an ArrayBuffer to a Base64-encoded data URL.
  *
@@ -115,12 +119,18 @@ export const UUIDv4 = () => {
  * @returns A string representing the Base64-encoded data URL.
  */
 export const getB64URL = (buffer: ArrayBuffer) => {
-  const b64 = btoa(
-    Array.from(new Uint8Array(buffer))
-      .map(b => String.fromCharCode(b))
-      .join(''),
-  );
-  return `data:;base64,${b64}`;
+  const bytes = new Uint8Array(buffer) as Uint8Array & { toBase64?: () => string };
+  if (typeof bytes.toBase64 === 'function') return `data:;base64,${bytes.toBase64()}`;
+  const nodeBuffer = (globalThis as { Buffer?: NodeBufferConstructor }).Buffer;
+  if (nodeBuffer) return `data:;base64,${nodeBuffer.from(buffer).toString('base64')}`;
+  // A multiple of three keeps padding in the final chunk only. Small chunks
+  // also keep the argument count below engine limits.
+  const chunkSize = 3 * 8192;
+  const chunks: string[] = [];
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    chunks.push(btoa(String.fromCharCode(...bytes.subarray(offset, offset + chunkSize))));
+  }
+  return `data:;base64,${chunks.join('')}`;
 };
 
 /**

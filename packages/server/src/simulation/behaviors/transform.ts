@@ -26,6 +26,8 @@ function targetAxis(actor: ServerBase): Vector3 {
 }
 
 function alignToAxis(quaternion: Quaternion, target: Vector3): Quaternion {
+  // An upright die face has a zero rotation, which cannot define a rotation axis.
+  if (target.lengthSquared() === 0) return quaternion;
   const current = Vector3.Up().applyRotationQuaternion(quaternion);
   target.normalize();
 

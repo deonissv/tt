@@ -1,14 +1,40 @@
-import { CreateBox, Logger, Mesh } from '@babylonjs/core';
-import type { MsgMap } from '@tt/actions';
+import type { CursorsPld } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
-import { ActorType, type DeckState, type TileStackState } from '@tt/states';
-import { wait } from '@tt/utils';
-import { getPhSim } from '../../test/testUtils';
-import type { Card } from '../simulation/actors';
-import { Actor, Deck, ServerBase } from '../simulation/actors';
-import { ServerActorBuilder } from '../simulation/serverActorBuilder';
-import { initHavok } from '../utils';
+import { ActorType, type ActorState, type DeckState, type SimulationStateSave, type TileStackState } from '@tt/states';
 import { ActionBuilder } from './action-builder';
+
+const actorState = (overrides: Partial<ActorState> = {}): ActorState => ({
+  guid: 'actor',
+  name: 'Actor',
+  type: ActorType.ACTOR,
+  model: { meshURL: '' },
+  transformation: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+  ...overrides,
+});
+
+const card = (faceURL: string): DeckState['cards'][number] => ({
+  guid: `card-${faceURL}`,
+  name: `Card ${faceURL}`,
+  type: ActorType.CARD,
+  faceURL,
+  backURL: `${faceURL}-back`,
+  cols: 1,
+  rows: 1,
+  sequence: 0,
+});
+
+const deck = (cards: DeckState['cards']): DeckState => ({
+  guid: 'deck',
+  name: 'Deck',
+  type: ActorType.DECK,
+  cards,
+});
+
+const makeBuilder = (actors: { guid: string; picked?: string }[] = []): ActionBuilder => {
+  const builder = new ActionBuilder();
+  builder.sim = { actors } as unknown as typeof builder.sim;
+  return builder;
+};
 
 it('broadcasts a tile stack size change to players already in the room', () => {
   const stack: TileStackState = {
@@ -19,8 +45,7 @@ it('broadcasts a tile stack size change to players already in the room', () => {
     faceURL: 'face.png',
     size: 3,
   };
-  const builder = new ActionBuilder();
-  builder.sim = { actors: [] } as unknown as typeof builder.sim;
+  const builder = makeBuilder();
   builder.prevSimState = { actorStates: [stack] };
 
   expect(builder.getSimActions({ actorStates: [{ ...stack, size: 2 }] })).toContainEqual({
@@ -30,28 +55,12 @@ it('broadcasts a tile stack size change to players already in the room', () => {
 });
 
 describe('empty deck rerender', () => {
-  const before: DeckState = {
-    guid: 'deck',
-    name: 'Deck',
-    type: ActorType.DECK,
-    cards: [
-      {
-        guid: 'last-card',
-        name: 'Last card',
-        type: ActorType.CARD,
-        faceURL: 'face.png',
-        backURL: 'back.png',
-        cols: 1,
-        rows: 1,
-        sequence: 0,
-      },
-    ],
-  };
+  const before = deck([card('face.png')]);
 
   it('emits a zero-size rerender when the final card is drawn', () => {
     expect(new ActionBuilder().getDeckRerender(before, { ...before, cards: [] })).toEqual({
       guid: 'deck',
-      grid: { faceURL: 'face.png', backURL: 'back.png', cols: 1, rows: 1, sequence: 0 },
+      grid: { faceURL: 'face.png', backURL: 'face.png-back', cols: 1, rows: 1, sequence: 0 },
       size: 0,
     });
   });
@@ -62,185 +71,180 @@ describe('empty deck rerender', () => {
   });
 });
 
+describe('getDeckRerender', () => {
+  it('does not rerender non-deck actors', () => {
+    expect(
+      new ActionBuilder().getDeckRerender(actorState() as unknown as DeckState, actorState() as unknown as DeckState),
+    ).toBeNull();
+  });
+
+  it('rerenders when the top card changes', () => {
+    const prev = deck([card('back1'), card('face1')]);
+    const current = deck([card('back1'), card('face2')]);
+
+    const payload = new ActionBuilder().getDeckRerender(prev, current);
+
+    expect(payload).toMatchObject({
+      guid: 'deck',
+      size: 2,
+      grid: { faceURL: 'face2', backURL: 'back1-back' },
+    });
+  });
+
+  it('rerenders when the bottom card changes', () => {
+    const prev = deck([card('back1'), card('face1')]);
+    const current = deck([card('back2'), card('face1')]);
+
+    expect(new ActionBuilder().getDeckRerender(prev, current)).toMatchObject({ guid: 'deck', size: 2 });
+  });
+
+  it('does not rerender when neither end card changed', () => {
+    const prev = deck([card('back1'), card('face1')]);
+
+    expect(new ActionBuilder().getDeckRerender(prev, { ...prev })).toBeNull();
+  });
+});
+
+describe('getCursorsAction', () => {
+  it('returns null for an empty cursor payload', () => {
+    expect(new ActionBuilder().getCursorsAction({})).toBeNull();
+  });
+
+  it('broadcasts new cursors, then suppresses identical repeats', () => {
+    const builder = new ActionBuilder();
+    const cursors: CursorsPld = { 'client-1': [1, 2] };
+
+    expect(builder.getCursorsAction(cursors)).toEqual({ type: ServerAction.CURSORS, payload: cursors });
+    expect(builder.getCursorsAction({ 'client-1': [1, 2] })).toBeNull();
+    expect(builder.getCursorsAction({ 'client-1': [3, 4] })).toEqual({
+      type: ServerAction.CURSORS,
+      payload: { 'client-1': [3, 4] },
+    });
+  });
+});
+
+describe('getActions', () => {
+  it('returns null when neither cursors nor simulation changed', () => {
+    expect(new ActionBuilder().getActions({}, { actorStates: [] })).toBeNull();
+  });
+
+  it('combines the cursors message with the simulation actions', () => {
+    const builder = makeBuilder();
+    builder.prevSimState = { actorStates: [actorState()] };
+
+    const actions = builder.getActions(
+      { 'client-1': [1, 2] },
+      { actorStates: [actorState({ transformation: { position: [1, 2, 3], rotation: [0, 0, 0], scale: [1, 1, 1] } })] },
+    );
+
+    expect(actions).toEqual([
+      { type: ServerAction.CURSORS, payload: { 'client-1': [1, 2] } },
+      { type: ServerAction.MOVE_ACTOR, payload: { guid: 'actor', position: [1, 2, 3] } },
+    ]);
+  });
+});
+
 describe('getSimActions', () => {
-  let actionBuilder: ActionBuilder;
+  it('treats the first observed state as the baseline and emits nothing', () => {
+    const builder = new ActionBuilder();
+    const state: SimulationStateSave = { actorStates: [actorState()] };
 
-  beforeAll(async () => {
-    Logger.LogLevels = 0;
-
-    await initHavok();
+    expect(builder.getSimActions(state)).toEqual([]);
+    expect(builder.prevSimState).toEqual(state);
   });
 
-  beforeEach(() => {
-    actionBuilder = new ActionBuilder();
+  it('emits nothing when the state is unchanged', () => {
+    const builder = makeBuilder();
+    builder.prevSimState = { actorStates: [actorState()] };
+
+    expect(builder.getSimActions({ actorStates: [actorState()] })).toEqual([]);
   });
 
-  it('returns ACTOR_MOVE actions', async () => {
-    const sim = getPhSim();
-    new ServerBase(
-      {
-        type: ActorType.ACTOR,
-        guid: 'box',
-        name: 'box',
-        transformation: { position: [0, 1, 0] },
-        model: { meshURL: '' },
-      },
-      CreateBox('box', { size: 1 }),
-    );
+  it('spawns a new actor that nobody picked', () => {
+    const spawned = actorState({ guid: 'new' });
+    const builder = makeBuilder([{ guid: 'new' }]);
+    builder.prevSimState = { actorStates: [] };
 
-    const initState = sim.toState();
-    actionBuilder.prevSimState = initState;
-    actionBuilder.sim = sim;
-
-    sim.start();
-    await wait(500);
-
-    const state = sim.toState();
-
-    const actions = actionBuilder.getSimActions(state);
-    sim.stop();
-
-    expect(actions.length).toBe(1);
-    const move_action = actions[0] as MsgMap[ServerAction.MOVE_ACTOR];
-    expect(move_action.type).toBe(ServerAction.MOVE_ACTOR);
-    expect(move_action.payload.guid).toBe('box');
-    expect(move_action.payload.position[0]).toBeCloseTo(0);
-    expect(move_action.payload.position[1]).toBeCloseTo(0.55);
-    expect(move_action.payload.position[2]).toBeCloseTo(0);
+    expect(builder.getSimActions({ actorStates: [spawned] })).toEqual([
+      { type: ServerAction.SPAWN_ACTOR, payload: spawned },
+    ]);
   });
 
-  it('returns SPAWN_ACTOR actions', async () => {
-    const sim = getPhSim();
+  it('spawns a picked actor bound to the picking client', () => {
+    const spawned = actorState({ guid: 'new' });
+    const builder = makeBuilder([{ guid: 'new', picked: 'client-9' }]);
+    builder.prevSimState = { actorStates: [] };
 
-    const initState = sim.toState();
-    actionBuilder.prevSimState = initState;
-    actionBuilder.sim = sim;
+    expect(builder.getSimActions({ actorStates: [spawned] })).toEqual([
+      { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'client-9', state: spawned } },
+    ]);
+  });
 
-    sim.start();
-    await wait(100);
+  it('emits nothing when an actor is removed (no REMOVE_ACTOR broadcast yet)', () => {
+    const builder = makeBuilder();
+    builder.prevSimState = { actorStates: [actorState({ guid: 'gone' })] };
 
-    new ServerBase(
-      {
-        type: ActorType.ACTOR,
-        guid: 'box1',
-        name: 'box1',
-        transformation: { position: [3, 1, 0] },
-        model: { meshURL: '' },
-      },
-      CreateBox('box', { size: 1 }),
-    );
-    await wait(10);
+    expect(builder.getSimActions({ actorStates: [] })).toEqual([]);
+  });
 
-    const state = sim.toState();
-    const actions = actionBuilder.getSimActions(state);
-    sim.stop();
+  it('emits MOVE_ACTOR and ROTATE_ACTOR for transformation changes', () => {
+    const builder = makeBuilder();
+    builder.prevSimState = { actorStates: [actorState()] };
 
-    expect(sim.actors.length).toBe(1);
-    expect(actions.map(a => a.type)).toContain(ServerAction.SPAWN_ACTOR);
-    const spawnAction = actions.find(action => action.type === ServerAction.SPAWN_ACTOR)!;
+    const actions = builder.getSimActions({
+      actorStates: [
+        actorState({ transformation: { position: [1, 2, 3], rotation: [0, Math.PI / 2, 0], scale: [1, 1, 1] } }),
+      ],
+    });
 
-    expect(spawnAction).toMatchObject({
-      type: ServerAction.SPAWN_ACTOR,
+    expect(actions).toEqual([
+      { type: ServerAction.MOVE_ACTOR, payload: { guid: 'actor', position: [1, 2, 3] } },
+      { type: ServerAction.ROTATE_ACTOR, payload: { guid: 'actor', position: [0, Math.PI / 2, 0] } },
+    ]);
+  });
+
+  it('emits RERENDER_DECK when a deck card changes', () => {
+    const builder = makeBuilder();
+    builder.prevSimState = { actorStates: [deck([card('back1'), card('face1')])] };
+
+    const actions = builder.getSimActions({ actorStates: [deck([card('back1'), card('face2')])] });
+
+    expect(actions).toContainEqual({
+      type: ServerAction.RERENDER_DECK,
       payload: {
-        type: ActorType.ACTOR,
-        guid: 'box1',
-        mass: 1,
-        name: 'box1',
-        model: { meshURL: '' },
-      },
-    });
-  });
-
-  it('returns SPAWN_ACTOR actions', async () => {
-    const sim = getPhSim();
-    const initState = sim.toState();
-    actionBuilder.prevSimState = initState;
-    actionBuilder.sim = sim;
-
-    sim.start();
-    await wait(100);
-
-    new ServerBase(
-      {
-        type: ActorType.ACTOR,
-        guid: 'box1',
-        name: 'box1',
-        transformation: { position: [3, 1, 0] },
-        model: { meshURL: '' },
-      },
-      CreateBox('box', { size: 1 }),
-    );
-    await wait(500);
-
-    const state = sim.toState();
-    const actions = actionBuilder.getSimActions(state);
-
-    sim.stop();
-    const spawnAction = actions.find(action => action.type === ServerAction.SPAWN_ACTOR)!;
-    expect(spawnAction.payload.transformation!.position![0]).toBeCloseTo(3);
-    expect(spawnAction.payload.transformation!.position![1]).toBeCloseTo(0.55);
-    expect(spawnAction.payload.transformation!.position![2]).toBeCloseTo(0);
-  });
-
-  it('returns RERENDER_DECK', async () => {
-    vi.spyOn(ServerActorBuilder, 'buildCard').mockImplementation(() => {
-      return Promise.resolve(
-        new Actor(
-          { guid: 'card', name: 'card', type: ActorType.ACTOR, model: { meshURL: '' } },
-          new Mesh('card'),
-        ) as unknown as Card,
-      );
-    });
-
-    const sim = getPhSim();
-
-    sim.start();
-    await wait(100);
-
-    new Deck(
-      {
         guid: 'deck',
-        name: 'deck',
-        type: ActorType.DECK,
-        cards: [
-          {
-            type: ActorType.CARD,
-            guid: 'card1',
-            name: 'card1',
-            faceURL: 'url1face',
-            backURL: 'url1back',
-            cols: 1,
-            rows: 1,
-            sequence: 0,
-          },
-          {
-            type: ActorType.CARD,
-            guid: 'card2',
-            name: 'card2',
-            faceURL: 'url2face',
-            backURL: 'url2back',
-            cols: 1,
-            rows: 1,
-            sequence: 0,
-          },
-        ],
+        grid: { faceURL: 'face2', backURL: 'back1-back', cols: 1, rows: 1, sequence: 0 },
+        size: 2,
       },
-      new Mesh('deckMesh'),
-    );
-    await wait(100);
-    const initState = structuredClone(sim.toState());
-    await wait(250);
-    await (sim.actors[0] as Deck).pickItem('client', 1);
-    await wait(250);
+    });
+  });
+});
 
-    actionBuilder.prevSimState = initState;
-    actionBuilder.sim = sim;
+describe('getActorPositionUpdate / getActorRotationUpdate / getActorScaleUpdate', () => {
+  it('returns null for equal transforms, including against the defaults', () => {
+    const builder = new ActionBuilder();
+    const withTransform = actorState();
+    const withoutTransform: ActorState = {
+      guid: 'actor',
+      name: 'Actor',
+      type: ActorType.ACTOR,
+      model: { meshURL: '' },
+    };
 
-    const state = sim.toState();
-    const actions = actionBuilder.getSimActions(state);
-    sim.stop();
+    expect(builder.getActorPositionUpdate(withTransform, withTransform)).toBeNull();
+    expect(builder.getActorRotationUpdate(withoutTransform, withoutTransform)).toBeNull();
+    expect(builder.getActorScaleUpdate(withoutTransform, withoutTransform)).toBeNull();
+  });
 
-    const renderActior = actions.find(action => action.type === ServerAction.RERENDER_DECK);
-    expect(renderActior).toBeDefined();
+  it('returns the changed position, rotation, and scale', () => {
+    const builder = new ActionBuilder();
+    const prev = actorState();
+    const next = actorState({
+      transformation: { position: [4, 5, 6], rotation: [0, 1, 0], scale: [2, 2, 2] },
+    });
+
+    expect(builder.getActorPositionUpdate(prev, next)).toEqual([4, 5, 6]);
+    expect(builder.getActorRotationUpdate(prev, next)).toEqual([0, 1, 0]);
+    expect(builder.getActorScaleUpdate(prev, next)).toEqual([2, 2, 2]);
   });
 });

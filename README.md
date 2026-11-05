@@ -75,3 +75,9 @@ command and hold it through teardown. `VISUAL_LOCK_TIMEOUT_MS` sets the wait lim
 in milliseconds, defaulting to one hour. Locking is skipped when `CI` or
 `GITHUB_RUN_ID` is set, and in attached dev/headed modes. A missing `flock` or a
 lock timeout fails setup without touching Docker.
+
+## Mutation tests
+
+Run `npm run test:mutation:smoke` for a quick check, or `npm run test:mutation`
+to mutate application code, shared libraries, and visual-test helpers against
+the unit tests. Open `reports/mutation/index.html` to inspect the results.

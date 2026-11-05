@@ -58,6 +58,12 @@ describe('Client', () => {
       expect(actions.map(action => action.type)).toEqual([ServerAction.CURSORS, ServerAction.REMOVE_ACTOR]);
     });
 
+    it('ignores a malformed cursors message without a payload', () => {
+      const malformed = { type: ServerAction.CURSORS } as MsgMap[ServerAction.CURSORS];
+
+      expect(client.prepareMessage(malformed, [removeAction])).toEqual([removeAction]);
+    });
+
     it("removes the client's own cursor from the cursors action", () => {
       const actions = client.prepareMessage(cursorsAction({ [user.code]: [1, 2], other: [3, 4] }), []);
 
