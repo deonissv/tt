@@ -38,7 +38,7 @@ export const HUD: React.FC<HUDProps> = ({ onCloseRoom, room, onSetPickHeight, on
   );
 
   const onLeaveRoom = useCallback(() => {
-    navigate('/games');
+    void navigate('/games');
   }, [navigate]);
 
   const onSetPickHeightChange = useCallback(

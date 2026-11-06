@@ -8,7 +8,7 @@ import { getErrorMsg } from '../../utils';
 const MIN_PASSWD_LENGTH = 8;
 
 interface Props {
-  onLogin?: () => void;
+  onLogin?: () => void | Promise<void>;
 }
 
 export const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
@@ -33,9 +33,8 @@ export const Login: React.FC<Props> = ({ onLogin }): React.ReactNode => {
       email,
       password,
     })
-      .then(() => {
-        if (onLogin) onLogin();
-      })
+      // Return either operation so this catch also owns navigation failures.
+      .then(() => (onLogin ? onLogin() : navigate('/games')))
       .catch(e => addToast(`Failed to sign in: ${getErrorMsg(e)}`));
   };
 

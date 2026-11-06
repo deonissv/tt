@@ -14,7 +14,9 @@ export const NotFoundPage = () => {
       </div>
       <button
         className="bg-[#064663] w-[150px] h-[50px] rounded-full mr-3 px-4 py-1 text-white hover:shadow-lg hover:scale-105 transition duration-300 ease-in-out flex justify-center items-center"
-        onClick={() => navigate('/games')}
+        onClick={() => {
+          void navigate('/games');
+        }}
       >
         <p className="font-bold uppercase tracking-wide text-sm">Back</p>
       </button>
