@@ -377,7 +377,7 @@ export class TTSParser extends ParserBase {
     if (!actorBase) return null;
 
     const cardID = objectState.CardID;
-    if (!cardID) {
+    if (cardID === undefined || cardID === null) {
       this.errors.push(objectState.GUID);
       return null;
     }
@@ -385,8 +385,10 @@ export class TTSParser extends ParserBase {
     // if (!this.hasProperty(objectState, 'CustomDeck', 'ERROR 12')) return null;
     // if (!this.isObject(objectState.CustomDeck, 'ERROR 13')) return null;
 
-    const deckId = +cardID.toString().slice(0, -2);
-    const sequence = +cardID.toString().slice(-2);
+    // CardID encodes deckId * 100 + sequence; numeric division also covers IDs
+    // below 100, where string slicing would yield NaN for the deck id.
+    const deckId = Math.floor(cardID / 100);
+    const sequence = cardID % 100;
     if (!isNumber(deckId) || !isNumber(sequence)) {
       this.errors.push(objectState.GUID);
       return null;
@@ -601,7 +603,7 @@ export class TTSParser extends ParserBase {
     }
 
     const value = this.parseNumber(rotationValue.Value);
-    if (!value) {
+    if (value === null) {
       this.errors.push(guid);
       return null;
     }

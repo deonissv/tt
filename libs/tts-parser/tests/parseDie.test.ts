@@ -9,6 +9,24 @@ describe('TTSParser - parseDie', () => {
     TTSParser.reset();
   });
 
+  it('should parse a zero face value', () => {
+    const source = structuredClone(DEMO.DIE4) as unknown as ObjectState;
+    const rotationValues = source.RotationValues as unknown as { Value: unknown }[];
+    rotationValues[0].Value = 0;
+
+    const result = TTSParser.parseDieN(source, ActorType.DIE4);
+    expect(result?.rotationValues[0].value).toBe(0);
+  });
+
+  it('should reject a missing face value', () => {
+    const source = structuredClone(DEMO.DIE4) as unknown as ObjectState;
+    const rotationValues = source.RotationValues as unknown as { Value?: unknown }[];
+    delete rotationValues[0].Value;
+
+    const result = TTSParser.parseDieN(source, ActorType.DIE4);
+    expect(result).toBeNull();
+  });
+
   it('should correctly parse demo die4', () => {
     const expected: Die4State = {
       guid: '60c5a3',
