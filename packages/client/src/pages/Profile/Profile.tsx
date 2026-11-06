@@ -27,13 +27,13 @@ export const Profile = () => {
         .then(() => navigate('/games'))
         .catch(e => addToast(`Failed to modify user: ${getErrorMsg(e)}`));
     } else {
-      navigate('/games');
+      void navigate('/games');
     }
   };
 
   const onLogout = () => {
     AuthService.logout();
-    navigate('/games');
+    void navigate('/games');
   };
   return (
     <div className="flex justify-center w-full mb-5">

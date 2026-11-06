@@ -34,7 +34,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
 
   const onRoomClosed = useCallback(() => {
     addToast('Room has been closed');
-    navigate('/games');
+    void navigate('/games');
   }, [addToast, navigate]);
 
   const onCloseRoom = useCallback(() => {
@@ -85,7 +85,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
         })
         .catch(_ => {
           addToast(`Failed to get room preview`);
-          navigate('/games');
+          void navigate('/games');
           return null;
         });
 
@@ -108,7 +108,7 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
         onRoomClosed,
       ).catch(() => {
         addToast(`Failed to initialize room`);
-        navigate('/games');
+        void navigate('/games');
         return null;
       });
 

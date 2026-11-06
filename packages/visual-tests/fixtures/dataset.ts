@@ -77,6 +77,7 @@ export async function createDataset(api: APIRequestContext, fixture: SimulationS
       observerToken: observer.token,
       authorLogin: author.login,
       guestLogin: guestAccount?.login,
+      gameCode: game.code,
       createRoom: async (): Promise<string> => {
         const roomResponse = await api.post('/api/v1/rooms', { headers, data: { gameCode: game.code } });
         await expect(roomResponse, 'Visual fixture room creation failed').toBeOK();

@@ -8,7 +8,7 @@ export const Room: React.FC = (): React.ReactNode => {
 
   const roomCodeGuard = useCallback(() => {
     if (!roomCode) {
-      navigate('/not-found');
+      void navigate('/not-found');
     }
     return roomCode!;
   }, [navigate, roomCode]);

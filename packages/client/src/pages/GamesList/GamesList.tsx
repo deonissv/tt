@@ -33,7 +33,9 @@ export const GamesList = () => {
     try {
       const roomId = await RoomService.createRoom(gameCode);
 
-      navigate(`/room/${roomId}`);
+      // Awaited so the room navigation completes before this flow ends; the
+      // surrounding catch owns any failure.
+      await navigate(`/room/${roomId}`);
     } catch (e) {
       addToast(`Failed to create room: ${getErrorMsg(e)}`);
     }
@@ -51,11 +53,11 @@ export const GamesList = () => {
   };
 
   const onEditGame = (gameCode: string) => {
-    navigate(`/games/${gameCode}`);
+    void navigate(`/games/${gameCode}`);
   };
 
   const onNewGame = () => {
-    navigate('/games/new');
+    void navigate('/games/new');
   };
 
   return (

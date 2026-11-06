@@ -12,7 +12,7 @@ export const Header: React.FC = (): React.ReactNode => {
       <div className="flex items-center max-w-screen-2xl justify-between mx-auto h-[100px]">
         <div
           onClick={() => {
-            navigate('/games');
+            void navigate('/games');
           }}
           className="h-[60px] w-[60px] cursor-pointer"
         >
@@ -20,16 +20,16 @@ export const Header: React.FC = (): React.ReactNode => {
         </div>
         <div className="flex items-center justify-end">
           <>
-            <Button className=" flex justify-center items-center mr-2" onClick={() => navigate('/join')}>
+            <Button className=" flex justify-center items-center mr-2" onClick={() => void navigate('/join')}>
               <p className="font-bold uppercase tracking-wide text-sm">Join Room</p>
             </Button>
-            <Button className=" flex justify-center items-center mr-2" onClick={() => navigate('/saves')}>
+            <Button className=" flex justify-center items-center mr-2" onClick={() => void navigate('/saves')}>
               <p className="font-bold uppercase tracking-wide text-sm">Saves</p>
             </Button>
           </>
           <Button
             className=" flex justify-center items-center mr-2"
-            onClick={() => navigate(AuthService.authorized() ? '/profile' : '/login')}
+            onClick={() => void navigate(AuthService.authorized() ? '/profile' : '/login')}
           >
             <p className="font-bold uppercase tracking-wide text-sm mr-3">Profile</p>
             <AccountCircleIcon />

@@ -1,38 +1,17 @@
-import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
-import { Layout, RequireAuth, ToastProvider } from './components';
+import { RouterProvider } from 'react-router-dom';
 
-import { CreateGame, GamesList, JoinRoom, Login, NotFoundPage, Profile, Room, Saves, Signup } from './pages';
+import { ToastProvider } from './components';
+import { router } from './router';
 import { StoreProvider } from './Store';
 
-export const App = () => {
-  const navigate = useNavigate();
-
-  const onLogin = () => {
-    navigate('/games');
-  };
-
+// StoreProvider and ToastProvider sit outside the data router so their state
+// survives every navigation, matching the pre-migration placement around the
+// route tree.
+export const App = (): React.ReactNode => {
   return (
     <StoreProvider>
       <ToastProvider>
-        <Routes>
-          <Route path="room/:roomCode" element={RequireAuth({ children: <Room /> })} />
-          <Route element={<Layout />}>
-            <Route path="login" element={<Login onLogin={onLogin} />} />
-            <Route path="signup" element={<Signup />} />
-            <Route element={RequireAuth({ children: <Outlet /> })}>
-              <Route path="profile" element={<Profile />} />
-              <Route path="join" element={<JoinRoom />} />
-              <Route path="saves" element={<Saves />} />
-              <Route path="games">
-                <Route index element={<GamesList />} />
-                <Route path="new" element={<CreateGame />} />
-                <Route path=":gameCode" element={<CreateGame />} />
-              </Route>
-              <Route path="*" element={<GamesList />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Route>
-        </Routes>
+        <RouterProvider router={router} />
       </ToastProvider>
     </StoreProvider>
   );

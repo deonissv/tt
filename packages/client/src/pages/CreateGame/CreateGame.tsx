@@ -82,9 +82,7 @@ export const CreateGame = () => {
     }
 
     GameService.createGame({ name, description, bannerUrl, content })
-      .then(() => {
-        navigate('/games');
-      })
+      .then(() => navigate('/games'))
       .catch(e => addToast(`Failed create a game: ${e}`));
   };
 
@@ -107,7 +105,7 @@ export const CreateGame = () => {
         .then(() => navigate('/games'))
         .catch(e => addToast(`Failed to modify a game: ${e}`));
     } else {
-      navigate('/games');
+      void navigate('/games');
     }
   };
 

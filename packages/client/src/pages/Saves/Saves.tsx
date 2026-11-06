@@ -34,7 +34,7 @@ export const Saves: React.FC = (): React.ReactNode => {
   const onCreateRoom = async (roomCode: string) => {
     try {
       const roomId = await RoomService.startRoom(roomCode);
-      navigate(`/room/${roomId}`);
+      await navigate(`/room/${roomId}`);
     } catch (e) {
       addToast(`Failed to create game: ${getErrorMsg(e)}`);
     }

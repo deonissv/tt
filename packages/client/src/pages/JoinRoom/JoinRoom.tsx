@@ -10,7 +10,7 @@ export const JoinRoom: React.FC = (): React.ReactNode => {
 
   const onJoinRoom = () => {
     if (isUUIDv4(roomCode)) {
-      navigate(`/room/${roomCode}`);
+      void navigate(`/room/${roomCode}`);
     }
   };
 
