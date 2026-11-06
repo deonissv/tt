@@ -26,4 +26,22 @@ describe('TTSParser - parseCard', () => {
     const result = TTSParser.parseCard(DEMO.CARD as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
+
+  it('should parse CardID 0 when a matching CustomDeck exists', () => {
+    const source = structuredClone(DEMO.CARD) as unknown as ObjectState & { CustomDeck: Record<number, object> };
+    const deckId = Math.floor(source.CardID! / 100);
+    source.CardID = 0;
+    source.CustomDeck = { 0: source.CustomDeck[deckId] };
+
+    const result = TTSParser.parseCard(source);
+    expect(result).not.toBeNull();
+    expect(result!.sequence).toBe(0);
+  });
+
+  it('should reject a card with no CardID', () => {
+    const source = structuredClone(DEMO.CARD) as unknown as ObjectState;
+    delete source.CardID;
+
+    expect(TTSParser.parseCard(source)).toBeNull();
+  });
 });
