@@ -24,9 +24,10 @@ export const expectActorUnchanged = async (room: Room, before: UnknownActorState
   const deadline = Date.now() + duration;
   do {
     const current = getActor((await captureRoom(room)).state, before.guid);
+    // Physics can enter or leave sleep without a player changing the actor.
     const differences = compareSnapshots(
-      { actorStates: [before] },
-      { actorStates: [current] },
+      { actorStates: [{ ...before, sleeping: undefined }] },
+      { actorStates: [{ ...current, sleeping: undefined }] },
       PHYSICS_STABILITY_TOLERANCES,
     );
     if (differences.length > 0) {
