@@ -22,6 +22,7 @@ type FixtureVariant =
   | 'failed-bag-item'
   | 'face-down-deck'
   | 'locked-actor'
+  | 'locked-bag'
   | 'persistence'
   | 'shuffle-bag'
   | 'static-scene';
@@ -62,6 +63,11 @@ const applyVariant = (state: SimulationStateSave, variant: FixtureVariant): void
   }
   if (variant === 'locked-actor') {
     getActor(state, '3b9ed5').locked = true;
+  }
+  if (variant === 'locked-bag') {
+    // Tabletop Simulator reference save: the Munchkin bag ships locked and
+    // players still draw from it, so extraction must survive the lock.
+    getActor<BagState>(state, '7a0b0b').locked = true;
   }
   if (variant === 'shuffle-bag') {
     const bag = getActor<BagState>(state, '7a0b0b');

@@ -1,10 +1,11 @@
 import { CreateBox, Logger } from '@babylonjs/core';
 import { Logger as NestLogger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import type { Room } from '@prisma/client';
-import { ClientAction } from '@tt/actions';
+import { ClientAction, ServerAction, type ServerActionMsg } from '@tt/actions';
 import { Channel } from '@tt/channel';
-import type { SimulationStateSave } from '@tt/states';
+import type { ActorState, SimulationStateSave } from '@tt/states';
 import { ActorType } from '@tt/states';
 import { getPhSim } from '../../test/testUtils';
 import type { ValidatedUser } from '../auth/validated-user';
@@ -50,6 +51,7 @@ describe('SimulationRoom', () => {
   let simulationFactory: SimulationFactory;
   let roomTable: Room;
   let room: SimulationRoom;
+  let assetUrlService: AssetUrlService;
 
   beforeAll(async () => {
     Logger.LogLevels = 0; // silence BabylonJS
@@ -77,6 +79,7 @@ describe('SimulationRoom', () => {
       ],
     }).compile();
 
+    assetUrlService = moduleRef.get(AssetUrlService);
     factory = moduleRef.get(SimulationRoomFactory);
     registry = moduleRef.get(RoomRegistry);
     actionsHandler = moduleRef.get(ActionHandler);
@@ -326,6 +329,70 @@ describe('SimulationRoom', () => {
 
       expect(state.downloadProgress).toEqual(room.downloadProgress);
       expect(Array.isArray(state.actorStates)).toBe(true);
+    });
+  });
+
+  describe('tick asset URLs', () => {
+    it('proxies spawn and rerender assets without mutating simulation actions', async () => {
+      vi.useFakeTimers();
+      const STATIC_HOST = 'http://static.host';
+      const ROOM_CODE = roomTable.code;
+      const service = new AssetUrlService(
+        new ConfigService({ VITE_STATIC_HOST: STATIC_HOST, VITE_API_HOST: 'http://api.host' }),
+      );
+      vi.spyOn(assetUrlService, 'patchStateURLs').mockImplementation((item: unknown, roomCode: string) =>
+        service.patchStateURLs(item, roomCode),
+      );
+      const sim = getPhSim();
+      vi.spyOn(sim, 'start').mockImplementation(() => undefined);
+      vi.spyOn(simulationFactory, 'create').mockResolvedValue(sim);
+      await room.init();
+      const socket = connect(user);
+      const send = vi.spyOn(Channel, 'send');
+      const state: ActorState = {
+        guid: 'actor',
+        name: 'Actor',
+        type: ActorType.ACTOR,
+        model: { meshURL: 'https://example.com/model.obj' },
+      };
+      const grid = {
+        faceURL: 'https://example.com/face.png',
+        backURL: `${STATIC_HOST}/assets/back.png`,
+        rows: 1,
+        cols: 1,
+        sequence: 0,
+      };
+      const actions: ServerActionMsg[] = [
+        { type: ServerAction.SPAWN_ACTOR, payload: state },
+        { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'player', state } },
+        { type: ServerAction.RERENDER_DECK, payload: { guid: 'deck', grid, size: 2 } },
+        { type: ServerAction.REMOVE_ACTOR, payload: 'actor' },
+      ];
+      const original = structuredClone(actions);
+      const patchedState = {
+        ...state,
+        model: { meshURL: service.getAssetURL(state.model.meshURL, ROOM_CODE) },
+      };
+
+      vi.spyOn(room.actionBuilder, 'getSimActions').mockReturnValue(actions);
+      vi.spyOn(room.actionBuilder, 'getCursorsAction').mockReturnValue(null);
+      vi.advanceTimersByTime(roomTable.stateTickDelay);
+      const patched = send.mock.calls[0][1];
+      expect(send.mock.calls[0][0]).toBe(socket);
+
+      expect(patched).toEqual([
+        { type: ServerAction.SPAWN_ACTOR, payload: patchedState },
+        { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'player', state: patchedState } },
+        {
+          type: ServerAction.RERENDER_DECK,
+          payload: { guid: 'deck', grid: { ...grid, faceURL: service.getAssetURL(grid.faceURL, ROOM_CODE) }, size: 2 },
+        },
+        actions[3],
+      ]);
+      expect(actions).toEqual(original);
+      expect(patched[3]).toBe(actions[3]);
+      clearInterval(room.savingInterval);
+      clearInterval(room.tickInterval);
     });
   });
 

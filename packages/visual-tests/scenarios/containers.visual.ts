@@ -85,6 +85,63 @@ const bag = manifestActor('7a0b0b');
 const tileStack = manifestActor('51d35d');
 
 test.describe(() => {
+  // Tabletop Simulator lets players draw from locked containers (the Munchkin
+  // demo bag ships locked). The lock must only forbid grabbing the bag itself.
+  test.use({ actorGuids: [bag.guid], fixtureVariant: 'locked-bag' });
+  test(
+    `[${bag.typeName} ${bag.guid}] extraction works while the container is locked`,
+    { tag: [`@actor:${bag.typeName}`, '@behavior:extract', '@behavior:lock'] },
+    async ({ player: { page, connection }, guestPlayer, room }, testInfo) => {
+      const guid = bag.guid;
+      const beforeCapture = await captureRoom(room);
+      const bagActor = getActor(beforeCapture.state, guid);
+      expect(bagActor.locked, 'the fixture bag must be locked').toBe(true);
+      const beforeContainerSize = containerSize(bagActor);
+      const beforeIdentities = actorIdentityList(bagActor);
+
+      const start = points[guid];
+      const end = [start[0] + 48, start[1] + 24];
+      await page.locator('canvas').focus();
+      await page.mouse.move(start[0], start[1]);
+      await waitForRenderedFrames(page);
+      await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), guid);
+      const drawn = await expectSpawnedActor(room, beforeCapture.state);
+      await expect(async () => {
+        await expectClientAction(
+          connection,
+          ClientAction.MOVE_ACTOR,
+          () => page.mouse.move(start[0] + 0.1, start[1]).then(() => page.mouse.move(start[0], start[1])),
+          drawn.guid,
+          1_000,
+        );
+      }).toPass({ timeout: 30_000, intervals: [100] });
+      await page.mouse.down();
+      await expectClientAction(
+        connection,
+        ClientAction.MOVE_ACTOR,
+        () => page.mouse.move(end[0], end[1], { steps: 20 }),
+        drawn.guid,
+      );
+      await waitForActorStable(room, drawn.guid, positionChanged, drawn);
+      await expectClientAction(connection, ClientAction.RELEASE_ACTOR, () => page.mouse.up(), drawn.guid);
+      await waitForActorStable(room, drawn.guid, positionChanged, drawn);
+      const afterCapture = await waitForRoomStable(room);
+      const afterBag = getActor(afterCapture.state, guid);
+
+      expect(afterBag.locked, 'extraction must not unlock the container').toBe(true);
+      expect(containerSize(afterBag)).toBe(beforeContainerSize - 1);
+      const spawnedGuids = (afterCapture.state.actorStates ?? [])
+        .filter(actor => !(beforeCapture.state.actorStates ?? []).some(previous => previous.guid === actor.guid))
+        .map(actor => actor.guid);
+      expect(sorted([...actorIdentityList(afterBag), ...spawnedGuids])).toEqual(sorted(beforeIdentities));
+      // The lock still forbids grabbing the bag itself: the bag never moved.
+      expect(afterBag.transformation!.position).toEqual(bagActor.transformation!.position);
+      await expectMatchingCanvases(testInfo, 'locked-bag-extract', [page, guestPlayer!.page]);
+    },
+  );
+});
+
+test.describe(() => {
   test.use({ actorGuids: [deck.guid] });
   test(
     `[${deck.typeName} ${deck.guid}] shuffle changes order within three actions and conserves identities`,

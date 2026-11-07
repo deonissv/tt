@@ -51,6 +51,8 @@ export async function pickItem(actor: ServerBase, clientId: string, pickHeight: 
   }
 
   if (!child || !update) return null;
+  // A player draws a movable item even when its container is locked.
+  child.locked = false;
   transformation.position[1] += 1;
   child.transformation = transformation;
   updateContainer(actor, update);
