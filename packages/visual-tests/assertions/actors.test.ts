@@ -27,6 +27,49 @@ describe('unchanged actor observation', () => {
     expect(captureRoom).toHaveBeenCalledTimes(3);
   });
 
+  it.each([
+    [false, true],
+    [true, false],
+    [undefined, true],
+    [false, undefined],
+  ])('allows physics sleeping to change from %s to %s', async (initial, sleeping) => {
+    vi.useFakeTimers();
+    const actor = { ...before, ...(initial === undefined ? {} : { sleeping: initial }) };
+    const current = { ...before, ...(sleeping === undefined ? {} : { sleeping }) };
+    vi.mocked(captureRoom)
+      .mockResolvedValueOnce({ state: { actorStates: [actor] } } as RoomSnapshot)
+      .mockResolvedValue({ state: { actorStates: [current] } } as RoomSnapshot);
+    const waiting = expectActorUnchanged(room, actor, 450);
+    const result = waiting.then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    await vi.advanceTimersByTimeAsync(450);
+    expect(await result).toBeUndefined();
+    expect(captureRoom).toHaveBeenCalledTimes(3);
+    expect(actor.sleeping).toBe(initial);
+  });
+
+  it.each([
+    { field: 'position', change: { transformation: { position: [1, 0, 0] } } },
+    { field: 'rotation', change: { transformation: { rotation: [0, 1, 0] } } },
+    { field: 'scale', change: { transformation: { scale: [2, 1, 1] } } },
+    { field: 'locked', change: { locked: true } },
+    { field: 'nested sleeping', change: { containedObjects: [{ guid: 'child', sleeping: true }] } },
+  ])('rejects changed $field even when physics sleeping changes', async ({ change }) => {
+    const actor = {
+      ...before,
+      sleeping: false,
+      locked: false,
+      transformation: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+      containedObjects: [{ guid: 'child', sleeping: false }],
+    } as UnknownActorState;
+    vi.mocked(captureRoom).mockResolvedValue({
+      state: { actorStates: [{ ...actor, sleeping: true, ...change }] },
+    } as RoomSnapshot);
+    await expect(expectActorUnchanged(room, actor)).rejects.toThrow('changed during observation');
+  });
+
   it('propagates unrelated API errors without rewriting their signature', async () => {
     const error = new Error('API returned 500: unrelated outage');
     vi.mocked(captureRoom).mockRejectedValue(error);
