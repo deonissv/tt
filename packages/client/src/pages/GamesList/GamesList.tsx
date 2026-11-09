@@ -6,6 +6,7 @@ import type { GamePreviewDto } from '@tt/dto';
 import { GameCard, PromiseModal, Spinner, useToast } from '@components';
 import { GameService, RoomService } from '@services';
 import { getErrorMsg } from '../../utils';
+import addPlusUrl from '../../assets/add-plus.svg';
 
 export const GamesList = () => {
   const { addToast } = useToast();
@@ -81,7 +82,7 @@ export const GamesList = () => {
           className="aspect-[2/3] p-4 text-center border border-dashed border-gray-500 rounded-lg bg-gray-800 hover:bg-gray-700 transition duration-300 shadow-lg hover:shadow-xl cursor-pointer flex flex-col items-center justify-center"
           onClick={onNewGame}
         >
-          <img className="w-28 mb-4" src="https://www.svgrepo.com/show/218190/add-plus.svg" alt="Add New" />
+          <img className="w-28 mb-4" src={addPlusUrl} alt="Add New" />
           <div className="text-xl font-semibold">New</div>
         </div>
 

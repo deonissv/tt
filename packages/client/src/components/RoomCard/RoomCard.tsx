@@ -1,6 +1,7 @@
 import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 import type { RoomPreviewDto } from '@tt/dto';
 import { isURL } from '@tt/utils';
+import questionMarkUrl from '../../assets/question-mark.svg';
 
 interface RoomCardProps {
   room: RoomPreviewDto;
@@ -14,7 +15,7 @@ export const RoomCard: React.FC<RoomCardProps> = ({ room, onCreateRoom, onRemove
       <div className="w-[15%] h-[100px] object-cover">
         {isURL(room.gameBannerUrl) ? (
           <img
-            src={room.gameBannerUrl ?? 'https://www.svgrepo.com/show/126178/question-mark.svg'}
+            src={room.gameBannerUrl ?? questionMarkUrl}
             alt={room.gameName}
             className=" inset-0 w-full h-full object-cover p-0 m-0"
           />
