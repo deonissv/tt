@@ -20,19 +20,42 @@ export async function expectSpawnedActor(room: Room, before: SimulationStateSave
   return getActor((await waitForActorStable(room, actor.guid, () => true, actor)).state, actor.guid);
 }
 
-export const expectActorUnchanged = async (room: Room, before: UnknownActorState, duration = 2_000): Promise<void> => {
+function withoutPhysicsSleep(state: SimulationStateSave): SimulationStateSave {
+  return {
+    ...state,
+    actorStates: state.actorStates?.map(actor => ({ ...actor, sleeping: undefined })),
+  };
+}
+
+async function observeUnchanged(
+  capture: () => Promise<SimulationStateSave>,
+  before: SimulationStateSave,
+  duration: number,
+  message: string,
+): Promise<void> {
   const deadline = Date.now() + duration;
   do {
-    const current = getActor((await captureRoom(room)).state, before.guid);
+    const current = await capture();
     // Physics can enter or leave sleep without a player changing the actor.
     const differences = compareSnapshots(
-      { actorStates: [{ ...before, sleeping: undefined }] },
-      { actorStates: [{ ...current, sleeping: undefined }] },
+      withoutPhysicsSleep(before),
+      withoutPhysicsSleep(current),
       PHYSICS_STABILITY_TOLERANCES,
     );
     if (differences.length > 0) {
-      throw new Error(`Actor ${before.guid} changed during observation: ${JSON.stringify(differences)}`);
+      throw new Error(`${message}: ${JSON.stringify(differences)}`);
     }
     await new Promise(resolve => setTimeout(resolve, 150));
   } while (Date.now() < deadline);
-};
+}
+
+export const expectActorUnchanged = (room: Room, before: UnknownActorState, duration = 2_000): Promise<void> =>
+  observeUnchanged(
+    async () => ({ actorStates: [getActor((await captureRoom(room)).state, before.guid)] }),
+    { actorStates: [before] },
+    duration,
+    `Actor ${before.guid} changed during observation`,
+  );
+
+export const expectRoomUnchanged = (room: Room, before: SimulationStateSave, duration = 2_000): Promise<void> =>
+  observeUnchanged(async () => (await captureRoom(room)).state, before, duration, 'Room changed during observation');

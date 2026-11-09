@@ -7,7 +7,14 @@ import type { UnknownActorState } from '@tt/states';
 import { waitForRenderedFrames } from '../support/rendering';
 import { getActor, waitForActorStable, waitForRoomStable } from '../support/physics';
 import { orientationDistanceRadians } from '../support/orientation';
-import { expect, test, expectMatchingCanvases, expectActorUnchanged, expectClientAction } from '../test';
+import {
+  expect,
+  test,
+  expectMatchingCanvases,
+  expectActorUnchanged,
+  expectRoomUnchanged,
+  expectClientAction,
+} from '../test';
 
 const genericActor = manifestActor('3b9ed5');
 const card = manifestActor('8ac7c6');
@@ -77,9 +84,7 @@ test.describe(() => {
 
       const whileHeld = await captureRoom(room);
       expect(getActor(whileHeld.state, actorGuid)).toHaveHeldRotation(held, 'KeyE');
-      expect({ actorStates: [getActor(whileHeld.state, cardGuid)] }).toMatchSimulationState({
-        actorStates: [cardBefore],
-      });
+      await expectActorUnchanged(room, cardBefore);
 
       await page.mouse.move(actorPoint[0] + 90, actorPoint[1] - 70, { steps: 20 });
       await waitForActorStable(room, actorGuid, positionChanged, getActor(whileHeld.state, actorGuid));
@@ -130,9 +135,8 @@ test.describe(() => {
       await page.mouse.move(640, 15);
       await page.keyboard.press('KeyE');
 
-      const after = await waitForRoomStable(room);
-      expect(after.state).toMatchSimulationState(before.state);
       await waitForRoomStable(room);
+      await expectRoomUnchanged(room, before.state);
     },
   );
 });

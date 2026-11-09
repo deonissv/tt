@@ -6,7 +6,14 @@ import { positionChanged } from '../support/transforms';
 import { captureRoom } from '../support/api';
 import { waitForClientReady, waitForRenderedFrames } from '../support/rendering';
 import { actorIdentityList, getActor, waitForActorStable, waitForRoomStable } from '../support/physics';
-import { expect, test, expectMatchingCanvases, expectClientAction, expectSpawnedActor } from '../test';
+import {
+  expect,
+  test,
+  expectMatchingCanvases,
+  expectClientAction,
+  expectSpawnedActor,
+  expectRoomUnchanged,
+} from '../test';
 
 const points: Record<string, number[]> = coordinates.profiles.default;
 const depletedPoints: Record<string, number[]> = { ...points, ...coordinates.profiles['depleting-containers'] };
@@ -209,8 +216,8 @@ test.describe(() => {
       await page.mouse.move(start[0], start[1]);
       await waitForRenderedFrames(page);
       await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), '7a0b0b');
-      const after = (await waitForRoomStable(room)).state;
-      expect(after).toMatchSimulationState(before);
+      await waitForRoomStable(room);
+      await expectRoomUnchanged(room, before);
     },
   );
 });
@@ -232,8 +239,8 @@ test.describe(() => {
       await page.mouse.move(start[0], start[1]);
       await waitForRenderedFrames(page);
       await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), '51d35d');
-      const after = (await waitForRoomStable(room)).state;
-      expect(after).toMatchSimulationState(before);
+      await waitForRoomStable(room);
+      await expectRoomUnchanged(room, before);
     },
   );
 });

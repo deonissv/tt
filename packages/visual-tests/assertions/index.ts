@@ -1,5 +1,5 @@
 export { expect } from './expect';
-export { expectActorUnchanged, expectSpawnedActor } from './actors';
+export { expectActorUnchanged, expectRoomUnchanged, expectSpawnedActor } from './actors';
 export { expectClientAction } from './protocol';
 export {
   assertSnapshotComparisonMode,

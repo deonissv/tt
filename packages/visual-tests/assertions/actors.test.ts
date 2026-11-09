@@ -1,7 +1,7 @@
 import type { UnknownActorState } from '@tt/states';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { captureRoom, type Room, type RoomSnapshot } from '../support/api';
-import { expectActorUnchanged, expectSpawnedActor } from './actors';
+import { expectActorUnchanged, expectRoomUnchanged, expectSpawnedActor } from './actors';
 
 vi.mock('../support/api', () => ({ captureRoom: vi.fn() }));
 
@@ -115,5 +115,52 @@ describe('new actor observation', () => {
     const error = new Error('API returned 500');
     vi.mocked(captureRoom).mockRejectedValue(error);
     await expect(expectSpawnedActor(room, before)).rejects.toBe(error);
+  });
+});
+
+describe('unchanged room observation', () => {
+  const room = {} as Room;
+  const actor = {
+    guid: 'actor',
+    locked: false,
+    sleeping: false,
+    containedObjects: [{ guid: 'child', sleeping: false }],
+  } as UnknownActorState;
+  const before = { actorStates: [actor], tableState: { guid: 'table' } } as RoomSnapshot['state'];
+
+  it('allows only top-level physics sleep transitions across all observation samples', async () => {
+    vi.useFakeTimers();
+    vi.mocked(captureRoom).mockResolvedValue({
+      state: { ...before, actorStates: [{ ...actor, sleeping: true }] },
+    } as RoomSnapshot);
+    const waiting = expectRoomUnchanged(room, before, 450);
+    await vi.advanceTimersByTimeAsync(450);
+    await waiting;
+    expect(captureRoom).toHaveBeenCalledTimes(3);
+    expect(actor.sleeping).toBe(false);
+  });
+
+  it.each([
+    { field: 'removed actor', change: { actorStates: [] } },
+    { field: 'added actor', change: { actorStates: [actor, { ...actor, guid: 'extra' }] } },
+    { field: 'locked', change: { actorStates: [{ ...actor, locked: true }] } },
+    { field: 'table', change: { tableState: { guid: 'other-table' } } },
+    {
+      field: 'contained sleep state',
+      change: { actorStates: [{ ...actor, containedObjects: [{ guid: 'child', sleeping: true }] }] },
+    },
+  ])('rejects changed $field', async ({ change }) => {
+    vi.mocked(captureRoom).mockResolvedValue({ state: { ...before, ...change } } as RoomSnapshot);
+    await expect(expectRoomUnchanged(room, before)).rejects.toThrow('Room changed during observation');
+  });
+
+  it('detects a change after an initially unchanged sample', async () => {
+    vi.useFakeTimers();
+    vi.mocked(captureRoom)
+      .mockResolvedValueOnce({ state: before } as RoomSnapshot)
+      .mockResolvedValue({ state: { ...before, actorStates: [] } } as unknown as RoomSnapshot);
+    const result = expect(expectRoomUnchanged(room, before, 450)).rejects.toThrow('Room changed during observation');
+    await vi.advanceTimersByTimeAsync(150);
+    await result;
   });
 });

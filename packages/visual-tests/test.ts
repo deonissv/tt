@@ -153,6 +153,7 @@ export const test = base.extend<
 export {
   expect,
   expectActorUnchanged,
+  expectRoomUnchanged,
   expectClientAction,
   expectSpawnedActor,
   expectChangedCanvases,
