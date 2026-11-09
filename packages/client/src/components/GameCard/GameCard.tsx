@@ -3,6 +3,7 @@ import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
 import { AuthService } from '@services';
 import { isURL } from '@tt/utils';
 import type { ReactNode } from 'react';
+import questionMarkUrl from '../../assets/question-mark.svg';
 
 interface GameCardProps {
   game: {
@@ -28,7 +29,7 @@ export const GameCard = ({ game, onCreateRoom, onEditGame, onRemoveGame }: GameC
       <div className="w-full h-[150px] bg-[#144272] aspect-w-16 aspect-h-9 mb-4 overflow-hidden">
         {isURL(game.bannerUrl) ? (
           <img
-            src={game.bannerUrl ?? 'https://www.svgrepo.com/show/126178/question-mark.svg'}
+            src={game.bannerUrl ?? questionMarkUrl}
             alt={game.name}
             className=" inset-0 w-full h-full object-cover p-0 m-0"
           />
