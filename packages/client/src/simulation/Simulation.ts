@@ -131,12 +131,14 @@ export class Simulation extends SimulationBase {
     return this.scene.pick(this.scene.pointerX, this.scene.pointerY).pickedMesh as Mesh | null;
   }
 
+  // Hover and key actions resolve locked actors too: a locked container can
+  // still be drawn from (PICK_ITEM), only grabbing it is forbidden.
   private _pickActor(): ClientBase | null {
     const pickedMesh = this._pickMesh();
     const actorCandidate = pickedMesh?.parent;
     if (!(actorCandidate instanceof ClientBase)) return null;
 
-    return actorCandidate.pickable ? actorCandidate : null;
+    return actorCandidate;
   }
 
   private get _camera(): ArcRotateCamera {
@@ -182,7 +184,9 @@ export class Simulation extends SimulationBase {
     this.scene.onPointerObservable.add(evt => {
       if (evt.type !== PointerEventTypes.POINTERMOVE) return;
 
-      const hoveredActor = this._pickActor();
+      // Locked objects remain targets for draw actions, but have no hover outline.
+      const target = this._pickActor();
+      const hoveredActor = target?.pickable ? target : null;
 
       if (this._hoveredActor && !hoveredActor) {
         this.unhighlightActor(this._hoveredActor);
@@ -218,7 +222,11 @@ export class Simulation extends SimulationBase {
 
           this._cursorPos = this.getCursor();
           this._pickedActor = this._pickActor();
-          if (!this._pickedActor) return;
+          // A locked object can be hovered and drawn from, never grabbed.
+          if (!this._pickedActor?.pickable) {
+            this._pickedActor = null;
+            return;
+          }
           this.cbs.onPickActor(this._pickedActor);
           break;
         }

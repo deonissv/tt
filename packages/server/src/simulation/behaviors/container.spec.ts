@@ -1,10 +1,14 @@
+import { Matrix } from '@babylonjs/core';
+import { can, Capability } from '@tt/rules';
 import {
   ActorType,
   applyActorStateUpdate,
   type ActorState,
   type ActorStateUpdate,
   type BagState,
+  type DeckState,
   type TileStackState,
+  type UnknownActorState,
 } from '@tt/states';
 import type { ServerBase } from '../actors';
 import { ServerActorBuilder } from '../serverActorBuilder';
@@ -29,7 +33,7 @@ function actorWithState(state: BagState | TileStackState): {
   return { actor, updateState };
 }
 
-function stackActor(size: number): ServerBase {
+function stackActor(size: number, locked = false): ServerBase {
   let state: TileStackState = {
     type: ActorType.TILE_STACK,
     guid: 'stack',
@@ -37,6 +41,7 @@ function stackActor(size: number): ServerBase {
     tileType: 0,
     faceURL: 'face.png',
     size,
+    locked,
   };
   return {
     guid: state.guid,
@@ -101,6 +106,53 @@ describe('functional container behavior', () => {
     expect(actor.toState()).toMatchObject({ size: 3 });
     expect(actor.model.scaling.y).toBe(3);
     expect(actor.__collider.scaling.y).toBe(3);
+  });
+
+  it.each(['bag', 'deck', 'stack'] as const)('draws an unlocked item from a locked %s', async kind => {
+    const actor = stackActor(3, true);
+    if (kind !== 'stack') {
+      const child = { ...item('child'), locked: true };
+      let state: BagState | DeckState =
+        kind === 'bag'
+          ? { type: ActorType.BAG, guid: 'bag', name: 'Bag', locked: true, containedObjects: [child] }
+          : {
+              type: ActorType.DECK,
+              guid: 'deck',
+              name: 'Deck',
+              locked: true,
+              cards: [
+                {
+                  ...child,
+                  type: ActorType.CARD,
+                  faceURL: 'face.png',
+                  backURL: 'back.png',
+                  rows: 1,
+                  cols: 1,
+                  sequence: 0,
+                },
+              ],
+            };
+      actor.toState = () => structuredClone(state);
+      actor.updateState = update => {
+        state = applyActorStateUpdate(state, update) as BagState | DeckState;
+      };
+      actor.model.getWorldMatrix = () => Matrix.Identity();
+    }
+    const before = actor.toState() as UnknownActorState;
+    const transformation = structuredClone(actor.transformation);
+    const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValueOnce(null);
+
+    await pickItem(actor, 'client', 1);
+
+    const drawn = build.mock.calls[0][0];
+    expect(drawn.locked).toBe(false);
+    expect(can(drawn, Capability.Pickable)).toBe(true);
+    expect(actor.toState()).toMatchObject({ locked: true });
+    expect(can(actor.toState() as UnknownActorState, Capability.Pickable)).toBe(false);
+    expect(actor.transformation).toEqual(transformation);
+    if (before.type === ActorType.BAG) expect(before.containedObjects[0].locked).toBe(true);
+    if (before.type === ActorType.DECK) expect(before.cards[0].locked).toBe(true);
+    if (kind === 'stack') expect(actor.toState()).toMatchObject({ size: 2 });
   });
 
   it('preserves a concurrent successful draw when another draw fails', async () => {

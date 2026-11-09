@@ -8,7 +8,7 @@ import { Client } from './client';
 import type { RoomsService } from './rooms.service';
 
 import type { Room } from '@prisma/client';
-import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG } from '@tt/actions';
+import type { ClientActionMsg, CursorsPld, DownloadProgressPld, MSG, ServerActionMsg } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
 import { Channel } from '@tt/channel';
 import type { SimulationState, SimulationStateSave } from '@tt/states';
@@ -259,7 +259,7 @@ export class SimulationRoom {
     }, {});
 
     const cursorsAction = this.actionBuilder.getCursorsAction(cursors);
-    const simActions = this.actionBuilder.getSimActions(this.simulation.toState());
+    const simActions = this.patchActionAssetURLs(this.actionBuilder.getSimActions(this.simulation.toState()));
 
     this.clients.forEach((client, ws) => {
       const actions = client.prepareMessage(cursorsAction, simActions);
@@ -304,6 +304,32 @@ export class SimulationRoom {
     return setInterval(() => {
       this.tick();
     }, this.room.stateTickDelay);
+  }
+
+  /**
+   * Rewrites raw save URLs in spawned-actor and deck-rerender payloads so the
+   * client loads those assets through the room proxy, exactly like the initial
+   * STATE payload does.
+   */
+  private patchActionAssetURLs(actions: ServerActionMsg[]): ServerActionMsg[] {
+    return actions.map(action => {
+      switch (action.type) {
+        case ServerAction.SPAWN_ACTOR:
+          return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
+        case ServerAction.SPAWN_PICKED_ACTOR:
+          return {
+            ...action,
+            payload: {
+              ...action.payload,
+              state: this.assetUrlService.patchStateURLs(action.payload.state, this.room.code),
+            },
+          };
+        case ServerAction.RERENDER_DECK:
+          return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
+        default:
+          return action;
+      }
+    });
   }
 
   /**

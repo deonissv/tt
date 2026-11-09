@@ -82,6 +82,19 @@ describe('@tt/rules', () => {
     expect(containerSize(actor())).toBeNull();
   });
 
+  it('lets players draw from locked containers while every movement stays blocked', () => {
+    // Tabletop Simulator reference: locking a deck or bag pins it in place but
+    // drawing from it keeps working (see the locked Munchkin bag in demo.json).
+    expect(can({ ...bag(1), locked: true }, Capability.Container)).toBe(true);
+    expect(can({ ...deck(1), locked: true }, Capability.Container)).toBe(true);
+    expect(can({ ...stack(2), locked: true }, Capability.Container)).toBe(true);
+
+    expect(can({ ...bag(0), locked: true }, Capability.Container)).toBe(false);
+    expect(can({ ...bag(2), locked: true }, Capability.Shuffleable)).toBe(false);
+    expect(can({ ...deck(2), locked: true }, Capability.Pickable)).toBe(false);
+    expect(can({ ...deck(2), locked: true }, Capability.Flippable)).toBe(false);
+  });
+
   it('selects die values with a pure numeric comparison', () => {
     const state: Die4State = {
       type: ActorType.DIE4,

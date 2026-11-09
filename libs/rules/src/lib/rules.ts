@@ -60,7 +60,10 @@ export function isContainerEmpty(state: UnknownActorState): boolean {
 
 export function can(state: UnknownActorState, capability: Capability, _ctx?: PlayerCtx): boolean {
   if (!BASE_CAPABILITIES[state.type]?.has(capability)) return false;
-  if (state.locked) return false;
+  // Locking only pins an object in place. Tabletop Simulator still lets players
+  // draw from a locked deck or bag (the drawn item itself is not locked), so
+  // Container stays available while every movement capability stays blocked.
+  if (state.locked && capability !== Capability.Container) return false;
   if (capability === Capability.Container && isContainerEmpty(state)) return false;
 
   if (capability === Capability.Shuffleable) {

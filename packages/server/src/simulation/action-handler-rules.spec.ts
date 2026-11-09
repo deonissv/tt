@@ -79,6 +79,24 @@ describe('ActionHandler portable rules', () => {
     expect(pickItem).toHaveBeenCalledWith(actor, player.code, player.pickHeight);
   });
 
+  it('allows extraction from a locked container like Tabletop Simulator does', () => {
+    const lockedBag = { ...bagState(1), locked: true };
+    const actor = runtimeActor(lockedBag);
+    handler.actors = [actor];
+
+    handler.handlePickItem('bag');
+
+    expect(pickItem).toHaveBeenCalledWith(actor, player.code, player.pickHeight);
+  });
+
+  it('rejects grabbing a locked container before invoking runtime behavior', () => {
+    handler.actors = [runtimeActor({ ...bagState(1), locked: true })];
+
+    handler.handlePickActor('bag');
+
+    expect(pick).not.toHaveBeenCalled();
+  });
+
   it('requires at least two items before invoking shuffle behavior', () => {
     handler.actors = [runtimeActor(bagState(1))];
 
