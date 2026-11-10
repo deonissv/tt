@@ -78,7 +78,7 @@ describe('TileStack', () => {
       type: ActorType.TILE,
       tileType: TileType.HEX,
       faceURL: 'face.png',
-      transformation: { position: [2, 4, 4], scale: [2, 2, 2] },
+      transformation: { position: [2, 4, 4], scale: [2, 6, 2] },
     });
     expect(builtState?.guid).not.toBe(state.guid);
     expect(stack.size).toBe(2);

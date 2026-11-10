@@ -46,7 +46,6 @@ export async function pickItem(actor: ServerBase, clientId: string, pickHeight: 
       guid: actor.scene.getUniqueGUID(),
       type: ActorType.TILE,
     } satisfies TileState;
-    transformation.scale[1] /= state.size;
     update = { guid: state.guid, size: state.size - 1 };
   }
 

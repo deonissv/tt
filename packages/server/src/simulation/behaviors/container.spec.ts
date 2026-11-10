@@ -97,6 +97,19 @@ describe('functional container behavior', () => {
     expect(updateState).not.toHaveBeenCalled();
   });
 
+  it('keeps the drawn tile at the stack node scale', async () => {
+    const actor = stackActor(5);
+    const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue({ picked: 'client' } as ServerBase);
+
+    await pickItem(actor, 'client', 1);
+
+    expect(build.mock.calls[0][0]).toMatchObject({
+      type: ActorType.TILE,
+      transformation: { scale: [1, 1, 1], position: [0, 1, 0] },
+    });
+    expect(actor.toState()).toMatchObject({ size: 4 });
+  });
+
   it('restores a tile when creation rejects', async () => {
     const actor = stackActor(3);
     vi.spyOn(ServerActorBuilder, 'build').mockRejectedValueOnce(new Error('asset unavailable'));
