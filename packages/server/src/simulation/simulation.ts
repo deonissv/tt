@@ -34,6 +34,8 @@ export class Simulation extends SimulationBase {
 
     hk.setVelocityLimits(50, 200);
     this.scene.enablePhysics(gravityVec, hk);
+    // Long render frames can push thin cards through a tabletop in one step.
+    this.scene.getPhysicsEngine()?.setSubTimeStep(1000 / 60);
   }
 
   static async actorFromState(actorState: UnknownActorState): Promise<ServerBase | null> {

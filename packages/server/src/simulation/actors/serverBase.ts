@@ -48,7 +48,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     this.body.shape!.material.restitution = 1;
     this.body.shape!.material.friction = 1;
 
-    this._scene.onBeforeRenderObservable.add(() => this._beforeRender());
+    this._scene.onAfterPhysicsObservable.add(() => this.updateHeldTarget());
     this.body.setCollisionCallbackEnabled(true);
     this.body.disablePreStep = false;
     this._setTransformations(state.transformation);
@@ -60,7 +60,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     if (state.locked) this.lock();
   }
 
-  private _beforeRender() {
+  private updateHeldTarget() {
     if (this.picked !== null && this.__targetPosition !== null) {
       let upHeight = this.defaultY + this.pickHeight;
       if (this.flipped) upHeight += 2 * this.defaultY;

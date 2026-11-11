@@ -2,7 +2,7 @@ import type { UnknownActorState } from '@tt/states';
 import { manifestActor } from '../fixtures/manifest';
 import { ClientAction } from '@tt/actions';
 import coordinates from '../fixtures/targeting/coordinates.json';
-import { positionChanged } from '../support/transforms';
+import { positionChanged, transformVector } from '../support/transforms';
 import { captureRoom } from '../support/api';
 import { waitForClientReady, waitForRenderedFrames } from '../support/rendering';
 import { actorIdentityList, getActor, waitForActorStable, waitForRoomStable } from '../support/physics';
@@ -90,6 +90,58 @@ for (const actor of ['7a0b0b', 'fb31d5', '51d35d'].map(manifestActor)) {
 const deck = manifestActor('fb31d5');
 const bag = manifestActor('7a0b0b');
 const tileStack = manifestActor('51d35d');
+
+test.describe(() => {
+  test.use({ actorGuids: [deck.guid] });
+  test(
+    `[${deck.typeName} ${deck.guid}] drawn card drops onto clear table space`,
+    { tag: [`@actor:${deck.typeName}`, '@behavior:extract'] },
+    async ({ player: { page, connection }, guestPlayer, room }, testInfo) => {
+      const before = (await captureRoom(room)).state;
+      const start = points[deck.guid];
+      // The deck is the only fixture actor, leaving the middle of the table clear.
+      const end = [640, 360];
+      await page.locator('canvas').focus();
+      await page.mouse.move(start[0], start[1]);
+      await waitForRenderedFrames(page);
+      await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), deck.guid);
+      const drawn = await expectSpawnedActor(room, before);
+      // Wait for the client to load the held card and start sending its movements.
+      await expect(async () => {
+        await expectClientAction(
+          connection,
+          ClientAction.MOVE_ACTOR,
+          () => page.mouse.move(start[0] + 0.1, start[1]).then(() => page.mouse.move(start[0], start[1])),
+          drawn.guid,
+          1_000,
+        );
+      }).toPass({ timeout: 30_000, intervals: [100] });
+      await page.mouse.down();
+      await expectClientAction(
+        connection,
+        ClientAction.MOVE_ACTOR,
+        () => page.mouse.move(end[0], end[1], { steps: 20 }),
+        drawn.guid,
+      );
+      const held = getActor((await waitForActorStable(room, drawn.guid, positionChanged, drawn)).state, drawn.guid);
+      const [heldX, heldY, heldZ] = transformVector(held, 'position');
+      const [deckX, , deckZ] = transformVector(getActor(before, deck.guid), 'position');
+      expect(Math.hypot(heldX - deckX, heldZ - deckZ), 'card is still over the deck before release').toBeGreaterThan(5);
+      expect(heldY, 'card must be held above the table before release').toBeGreaterThan(2);
+
+      await expectClientAction(connection, ClientAction.RELEASE_ACTOR, () => page.mouse.up(), drawn.guid);
+      await waitForActorStable(room, drawn.guid, positionChanged, held);
+      const after = (await waitForRoomStable(room)).state;
+      const landed = getActor(after, drawn.guid);
+      const [x, y, z] = transformVector(landed, 'position');
+      const [sourceX, , sourceZ] = transformVector(getActor(after, deck.guid), 'position');
+      expect(Math.hypot(x - sourceX, z - sourceZ), 'card landed on the source deck').toBeGreaterThan(5);
+      expect(y, 'card sank below the visible felt').toBeGreaterThan(0.85);
+      expect(y, 'card did not settle at table height').toBeLessThan(0.95);
+      await expectMatchingCanvases(testInfo, 'card-dropped-on-table', [page, guestPlayer!.page]);
+    },
+  );
+});
 
 test.describe(() => {
   // Tabletop Simulator lets players draw from locked containers (the Munchkin
