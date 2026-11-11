@@ -1,4 +1,4 @@
-import { Quaternion, Vector2, Vector3 } from '@babylonjs/core';
+import { PhysicsActivationControl, Quaternion, Vector2, Vector3 } from '@babylonjs/core';
 import { ActorType, type DieBaseState } from '@tt/states';
 import { PRECISION_EPSILON } from '@tt/utils';
 import type { ServerBase } from '../actors';
@@ -48,6 +48,10 @@ export function pick(actor: ServerBase, clientId: string, pickHeight: number): v
 
   actor.body.setLinearVelocity(Vector3.Zero());
   actor.body.setAngularVelocity(Vector3.Zero());
+  // The lift target is set after the next physics step. Until then, a trigger
+  // must not fall into the surface it was resting on.
+  actor.body.setGravityFactor(0);
+  actor.hk.setActivationControl(actor.body, PhysicsActivationControl.ALWAYS_ACTIVE);
   actor.pickHeight = pickHeight;
   actor.__targetPosition = new Vector2(actor.position.x, actor.position.z);
 
@@ -62,9 +66,21 @@ export function pick(actor: ServerBase, clientId: string, pickHeight: number): v
 }
 
 export function release(actor: ServerBase): void {
+  const rotation = actor.__targetRotation ?? actor.absoluteRotationQuaternion;
+  // Apply the held orientation before the next step so the card drops without spin.
+  if (actor.__targetRotation) {
+    actor.rotation = rotation.toEulerAngles();
+    actor._forceUpdate();
+  }
+  actor.body.setTargetTransform(actor.position, rotation);
+  actor.body.setLinearVelocity(Vector3.Zero());
+  actor.body.setAngularVelocity(Vector3.Zero());
+  actor.body.setGravityFactor(1);
+  actor.hk.setActivationControl(actor.body, PhysicsActivationControl.SIMULATION_CONTROLLED);
   actor.picked = null;
   actor.pickHeight = 0;
   actor.__targetPosition = null;
+  actor.__targetRotation = null;
   actor.body.setCollisionCallbackEnabled(true);
   actor.body.shape!.isTrigger = false;
 }

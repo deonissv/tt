@@ -118,7 +118,7 @@ export class SharedBase<T extends ActorBaseState = ActorBaseState> extends Trans
 
   _forceUpdate() {
     this.body.disablePreStep = false;
-    this._scene.onAfterRenderObservable.addOnce(() => {
+    this._scene.onAfterPhysicsObservable.addOnce(() => {
       this.body.disablePreStep = true;
     });
   }

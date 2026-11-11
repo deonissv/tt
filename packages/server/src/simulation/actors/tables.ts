@@ -196,7 +196,8 @@ export class RectangleTable extends RectangleTableMixin<TableCtor>(ServerBase) {
     const tableFrame = await Loader.loadMesh(AssetsManager.RECTANGLE_TABLE.frame.meshURL);
     const felt = CreatePlane('felt', { width: 56.24, height: 36.33 });
     felt.rotation.x = Math.PI / 2;
-    felt.position.y = 0.85;
+    // Leave room for resting contacts to overlap without hiding thin cards under the visible felt.
+    felt.position.y = 0.86;
 
     if (!tableFrame) return null;
     const wrapper = Mesh.MergeMeshes([tableFrame, felt], true, false, undefined, false, true)!;
