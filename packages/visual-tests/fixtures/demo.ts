@@ -21,6 +21,7 @@ type FixtureVariant =
   | 'exhausted-tile-stack'
   | 'failed-bag-item'
   | 'face-down-deck'
+  | 'repeated-deck-card-guids'
   | 'locked-actor'
   | 'locked-bag'
   | 'persistence'
@@ -43,6 +44,12 @@ const getActor = <T extends UnknownActorState>(state: SimulationStateSave, guid:
 };
 
 const applyVariant = (state: SimulationStateSave, variant: FixtureVariant): void => {
+  if (variant === 'repeated-deck-card-guids') {
+    const deck = getActor<DeckState>(state, 'fb31d5');
+    // The Munchkin save reuses card GUIDs within decks. The third draw
+    // collides with the first card already lying on the table.
+    deck.cards.at(-3)!.guid = deck.cards.at(-1)!.guid;
+  }
   if (variant === 'face-down-deck') {
     getActor<DeckState>(state, 'fb31d5').transformation!.rotation = [Math.PI, 0, 0];
   }

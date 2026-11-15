@@ -53,10 +53,7 @@ export class Card extends CardMixin(ClientBase<CardState>) {
     faceTexture.uScale = cardWidth;
     faceTexture.vScale = cardHeight;
 
-    const ratio = faceTexture.getBaseSize().width / grid.cols / (faceTexture.getBaseSize().height / grid.rows);
-    model.scaling.x = 1.6 * ratio;
-
-    return FlatModel(
+    const cardModel = FlatModel(
       model,
       {
         texture: faceTexture,
@@ -73,6 +70,21 @@ export class Card extends CardMixin(ClientBase<CardState>) {
         faceIndexCount: CARD_BACK_INDEX_COUNT,
       },
     );
+
+    const material = cardModel.material;
+    const updateWidth = () => {
+      // A deck may have rerendered with another face while this image loaded.
+      if (cardModel.isDisposed() || cardModel.material !== material) return;
+      const { width, height } = faceTexture.getBaseSize();
+      if (width > 0 && height > 0) {
+        cardModel.scaling.x = 1.6 * (width / grid.cols / (height / grid.rows));
+      }
+    };
+
+    cardModel.scaling.x = 1.6;
+    updateWidth();
+    if (!faceTexture.isReady()) faceTexture.onLoadObservable.addOnce(updateWidth);
+    return cardModel;
   }
 
   static getColRow(sequence: number, cols: number): [number, number] {

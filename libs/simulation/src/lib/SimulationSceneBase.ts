@@ -4,15 +4,30 @@ import { UUIDv4 } from '@tt/utils';
 
 const GET_GUID_ATTEMPTS = 1000000;
 export class SimulationSceneBase extends Scene {
-  getUniqueGUID() {
-    const guids = this.actors.map(actor => actor.guid);
-    if (guids.length > 999999) {
+  private readonly reservedGUIDs = new Set<string>();
+
+  private getUsedGUIDs(): Set<string> {
+    return new Set([...this.actors.map(actor => actor.guid), ...this.reservedGUIDs]);
+  }
+
+  releaseGUID(guid: string): void {
+    this.reservedGUIDs.delete(guid);
+  }
+
+  getUniqueGUID(preferredGUID?: string): string {
+    const guids = this.getUsedGUIDs();
+    if (preferredGUID !== undefined && !guids.has(preferredGUID)) {
+      this.reservedGUIDs.add(preferredGUID);
+      return preferredGUID;
+    }
+    if (guids.size > 999999) {
       throw new Error('Cant generate guid: Too many actors');
     }
 
     for (let i = 0; i < GET_GUID_ATTEMPTS; i++) {
       const candidate = UUIDv4().slice(0, 6);
-      if (!guids.includes(candidate)) {
+      if (!guids.has(candidate)) {
+        this.reservedGUIDs.add(candidate);
         return candidate;
       }
     }
