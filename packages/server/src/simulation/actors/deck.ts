@@ -1,13 +1,19 @@
+import { Axis, Vector3, type Quaternion } from '@babylonjs/core';
 import { Loader } from '@tt/loader';
 import { containerSize } from '@tt/rules';
 import type { DeckState } from '@tt/states';
-import { pickItem, shuffle } from '../behaviors/container';
+import { shuffle as shuffleItems } from '@tt/utils';
+import { spawnDrawnItem } from '../behaviors/container';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
 export class Deck extends ServerBase<DeckState> {
   get size(): number {
     return containerSize(this.toState()) ?? 0;
+  }
+
+  getPickRotation(): Quaternion {
+    return this.absoluteRotationQuaternion;
   }
 
   static async fromState(state: DeckState): Promise<Deck | null> {
@@ -23,10 +29,20 @@ export class Deck extends ServerBase<DeckState> {
   }
 
   async pickItem(clientId: string, pickHeight: number): Promise<ServerBase | null> {
-    return pickItem(this, clientId, pickHeight);
+    const state = this.toState();
+    if (state.cards.length < 1) return null;
+    const up = Vector3.TransformNormal(Axis.Y, this.model.getWorldMatrix()).normalize();
+    const faceUp = Vector3.Dot(up, Axis.Y) > 0;
+    const child = structuredClone(faceUp ? state.cards.at(-1)! : state.cards.at(0)!);
+    const cards = structuredClone(faceUp ? state.cards.slice(0, -1) : state.cards.slice(1));
+    this.updateState({ guid: state.guid, cards });
+    this.model.scaling.y = cards.length;
+    return spawnDrawnItem(this, child, clientId, pickHeight);
   }
 
   shuffle() {
-    shuffle(this);
+    const cards = structuredClone(this.toState().cards);
+    shuffleItems(cards);
+    this.updateState({ guid: this.guid, cards });
   }
 }

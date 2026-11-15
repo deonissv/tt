@@ -1,11 +1,10 @@
 import type { Tuple } from '@babylonjs/core';
 import type { ClientActionMsg } from '@tt/actions';
 import { ClientAction } from '@tt/actions';
-import { can, Capability } from '@tt/rules';
-import type { UnknownActorState } from '@tt/states';
+import { Capability } from '@tt/rules';
+import { can } from './actor-rules';
 import type { Client } from '../rooms/client';
 import type { ServerBase } from './actors';
-import { flip, move, pick, pickItem, release, roll, rotate, shuffle } from './behaviors';
 
 export class ActionHandler {
   actors: ServerBase[] = [];
@@ -55,62 +54,57 @@ export class ActionHandler {
     }
   }
 
-  private findCapableActor(guid: string, capability: Capability): ServerBase | undefined {
-    const actor = this.actors.find(actor => actor.guid === guid);
-    if (!actor) return undefined;
-
-    const state = actor.toState() as UnknownActorState;
-    return can(state, capability, { code: this.client.code }) ? actor : undefined;
-  }
-
   handlePickItem(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Container);
-    if (actor) void pickItem(actor, this.client.code, this.client.pickHeight);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Container, { code: this.client.code }))
+      void actor.pickItem(this.client.code, this.client.pickHeight);
   }
 
   handlePickActor(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Pickable);
-    if (actor) pick(actor, this.client.code, this.client.pickHeight);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Pickable, { code: this.client.code }))
+      actor.pick(this.client.code, this.client.pickHeight);
   }
 
   handleReleaseActor(guid: string) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor?.picked === this.client.code) release(actor);
+    if (actor?.picked === this.client.code) actor.release();
   }
 
   releaseHeld(client: Client, actors: ServerBase[]): void {
     for (const actor of actors) {
-      if (actor.picked === client.code) release(actor);
+      if (actor.picked === client.code) actor.release();
     }
   }
 
   handleMoveActor(guid: string, position: Tuple<number, 2>) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor?.picked === this.client.code) move(actor, ...position);
+    if (actor?.picked === this.client.code) actor.move(...position);
   }
   handleRoll(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Rollable);
-    if (actor) roll(actor);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Rollable, { code: this.client.code })) actor.roll();
   }
 
   handleShuffle(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Shuffleable);
-    if (actor) shuffle(actor);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Shuffleable, { code: this.client.code })) actor.shuffle();
   }
 
   handleFlip(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Flippable);
-    if (actor) flip(actor);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Flippable, { code: this.client.code })) actor.flip();
   }
 
   handleRotateCW(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Rotatable);
-    if (actor) rotate(actor, this.client.rotationStep);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Rotatable, { code: this.client.code })) actor.rotateCW(this.client.rotationStep);
   }
 
   handleRotateCCW(guid: string) {
-    const actor = this.findCapableActor(guid, Capability.Rotatable);
-    if (actor) rotate(actor, -this.client.rotationStep);
+    const actor = this.actors.find(actor => actor.guid === guid);
+    if (actor && can(actor, Capability.Rotatable, { code: this.client.code }))
+      actor.rotateCCW(this.client.rotationStep);
   }
 
   handleSetPickHeight(height: number) {

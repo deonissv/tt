@@ -1,6 +1,6 @@
 import { Quaternion, Vector3 } from '@babylonjs/core';
 import type { ServerBase } from '../actors';
-import { flip, rotate } from './transform';
+import { flip, pick, rotate } from './transform';
 
 const quarter = Math.PI / 2;
 
@@ -21,6 +21,32 @@ function expectOrientation(actor: ServerBase, rotation: number[]): void {
 }
 
 describe('held actor transforms', () => {
+  it('uses the actor pickup policy during shared physics setup', () => {
+    const rotation = Quaternion.FromEulerAngles(0.3, 0.6, 0.9);
+    const getPickRotation = vi.fn().mockReturnValue(rotation);
+    const actor = {
+      picked: null,
+      position: Vector3.Zero(),
+      body: {
+        setLinearVelocity: vi.fn(),
+        setAngularVelocity: vi.fn(),
+        setGravityFactor: vi.fn(),
+        setCollisionCallbackEnabled: vi.fn(),
+        shape: { isTrigger: false },
+      },
+      hk: { setActivationControl: vi.fn() },
+      getPickRotation,
+    } as unknown as ServerBase;
+
+    pick(actor, 'player', 2, getPickRotation);
+
+    expect(getPickRotation).toHaveBeenCalledOnce();
+    expect(actor.__targetRotation).toBe(rotation);
+    expect(actor.picked).toBe('player');
+    expect(actor.pickHeight).toBe(2);
+    expect(actor.body.shape!.isTrigger).toBe(true);
+  });
+
   it.each([
     { angle: quarter, expected: [-quarter, quarter, 0] },
     { angle: -quarter, expected: [quarter, -quarter, 0] },

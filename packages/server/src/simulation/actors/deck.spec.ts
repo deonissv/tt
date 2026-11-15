@@ -1,4 +1,4 @@
-import { CreateBox, Logger } from '@babylonjs/core';
+import { CreateBox, Logger, Quaternion, Vector3 } from '@babylonjs/core';
 import { Loader } from '@tt/loader';
 import { ActorType, type CardState, type DeckState } from '@tt/states';
 import { initHavok } from '../../../src/utils';
@@ -119,6 +119,25 @@ describe('Deck', () => {
     for (const { state, resolve } of pending) resolve(new Card(state, CreateBox('drawn-card', { size: 1 })));
     const drawn = await Promise.all([first, second]);
     expect(drawn.map(actor => actor?.picked)).toEqual(['client', 'other-client']);
+  });
+
+  it('draws the bottom card when the deck is face down', async () => {
+    const sim = getPhSim();
+    try {
+      const deck = new Deck(deckState(), CreateBox('deck-model', { size: 1 }));
+      deck.rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), Math.PI);
+      deck.computeWorldMatrix(true);
+      deck.model.computeWorldMatrix(true);
+      const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue(null);
+
+      await deck.pickItem('client', 1);
+
+      expect(build.mock.calls[0][0].guid).toBe('bottom');
+      expect(deck.toState().cards.map(({ guid }) => guid)).toEqual(['top']);
+      expect(deck.model.scaling.y).toBe(1);
+    } finally {
+      sim.engine.dispose();
+    }
   });
 
   it('shuffles cards without mutating the input state', () => {

@@ -1,7 +1,6 @@
 import { Vector3 } from '@babylonjs/core';
 import { getRandomInt } from '@tt/utils';
 import type { ServerBase } from '../actors';
-import { pick, release } from './transform';
 
 const ROLL_IMPULSE_MIN = 450;
 const ROLL_IMPULSE_MAX = 600;
@@ -17,9 +16,9 @@ export function roll(actor: ServerBase): void {
   );
 
   actor.body.setLinearVelocity(Vector3.Zero());
-  pick(actor, '', 0.5);
+  actor.pick('', 0.5);
   setTimeout(() => {
-    release(actor);
+    actor.release();
     setTimeout(() => {
       actor.body.applyImpulse(new Vector3(0, impulse, 0), actor.body.getObjectCenterWorld());
       actor.body.applyAngularImpulse(angular);
