@@ -81,3 +81,7 @@ lock timeout fails setup without touching Docker.
 Run `npm run test:mutation:smoke` for a quick check, or `npm run test:mutation`
 to mutate application code, shared libraries, and visual-test helpers against
 the unit tests. Open `reports/mutation/index.html` to inspect the results.
+
+CI runs mutation smoke checks on pull requests and pushes to `main`. The separate
+mutation workflow runs the full suite nightly at 02:37 UTC when the latest commit
+is less than 24 hours old. Manual runs can select full, incremental, or smoke scope.
