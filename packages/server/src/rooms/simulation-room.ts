@@ -15,6 +15,7 @@ import type { SimulationState, SimulationStateSave } from '@tt/states';
 import { hasProperty, isObject } from '@tt/utils';
 import type { ValidatedUser } from '../auth/validated-user';
 import type { ActionHandler } from '../simulation/action-handler';
+import { parseClientActions } from './action-validation';
 import { ActionBuilder } from './action-builder';
 import type { AssetUrlService } from './asset-url.service';
 
@@ -174,7 +175,13 @@ export class SimulationRoom {
    */
   private onMessage(event: WebSocket.MessageEvent, canClose: boolean) {
     SimulationRoom.logger.debug(`Received message: ${JSON.stringify(event.data)}`);
-    const actions = Channel.read(event) as ClientActionMsg[];
+    let actions: ClientActionMsg[];
+    try {
+      actions = parseClientActions(Channel.read(event));
+    } catch (e) {
+      SimulationRoom.logger.warn(`Dropped malformed frame: ${String(e)}`);
+      return;
+    }
 
     const cursorAction = actions.find(action => action.type === ClientAction.CURSOR);
     const cursorClient = this.clients.get(event.target)?.code;
