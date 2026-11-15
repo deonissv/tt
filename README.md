@@ -1,42 +1,55 @@
-# SETUP
+# TT
 
-rename _example-env_ to _.env_
+TT is a multiplayer tabletop simulator. It loads Tabletop Simulator JSON saves and keeps players in sync over WebSockets.
 
-## Via docker
+## Getting started
 
-```
+### Requirements
+
+- Node.js 22 or higher and npm. CI uses Node.js 22.
+- PostgreSQL for local development.
+- Docker Compose for the Docker development environment and container-based tests.
+
+### Local development
+
+Run commands from the repository root. The project uses npm workspaces.
+
+1. Install dependencies with `npm ci`.
+2. Copy `example-env` to `.env` and configure it for your local PostgreSQL database. Database scripts load `.env` through dotenv-cli.
+3. Start PostgreSQL, then run `npm run db:init` to generate Prisma types, push the schema, and seed data. Check the target database first, since this command changes its schema and data.
+4. Start the client in one terminal:
+
+   ```bash
+   npm run client dev
+   ```
+
+5. Start the server in another terminal:
+
+   ```bash
+   npm run server dev
+   ```
+
+The root `npm run dev` script also tries to start `packages/shared`, which does not exist. Use the separate commands above.
+
+### Other commands
+
+| Task | Command |
+| --- | --- |
+| Build the application | `npm run build` |
+| Start the built application | `npm run start` |
+| Generate Prisma types without changing the database | `npm run db:gen` |
+| Generate types, push the database schema, and seed data | `npm run db:init` |
+| Start the Docker development profile | `npm run docker:dev` |
+
+### Docker setup
+
+Create `.env` from `example-env` and configure it for the Docker environment, then run:
+
+```bash
 docker compose up --build
 ```
 
 The visual regression stack uses a separate Compose project.
-
-## Manual
-
-### Requirements:
-
-Node.js 22 or higher, PostgreSQL
-
-- Start a PostresSQL db
-- Edit data required to connect to db in .env file
-- Initialize a schema and init data
-
-```
-  npm run i:all
-  npm run db:init
-
-```
-
-- Build apps
-
-```
-npm run build
-```
-
-- Start apps
-
-```
-npm run start
-```
 
 # Simulation key bindings:
 
