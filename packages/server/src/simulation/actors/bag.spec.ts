@@ -3,7 +3,6 @@ import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
 import { initHavok } from '../../../src/utils';
 import { getPhSim } from '../../../test/testUtils';
-import { pickItem } from '../behaviors';
 import { ServerActorBuilder } from '../serverActorBuilder';
 import { Actor } from './actor';
 import { Bag } from './bag';
@@ -55,7 +54,7 @@ describe('container behavior', () => {
     sim.start();
     await wait(100);
 
-    await pickItem(bag, '', 1);
+    await bag.pickItem('', 1);
     await wait(100);
 
     const actors = sim.actors;

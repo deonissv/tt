@@ -1,4 +1,4 @@
-import { CreateBox, Logger } from '@babylonjs/core';
+import { CreateBox, Logger, Vector3 } from '@babylonjs/core';
 import { Loader } from '@tt/loader';
 import { ActorType, type DieState } from '@tt/states';
 import { initHavok } from '../../../src/utils';
@@ -42,6 +42,26 @@ describe('ServerDie', () => {
     const die = new ServerDie(dieState(type, faces), CreateBox(`d${faces}`, { size: 1 }));
 
     expect(die.numFaces).toBe(faces);
+  });
+
+  it('uses the nearest configured orientation when picked', () => {
+    const sim = getPhSim();
+    try {
+      const state = dieState(ActorType.DIE4, 4);
+      state.rotationValues[0].rotation = [0, 0, 1];
+      state.rotationValues[1].rotation = [1, 0, 0];
+      state.rotationValues[2].rotation = [0, 1, 0];
+      state.rotationValues[3].rotation = [-1, 0, 0];
+      state.transformation = { rotation: [0, 0, 0.9] };
+      const die = new ServerDie(state, CreateBox('tilted-die', { size: 1 }));
+
+      die.pick('player', 1);
+
+      const heldUp = Vector3.Up().applyRotationQuaternion(die.__targetRotation!);
+      expect(Vector3.Distance(heldUp, Vector3.Forward())).toBeLessThan(0.000001);
+    } finally {
+      sim.engine.dispose();
+    }
   });
 
   it('loads the configured collider as the model for a standard die', async () => {

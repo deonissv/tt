@@ -1,8 +1,8 @@
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Loader } from '@tt/loader';
 import { containerSize } from '@tt/rules';
-import type { TileStackState } from '@tt/states';
-import { pickItem } from '../behaviors/container';
+import { ActorType, type TileState, type TileStackState } from '@tt/states';
+import { spawnDrawnItem } from '../behaviors/container';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
@@ -22,7 +22,22 @@ export class TileStack extends ServerBase<TileStackState> {
   }
 
   async pickItem(clientId: string, pickHeight: number): Promise<ServerBase | null> {
-    return pickItem(this, clientId, pickHeight);
+    const state = this.toState();
+    if (state.size < 2) return null;
+    const { size: _size, ...tileData } = structuredClone(state);
+    const child: TileState = { ...tileData, type: ActorType.TILE };
+    this.setSize(state.size - 1);
+    return spawnDrawnItem(this, child, clientId, pickHeight, () => {
+      // Restore this reservation without undoing other completed draws.
+      this.setSize(this.toState().size + 1);
+    });
+  }
+
+  private setSize(size: number): void {
+    this.updateState({ guid: this.guid, size });
+    this.model.scaling.y = size;
+    this.__collider.scaling.y = size;
+    this._forceUpdate();
   }
 
   static async fromState(state: TileStackState): Promise<TileStack | null> {

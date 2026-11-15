@@ -1,9 +1,10 @@
-import type { Mesh } from '@babylonjs/core';
+import { Vector3, type Mesh, type Quaternion } from '@babylonjs/core';
 import { Loader } from '@tt/loader';
 import type { DieState } from '@tt/states';
 import { DieFacesNumber } from '@tt/states';
 import type { Constructor } from '@tt/utils';
 import { roll } from '../behaviors/roll';
+import { alignToAxis } from '../behaviors/transform';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
@@ -24,7 +25,18 @@ export class ServerDie extends ServerBase<DieState> {
     return new this(state, collider);
   }
 
-  roll() {
+  getPickRotation(): Quaternion {
+    const currentRotation = this.absoluteRotationQuaternion.toEulerAngles();
+    const closest = this.__state.rotationValues.reduce(
+      (best, row) => {
+        const distance = Vector3.DistanceSquared(currentRotation, Vector3.FromArray(row.rotation));
+        return distance < best.distance ? { rotation: row.rotation, distance } : best;
+      },
+      { rotation: null as number[] | null, distance: Infinity },
+    ).rotation;
+    return alignToAxis(this.absoluteRotationQuaternion, closest ? Vector3.FromArray(closest) : Vector3.Up());
+  }
+  roll(): void {
     roll(this);
   }
 }

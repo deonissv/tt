@@ -1,3 +1,4 @@
+import type { Quaternion } from '@babylonjs/core';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { CardMixin } from '@tt/actors';
 import { Loader } from '@tt/loader';
@@ -13,6 +14,10 @@ class CardBase extends ServerBase<CardState> {
 }
 
 export class Card extends CardMixin<Constructor<ServerBase<CardState>>>(CardBase) {
+  getPickRotation(): Quaternion {
+    return this.absoluteRotationQuaternion;
+  }
+
   static async fromState(state: CardState): Promise<Card | null> {
     const model = await Loader.loadMesh(AssetsManager.CARD_MODEL_URL);
 

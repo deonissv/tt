@@ -14,7 +14,7 @@ import {
 import { SharedBase } from '@tt/actors';
 import type { SimulationSceneBase } from '@tt/simulation';
 import type { ActorBaseState } from '@tt/states';
-import { flip, move, pick, release, rotate } from '../behaviors/transform';
+import { alignToAxis, flip, move, pick, release, rotate } from '../behaviors/transform';
 
 export class ServerBase<T extends ActorBaseState = ActorBaseState> extends SharedBase<T> {
   defaultY: number;
@@ -107,8 +107,12 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     return this._scene as SimulationSceneBase;
   }
 
+  getPickRotation(): Quaternion {
+    return alignToAxis(this.absoluteRotationQuaternion, Vector3.Up());
+  }
+
   pick(clientId: string, pickHeight: number) {
-    pick(this, clientId, pickHeight);
+    pick(this, clientId, pickHeight, () => this.getPickRotation());
   }
 
   release() {

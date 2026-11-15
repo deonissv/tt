@@ -10,9 +10,8 @@ import {
   type TileStackState,
   type UnknownActorState,
 } from '@tt/states';
-import type { ServerBase } from '../actors';
+import { Bag, Deck, TileStack, type ServerBase } from '../actors';
 import { ServerActorBuilder } from '../serverActorBuilder';
-import { pickItem, shuffle } from './container';
 
 const item = (guid: string): ActorState => ({
   type: ActorType.ACTOR,
@@ -21,19 +20,21 @@ const item = (guid: string): ActorState => ({
   model: { meshURL: `${guid}.obj` },
 });
 
-function actorWithState(state: BagState | TileStackState): {
-  actor: ServerBase;
+function actorWithState(state: BagState): {
+  actor: Bag;
   updateState: ReturnType<typeof vi.fn>;
 } {
   const updateState = vi.fn();
   const actor = {
+    guid: state.guid,
     toState: () => structuredClone(state),
     updateState,
-  } as unknown as ServerBase;
+  } as unknown as Bag;
+  Object.setPrototypeOf(actor, Bag.prototype);
   return { actor, updateState };
 }
 
-function stackActor(size: number, locked = false): ServerBase {
+function stackActor(size: number, locked = false): ServerBase & Pick<Bag, 'pickItem'> {
   let nextGuid = 0;
   let state: TileStackState = {
     type: ActorType.TILE_STACK,
@@ -44,7 +45,7 @@ function stackActor(size: number, locked = false): ServerBase {
     size,
     locked,
   };
-  return {
+  const actor = {
     guid: state.guid,
     toState: () => structuredClone(state),
     updateState: (update: ActorStateUpdate) => {
@@ -58,10 +59,12 @@ function stackActor(size: number, locked = false): ServerBase {
       getUniqueGUID: vi.fn((guid?: string) => guid ?? `tile-${nextGuid++}`),
       releaseGUID: vi.fn(),
     },
-  } as unknown as ServerBase;
+  } as unknown as ServerBase & Pick<Bag, 'pickItem'>;
+  Object.setPrototypeOf(actor, TileStack.prototype);
+  return actor;
 }
 
-describe('functional container behavior', () => {
+describe('actor container operations', () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });
@@ -77,7 +80,7 @@ describe('functional container behavior', () => {
     const { actor, updateState } = actorWithState(state);
     vi.spyOn(Math, 'random').mockReturnValue(0);
 
-    shuffle(actor);
+    actor.shuffle();
 
     expect(updateState).toHaveBeenCalledWith({
       guid: state.guid,
@@ -86,28 +89,15 @@ describe('functional container behavior', () => {
     expect(state).toEqual(source);
   });
 
-  it('does not invent shuffle behavior for a tile stack', () => {
-    const { actor, updateState } = actorWithState({
-      type: ActorType.TILE_STACK,
-      guid: 'stack',
-      name: 'Stack',
-      tileType: 0,
-      faceURL: 'face.png',
-      size: 3,
-    });
-
-    shuffle(actor);
-
-    expect(updateState).not.toHaveBeenCalled();
-  });
-
   it('keeps the drawn tile at the stack node scale', async () => {
     const actor = stackActor(5);
     const allocateGUID = vi.spyOn(actor.scene, 'getUniqueGUID');
     const releaseGUID = vi.spyOn(actor.scene, 'releaseGUID');
-    const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue({ picked: 'client' } as ServerBase);
+    const build = vi
+      .spyOn(ServerActorBuilder, 'build')
+      .mockResolvedValue({ picked: 'client', pick: vi.fn() } as unknown as ServerBase);
 
-    await pickItem(actor, 'client', 1);
+    await actor.pickItem('client', 1);
 
     expect(build.mock.calls[0][0]).toMatchObject({
       type: ActorType.TILE,
@@ -122,7 +112,7 @@ describe('functional container behavior', () => {
     const actor = stackActor(3);
     vi.spyOn(ServerActorBuilder, 'build').mockRejectedValueOnce(new Error('asset unavailable'));
 
-    await expect(pickItem(actor, 'client', 1)).rejects.toThrow('asset unavailable');
+    await expect(actor.pickItem('client', 1)).rejects.toThrow('asset unavailable');
 
     expect(actor.toState()).toMatchObject({ size: 3 });
     expect(actor.model.scaling.y).toBe(3);
@@ -158,12 +148,13 @@ describe('functional container behavior', () => {
         state = applyActorStateUpdate(state, update) as BagState | DeckState;
       };
       actor.model.getWorldMatrix = () => Matrix.Identity();
+      Object.setPrototypeOf(actor, kind === 'bag' ? Bag.prototype : Deck.prototype);
     }
     const before = actor.toState() as UnknownActorState;
     const transformation = structuredClone(actor.transformation);
     const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValueOnce(null);
 
-    await pickItem(actor, 'client', 1);
+    await actor.pickItem('client', 1);
 
     const drawn = build.mock.calls[0][0];
     expect(drawn.locked).toBe(false);
@@ -182,16 +173,16 @@ describe('functional container behavior', () => {
     const pendingSpawn = new Promise<ServerBase | null>((_, reject) => {
       rejectSpawn = reject;
     });
-    const spawned = { picked: 'client' } as ServerBase;
+    const spawned = { picked: 'client', pick: vi.fn() } as unknown as ServerBase;
     const build = vi
       .spyOn(ServerActorBuilder, 'build')
       .mockReturnValueOnce(pendingSpawn)
       .mockResolvedValueOnce(spawned);
 
-    const failed = expect(pickItem(actor, 'client', 1)).rejects.toThrow('asset unavailable');
-    await expect(pickItem(actor, 'client', 1)).resolves.toBe(spawned);
+    const failed = expect(actor.pickItem('client', 1)).rejects.toThrow('asset unavailable');
+    await expect(actor.pickItem('client', 1)).resolves.toBe(spawned);
     expect(actor.toState()).toMatchObject({ size: 1 });
-    await expect(pickItem(actor, 'client', 1)).resolves.toBeNull();
+    await expect(actor.pickItem('client', 1)).resolves.toBeNull();
     expect(build).toHaveBeenCalledTimes(2);
 
     rejectSpawn(new Error('asset unavailable'));

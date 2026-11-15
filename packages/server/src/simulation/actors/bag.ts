@@ -1,7 +1,8 @@
 import { Loader } from '@tt/loader';
 import { containerSize } from '@tt/rules';
 import type { BagState } from '@tt/states';
-import { pickItem, shuffle } from '../behaviors/container';
+import { shuffle as shuffleItems } from '@tt/utils';
+import { spawnDrawnItem } from '../behaviors/container';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
@@ -11,7 +12,11 @@ export class Bag extends ServerBase<BagState> {
   }
 
   async pickItem(clientId: string, pickHeight: number): Promise<ServerBase | null> {
-    return pickItem(this, clientId, pickHeight);
+    const state = this.toState();
+    if (state.containedObjects.length < 1) return null;
+    const child = structuredClone(state.containedObjects.at(-1)!);
+    this.updateState({ guid: state.guid, containedObjects: structuredClone(state.containedObjects.slice(0, -1)) });
+    return spawnDrawnItem(this, child, clientId, pickHeight);
   }
 
   static async fromState(state: BagState): Promise<Bag | null> {
@@ -29,6 +34,8 @@ export class Bag extends ServerBase<BagState> {
   }
 
   shuffle() {
-    shuffle(this);
+    const containedObjects = structuredClone(this.toState().containedObjects);
+    shuffleItems(containedObjects);
+    this.updateState({ guid: this.guid, containedObjects });
   }
 }
