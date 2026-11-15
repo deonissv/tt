@@ -43,21 +43,22 @@ export async function pickItem(actor: ServerBase, clientId: string, pickHeight: 
     const { size: _size, ...tileData } = structuredClone(state);
     child = {
       ...tileData,
-      guid: actor.scene.getUniqueGUID(),
       type: ActorType.TILE,
     } satisfies TileState;
     update = { guid: state.guid, size: state.size - 1 };
   }
 
   if (!child || !update) return null;
+  const scene = actor.scene;
+  child.guid = scene.getUniqueGUID(child.guid);
+
   // A player draws a movable item even when its container is locked.
   child.locked = false;
   transformation.position[1] += 1;
   child.transformation = transformation;
-  updateContainer(actor, update);
-
   let spawned: ServerBase | null;
   try {
+    updateContainer(actor, update);
     spawned = await ServerActorBuilder.build(child);
   } catch (error) {
     if (state.type === ActorType.TILE_STACK) {
@@ -68,6 +69,8 @@ export async function pickItem(actor: ServerBase, clientId: string, pickHeight: 
       }
     }
     throw error;
+  } finally {
+    scene.releaseGUID(child.guid);
   }
 
   if (spawned) pick(spawned, clientId, pickHeight);

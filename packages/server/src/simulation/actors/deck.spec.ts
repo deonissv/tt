@@ -85,6 +85,42 @@ describe('Deck', () => {
     expect(state.cards).toHaveLength(2);
   });
 
+  it('assigns a fresh identity when a later draw reuses an imported card GUID', async () => {
+    const sim = getPhSim();
+    const state = deckState([card('repeated'), card('middle'), card('repeated')]);
+    const deck = new Deck(state, CreateBox('deck-model', { size: 1 }));
+    vi.spyOn(ServerActorBuilder, 'build').mockImplementation(actorState =>
+      Promise.resolve(new Card(actorState as CardState, CreateBox('drawn-card', { size: 1 }))),
+    );
+
+    const first = await deck.pickItem('client', 1);
+    await deck.pickItem('client', 1);
+    const third = await deck.pickItem('client', 1);
+
+    expect(first?.guid).toBe('repeated');
+    expect(third?.guid).not.toBe(first?.guid);
+    expect(new Set(sim.actors.map(actor => actor.guid)).size).toBe(sim.actors.length);
+    expect(third?.picked).toBe('client');
+    expect(state.cards.map(card => card.guid)).toEqual(['repeated', 'middle', 'repeated']);
+  });
+
+  it('reserves distinct identities while duplicate cards are still being built', async () => {
+    getPhSim();
+    const deck = new Deck(deckState([card('repeated'), card('repeated')]), CreateBox('deck-model', { size: 1 }));
+    const pending: { state: CardState; resolve: (actor: Card) => void }[] = [];
+    vi.spyOn(ServerActorBuilder, 'build').mockImplementation(
+      actorState => new Promise<Card>(resolve => pending.push({ state: actorState as CardState, resolve })),
+    );
+
+    const first = deck.pickItem('client', 1);
+    const second = deck.pickItem('other-client', 1);
+
+    expect(pending[0].state.guid).not.toBe(pending[1].state.guid);
+    for (const { state, resolve } of pending) resolve(new Card(state, CreateBox('drawn-card', { size: 1 })));
+    const drawn = await Promise.all([first, second]);
+    expect(drawn.map(actor => actor?.picked)).toEqual(['client', 'other-client']);
+  });
+
   it('shuffles cards without mutating the input state', () => {
     getPhSim();
     const state = deckState([card('first'), card('second'), card('third')]);

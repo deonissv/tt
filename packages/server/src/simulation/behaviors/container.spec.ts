@@ -34,6 +34,7 @@ function actorWithState(state: BagState | TileStackState): {
 }
 
 function stackActor(size: number, locked = false): ServerBase {
+  let nextGuid = 0;
   let state: TileStackState = {
     type: ActorType.TILE_STACK,
     guid: 'stack',
@@ -53,7 +54,10 @@ function stackActor(size: number, locked = false): ServerBase {
     model: { scaling: { y: size } },
     __collider: { scaling: { y: size } },
     _forceUpdate: vi.fn(),
-    scene: { getUniqueGUID: vi.fn().mockReturnValue('tile') },
+    scene: {
+      getUniqueGUID: vi.fn((guid?: string) => guid ?? `tile-${nextGuid++}`),
+      releaseGUID: vi.fn(),
+    },
   } as unknown as ServerBase;
 }
 
@@ -99,6 +103,8 @@ describe('functional container behavior', () => {
 
   it('keeps the drawn tile at the stack node scale', async () => {
     const actor = stackActor(5);
+    const allocateGUID = vi.spyOn(actor.scene, 'getUniqueGUID');
+    const releaseGUID = vi.spyOn(actor.scene, 'releaseGUID');
     const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue({ picked: 'client' } as ServerBase);
 
     await pickItem(actor, 'client', 1);
@@ -108,6 +114,8 @@ describe('functional container behavior', () => {
       transformation: { scale: [1, 1, 1], position: [0, 1, 0] },
     });
     expect(actor.toState()).toMatchObject({ size: 4 });
+    expect(allocateGUID).toHaveBeenCalledTimes(1);
+    expect(releaseGUID).toHaveBeenCalledWith(build.mock.calls[0][0].guid);
   });
 
   it('restores a tile when creation rejects', async () => {
