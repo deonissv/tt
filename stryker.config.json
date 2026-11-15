@@ -29,6 +29,7 @@
   "ignorePatterns": [
     "proxy/**",
     "assets/**",
+    "!assets/*.obj",
     "**/public/**",
     "**/dist/**",
     "**/build/**",
