@@ -71,7 +71,7 @@ jobs:
         if: env.MUTATION_SCOPE != 'smoke'
         id: fingerprint
         env:
-          FINGERPRINT: ${{ hashFiles('package-lock.json', 'package.json', 'stryker*.json', 'stryker*.cjs', 'vitest*.ts', 'tsconfig*.json', 'libs/**/tsconfig*.json', 'packages/**/tsconfig*.json', 'packages/visual-tests/fixtures/**/*.json', 'static/**/*.json', 'libs/demo-saves/src/**/*.obj.ts', '!**/node_modules/**') }}
+          FINGERPRINT: ${{ hashFiles('package-lock.json', 'package.json', 'stryker*.json', 'stryker*.cjs', 'vitest*.ts', 'tsconfig*.json', 'libs/**/tsconfig*.json', 'packages/**/tsconfig*.json', 'packages/visual-tests/fixtures/**/*.json', 'static/**/*.json', 'libs/demo-saves/src/**/*.obj.ts', 'assets/*.obj', '!**/node_modules/**') }}
         run: echo "value=$FINGERPRINT" >> "$GITHUB_OUTPUT"
       - name: Restore and save complete mutation results
         if: env.MUTATION_SCOPE != 'smoke'
