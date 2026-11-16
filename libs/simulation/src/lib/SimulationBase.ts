@@ -126,13 +126,18 @@ export abstract class SimulationBase {
     const rv: SimulationStateSave = { actorStates: [] };
 
     const leftHandedSystemCandidate = delta.leftHandedSystem ?? state.leftHandedSystem;
-    if (leftHandedSystemCandidate) {
+    if (leftHandedSystemCandidate !== undefined) {
       rv.leftHandedSystem = leftHandedSystemCandidate;
     }
 
     const gravityCandidate = delta.gravity ?? state.gravity;
-    if (gravityCandidate) {
+    if (gravityCandidate !== undefined) {
       rv.gravity = gravityCandidate;
+    }
+
+    const tableCandidate = delta.table ?? state.table;
+    if (tableCandidate !== undefined) {
+      rv.table = tableCandidate;
     }
 
     if (state.actorStates) {
