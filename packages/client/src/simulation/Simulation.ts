@@ -10,12 +10,12 @@ import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Logger } from '@tt/logger';
 import type { SimulationSceneBase } from '@tt/simulation';
 import { EngineFactory, SimulationBase } from '@tt/simulation';
-import type { CardGrid, UnknownActorState } from '@tt/states';
+import type { CardGrid, CardState, UnknownActorState } from '@tt/states';
 import { ActorType, type SimulationStateSave } from '@tt/states';
 
 import type { Tuple } from '@tt/utils';
 import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
-import { ClientBase, Deck, TileStack } from './actors';
+import { Bag, ClientBase, Deck, TileStack } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 import { SimulationScene } from './SimulationScene';
 
@@ -286,13 +286,18 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  handleDeckRerender(guid: string, grid: CardGrid, size: number) {
+  handleDeckRerender(guid: string, grid: CardGrid, size: number, cards: CardState[]) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor instanceof Deck) void actor.rerenderDeck(grid, size);
+    if (actor instanceof Deck) void actor.rerenderDeck(grid, size, cards);
   }
 
   handleTileStackRerender(guid: string, size: number) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor instanceof TileStack) actor.rerenderStack(size);
+  }
+
+  handleBagRerender(guid: string, containedObjects: UnknownActorState[]) {
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor instanceof Bag) actor.rerenderBag(containedObjects);
   }
 }

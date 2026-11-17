@@ -1,9 +1,10 @@
-import type { CursorsPld, MsgMap, RerenderDeckPld, ServerActionMsg } from '@tt/actions';
+import type { CursorsPld, MsgMap, RerenderBagPld, RerenderDeckPld, ServerActionMsg } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
 import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@tt/actors';
 import {
   ActorType,
   type ActorBaseState,
+  type BagState,
   type DeckState,
   type SimulationStateSave,
   type Transformation,
@@ -128,6 +129,14 @@ export class ActionBuilder {
           });
         }
 
+        const bagRerender = this.getBagRerender(prevActorState as BagState, actorState as BagState);
+        if (bagRerender) {
+          actions.push({
+            type: ServerAction.RERENDER_BAG,
+            payload: bagRerender,
+          });
+        }
+
         if (
           prevActorState.type === ActorType.TILE_STACK &&
           actorState.type === ActorType.TILE_STACK &&
@@ -173,15 +182,19 @@ export class ActionBuilder {
 
   getDeckRerender(prevState: DeckState, currentState: DeckState): RerenderDeckPld | null {
     if (prevState.type != ActorType.DECK) return null;
-    if (
-      JSON.stringify(prevState.cards.at(-1)) === JSON.stringify(currentState.cards.at(-1)) &&
-      JSON.stringify(prevState.cards.at(0)) === JSON.stringify(currentState.cards.at(0))
-    )
-      return null;
+    if (JSON.stringify(prevState.cards) === JSON.stringify(currentState.cards)) return null;
 
     const rerenderPld = this.getRerenderDeckPld(currentState, prevState);
     // return SimulationRoom.patchStateURLs(rerenderPld as unknown as RecursiveObject) as unknown as RerenderDeckPld; @TODO
     return rerenderPld;
+  }
+
+  getBagRerender(prevState: BagState, currentState: BagState): RerenderBagPld | null {
+    if (prevState.type != ActorType.BAG) return null;
+    if (JSON.stringify(prevState.containedObjects) === JSON.stringify(currentState.containedObjects)) return null;
+
+    // The delivered order rides along so client snapshots agree with the server.
+    return { guid: currentState.guid, containedObjects: structuredClone(currentState.containedObjects) };
   }
 
   private getRerenderDeckPld(deckState: DeckState, previousState: DeckState): RerenderDeckPld {
@@ -200,6 +213,8 @@ export class ActionBuilder {
         sequence: faceCard.sequence,
       },
       size: deckState.cards.length,
+      // The full order rides along so client snapshots agree with the server.
+      cards: structuredClone(deckState.cards),
     };
   }
 }

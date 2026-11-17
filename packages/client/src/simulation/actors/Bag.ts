@@ -4,6 +4,10 @@ import { AssetsManager } from './AssetsManages';
 import { ClientBase } from './ClientBase';
 
 export class Bag extends ClientBase<BagState> {
+  rerenderBag(containedObjects: BagState['containedObjects']): void {
+    this.updateState({ guid: this.guid, containedObjects });
+  }
+
   static async fromState(state: BagState): Promise<Bag | null> {
     const modelState: Model = state.model ?? AssetsManager.BAG_MODEL;
     const [model, collider] = await Loader.loadModel(modelState);

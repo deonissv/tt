@@ -1,6 +1,14 @@
 import type { CursorsPld } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
-import { ActorType, type ActorState, type DeckState, type SimulationStateSave, type TileStackState } from '@tt/states';
+import {
+  ActorType,
+  type ActorState,
+  type BagState,
+  type UnknownActorState,
+  type DeckState,
+  type SimulationStateSave,
+  type TileStackState,
+} from '@tt/states';
 import { ActionBuilder } from './action-builder';
 
 const actorState = (overrides: Partial<ActorState> = {}): ActorState => ({
@@ -62,6 +70,31 @@ describe('empty deck rerender', () => {
       guid: 'deck',
       grid: { faceURL: 'face.png', backURL: 'face.png-back', cols: 1, rows: 1, sequence: 0 },
       size: 0,
+      cards: [],
+    });
+  });
+
+  it('delivers the new card order so client snapshots stay in sync', () => {
+    const remaining: DeckState['cards'] = [
+      {
+        guid: 'mid',
+        name: 'mid',
+        type: ActorType.CARD,
+        faceURL: 'm.png',
+        backURL: 'm.png',
+        cols: 1,
+        rows: 1,
+        sequence: 0,
+      },
+    ];
+    const beforeDraw: DeckState = { ...before, cards: [...remaining, { ...before.cards[0], guid: 'drawn' }] };
+    const afterDraw: DeckState = { ...before, cards: remaining };
+
+    expect(new ActionBuilder().getDeckRerender(beforeDraw, afterDraw)).toEqual({
+      guid: 'deck',
+      grid: { faceURL: 'm.png', backURL: 'm.png', cols: 1, rows: 1, sequence: 0 },
+      size: 1,
+      cards: remaining,
     });
   });
 
@@ -98,11 +131,18 @@ describe('getDeckRerender', () => {
     expect(new ActionBuilder().getDeckRerender(prev, current)).toMatchObject({ guid: 'deck', size: 2 });
   });
 
-  it('does not rerender when neither end card changed', () => {
+  it('does not rerender when the cards are unchanged', () => {
     const prev = deck([card('back1'), card('face1')]);
 
     expect(new ActionBuilder().getDeckRerender(prev, { ...prev })).toBeNull();
   });
+});
+
+it('delivers a changed interior deck order even when both end cards stay the same', () => {
+  const cards = [card('bottom'), card('middle1'), card('middle2'), card('top')];
+  const reordered = [cards[0], cards[2], cards[1], cards[3]];
+
+  expect(new ActionBuilder().getDeckRerender(deck(cards), deck(reordered))).toMatchObject({ cards: reordered });
 });
 
 describe('getCursorsAction', () => {
@@ -215,6 +255,7 @@ describe('getSimActions', () => {
         guid: 'deck',
         grid: { faceURL: 'face2', backURL: 'back1-back', cols: 1, rows: 1, sequence: 0 },
         size: 2,
+        cards: [card('back1'), card('face2')],
       },
     });
   });
@@ -246,5 +287,50 @@ describe('getActorPositionUpdate / getActorRotationUpdate / getActorScaleUpdate'
     expect(builder.getActorPositionUpdate(prev, next)).toEqual([4, 5, 6]);
     expect(builder.getActorRotationUpdate(prev, next)).toEqual([0, 1, 0]);
     expect(builder.getActorScaleUpdate(prev, next)).toEqual([2, 2, 2]);
+  });
+});
+
+describe('bag rerender', () => {
+  const bagItem = (guid: string): UnknownActorState => ({
+    type: ActorType.ACTOR,
+    guid,
+    name: guid,
+    model: { meshURL: `${guid}.obj` },
+  });
+  const bag = (items: UnknownActorState[]): BagState => ({
+    guid: 'bag',
+    name: 'Bag',
+    type: ActorType.BAG,
+    containedObjects: items,
+  });
+
+  it('delivers the remaining contents when an item is extracted', () => {
+    const remaining = [bagItem('first')];
+    const builder = new ActionBuilder();
+
+    expect(builder.getBagRerender(bag([...remaining, bagItem('drawn')]), bag(remaining))).toEqual({
+      guid: 'bag',
+      containedObjects: remaining,
+    });
+  });
+
+  it.each([
+    ['shuffle', [bagItem('second'), bagItem('first')]],
+    ['final extraction', []],
+  ])('broadcasts %s and suppresses the next unchanged tick', (_, remaining) => {
+    const builder = makeBuilder();
+    builder.prevSimState = { actorStates: [bag([bagItem('first'), bagItem('second')])] };
+    const state = { actorStates: [bag(remaining)] };
+
+    const actions = builder.getSimActions(state);
+
+    expect(actions).toEqual([
+      { type: ServerAction.RERENDER_BAG, payload: { guid: 'bag', containedObjects: remaining } },
+    ]);
+    expect(builder.getSimActions(state)).toEqual([]);
+  });
+
+  it('does not rerender an unchanged bag', () => {
+    expect(new ActionBuilder().getBagRerender(bag([bagItem('first')]), bag([bagItem('first')]))).toBeNull();
   });
 });

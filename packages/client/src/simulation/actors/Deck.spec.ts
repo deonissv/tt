@@ -48,9 +48,23 @@ describe('empty client decks', () => {
     const deck = new Deck(state, CreateBox('deck', {}, scene), texture, texture);
     const loadTexture = vi.spyOn(Loader, 'loadTexture').mockResolvedValue(null);
 
-    await deck.rerenderDeck(card, 0);
+    await deck.rerenderDeck(card, 0, []);
 
     expect(deck.isEnabled()).toBe(false);
     expect(loadTexture).not.toHaveBeenCalled();
+    expect(deck.toState().cards).toEqual([]);
+  });
+
+  it('adopts the delivered card order into its serialized state', async () => {
+    const state: DeckState = { guid: 'deck', name: 'Deck', type: ActorType.DECK, cards: [card] };
+    const texture = new Texture(null, scene);
+    const deck = new Deck(state, CreateBox('deck', {}, scene), texture, texture);
+    vi.spyOn(Loader, 'loadTexture').mockResolvedValue(texture);
+    const nextTop = { ...card, guid: 'next-top', faceURL: 'next-face.png' };
+
+    await deck.rerenderDeck(nextTop, 1, [nextTop]);
+
+    expect(deck.toState().cards.map(loaded => loaded.guid)).toEqual(['next-top']);
+    expect(deck.model.scaling.y).toBe(1);
   });
 });
