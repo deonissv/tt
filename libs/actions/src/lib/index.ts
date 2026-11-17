@@ -7,6 +7,7 @@ export type {
   DropActorPld,
   MoveClientActorPld,
   MoveServerActorPld,
+  RerenderBagPld,
   RerenderDeckPld,
   RerenderTileStackPld,
   RotateClientActorPld,

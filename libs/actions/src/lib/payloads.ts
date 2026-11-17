@@ -46,3 +46,8 @@ export interface RerenderTileStackPld {
   guid: string;
   size: number;
 }
+
+export interface RerenderBagPld {
+  guid: string;
+  containedObjects: UnknownActorState[];
+}

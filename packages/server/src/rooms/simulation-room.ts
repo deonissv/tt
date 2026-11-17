@@ -314,7 +314,7 @@ export class SimulationRoom {
   }
 
   /**
-   * Rewrites raw save URLs in spawned-actor and deck-rerender payloads so the
+   * Rewrites raw save URLs in spawned-actor and container-rerender payloads so the
    * client loads those assets through the room proxy, exactly like the initial
    * STATE payload does.
    */
@@ -332,6 +332,8 @@ export class SimulationRoom {
             },
           };
         case ServerAction.RERENDER_DECK:
+          return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
+        case ServerAction.RERENDER_BAG:
           return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
         default:
           return action;

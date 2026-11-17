@@ -372,6 +372,7 @@ describe('SimulationRoom', () => {
         { type: ServerAction.SPAWN_ACTOR, payload: state },
         { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'player', state } },
         { type: ServerAction.RERENDER_DECK, payload: { guid: 'deck', grid, size: 2, cards } },
+        { type: ServerAction.RERENDER_BAG, payload: { guid: 'bag', containedObjects: [state] } },
         { type: ServerAction.REMOVE_ACTOR, payload: 'actor' },
       ];
       const original = structuredClone(actions);
@@ -398,10 +399,11 @@ describe('SimulationRoom', () => {
             cards: cards.map(card => ({ ...card, faceURL: service.getAssetURL(card.faceURL, ROOM_CODE) })),
           },
         },
-        actions[3],
+        { type: ServerAction.RERENDER_BAG, payload: { guid: 'bag', containedObjects: [patchedState] } },
+        actions[4],
       ]);
       expect(actions).toEqual(original);
-      expect(patched[3]).toBe(actions[3]);
+      expect(patched[4]).toBe(actions[4]);
       clearInterval(room.savingInterval);
       clearInterval(room.tickInterval);
     });

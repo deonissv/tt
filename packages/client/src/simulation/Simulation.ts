@@ -15,7 +15,7 @@ import { ActorType, type SimulationStateSave } from '@tt/states';
 
 import type { Tuple } from '@tt/utils';
 import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
-import { ClientBase, Deck, TileStack } from './actors';
+import { Bag, ClientBase, Deck, TileStack } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 import { SimulationScene } from './SimulationScene';
 
@@ -37,7 +37,7 @@ export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
   private _hoveredActor: ClientBase | null = null;
   private _pickedActor: ClientBase | null = null;
-  private _pendingSpawns = new Map<string, symbol>();
+  private _pendingSpawns = new Map<string, { bagContents?: UnknownActorState[] }>();
   private _cursorPos: [number, number] = [0, 0];
   cbs: SimulationCallbacks;
 
@@ -277,7 +277,7 @@ export class Simulation extends SimulationBase {
   }
 
   private async _spawnActor(state: UnknownActorState, picked: boolean) {
-    const token = Symbol();
+    const token: { bagContents?: UnknownActorState[] } = {};
     this._pendingSpawns.set(state.guid, token);
     try {
       const actor = await ClientActorBuilder.build(state);
@@ -285,6 +285,7 @@ export class Simulation extends SimulationBase {
         actor?.dispose();
         return;
       }
+      if (actor instanceof Bag && token.bagContents) actor.rerenderBag(token.bagContents);
       if (actor && picked) {
         this._cursorPos = this.getCursor();
         this._pickedActor = actor;
@@ -309,6 +310,13 @@ export class Simulation extends SimulationBase {
   handleTileStackRerender(guid: string, size: number) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor instanceof TileStack) actor.rerenderStack(size);
+  }
+
+  handleBagRerender(guid: string, containedObjects: UnknownActorState[]) {
+    const pending = this._pendingSpawns.get(guid);
+    if (pending) pending.bagContents = containedObjects;
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor instanceof Bag) actor.rerenderBag(containedObjects);
   }
 
   handleRemoveActor(guid: string) {
