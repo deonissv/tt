@@ -3,7 +3,7 @@ import { Loader } from '@tt/loader';
 import { containerSize } from '@tt/rules';
 import type { DeckState } from '@tt/states';
 import { shuffle as shuffleItems } from '@tt/utils';
-import { spawnDrawnItem } from '../behaviors/container';
+import { releaseSlot, reserveSlot, restoreSlot, spawnDrawnItem } from '../behaviors/container';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
 
@@ -35,9 +35,19 @@ export class Deck extends ServerBase<DeckState> {
     const faceUp = Vector3.Dot(up, Axis.Y) > 0;
     const child = structuredClone(faceUp ? state.cards.at(-1)! : state.cards.at(0)!);
     const cards = structuredClone(faceUp ? state.cards.slice(0, -1) : state.cards.slice(1));
+    const slot = reserveSlot(this, state.cards.length, faceUp);
     this.updateState({ guid: state.guid, cards });
     this.model.scaling.y = cards.length;
-    return spawnDrawnItem(this, child, clientId, pickHeight);
+    try {
+      return await spawnDrawnItem(this, child, clientId, pickHeight, () => {
+        const cards = [...this.toState().cards];
+        cards.splice(restoreSlot(slot), 0, child);
+        this.updateState({ guid: this.guid, cards });
+        this.model.scaling.y = cards.length;
+      });
+    } finally {
+      releaseSlot(this, slot);
+    }
   }
 
   shuffle() {
