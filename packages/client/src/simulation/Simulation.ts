@@ -10,7 +10,7 @@ import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Logger } from '@tt/logger';
 import type { SimulationSceneBase } from '@tt/simulation';
 import { EngineFactory, SimulationBase } from '@tt/simulation';
-import type { CardGrid, UnknownActorState } from '@tt/states';
+import type { CardGrid, CardState, UnknownActorState } from '@tt/states';
 import { ActorType, type SimulationStateSave } from '@tt/states';
 
 import type { Tuple } from '@tt/utils';
@@ -286,9 +286,9 @@ export class Simulation extends SimulationBase {
     }
   }
 
-  handleDeckRerender(guid: string, grid: CardGrid, size: number) {
+  handleDeckRerender(guid: string, grid: CardGrid, size: number, cards: CardState[]) {
     const actor = this.actors.find(a => a.guid === guid);
-    if (actor instanceof Deck) void actor.rerenderDeck(grid, size);
+    if (actor instanceof Deck) void actor.rerenderDeck(grid, size, cards);
   }
 
   handleTileStackRerender(guid: string, size: number) {
