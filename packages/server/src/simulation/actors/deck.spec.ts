@@ -128,7 +128,7 @@ describe('Deck', () => {
       deck.rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), Math.PI);
       deck.computeWorldMatrix(true);
       deck.model.computeWorldMatrix(true);
-      const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue(null);
+      const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue({ pick: vi.fn() } as unknown as Card);
 
       await deck.pickItem('client', 1);
 
