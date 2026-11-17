@@ -1,7 +1,7 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { Loader } from '@tt/loader';
-import type { CardGrid, DeckState } from '@tt/states';
+import type { CardGrid, CardState, DeckState } from '@tt/states';
 import { AssetsManager } from './AssetsManages';
 import { Card } from './Card';
 import { ClientBase } from './ClientBase';
@@ -43,7 +43,9 @@ export class Deck extends ClientBase<DeckState> {
     this.model.scaling.y = size;
   }
 
-  async rerenderDeck(grid: CardGrid, size: number) {
+  async rerenderDeck(grid: CardGrid, size: number, cards: CardState[]) {
+    // The delivered order is authoritative for the client's serialized state.
+    this.updateState({ guid: this.guid, cards });
     if (size === 0) {
       this.setEnabled(false);
       return;

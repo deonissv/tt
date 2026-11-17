@@ -362,10 +362,16 @@ describe('SimulationRoom', () => {
         cols: 1,
         sequence: 0,
       };
+      const cards = ['bottom', 'top'].map(guid => ({
+        ...grid,
+        guid,
+        name: guid,
+        type: ActorType.CARD as const,
+      }));
       const actions: ServerActionMsg[] = [
         { type: ServerAction.SPAWN_ACTOR, payload: state },
         { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'player', state } },
-        { type: ServerAction.RERENDER_DECK, payload: { guid: 'deck', grid, size: 2 } },
+        { type: ServerAction.RERENDER_DECK, payload: { guid: 'deck', grid, size: 2, cards } },
         { type: ServerAction.REMOVE_ACTOR, payload: 'actor' },
       ];
       const original = structuredClone(actions);
@@ -385,7 +391,12 @@ describe('SimulationRoom', () => {
         { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'player', state: patchedState } },
         {
           type: ServerAction.RERENDER_DECK,
-          payload: { guid: 'deck', grid: { ...grid, faceURL: service.getAssetURL(grid.faceURL, ROOM_CODE) }, size: 2 },
+          payload: {
+            guid: 'deck',
+            grid: { ...grid, faceURL: service.getAssetURL(grid.faceURL, ROOM_CODE) },
+            size: 2,
+            cards: cards.map(card => ({ ...card, faceURL: service.getAssetURL(card.faceURL, ROOM_CODE) })),
+          },
         },
         actions[3],
       ]);

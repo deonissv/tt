@@ -104,7 +104,7 @@ export class SimulationRoom {
           break;
         }
         case ServerAction.RERENDER_DECK: {
-          sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size);
+          sim.handleDeckRerender(action.payload.guid, action.payload.grid, action.payload.size, action.payload.cards);
           break;
         }
         case ServerAction.RERENDER_TILE_STACK: {

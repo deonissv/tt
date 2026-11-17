@@ -1,4 +1,4 @@
-import type { CursorsPld } from '@tt/actions';
+import type { CursorsPld, MsgMap } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
 import { ActorType, type ActorState, type DeckState, type SimulationStateSave, type TileStackState } from '@tt/states';
 import { ActionBuilder } from './action-builder';
@@ -62,12 +62,63 @@ describe('empty deck rerender', () => {
       guid: 'deck',
       grid: { faceURL: 'face.png', backURL: 'face.png-back', cols: 1, rows: 1, sequence: 0 },
       size: 0,
+      cards: [],
+    });
+  });
+
+  it('delivers the new card order so client snapshots stay in sync', () => {
+    const remaining: DeckState['cards'] = [
+      {
+        guid: 'mid',
+        name: 'mid',
+        type: ActorType.CARD,
+        faceURL: 'm.png',
+        backURL: 'm.png',
+        cols: 1,
+        rows: 1,
+        sequence: 0,
+      },
+    ];
+    const beforeDraw: DeckState = { ...before, cards: [...remaining, { ...before.cards[0], guid: 'drawn' }] };
+    const afterDraw: DeckState = { ...before, cards: remaining };
+
+    expect(new ActionBuilder().getDeckRerender(beforeDraw, afterDraw)).toEqual({
+      guid: 'deck',
+      grid: { faceURL: 'm.png', backURL: 'm.png', cols: 1, rows: 1, sequence: 0 },
+      size: 1,
+      cards: remaining,
     });
   });
 
   it('does not rerender an unchanged empty deck', () => {
     const empty = { ...before, cards: [] };
     expect(new ActionBuilder().getDeckRerender(empty, empty)).toBeNull();
+  });
+
+  it.each(['shuffle', 'extract'] as const)('delivers an interior %s with unchanged end cards', operation => {
+    const cards = ['bottom', 'middle-a', 'middle-b', 'top'].map(guid => ({ ...before.cards[0], guid }));
+    const nextCards =
+      operation === 'shuffle' ? [cards[0], cards[2], cards[1], cards[3]] : [cards[0], cards[2], cards[3]];
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [{ ...before, cards }] };
+
+    const actions = builder.getSimActions({ actorStates: [{ ...before, cards: nextCards }] });
+
+    expect(actions).toEqual([
+      {
+        type: ServerAction.RERENDER_DECK,
+        payload: {
+          guid: 'deck',
+          grid: { faceURL: 'face.png', backURL: 'face.png-back', cols: 1, rows: 1, sequence: 0 },
+          size: nextCards.length,
+          cards: nextCards,
+        },
+      },
+    ]);
+    const payload = (actions[0] as MsgMap[ServerAction.RERENDER_DECK]).payload;
+    expect(payload.cards).not.toBe(nextCards);
+    expect(builder.getSimActions({ actorStates: [{ ...before, cards: nextCards }] })).toEqual([]);
   });
 });
 
@@ -215,6 +266,7 @@ describe('getSimActions', () => {
         guid: 'deck',
         grid: { faceURL: 'face2', backURL: 'back1-back', cols: 1, rows: 1, sequence: 0 },
         size: 2,
+        cards: [card('back1'), card('face2')],
       },
     });
   });

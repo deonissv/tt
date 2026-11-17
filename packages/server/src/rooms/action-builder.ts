@@ -173,11 +173,7 @@ export class ActionBuilder {
 
   getDeckRerender(prevState: DeckState, currentState: DeckState): RerenderDeckPld | null {
     if (prevState.type != ActorType.DECK) return null;
-    if (
-      JSON.stringify(prevState.cards.at(-1)) === JSON.stringify(currentState.cards.at(-1)) &&
-      JSON.stringify(prevState.cards.at(0)) === JSON.stringify(currentState.cards.at(0))
-    )
-      return null;
+    if (JSON.stringify(prevState.cards) === JSON.stringify(currentState.cards)) return null;
 
     const rerenderPld = this.getRerenderDeckPld(currentState, prevState);
     // return SimulationRoom.patchStateURLs(rerenderPld as unknown as RecursiveObject) as unknown as RerenderDeckPld; @TODO
@@ -200,6 +196,8 @@ export class ActionBuilder {
         sequence: faceCard.sequence,
       },
       size: deckState.cards.length,
+      // The full order rides along so client snapshots agree with the server.
+      cards: structuredClone(deckState.cards),
     };
   }
 }
