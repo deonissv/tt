@@ -74,7 +74,7 @@ export class ActionBuilder {
       if (!actorState && !prevActorState) return;
 
       if (!actorState && prevActorState) {
-        // handle remove actor
+        actions.push({ type: ServerAction.REMOVE_ACTOR, payload: guid });
         return;
       }
       if (!prevActorState && actorState) {
