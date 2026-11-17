@@ -1,4 +1,4 @@
-import type { CardGrid, UnknownActorState } from '@tt/states';
+import type { CardGrid, CardState, UnknownActorState } from '@tt/states';
 import type { Tuple } from '@tt/utils';
 
 export interface DownloadProgressPld {
@@ -39,6 +39,7 @@ export interface RerenderDeckPld {
   guid: string;
   grid: CardGrid;
   size: number;
+  cards: CardState[];
 }
 
 export interface RerenderTileStackPld {
