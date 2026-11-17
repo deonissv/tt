@@ -111,6 +111,10 @@ export class SimulationRoom {
           sim.handleTileStackRerender(action.payload.guid, action.payload.size);
           break;
         }
+        case ServerAction.REMOVE_ACTOR: {
+          sim.handleRemoveActor(action.payload);
+          break;
+        }
         case ServerAction.CLOSED: {
           ws.close();
           onRoomClosed();

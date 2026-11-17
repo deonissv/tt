@@ -231,10 +231,11 @@ describe('getSimActions', () => {
     ]);
   });
 
-  it('emits nothing when an actor is removed (no REMOVE_ACTOR broadcast yet)', () => {
+  it('broadcasts actor removal once when an actor leaves the state', () => {
     const builder = makeBuilder();
     builder.prevSimState = { actorStates: [actorState({ guid: 'gone' })] };
 
+    expect(builder.getSimActions({ actorStates: [] })).toEqual([{ type: ServerAction.REMOVE_ACTOR, payload: 'gone' }]);
     expect(builder.getSimActions({ actorStates: [] })).toEqual([]);
   });
 
