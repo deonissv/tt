@@ -115,6 +115,10 @@ export class SimulationRoom {
           sim.handleBagRerender(action.payload.guid, action.payload.containedObjects);
           break;
         }
+        case ServerAction.REMOVE_ACTOR: {
+          sim.handleRemoveActor(action.payload);
+          break;
+        }
         case ServerAction.CLOSED: {
           ws.close();
           onRoomClosed();

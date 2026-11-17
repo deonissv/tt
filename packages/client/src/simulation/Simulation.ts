@@ -37,6 +37,7 @@ export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
   private _hoveredActor: ClientBase | null = null;
   private _pickedActor: ClientBase | null = null;
+  private _pendingSpawns = new Map<string, { bagContents?: UnknownActorState[] }>();
   private _cursorPos: [number, number] = [0, 0];
   cbs: SimulationCallbacks;
 
@@ -268,14 +269,29 @@ export class Simulation extends SimulationBase {
   }
 
   async handleSpawnActor(state: UnknownActorState) {
-    await ClientActorBuilder.build(state);
+    await this._spawnActor(state, false);
   }
 
   async handleSpawnPickedActor(state: UnknownActorState) {
-    const actor = await ClientActorBuilder.build(state);
-    if (actor) {
-      this._cursorPos = this.getCursor();
-      this._pickedActor = actor;
+    await this._spawnActor(state, true);
+  }
+
+  private async _spawnActor(state: UnknownActorState, picked: boolean) {
+    const token: { bagContents?: UnknownActorState[] } = {};
+    this._pendingSpawns.set(state.guid, token);
+    try {
+      const actor = await ClientActorBuilder.build(state);
+      if (this._pendingSpawns.get(state.guid) !== token) {
+        actor?.dispose();
+        return;
+      }
+      if (actor instanceof Bag && token.bagContents) actor.rerenderBag(token.bagContents);
+      if (actor && picked) {
+        this._cursorPos = this.getCursor();
+        this._pickedActor = actor;
+      }
+    } finally {
+      if (this._pendingSpawns.get(state.guid) === token) this._pendingSpawns.delete(state.guid);
     }
   }
 
@@ -297,7 +313,23 @@ export class Simulation extends SimulationBase {
   }
 
   handleBagRerender(guid: string, containedObjects: UnknownActorState[]) {
+    const pending = this._pendingSpawns.get(guid);
+    if (pending) pending.bagContents = containedObjects;
     const actor = this.actors.find(a => a.guid === guid);
     if (actor instanceof Bag) actor.rerenderBag(containedObjects);
+  }
+
+  handleRemoveActor(guid: string) {
+    this._pendingSpawns.delete(guid);
+    const actor = this.actors.find(a => a.guid === guid);
+    if (!actor) return;
+
+    if (this._hoveredActor?.guid === guid) {
+      this.unhighlightActor(this._hoveredActor);
+      this._hoveredActor = null;
+    }
+    if (this._pickedActor?.guid === guid) this._pickedActor = null;
+
+    actor.dispose();
   }
 }

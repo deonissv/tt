@@ -300,11 +300,9 @@ test.describe(() => {
 test.describe(() => {
   test.use({ actorGuids: [bag.guid], guestMode: 'none', fixtureVariant: 'failed-bag-item' });
   test(
-    `[${bag.typeName} ${bag.guid}] failed extraction reproduces VIS-003 without hiding another failure`,
+    `[${bag.typeName} ${bag.guid}] failed extraction preserves the bag and spawns no actor (VIS-003)`,
     { tag: [`@actor:${bag.typeName}`, '@behavior:extract'] },
-    async ({ player: { page, connection }, room }, testInfo) => {
-      testInfo.annotations.push({ type: 'known-defect', description: 'VIS-003' });
-
+    async ({ player: { page, connection }, room }) => {
       const guid = '7a0b0b';
       const before = (await captureRoom(room)).state;
       const beforeItems = actorIdentityList(getActor(before, guid));
@@ -315,20 +313,15 @@ test.describe(() => {
       await page.mouse.move(start[0], start[1]);
       await waitForRenderedFrames(page);
       await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), guid);
-      await expect
-        .poll(async () => containerSize(getActor((await captureRoom(room)).state, guid)), {
-          message: 'failed extraction action was not observed',
-          timeout: 10_000,
-        })
-        .toBe(beforeSize - 1);
 
       const after = (await waitForRoomStable(room)).state;
       expect(
         after.actorStates!.map(actor => actor.guid).sort(),
         'failed extraction spawned or removed an actor',
       ).toEqual(before.actorStates!.map(actor => actor.guid).sort());
-      expect(actorIdentityList(getActor(after, guid)), 'VIS-003 must lose exactly the failed item').toEqual(
-        beforeItems.slice(0, -1),
+      expect(containerSize(getActor(after, guid)), 'failed extraction changed the bag count').toBe(beforeSize);
+      expect(actorIdentityList(getActor(after, guid)), 'failed extraction changed the bag contents').toEqual(
+        beforeItems,
       );
     },
   );

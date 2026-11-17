@@ -362,11 +362,16 @@ describe('SimulationRoom', () => {
         cols: 1,
         sequence: 0,
       };
-      const cards = [{ ...grid, guid: 'card', name: 'Card', type: ActorType.CARD as const }];
+      const cards = ['bottom', 'top'].map(guid => ({
+        ...grid,
+        guid,
+        name: guid,
+        type: ActorType.CARD as const,
+      }));
       const actions: ServerActionMsg[] = [
         { type: ServerAction.SPAWN_ACTOR, payload: state },
         { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'player', state } },
-        { type: ServerAction.RERENDER_DECK, payload: { guid: 'deck', grid, size: 1, cards } },
+        { type: ServerAction.RERENDER_DECK, payload: { guid: 'deck', grid, size: 2, cards } },
         { type: ServerAction.RERENDER_BAG, payload: { guid: 'bag', containedObjects: [state] } },
         { type: ServerAction.REMOVE_ACTOR, payload: 'actor' },
       ];
@@ -390,7 +395,7 @@ describe('SimulationRoom', () => {
           payload: {
             guid: 'deck',
             grid: { ...grid, faceURL: service.getAssetURL(grid.faceURL, ROOM_CODE) },
-            size: 1,
+            size: 2,
             cards: cards.map(card => ({ ...card, faceURL: service.getAssetURL(card.faceURL, ROOM_CODE) })),
           },
         },

@@ -15,7 +15,7 @@ const card = {
   sequence: 0,
 };
 
-describe('empty client decks', () => {
+describe('client deck snapshots', () => {
   let engine: NullEngine;
   let scene: Scene;
 
@@ -66,5 +66,22 @@ describe('empty client decks', () => {
 
     expect(deck.toState().cards.map(loaded => loaded.guid)).toEqual(['next-top']);
     expect(deck.model.scaling.y).toBe(1);
+  });
+
+  it('updates its snapshot before textures finish loading', async () => {
+    const cards = ['bottom', 'middle-a', 'middle-b', 'top'].map(guid => ({ ...card, guid }));
+    const state: DeckState = { guid: 'deck', name: 'Deck', type: ActorType.DECK, cards };
+    const texture = new Texture(null, scene);
+    const deck = new Deck(state, CreateBox('deck', {}, scene), texture, texture);
+    let finishLoading!: (texture: Texture | null) => void;
+    vi.spyOn(Loader, 'loadTexture').mockReturnValue(new Promise(resolve => (finishLoading = resolve)));
+    const shuffled = [cards[0], cards[2], cards[1], cards[3]];
+
+    const rendering = deck.rerenderDeck(card, shuffled.length, shuffled);
+
+    expect(deck.toState().cards).toEqual(shuffled);
+    finishLoading(null);
+    await rendering;
+    expect(deck.toState().cards).toEqual(shuffled);
   });
 });

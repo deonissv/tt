@@ -1,4 +1,4 @@
-import type { CursorsPld } from '@tt/actions';
+import type { CursorsPld, MsgMap } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
 import {
   ActorType,
@@ -102,6 +102,32 @@ describe('empty deck rerender', () => {
     const empty = { ...before, cards: [] };
     expect(new ActionBuilder().getDeckRerender(empty, empty)).toBeNull();
   });
+
+  it.each(['shuffle', 'extract'] as const)('delivers an interior %s with unchanged end cards', operation => {
+    const cards = ['bottom', 'middle-a', 'middle-b', 'top'].map(guid => ({ ...before.cards[0], guid }));
+    const nextCards =
+      operation === 'shuffle' ? [cards[0], cards[2], cards[1], cards[3]] : [cards[0], cards[2], cards[3]];
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [{ ...before, cards }] };
+
+    const actions = builder.getSimActions({ actorStates: [{ ...before, cards: nextCards }] });
+
+    expect(actions).toEqual([
+      {
+        type: ServerAction.RERENDER_DECK,
+        payload: {
+          guid: 'deck',
+          grid: { faceURL: 'face.png', backURL: 'face.png-back', cols: 1, rows: 1, sequence: 0 },
+          size: nextCards.length,
+          cards: nextCards,
+        },
+      },
+    ]);
+    const payload = (actions[0] as MsgMap[ServerAction.RERENDER_DECK]).payload;
+    expect(payload.cards).not.toBe(nextCards);
+    expect(builder.getSimActions({ actorStates: [{ ...before, cards: nextCards }] })).toEqual([]);
+  });
 });
 
 describe('getDeckRerender', () => {
@@ -131,18 +157,11 @@ describe('getDeckRerender', () => {
     expect(new ActionBuilder().getDeckRerender(prev, current)).toMatchObject({ guid: 'deck', size: 2 });
   });
 
-  it('does not rerender when the cards are unchanged', () => {
+  it('does not rerender when neither end card changed', () => {
     const prev = deck([card('back1'), card('face1')]);
 
     expect(new ActionBuilder().getDeckRerender(prev, { ...prev })).toBeNull();
   });
-});
-
-it('delivers a changed interior deck order even when both end cards stay the same', () => {
-  const cards = [card('bottom'), card('middle1'), card('middle2'), card('top')];
-  const reordered = [cards[0], cards[2], cards[1], cards[3]];
-
-  expect(new ActionBuilder().getDeckRerender(deck(cards), deck(reordered))).toMatchObject({ cards: reordered });
 });
 
 describe('getCursorsAction', () => {
@@ -220,10 +239,11 @@ describe('getSimActions', () => {
     ]);
   });
 
-  it('emits nothing when an actor is removed (no REMOVE_ACTOR broadcast yet)', () => {
+  it('broadcasts actor removal once when an actor leaves the state', () => {
     const builder = makeBuilder();
     builder.prevSimState = { actorStates: [actorState({ guid: 'gone' })] };
 
+    expect(builder.getSimActions({ actorStates: [] })).toEqual([{ type: ServerAction.REMOVE_ACTOR, payload: 'gone' }]);
     expect(builder.getSimActions({ actorStates: [] })).toEqual([]);
   });
 
