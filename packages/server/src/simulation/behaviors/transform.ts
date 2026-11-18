@@ -31,6 +31,7 @@ export function pick(actor: ServerBase, clientId: string, pickHeight: number, ge
   actor.hk.setActivationControl(actor.body, PhysicsActivationControl.ALWAYS_ACTIVE);
   actor.pickHeight = pickHeight;
   actor.__targetPosition = new Vector2(actor.position.x, actor.position.z);
+  actor.__hoverAnchor = null;
 
   actor.__targetRotation = getRotation();
   actor.picked = clientId;
@@ -54,6 +55,7 @@ export function release(actor: ServerBase): void {
   actor.pickHeight = 0;
   actor.__targetPosition = null;
   actor.__targetRotation = null;
+  actor.__hoverAnchor = null;
   actor.body.setCollisionCallbackEnabled(true);
   actor.body.shape!.isTrigger = false;
 }
@@ -64,10 +66,14 @@ export function move(actor: ServerBase, dx: number, dy: number): void {
 
 export function flip(actor: ServerBase): void {
   const rotation = Quaternion.RotationAxis(Vector3.Right(), Math.PI);
-  actor.__targetRotation = actor.absoluteRotationQuaternion.multiply(rotation);
+  const current =
+    actor.picked === null && actor.__targetRotation ? actor.__targetRotation : actor.absoluteRotationQuaternion;
+  actor.__targetRotation = current.multiply(rotation);
   actor.flipped = !actor.flipped;
 }
 
 export function rotate(actor: ServerBase, angle: number): void {
-  actor.__targetRotation = actor.absoluteRotationQuaternion.multiply(Quaternion.RotationAxis(Vector3.Up(), angle));
+  const current =
+    actor.picked === null && actor.__targetRotation ? actor.__targetRotation : actor.absoluteRotationQuaternion;
+  actor.__targetRotation = current.multiply(Quaternion.RotationAxis(Vector3.Up(), angle));
 }

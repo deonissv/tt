@@ -65,6 +65,23 @@ describe('card table physics', () => {
     expect(actor.position.y).toBeCloseTo(startY, 5);
   });
 
+  it('flips a resting card without holding it or losing its tabletop contact', async () => {
+    const actor = await card('card', 0);
+    render(120);
+    const initialFacing = Vector3.Up().applyRotationQuaternion(actor.absoluteRotationQuaternion);
+    const initialPosition = actor.position.clone();
+
+    actor.flip();
+    render(360);
+
+    const facing = Vector3.Up().applyRotationQuaternion(actor.absoluteRotationQuaternion);
+    expect(Vector3.Dot(facing, initialFacing)).toBeLessThan(-0.99);
+    expect(actor.__targetRotation).toBeNull();
+    expect(actor.sleeping).toBe(true);
+    expect(Vector3.Distance(actor.position, initialPosition)).toBeLessThan(0.05);
+    expect(actor.body.shape!.isTrigger).toBe(false);
+  });
+
   it('preserves a queued flip when dropping a held card before the next physics step', async () => {
     const actor = await card('card', 0);
     render(120);

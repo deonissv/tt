@@ -1,7 +1,7 @@
 import { captureRoom } from '../support/api';
 import { manifestActor } from '../fixtures/manifest';
 import { positionChanged, rotationChanged } from '../support/transforms';
-import { ClientAction } from '@tt/actions';
+import { ClientAction, ServerAction, type ServerActionMsg } from '@tt/actions';
 import coordinates from '../fixtures/targeting/coordinates.json';
 import type { UnknownActorState } from '@tt/states';
 import { waitForRenderedFrames } from '../support/rendering';
@@ -97,25 +97,62 @@ test.describe(() => {
 });
 
 test.describe(() => {
-  test.use({ actorGuids: [genericActor.guid], guestMode: 'none' });
-  test(
-    `[${genericActor.typeName} ${genericActor.guid}] hover-only flip reproduces VIS-002 with a narrow signature`,
-    { tag: [`@actor:${genericActor.typeName}`, '@behavior:flip', '@behavior:targeting'] },
-    async ({ player: { page, connection }, room }, testInfo) => {
-      testInfo.annotations.push({ type: 'known-defect', description: 'VIS-002' });
+  test.use({ actorGuids: [genericActor.guid] });
+  for (const [key, action] of [
+    ['KeyF', ClientAction.FLIP],
+    ['KeyE', ClientAction.CW],
+    ['KeyQ', ClientAction.CCW],
+  ] as const) {
+    test(
+      `[${genericActor.typeName} ${genericActor.guid}] hover-only ${key} applies and synchronizes (VIS-002)`,
+      { tag: [`@actor:${genericActor.typeName}`, '@behavior:flip', '@behavior:rotate', '@behavior:targeting'] },
+      async ({ player: { page, connection }, guestPlayer, room }, testInfo) => {
+        const guid = genericActor.guid;
+        const before = getActor((await captureRoom(room)).state, guid);
+        const start = coordinates.profiles.default['3b9ed5'];
+        await page.locator('canvas').focus();
+        await page.mouse.move(start[0], start[1]);
+        await waitForRenderedFrames(page);
+        const rotations: (number[] | undefined)[] = [];
+        const sockets = [connection.socket, guestPlayer!.connection.socket];
+        const listeners = sockets.map((socket, index) => {
+          const listener = ({ payload }: { payload: string | Buffer }) => {
+            const messages = JSON.parse(
+              typeof payload === 'string' ? payload : payload.toString('utf8'),
+            ) as ServerActionMsg[];
+            const received = messages.find(
+              message => message.type === ServerAction.ROTATE_ACTOR && message.payload.guid === guid,
+            );
+            if (received?.type === ServerAction.ROTATE_ACTOR) rotations[index] = received.payload.position;
+          };
+          socket.on('framereceived', listener);
+          return listener;
+        });
+        try {
+          await expectClientAction(connection, action, () => page.keyboard.press(key), guid);
 
-      const guid = '3b9ed5';
-      const before = getActor((await captureRoom(room)).state, guid);
-      const start = coordinates.profiles.default['3b9ed5'];
-      await page.locator('canvas').focus();
-      await page.mouse.move(start[0], start[1]);
-      await waitForRenderedFrames(page);
-      await expectClientAction(connection, ClientAction.FLIP, () => page.keyboard.press('KeyF'), guid);
-
-      await expectActorUnchanged(room, before);
-      await waitForRoomStable(room);
-    },
-  );
+          const after = getActor((await waitForActorStable(room, guid, rotationChanged, before)).state, guid);
+          expect(after).toHaveHeldRotation(before, key);
+          const [beforeX, beforeY, beforeZ] = before.transformation!.position!;
+          const [afterX, afterY, afterZ] = after.transformation!.position!;
+          expect(Math.hypot(afterX - beforeX, afterZ - beforeZ)).toBeLessThan(0.1);
+          expect(Math.abs(afterY - beforeY)).toBeLessThan(0.2);
+          for (const index of [0, 1]) {
+            await expect
+              .poll(() => {
+                const received = rotations[index];
+                return received ? orientationDistanceRadians(after.transformation!.rotation!, received) : Infinity;
+              })
+              .toBeLessThan(0.01);
+          }
+          await waitForRoomStable(room);
+          await expectMatchingCanvases(testInfo, `hover-only-${key}`, [page, guestPlayer!.page]);
+        } finally {
+          sockets.forEach((socket, index) => socket.off('framereceived', listeners[index]));
+        }
+      },
+    );
+  }
 });
 
 test.describe(() => {
