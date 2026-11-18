@@ -1,6 +1,7 @@
 import type { HavokPlugin } from '@babylonjs/core';
 import type { HavokPhysicsWithBindings, HP_BodyId } from '@babylonjs/havok';
 import {
+  PhysicsActivationControl,
   PhysicsBody,
   PhysicsMotionType,
   PhysicsShapeMesh,
@@ -16,12 +17,21 @@ import type { SimulationSceneBase } from '@tt/simulation';
 import type { ActorBaseState } from '@tt/states';
 import { alignToAxis, flip, move, pick, release, rotate } from '../behaviors/transform';
 
+// A hovered actor pursues its target orientation in small steps until this
+// close to it, then is held briefly so residual velocities drain before the
+// physics body is dropped back onto the table.
+const CONVERGED_ROTATION_RADIANS = 0.005;
+const HOVERED_ROTATION_STEP_RADIANS = 0.2;
+const HOVERED_SETTLE_FRAMES = 10;
+
 export class ServerBase<T extends ActorBaseState = ActorBaseState> extends SharedBase<T> {
   defaultY: number;
   obstacleHeight: number | null = null;
 
   __targetPosition: Vector2 | null = null;
   __targetRotation: Quaternion | null = null;
+  __hoverAnchor: Vector3 | null = null;
+  private __hoverSettled = 0;
 
   flipped = false;
   flipOffset = 0;
@@ -48,7 +58,7 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     this.body.shape!.material.restitution = 1;
     this.body.shape!.material.friction = 1;
 
-    this._scene.onAfterPhysicsObservable.add(() => this.updateHeldTarget());
+    this._scene.onAfterPhysicsObservable.add(() => this.updateTransformTarget());
     this.body.setCollisionCallbackEnabled(true);
     this.body.disablePreStep = false;
     this._setTransformations(state.transformation);
@@ -60,8 +70,49 @@ export class ServerBase<T extends ActorBaseState = ActorBaseState> extends Share
     if (state.locked) this.lock();
   }
 
-  private updateHeldTarget() {
-    if (this.picked !== null && this.__targetPosition !== null) {
+  private updateTransformTarget() {
+    if (this.picked === null) {
+      // Flip and rotate actions also target a hovered actor that is not held.
+      // The actor is lifted like a held flip because rotating at surface
+      // contact leaves the body without a clean landing contact.
+      if (this.__targetRotation !== null) {
+        if (this.__hoverAnchor === null) {
+          this.body.setLinearVelocity(Vector3.Zero());
+          this.body.setAngularVelocity(Vector3.Zero());
+          this.body.setGravityFactor(0);
+          this.hk.setActivationControl(this.body, PhysicsActivationControl.ALWAYS_ACTIVE);
+          this.body.setCollisionCallbackEnabled(false);
+          this.body.shape!.isTrigger = true;
+          // Clear the swept geometry, including thin and off-center meshes.
+          const bounds = this.body.getBoundingBox();
+          const radius = Math.max(...bounds.vectorsWorld.map(point => Vector3.Distance(this.position, point)));
+          this.__hoverAnchor = this.position.add(new Vector3(0, 2 * radius + 0.05, 0));
+          this.__hoverSettled = 0;
+        }
+
+        // Finish lifting before rotating so the mesh clears the table.
+        if (Vector3.Distance(this.position, this.__hoverAnchor) > 0.01) {
+          this.body.setTargetTransform(this.__hoverAnchor, this.absoluteRotationQuaternion);
+          return;
+        }
+
+        const dot = Math.abs(Quaternion.Dot(this.absoluteRotationQuaternion, this.__targetRotation));
+        const angle = 2 * Math.acos(Math.min(1, dot));
+        let goal = this.__targetRotation;
+        if (angle >= CONVERGED_ROTATION_RADIANS) {
+          const fraction = Math.min(1, HOVERED_ROTATION_STEP_RADIANS / angle);
+          goal = Quaternion.Slerp(this.absoluteRotationQuaternion, this.__targetRotation, fraction);
+          this.__hoverSettled = 0;
+        } else if (++this.__hoverSettled >= HOVERED_SETTLE_FRAMES) {
+          this.release();
+          return;
+        }
+        this.body.setTargetTransform(this.__hoverAnchor, goal);
+      }
+      return;
+    }
+
+    if (this.__targetPosition !== null) {
       let upHeight = this.defaultY + this.pickHeight;
       if (this.flipped) upHeight += 2 * this.defaultY;
 
