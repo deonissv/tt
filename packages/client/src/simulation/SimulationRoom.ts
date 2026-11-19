@@ -1,3 +1,4 @@
+import { Loader } from '@tt/loader';
 import { AuthService, RoomService } from '@services';
 import type { ActionMsg, ClientActionMsg, CursorsPld, DownloadProgressPld } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
@@ -220,6 +221,7 @@ export class SimulationRoom {
   }
 
   destructor() {
+    Loader.Assets.clear();
     if (this.updateTimeout) clearInterval(this.updateTimeout);
     this.ws.close();
   }

@@ -93,6 +93,51 @@ const tileStack = manifestActor('51d35d');
 
 test.describe(() => {
   test.use({ actorGuids: [deck.guid] });
+  test('repeated container draws reuse loaded assets', async ({ player: { page, connection }, room }) => {
+    const requests: string[] = [];
+    page.on('request', request => {
+      if (request.resourceType() === 'fetch' && /\/(assets|proxy)\//.test(request.url())) requests.push(request.url());
+    });
+    const initial = (await captureRoom(room)).state;
+    const initialSize = containerSize(getActor(initial, deck.guid));
+    const start = points[deck.guid];
+    await page.locator('canvas').focus();
+    for (const end of [
+      [640, 360],
+      [740, 400],
+    ]) {
+      const before = (await captureRoom(room)).state;
+      await page.mouse.move(start[0], start[1]);
+      await waitForRenderedFrames(page);
+      await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), deck.guid);
+      const drawn = await expectSpawnedActor(room, before);
+      await expect(async () => {
+        await expectClientAction(
+          connection,
+          ClientAction.MOVE_ACTOR,
+          () => page.mouse.move(start[0] + 0.1, start[1]).then(() => page.mouse.move(start[0], start[1])),
+          drawn.guid,
+          1_000,
+        );
+      }).toPass({ timeout: 30_000, intervals: [100] });
+      await page.mouse.down();
+      await expectClientAction(
+        connection,
+        ClientAction.MOVE_ACTOR,
+        () => page.mouse.move(end[0], end[1], { steps: 20 }),
+        drawn.guid,
+      );
+      await expectClientAction(connection, ClientAction.RELEASE_ACTOR, () => page.mouse.up(), drawn.guid);
+      await waitForActorStable(room, drawn.guid, positionChanged, drawn);
+    }
+    const after = (await waitForRoomStable(room)).state;
+    expect(containerSize(getActor(after, deck.guid))).toBe(initialSize - 2);
+    expect(requests, 'drawing from a loaded deck must not fetch its atlases again').toEqual([]);
+  });
+});
+
+test.describe(() => {
+  test.use({ actorGuids: [deck.guid] });
   test(
     `[${deck.typeName} ${deck.guid}] drawn card drops onto clear table space`,
     { tag: [`@actor:${deck.typeName}`, '@behavior:extract'] },

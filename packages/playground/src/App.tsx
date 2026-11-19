@@ -13,16 +13,19 @@ Logger.register(console);
 const App = () => {
   const canvas = useRef<HTMLCanvasElement>(null);
 
-  Loader.registerFileFetcher(async (url: string) => {
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
+  Loader.registerFileFetcher(
+    Loader.cachedFileFetcher(async (url: string) => {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Failed to fetch asset: ${url} (${response.status})`);
+      const arrayBuffer = await response.arrayBuffer();
 
-    const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
-    const b64 = getB64URL(arrayBuffer);
+      const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+      const b64 = getB64URL(arrayBuffer);
 
-    Logger.log(`Fetched file: ${url}`);
-    return { url: b64, mime };
-  });
+      Logger.log(`Fetched file: ${url}`);
+      return { url: b64, mime };
+    }),
+  );
 
   const init = useCallback(async (): Promise<Simulation> => {
     const sim = await Simulation.init(
@@ -274,6 +277,7 @@ const App = () => {
     init()
       // eslint-disable-next-line no-console
       .catch(console.error);
+    return () => Loader.Assets.clear();
   }, [init]);
 
   return <canvas ref={canvas} className="w-full h-full !border-0 !hover:border-0 !focus:border-0" />;
