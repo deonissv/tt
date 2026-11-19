@@ -332,6 +332,57 @@ describe('SimulationRoom', () => {
     });
   });
 
+  it('sends accumulated motion and rotation, then one removal, to both players', async () => {
+    vi.useFakeTimers();
+    const sim = getPhSim();
+    vi.spyOn(sim, 'start').mockImplementation(() => undefined);
+    vi.spyOn(simulationFactory, 'create').mockResolvedValue(sim);
+    const stateAt = (value: number): SimulationStateSave => ({
+      actorStates: [
+        {
+          guid: 'box',
+          name: 'Box',
+          type: ActorType.ACTOR,
+          model: { meshURL: '' },
+          transformation: { position: [value, 0, 0], rotation: [0, value, 0] },
+        },
+      ],
+    });
+    const snapshot = vi.spyOn(sim, 'toState').mockReturnValue(stateAt(0));
+    await room.init();
+    const sockets = [connect(user), connect(otherUser)];
+    const sends = sockets.map(socket => vi.spyOn(socket, 'send'));
+    const tick = (state: SimulationStateSave) => {
+      snapshot.mockReturnValue(state);
+      vi.advanceTimersByTime(roomTable.stateTickDelay);
+    };
+
+    try {
+      tick(stateAt(0));
+      tick(stateAt(0.0004));
+      tick(stateAt(0.0008));
+      sends.forEach(send => expect(send).not.toHaveBeenCalled());
+      tick(stateAt(0.0012));
+      sends.forEach(send => {
+        expect(send).toHaveBeenCalledTimes(1);
+        expect(JSON.parse(send.mock.calls[0][0])).toEqual([
+          { type: ServerAction.MOVE_ACTOR, payload: { guid: 'box', position: [0.0012, 0, 0] } },
+          { type: ServerAction.ROTATE_ACTOR, payload: { guid: 'box', position: [0, 0.0012, 0] } },
+        ]);
+      });
+      tick(stateAt(0.0012));
+      tick({ actorStates: [] });
+      tick({ actorStates: [] });
+      sends.forEach(send => {
+        expect(send).toHaveBeenCalledTimes(2);
+        expect(JSON.parse(send.mock.calls[1][0])).toEqual([{ type: ServerAction.REMOVE_ACTOR, payload: 'box' }]);
+      });
+    } finally {
+      clearInterval(room.savingInterval);
+      clearInterval(room.tickInterval);
+    }
+  });
+
   describe('tick asset URLs', () => {
     it('proxies spawn and rerender assets without mutating simulation actions', async () => {
       vi.useFakeTimers();

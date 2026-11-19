@@ -7,7 +7,9 @@ import {
   type BagState,
   type DeckState,
   type SimulationStateSave,
+  type TileStackState,
   type Transformation,
+  type UnknownActorState,
 } from '@tt/states';
 import { vecFloatCompare } from '@tt/utils';
 import type { Simulation } from '../simulation/simulation';
@@ -15,6 +17,7 @@ import type { Simulation } from '../simulation/simulation';
 export class ActionBuilder {
   prevCursors: string | null = null;
   prevSimState: SimulationStateSave | null = null;
+  private prevObservedSimState: string | null = null;
   sim: Simulation;
 
   getActions(cursors: CursorsPld, simState: SimulationStateSave): ServerActionMsg[] | null {
@@ -44,16 +47,79 @@ export class ActionBuilder {
   }
 
   getSimActions(simState: SimulationStateSave): ServerActionMsg[] {
-    if (JSON.stringify(simState) === JSON.stringify(this.prevSimState)) return [];
+    const observedState = JSON.stringify(simState);
+    if (observedState === this.prevObservedSimState) return [];
+    this.prevObservedSimState = observedState;
 
     if (!this.prevSimState) {
-      this.prevSimState = simState;
+      this.prevSimState = structuredClone(simState);
       return [];
     }
     const actions = this._getSimActions(this.prevSimState, simState);
-    this.prevSimState = structuredClone(simState);
+    if (actions.length > 0) {
+      // prevSimState must stay the last state delivered to clients: sub-threshold
+      // motion accumulates against it and is broadcast once it crosses the
+      // protocol precision instead of being swallowed tick by tick.
+      this.prevSimState = this.advanceDeliveredState(this.prevSimState, actions);
+    }
 
     return actions;
+  }
+
+  private advanceDeliveredState(prevState: SimulationStateSave, actions: ServerActionMsg[]): SimulationStateSave {
+    const next = structuredClone(prevState);
+    next.actorStates ??= [];
+
+    for (const action of actions) {
+      switch (action.type) {
+        case ServerAction.MOVE_ACTOR: {
+          const actor = this.deliveredActor(next, action.payload.guid);
+          actor.transformation = { ...actor.transformation, position: structuredClone(action.payload.position) };
+          break;
+        }
+        case ServerAction.ROTATE_ACTOR: {
+          const actor = this.deliveredActor(next, action.payload.guid);
+          actor.transformation = { ...actor.transformation, rotation: structuredClone(action.payload.position) };
+          break;
+        }
+        case ServerAction.SPAWN_ACTOR:
+          next.actorStates.push(structuredClone(action.payload));
+          break;
+        case ServerAction.SPAWN_PICKED_ACTOR:
+          next.actorStates.push(structuredClone(action.payload.state));
+          break;
+        case ServerAction.REMOVE_ACTOR:
+          next.actorStates = next.actorStates.filter(actor => actor.guid !== action.payload);
+          break;
+        case ServerAction.RERENDER_DECK: {
+          const deck = this.deliveredActor(next, action.payload.guid) as DeckState;
+          deck.cards = structuredClone(action.payload.cards);
+          break;
+        }
+        case ServerAction.RERENDER_TILE_STACK: {
+          const stack = this.deliveredActor(next, action.payload.guid) as TileStackState;
+          stack.size = action.payload.size;
+          break;
+        }
+        case ServerAction.RERENDER_BAG: {
+          const bag = this.deliveredActor(next, action.payload.guid) as BagState;
+          bag.containedObjects = structuredClone(action.payload.containedObjects);
+          break;
+        }
+      }
+    }
+
+    return next;
+  }
+
+  private deliveredActor(state: SimulationStateSave, guid: string): UnknownActorState {
+    const actors = (state.actorStates ??= []);
+    let actor = actors.find(actorState => actorState.guid === guid);
+    if (!actor) {
+      actor = { guid } as UnknownActorState;
+      actors.push(actor);
+    }
+    return actor;
   }
 
   _getSimActions(prevState: SimulationStateSave, state: SimulationStateSave): ServerActionMsg[] {
