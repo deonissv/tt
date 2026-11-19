@@ -1,6 +1,6 @@
 import { CreateBox, Logger, Mesh } from '@babylonjs/core';
 import { ClientAction } from '@tt/actions';
-import { ActorType } from '@tt/states';
+import { ActorType, type UnknownActorState } from '@tt/states';
 import { wait } from '@tt/utils';
 import { getPhSim } from '../../test/testUtils';
 import { Client } from '../rooms/client';
@@ -313,7 +313,7 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('tileStack');
+      await actionHandler.handlePickItem('tileStack');
 
       await wait(500);
 
@@ -381,7 +381,7 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('deck');
+      await actionHandler.handlePickItem('deck');
 
       await wait(500);
       expect(sim.actors.length).toBe(2);
@@ -389,6 +389,73 @@ describe('handleAction', () => {
 
       const state = sim.toState();
       expect(state.actorStates!.length).toBe(2);
+    });
+
+    it('should draw fresh copies from an infinite bag without emptying it', async () => {
+      const built: UnknownActorState[] = [];
+      vi.spyOn(ServerActorBuilder, 'buildTile').mockImplementation(state => {
+        built.push(state);
+        return Promise.resolve(
+          new Tile(
+            {
+              type: ActorType.TILE,
+              tileType: 0,
+              guid: state.guid,
+              name: 'tile',
+              faceURL: '',
+            },
+            CreateBox(`tile-${built.length}`, { size: 1 }),
+          ),
+        );
+      });
+      const sim = getPhSim();
+
+      const { Bag } = await import('./actors');
+      new Bag(
+        {
+          type: ActorType.BAG,
+          guid: 'infbag',
+          name: 'infbag',
+          infinite: true,
+          transformation: { position: [0, 0.6, 0] },
+          model: { meshURL: '' },
+          containedObjects: [
+            {
+              type: ActorType.TILE,
+              tileType: 0,
+              guid: 'coin',
+              name: 'coin',
+              faceURL: '',
+              transformation: { position: [0, 0.6, 0] },
+            },
+          ],
+        },
+        CreateBox('infbag', { size: 1 }),
+      );
+      sim.start();
+      actionHandler.actors = sim.actors;
+      actionHandler.client = new Client({
+        code: 'client',
+        roleId: 1,
+        userId: 1,
+        username: 'client',
+      });
+      actionHandler.client.pickHeight = PICK_HIGHT;
+
+      await wait(100);
+      await actionHandler.handlePickItem('infbag');
+      await wait(300);
+      await actionHandler.handlePickItem('infbag');
+      await wait(300);
+
+      expect(built).toHaveLength(2);
+      expect(built[0].guid).not.toBe(built[1].guid);
+      expect(built.every(state => state.guid !== 'coin')).toBe(true);
+      const bag = sim.actors.find(actor => actor.guid === 'infbag') as unknown as {
+        toState: () => { containedObjects: { guid: string }[] };
+      };
+      expect(bag.toState().containedObjects.map(item => item.guid)).toEqual(['coin']);
+      expect(sim.actors.filter(actor => built.some(state => state.guid === actor.guid))).toHaveLength(2);
     });
   });
 
@@ -432,7 +499,7 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('tileStack');
+      await actionHandler.handlePickItem('tileStack');
 
       await wait(500);
 

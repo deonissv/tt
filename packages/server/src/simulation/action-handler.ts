@@ -1,6 +1,7 @@
 import type { Tuple } from '@babylonjs/core';
 import type { ClientActionMsg } from '@tt/actions';
 import { ClientAction } from '@tt/actions';
+import { Logger } from '@tt/logger';
 import { Capability } from '@tt/rules';
 import { can } from './actor-rules';
 import type { Client } from '../rooms/client';
@@ -28,7 +29,7 @@ export class ActionHandler {
         this.handleMoveActor(msg.payload.guid, msg.payload.position);
         break;
       case ClientAction.PICK_ITEM:
-        this.handlePickItem(msg.payload);
+        void this.handlePickItem(msg.payload);
         break;
       case ClientAction.ROLL:
         this.handleRoll(msg.payload);
@@ -54,10 +55,14 @@ export class ActionHandler {
     }
   }
 
-  handlePickItem(guid: string) {
+  async handlePickItem(guid: string): Promise<void> {
     const actor = this.actors.find(actor => actor.guid === guid);
-    if (actor && can(actor, Capability.Container, { code: this.client.code }))
-      void actor.pickItem(this.client.code, this.client.pickHeight);
+    if (!actor || !can(actor, Capability.Container, { code: this.client.code })) return;
+    try {
+      await actor.pickItem(this.client.code, this.client.pickHeight);
+    } catch (error) {
+      Logger.error(`Failed to draw from container ${guid}`, error);
+    }
   }
 
   handlePickActor(guid: string) {

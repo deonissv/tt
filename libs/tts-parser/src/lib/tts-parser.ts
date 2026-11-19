@@ -364,8 +364,14 @@ export class TTSParser extends ParserBase {
     const bagState: BagState = {
       type: ActorType.BAG,
       ...actorBase,
-      containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
+      containedObjects: containedObjects.filter((o): o is UnknownActorState => o !== null),
     };
+
+    // Both built-in and custom model infinite bags retain their template on draw.
+    const name = objectState.Name.toLowerCase();
+    if (name.startsWith('infinite_') || name === 'custom_model_infinite_bag') {
+      bagState.infinite = true;
+    }
 
     if (model) bagState.model = model;
 

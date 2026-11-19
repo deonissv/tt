@@ -3,6 +3,7 @@ import { ActorType } from '@tt/states';
 export const ACTOR_MANIFEST = [
   { typeName: 'ACTOR', type: ActorType.ACTOR, guid: '3b9ed5' },
   { typeName: 'BAG', type: ActorType.BAG, guid: '7a0b0b' },
+  { typeName: 'INFINITE_BAG', type: ActorType.BAG, guid: '314455' },
   { typeName: 'CARD', type: ActorType.CARD, guid: '8ac7c6' },
   { typeName: 'DECK', type: ActorType.DECK, guid: 'fb31d5' },
   { typeName: 'TILE', type: ActorType.TILE, guid: '7b4f3e' },

@@ -13,7 +13,7 @@ it('builds independent fixtures and independent repeated bag items', () => {
 
   const second = buildDemoFixture('http://web:8080', 'shuffle-bag');
   const freshBag = second.actorStates!.find(actor => actor.guid === bag.guid) as BagState;
-  expect(second.actorStates).toHaveLength(14);
+  expect(second.actorStates).toHaveLength(15);
   expect(freshBag.transformation!.position![0]).not.toBe(999);
   expect(freshBag.containedObjects[0].transformation!.position![0]).not.toBe(999);
 });

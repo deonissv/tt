@@ -10,4 +10,9 @@ export interface BagState extends ActorBaseState {
   model?: Model;
   children?: ActorState[];
   containedObjects: UnknownActorState[];
+  /**
+   * Draw copies with fresh identities while retaining containedObjects as templates.
+   * Missing or false means finite. Persist this flag with the template contents.
+   */
+  infinite?: boolean;
 }

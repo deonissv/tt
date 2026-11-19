@@ -65,30 +65,30 @@ describe('ActionHandler portable rules', () => {
     expect(actor.spies.pick).not.toHaveBeenCalled();
   });
 
-  it('rejects extraction from an empty container before invoking runtime behavior', () => {
+  it('rejects extraction from an empty container before invoking runtime behavior', async () => {
     const actor = runtimeActor(bagState(0));
     handler.actors = [actor];
 
-    handler.handlePickItem('bag');
+    await handler.handlePickItem('bag');
 
     expect(actor.spies.pickItem).not.toHaveBeenCalled();
   });
 
-  it('allows extraction when portable container rules pass', () => {
+  it('allows extraction when portable container rules pass', async () => {
     const actor = runtimeActor(bagState(1));
     handler.actors = [actor];
 
-    handler.handlePickItem('bag');
+    await handler.handlePickItem('bag');
 
     expect(actor.spies.pickItem).toHaveBeenCalledWith(player.code, player.pickHeight);
   });
 
-  it('allows extraction from a locked container like Tabletop Simulator does', () => {
+  it('allows extraction from a locked container like Tabletop Simulator does', async () => {
     const lockedBag = { ...bagState(1), locked: true };
     const actor = runtimeActor(lockedBag);
     handler.actors = [actor];
 
-    handler.handlePickItem('bag');
+    await handler.handlePickItem('bag');
 
     expect(actor.spies.pickItem).toHaveBeenCalledWith(player.code, player.pickHeight);
   });
@@ -120,11 +120,11 @@ describe('ActionHandler portable rules', () => {
     expect(actor.spies.shuffle).toHaveBeenCalledWith();
   });
 
-  it('rejects container actions on an ordinary actor before calling unsupported methods', () => {
+  it('rejects container actions on an ordinary actor before calling unsupported methods', async () => {
     const actor = runtimeActor(actorState());
     handler.actors = [actor];
 
-    handler.handlePickItem('actor');
+    await handler.handlePickItem('actor');
     handler.handleShuffle('actor');
 
     expect(actor.spies.pickItem).not.toHaveBeenCalled();

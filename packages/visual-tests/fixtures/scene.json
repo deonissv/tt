@@ -55,6 +55,35 @@
       }
     },
     {
+      "type": 1,
+      "guid": "314455",
+      "name": "Infinite_Bag",
+      "infinite": true,
+      "transformation": {
+        "position": [6, 4, -4],
+        "rotation": [0, 0, 0],
+        "scale": [1, 1, 1]
+      },
+      "colorDiffuse": [0.3058885, 0.372555166, 1],
+      "containedObjects": [
+        {
+          "type": 4,
+          "guid": "2c72d9",
+          "name": "Custom_Tile",
+          "transformation": {
+            "position": [6, 3.5, -4],
+            "rotation": [0, 0, 0],
+            "scale": [1, 1, 1]
+          },
+          "colorDiffuse": [1, 1, 1],
+          "faceURL": "http://visual-assets.invalid/assets/felt_diff.png",
+          "widthScale": 0,
+          "tileType": 0,
+          "locked": false
+        }
+      ]
+    },
+    {
       "type": 4,
       "guid": "7b4f3e",
       "name": "Custom_Tile",
