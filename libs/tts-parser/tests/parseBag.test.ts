@@ -56,4 +56,18 @@ describe('TTSParser - parseBag', () => {
     const result = TTSParser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
     expect(result).toMatchObject(expected);
   });
+
+  it('marks Infinite_Bag saves as never-depleting containers', () => {
+    const result = TTSParser.parseBag(DEMO.INFINITE_BAG as unknown as ObjectState);
+
+    expect(result?.type).toBe(ActorType.BAG);
+    expect(result?.infinite).toBe(true);
+    expect(result?.containedObjects).toHaveLength(1);
+  });
+
+  it('leaves ordinary bags finite', () => {
+    const result = TTSParser.parseBag(DEMO.BAG as unknown as ObjectState);
+
+    expect(result?.infinite).toBeUndefined();
+  });
 });

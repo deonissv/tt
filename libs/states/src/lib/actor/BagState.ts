@@ -10,4 +10,9 @@ export interface BagState extends ActorBaseState {
   model?: Model;
   children?: ActorState[];
   containedObjects: UnknownActorState[];
+  /**
+   * Tabletop Simulator infinite bags hand out copies and never deplete
+   * (save files mark them by the `Infinite_` name prefix).
+   */
+  infinite?: boolean;
 }

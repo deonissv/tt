@@ -367,6 +367,12 @@ export class TTSParser extends ParserBase {
       containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
     };
 
+    // Tabletop Simulator marks endless containers in the save by naming them
+    // `Infinite_Bag` (and friends): drawing hands out copies without depleting.
+    if (typeof objectState.Name === 'string' && objectState.Name.toLowerCase().includes('infinite')) {
+      bagState.infinite = true;
+    }
+
     if (model) bagState.model = model;
 
     return bagState;
