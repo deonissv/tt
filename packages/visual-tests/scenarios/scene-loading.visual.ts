@@ -19,12 +19,12 @@ test.use({
 test.describe(() => {
   test.use({ fixtureVariant: 'static-scene' });
   test(
-    'loads the Rectangle table and all 14 actor types with local assets',
+    'loads the Rectangle table and all 15 actor types with local assets',
     { tag: [...ACTOR_MANIFEST.map(actor => `@actor:${actor.typeName}`), '@behavior:load', '@behavior:render'] },
     async ({ player: { page, connection }, guestPlayer, room }, testInfo) => {
       const server = await captureRoom(room);
       for (const observed of [connection, guestPlayer!.connection]) expect(observed.connectionCount).toBe(1);
-      expect(server.downloadProgress).toMatchObject({ failed: 0, succeeded: 14, total: 14 });
+      expect(server.downloadProgress).toMatchObject({ failed: 0, succeeded: 15, total: 15 });
       expect(server.state.table?.type).toBe('Rectangle');
 
       for (const expected of ACTOR_MANIFEST) {

@@ -1,4 +1,4 @@
-import type { UnknownActorState } from '@tt/states';
+import type { BagState, UnknownActorState } from '@tt/states';
 import { manifestActor } from '../fixtures/manifest';
 import { ClientAction } from '@tt/actions';
 import coordinates from '../fixtures/targeting/coordinates.json';
@@ -90,6 +90,64 @@ for (const actor of ['7a0b0b', 'fb31d5', '51d35d'].map(manifestActor)) {
 const deck = manifestActor('fb31d5');
 const bag = manifestActor('7a0b0b');
 const tileStack = manifestActor('51d35d');
+const infiniteBag = manifestActor('314455');
+
+test.describe(() => {
+  // Tabletop Simulator infinite bags hand out a fresh copy per draw and never
+  // deplete: the stored item keeps its identity while every spawn is new.
+  test.use({ actorGuids: [infiniteBag.guid] });
+  test(
+    `[${infiniteBag.typeName} ${infiniteBag.guid}] extraction hands out fresh copies without depleting the bag`,
+    { tag: [`@actor:${infiniteBag.typeName}`, '@behavior:extract', '@behavior:infinite'] },
+    async ({ player: { page, connection }, guestPlayer, room }, testInfo) => {
+      const guid = infiniteBag.guid;
+      let baselineCapture = await captureRoom(room);
+      const bagActor = getActor(baselineCapture.state, guid) as BagState;
+      expect(bagActor.infinite, 'the fixture bag must be infinite').toBe(true);
+      const stored = actorIdentityList(bagActor);
+      expect(stored).toHaveLength(1);
+      const storedGuid = stored[0];
+
+      const start = points[guid];
+      await page.locator('canvas').focus();
+      await page.mouse.move(start[0], start[1]);
+      await waitForRenderedFrames(page);
+
+      const spawnedGuids: string[] = [];
+      for (let draw = 0; draw < 2; draw++) {
+        await expectClientAction(connection, ClientAction.PICK_ITEM, () => page.keyboard.press('KeyG'), guid);
+        const drawn = await expectSpawnedActor(room, baselineCapture.state);
+        expect(drawn.guid, 'each draw must produce a new identity').not.toBe(storedGuid);
+        expect(spawnedGuids).not.toContain(drawn.guid);
+        spawnedGuids.push(drawn.guid);
+        // Drop the held copy well clear of the bag's hover box before drawing again.
+        await page.mouse.down();
+        await expectClientAction(
+          connection,
+          ClientAction.MOVE_ACTOR,
+          () => page.mouse.move(start[0] + 90 + draw * 30, start[1] + 60, { steps: 10 }),
+          drawn.guid,
+        );
+        await expectClientAction(connection, ClientAction.RELEASE_ACTOR, () => page.mouse.up(), drawn.guid);
+        await waitForActorStable(room, drawn.guid, positionChanged, drawn);
+        baselineCapture = await waitForRoomStable(room);
+        // Re-hover the bag itself: the dropped copy must not become the target.
+        await page.mouse.move(start[0], start[1]);
+        await waitForRenderedFrames(page);
+      }
+
+      const afterBag = getActor(baselineCapture.state, guid) as BagState;
+      expect(actorIdentityList(afterBag), 'the infinite bag never depletes').toEqual(stored);
+      for (const spawned of spawnedGuids) {
+        expect(
+          (baselineCapture.state.actorStates ?? []).some(actor => actor.guid === spawned),
+          'every drawn copy stays in the room',
+        ).toBe(true);
+      }
+      await expectMatchingCanvases(testInfo, 'infinite-bag-extract', [page, guestPlayer!.page]);
+    },
+  );
+});
 
 test.describe(() => {
   test.use({ actorGuids: [deck.guid] });
