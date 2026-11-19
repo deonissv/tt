@@ -26,7 +26,31 @@ export class Loader {
   };
 
   static registerFileFetcher(fetcher: FileFetcher) {
+    this.Assets.clear();
     this.fetchFile = fetcher;
+  }
+
+  /** Reuses pending and successful fetches until the session cache is cleared. */
+  static cachedFileFetcher(fetcher: FileFetcher, signal?: AbortSignal): FileFetcher {
+    return (url: string) => {
+      if (signal?.aborted) return Promise.resolve(null);
+      const cached = this.Assets.get(url);
+      if (cached) return cached;
+
+      const pending = fetcher(url).then(
+        result => {
+          if (!result && this.Assets.get(url) === pending) this.Assets.delete(url);
+          return result;
+        },
+        error => {
+          if (this.Assets.get(url) === pending) this.Assets.delete(url);
+          if (signal?.aborted) return null;
+          throw error;
+        },
+      );
+      this.Assets.set(url, pending);
+      return pending;
+    };
   }
 
   static _getModelExtension(mime: MimeType): string {

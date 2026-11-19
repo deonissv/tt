@@ -57,13 +57,25 @@ export class Simulation extends SimulationBase {
     canvas: HTMLCanvasElement | undefined,
     stateSave: SimulationStateSave,
     cbs: SimulationCallbacks,
+    signal?: AbortSignal,
   ): Promise<Simulation> {
+    signal?.throwIfAborted();
     const engine = await EngineFactory(canvas);
+    if (signal?.aborted) {
+      engine.dispose();
+      signal.throwIfAborted();
+    }
     const scene = new SimulationScene(engine, stateSave?.leftHandedSystem);
     const sim = new Simulation(scene, cbs);
 
     if (stateSave.table) {
       await this.tableFromState(stateSave.table);
+    }
+
+    if (signal?.aborted) {
+      scene.dispose();
+      engine.dispose();
+      signal.throwIfAborted();
     }
 
     await Promise.all(
@@ -82,6 +94,12 @@ export class Simulation extends SimulationBase {
         }
       }),
     );
+
+    if (signal?.aborted) {
+      scene.dispose();
+      engine.dispose();
+      signal.throwIfAborted();
+    }
 
     sim._handlePick();
     sim._handleHoverHighlight();

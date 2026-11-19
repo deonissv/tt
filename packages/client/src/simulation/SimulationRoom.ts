@@ -64,8 +64,13 @@ export class SimulationRoom {
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
     onRoomClosed: () => void,
+    signal?: AbortSignal,
   ): Promise<[SimulationRoom, DownloadProgressPld]> {
     const [ws, simState] = await RoomService.connect(roomId, setDownloadProgress);
+    if (signal?.aborted) {
+      ws.close();
+      signal.throwIfAborted();
+    }
     const clientId = AuthService.getJWT()!.code;
 
     let sim: Simulation | null = null;
@@ -135,7 +140,13 @@ export class SimulationRoom {
       });
     });
 
-    sim = await Simulation.init(canvas, simState, SimulationRoom);
+    try {
+      sim = await Simulation.init(canvas, simState, SimulationRoom, signal);
+      signal?.throwIfAborted();
+    } catch (error) {
+      ws.close();
+      throw error;
+    }
     buffer.forEach(action => {
       handleActtion(action);
     });

@@ -78,6 +78,8 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
   );
 
   useEffect(() => {
+    const controller = new AbortController();
+    let cleanup: (() => void) | undefined;
     const init = async (): Promise<[SimulationRoom, DownloadProgressPld] | null> => {
       RoomService.getRoom(roomCode)
         .then(r => {
@@ -89,16 +91,21 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
           return null;
         });
 
-      Loader.registerFileFetcher(async (url: string) => {
-        const response = await fetch(url);
-        const arrayBuffer = await response.arrayBuffer();
+      Loader.registerFileFetcher(
+        Loader.cachedFileFetcher(async (url: string) => {
+          const proxyRoom = /^\/proxy\/([^/]+)\//.exec(new URL(url, window.location.href).pathname)?.[1];
+          if (proxyRoom && proxyRoom !== roomCode) return null;
+          const response = await fetch(url, { signal: controller.signal });
+          if (!response.ok) return null;
+          const arrayBuffer = await response.arrayBuffer();
 
-        const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
-        const b64 = getB64URL(arrayBuffer);
+          const mime = MimeResolver.getMime(arrayBuffer) ?? MimeType.OBJ;
+          const b64 = getB64URL(arrayBuffer);
 
-        Logger.log(`Fetched file: ${url}`);
-        return { url: b64, mime };
-      });
+          Logger.log(`Fetched file: ${url}`);
+          return { url: b64, mime };
+        }, controller.signal),
+      );
 
       const rv = await SimulationRoom.init(
         canvas.current!,
@@ -106,7 +113,9 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
         setCursors,
         setDownloadProgress,
         onRoomClosed,
+        controller.signal,
       ).catch(() => {
+        if (controller.signal.aborted) return null;
         addToast(`Failed to initialize room`);
         void navigate('/games');
         return null;
@@ -125,6 +134,10 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
       .then(rv => {
         if (!rv) return;
         const [sr, downloadProgress] = rv;
+        if (controller.signal.aborted) {
+          sr.destructor();
+          return;
+        }
 
         simulationRoom.current = sr;
         clientId.current = sr.clientId;
@@ -150,20 +163,19 @@ export const Canvas: React.FC<{ roomCode: string }> = ({ roomCode }): React.Reac
           );
         }
 
-        return () => {
+        cleanup = () => {
           canvas.current?.removeEventListener('pointermove', handlePointerMove);
           canvas.current?.removeEventListener('mousemove', handleMouseMove);
           sr.destructor();
         };
       })
       .catch(() => addToast(`Failed to join room`));
-  }, [addToast, navigate, onRoomClosed, roomCode]);
-
-  useEffect(() => {
     return () => {
-      simulationRoom.current?.destructor();
+      controller.abort();
+      Loader.Assets.clear();
+      cleanup?.();
     };
-  }, [simulationRoom]);
+  }, [addToast, navigate, onRoomClosed, roomCode]);
 
   useEffect(() => {
     updateCursors(cursor, cursors, screenCursors);

@@ -13,17 +13,6 @@ Logger.register(console);
 const App = () => {
   const canvas = useRef<HTMLCanvasElement>(null);
 
-  Loader.registerFileFetcher(async (url: string) => {
-    const response = await fetch(url);
-    const arrayBuffer = await response.arrayBuffer();
-
-    const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
-    const b64 = getB64URL(arrayBuffer);
-
-    Logger.log(`Fetched file: ${url}`);
-    return { url: b64, mime };
-  });
-
   const init = useCallback(async (): Promise<Simulation> => {
     const sim = await Simulation.init(
       canvas.current!,
@@ -271,9 +260,27 @@ const App = () => {
   }, [canvas]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    Loader.registerFileFetcher(
+      Loader.cachedFileFetcher(async (url: string) => {
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) return null;
+        const arrayBuffer = await response.arrayBuffer();
+
+        const mime = MimeDetector.getMime(arrayBuffer) ?? MimeType.OBJ;
+        const b64 = getB64URL(arrayBuffer);
+
+        Logger.log(`Fetched file: ${url}`);
+        return { url: b64, mime };
+      }, controller.signal),
+    );
     init()
       // eslint-disable-next-line no-console
       .catch(console.error);
+    return () => {
+      controller.abort();
+      Loader.Assets.clear();
+    };
   }, [init]);
 
   return <canvas ref={canvas} className="w-full h-full !border-0 !hover:border-0 !focus:border-0" />;

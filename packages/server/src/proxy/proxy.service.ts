@@ -32,6 +32,7 @@ export class ProxyService {
   async proxy(roomCode: string, url: string) {
     try {
       const response = await fetch(url);
+      if (!response.ok) throw new NotFoundException();
       const file = await response.arrayBuffer();
 
       const buffer = new Uint8Array(file);
