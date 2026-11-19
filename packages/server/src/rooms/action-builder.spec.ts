@@ -310,6 +310,188 @@ describe('getActorPositionUpdate / getActorRotationUpdate / getActorScaleUpdate'
   });
 });
 
+describe('sub-threshold drift', () => {
+  it('skips unchanged snapshots without forgetting accumulated motion', () => {
+    const builder = makeBuilder();
+    const stateAt = (x: number, sleeping: boolean): SimulationStateSave => ({
+      actorStates: [{ ...actorState({ transformation: { position: [x, 0, 0] } }), sleeping }],
+    });
+    builder.getSimActions(stateAt(0, false));
+    const compare = vi.spyOn(builder, '_getSimActions');
+
+    expect(builder.getSimActions(stateAt(0.0004, true))).toEqual([]);
+    expect(compare).toHaveBeenCalledTimes(1);
+    expect(builder.getSimActions(stateAt(0.0004, true))).toEqual([]);
+    expect(compare).toHaveBeenCalledTimes(1);
+    expect(builder.getSimActions(stateAt(0.0008, true))).toEqual([]);
+    expect(builder.getSimActions(stateAt(0.0012, false))).toEqual([
+      { type: ServerAction.MOVE_ACTOR, payload: { guid: 'actor', position: [0.0012, 0, 0] } },
+    ]);
+    expect(builder.getSimActions(stateAt(0.0012, false))).toEqual([]);
+    expect(compare).toHaveBeenCalledTimes(3);
+  });
+
+  const driftingActor = (x: number): UnknownActorState => ({
+    type: ActorType.ACTOR,
+    guid: 'box',
+    name: 'box',
+    model: { meshURL: '' },
+    transformation: { position: [x, 0.55, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
+  });
+
+  it.each(['position', 'rotation'] as const)('accumulates %s independently of other transmitted changes', field => {
+    const otherField = field === 'position' ? 'rotation' : 'position';
+    const state = (value: number, otherValue: number): SimulationStateSave => ({
+      actorStates: [actorState({ transformation: { [field]: [value, 0, 0], [otherField]: [otherValue, 0, 0] } })],
+    });
+    const builder = makeBuilder();
+    builder.getSimActions(state(0, 0));
+    const actionType = field === 'position' ? ServerAction.MOVE_ACTOR : ServerAction.ROTATE_ACTOR;
+
+    for (const [value, otherValue] of [
+      [0.0004, 1],
+      [0.0008, 2],
+    ]) {
+      const actions = builder.getSimActions(state(value, otherValue));
+      expect(actions).toHaveLength(1);
+      expect(actions[0].type).not.toBe(actionType);
+    }
+    expect(builder.getSimActions(state(0.0012, 2))).toEqual([
+      { type: actionType, payload: { guid: 'actor', position: [0.0012, 0, 0] } },
+    ]);
+    expect(builder.getSimActions(state(0.0016, 2))).toEqual([]);
+    expect(builder.getSimActions(state(0.002, 2))).toEqual([]);
+    expect(builder.getSimActions(state(0.0024, 2))).toEqual([
+      { type: actionType, payload: { guid: 'actor', position: [0.0024, 0, 0] } },
+    ]);
+  });
+
+  it('retains a snapshot when the initial input is mutated', () => {
+    const builder = makeBuilder();
+    const initial = { actorStates: [driftingActor(0)] };
+    builder.getSimActions(initial);
+    initial.actorStates[0].transformation!.position![0] = 0.0012;
+
+    expect(builder.getSimActions(initial)).toEqual([
+      { type: ServerAction.MOVE_ACTOR, payload: { guid: 'box', position: [0.0012, 0.55, 0] } },
+    ]);
+  });
+
+  it.each<[UnknownActorState, UnknownActorState, ServerAction]>([
+    [deck([card('first'), card('second')]), deck([card('second')]), ServerAction.RERENDER_DECK],
+    [
+      { guid: 'bag', name: 'Bag', type: ActorType.BAG, containedObjects: [actorState()] },
+      { guid: 'bag', name: 'Bag', type: ActorType.BAG, containedObjects: [] },
+      ServerAction.RERENDER_BAG,
+    ],
+    [
+      { guid: 'stack', name: 'Stack', type: ActorType.TILE_STACK, tileType: 0, faceURL: '', size: 2 },
+      { guid: 'stack', name: 'Stack', type: ActorType.TILE_STACK, tileType: 0, faceURL: '', size: 1 },
+      ServerAction.RERENDER_TILE_STACK,
+    ],
+  ])('preserves pending motion through a container rerender %#', (before, after, actionType) => {
+    const builder = makeBuilder();
+    builder.getSimActions({ actorStates: [before] });
+    const stateAt = (value: number): SimulationStateSave => ({
+      actorStates: [{ ...after, transformation: { position: [value, 0, 0], rotation: [0, value, 0] } }],
+    });
+
+    const actions = builder.getSimActions(stateAt(0.0004));
+    expect(actions.map(action => action.type)).toEqual([actionType]);
+    expect(builder.getSimActions(stateAt(0.0008))).toEqual([]);
+    expect(builder.getSimActions(stateAt(0.0012))).toEqual([
+      { type: ServerAction.MOVE_ACTOR, payload: { guid: after.guid, position: [0.0012, 0, 0] } },
+      { type: ServerAction.ROTATE_ACTOR, payload: { guid: after.guid, position: [0, 0.0012, 0] } },
+    ]);
+    expect(builder.getSimActions(stateAt(0.0012))).toEqual([]);
+  });
+
+  it('forgets removed actors so the same guid can spawn again', () => {
+    const builder = makeBuilder([{ guid: 'box' }]);
+    const initial = { actorStates: [driftingActor(0)] };
+    builder.getSimActions(initial);
+    expect(builder.getSimActions({ actorStates: [] })).toEqual([{ type: ServerAction.REMOVE_ACTOR, payload: 'box' }]);
+    expect(builder.getSimActions({ actorStates: [] })).toEqual([]);
+    expect(builder.getSimActions(initial)).toEqual([
+      { type: ServerAction.SPAWN_ACTOR, payload: initial.actorStates[0] },
+    ]);
+    expect(builder.getSimActions(initial)).toEqual([]);
+  });
+
+  it('broadcasts accumulated sub-threshold motion instead of swallowing it', () => {
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [driftingActor(0)] };
+
+    expect(builder.getSimActions({ actorStates: [driftingActor(0.0004)] })).toEqual([]);
+    expect(builder.getSimActions({ actorStates: [driftingActor(0.0008)] })).toEqual([]);
+    expect(builder.getSimActions({ actorStates: [driftingActor(0.0012)] })).toContainEqual({
+      type: ServerAction.MOVE_ACTOR,
+      payload: { guid: 'box', position: [0.0012, 0.55, 0] },
+    });
+    expect(builder.getSimActions({ actorStates: [driftingActor(0.0012)] })).toEqual([]);
+  });
+
+  it('does not repeat a deck rerender once delivered', () => {
+    const deck = (cards: string[]): DeckState => ({
+      type: ActorType.DECK,
+      guid: 'deck',
+      name: 'Deck',
+      cards: cards.map(guid => ({
+        type: ActorType.CARD,
+        guid,
+        name: guid,
+        faceURL: `${guid}.png`,
+        backURL: `${guid}.png`,
+        cols: 1,
+        rows: 1,
+        sequence: 0,
+      })),
+    });
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [deck(['first', 'second'])] };
+
+    const actions = builder.getSimActions({ actorStates: [deck(['second', 'first'])] });
+    expect(actions.filter(action => action.type === ServerAction.RERENDER_DECK)).toHaveLength(1);
+    expect(builder.getSimActions({ actorStates: [deck(['second', 'first'])] })).toEqual([]);
+  });
+
+  it('does not repeat a bag rerender once delivered', () => {
+    const item = (guid: string): UnknownActorState => ({
+      type: ActorType.ACTOR,
+      guid,
+      name: guid,
+      model: { meshURL: `${guid}.obj` },
+    });
+    const bag = (items: UnknownActorState[]): BagState => ({
+      type: ActorType.BAG,
+      guid: 'bag',
+      name: 'Bag',
+      containedObjects: items,
+    });
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [bag([item('first'), item('second')])] };
+
+    expect(builder.getSimActions({ actorStates: [bag([item('first')])] }).map(a => a.type)).toContain(
+      ServerAction.RERENDER_BAG,
+    );
+    expect(builder.getSimActions({ actorStates: [bag([item('first')])] })).toEqual([]);
+  });
+
+  it('does not respawn an actor once delivered', () => {
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [{ guid: 'box', picked: null }] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [] };
+
+    expect(builder.getSimActions({ actorStates: [driftingActor(0)] }).map(a => a.type)).toContain(
+      ServerAction.SPAWN_ACTOR,
+    );
+    expect(builder.getSimActions({ actorStates: [driftingActor(0)] })).toEqual([]);
+  });
+});
+
 describe('bag rerender', () => {
   const bagItem = (guid: string): UnknownActorState => ({
     type: ActorType.ACTOR,
