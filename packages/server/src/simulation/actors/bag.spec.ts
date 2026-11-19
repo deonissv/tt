@@ -105,9 +105,9 @@ describe('container behavior', () => {
     sim.start();
     await wait(100);
 
-    await pickItem(bag, '', 1);
+    await bag.pickItem('', 1);
     await wait(100);
-    await pickItem(bag, '', 1);
+    await bag.pickItem('', 1);
     await wait(100);
 
     expect(built).toHaveLength(2);

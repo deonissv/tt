@@ -313,7 +313,7 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('tileStack');
+      await actionHandler.handlePickItem('tileStack');
 
       await wait(500);
 
@@ -381,7 +381,7 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('deck');
+      await actionHandler.handlePickItem('deck');
 
       await wait(500);
       expect(sim.actors.length).toBe(2);
@@ -443,9 +443,9 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('infbag');
+      await actionHandler.handlePickItem('infbag');
       await wait(300);
-      actionHandler.handlePickItem('infbag');
+      await actionHandler.handlePickItem('infbag');
       await wait(300);
 
       expect(built).toHaveLength(2);
@@ -499,7 +499,7 @@ describe('handleAction', () => {
       actionHandler.client.pickHeight = PICK_HIGHT;
 
       await wait(100);
-      actionHandler.handlePickItem('tileStack');
+      await actionHandler.handlePickItem('tileStack');
 
       await wait(500);
 

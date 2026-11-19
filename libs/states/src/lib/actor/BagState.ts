@@ -11,8 +11,8 @@ export interface BagState extends ActorBaseState {
   children?: ActorState[];
   containedObjects: UnknownActorState[];
   /**
-   * Tabletop Simulator infinite bags hand out copies and never deplete
-   * (save files mark them by the `Infinite_` name prefix).
+   * Draw copies with fresh identities while retaining containedObjects as templates.
+   * Missing or false means finite. Persist this flag with the template contents.
    */
   infinite?: boolean;
 }

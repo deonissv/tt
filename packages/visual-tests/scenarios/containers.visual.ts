@@ -120,6 +120,16 @@ test.describe(() => {
         expect(drawn.guid, 'each draw must produce a new identity').not.toBe(storedGuid);
         expect(spawnedGuids).not.toContain(drawn.guid);
         spawnedGuids.push(drawn.guid);
+        // Wait until the browser has loaded and picked up the server's new copy.
+        await expect(async () => {
+          await expectClientAction(
+            connection,
+            ClientAction.MOVE_ACTOR,
+            () => page.mouse.move(start[0] + 0.1, start[1]).then(() => page.mouse.move(start[0], start[1])),
+            drawn.guid,
+            1_000,
+          );
+        }).toPass({ timeout: 30_000, intervals: [100] });
         // Drop the held copy well clear of the bag's hover box before drawing again.
         await page.mouse.down();
         await expectClientAction(

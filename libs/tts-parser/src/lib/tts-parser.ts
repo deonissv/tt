@@ -364,12 +364,12 @@ export class TTSParser extends ParserBase {
     const bagState: BagState = {
       type: ActorType.BAG,
       ...actorBase,
-      containedObjects: containedObjects.filter((o): o is ActorState => o !== null),
+      containedObjects: containedObjects.filter((o): o is UnknownActorState => o !== null),
     };
 
-    // Tabletop Simulator marks endless containers in the save by naming them
-    // `Infinite_Bag` (and friends): drawing hands out copies without depleting.
-    if (typeof objectState.Name === 'string' && objectState.Name.toLowerCase().includes('infinite')) {
+    // Both built-in and custom model infinite bags retain their template on draw.
+    const name = objectState.Name.toLowerCase();
+    if (name.startsWith('infinite_') || name === 'custom_model_infinite_bag') {
       bagState.infinite = true;
     }
 

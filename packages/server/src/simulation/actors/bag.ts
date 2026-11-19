@@ -1,10 +1,24 @@
 import { Loader } from '@tt/loader';
 import { containerSize } from '@tt/rules';
-import type { BagState } from '@tt/states';
-import { shuffle as shuffleItems } from '@tt/utils';
+import type { ActorBaseState, BagState } from '@tt/states';
+import { shuffle as shuffleItems, UUIDv4 } from '@tt/utils';
 import { releaseSlot, reserveSlot, restoreSlot, spawnDrawnItem } from '../behaviors/container';
 import { AssetsManager } from './assets-manager';
 import { ServerBase } from './serverBase';
+
+function refreshGUIDs(
+  state: ActorBaseState & {
+    children?: ActorBaseState[];
+    containedObjects?: ActorBaseState[];
+    cards?: ActorBaseState[];
+  },
+): void {
+  // Nested templates may become live actors later, so copy their identities too.
+  state.guid = UUIDv4();
+  state.children?.forEach(refreshGUIDs);
+  state.containedObjects?.forEach(refreshGUIDs);
+  state.cards?.forEach(refreshGUIDs);
+}
 
 export class Bag extends ServerBase<BagState> {
   get size(): number {
@@ -15,6 +29,10 @@ export class Bag extends ServerBase<BagState> {
     const state = this.toState();
     if (state.containedObjects.length < 1) return null;
     const child = structuredClone(state.containedObjects.at(-1)!);
+    if (state.infinite) {
+      refreshGUIDs(child);
+      return spawnDrawnItem(this, child, clientId, pickHeight);
+    }
     const slot = reserveSlot(this, state.containedObjects.length, true);
     this.updateState({ guid: state.guid, containedObjects: structuredClone(state.containedObjects.slice(0, -1)) });
     try {
