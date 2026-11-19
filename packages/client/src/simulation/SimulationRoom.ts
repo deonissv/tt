@@ -1,4 +1,3 @@
-import { Loader } from '@tt/loader';
 import { AuthService, RoomService } from '@services';
 import type { ActionMsg, ClientActionMsg, CursorsPld, DownloadProgressPld } from '@tt/actions';
 import { ClientAction, ServerAction } from '@tt/actions';
@@ -65,8 +64,13 @@ export class SimulationRoom {
     setCursors: Dispatch<SetStateAction<CursorsPld>>,
     setDownloadProgress: Dispatch<SetStateAction<Tuple<number, 2> | null>>,
     onRoomClosed: () => void,
+    signal?: AbortSignal,
   ): Promise<[SimulationRoom, DownloadProgressPld]> {
     const [ws, simState] = await RoomService.connect(roomId, setDownloadProgress);
+    if (signal?.aborted) {
+      ws.close();
+      signal.throwIfAborted();
+    }
     const clientId = AuthService.getJWT()!.code;
 
     let sim: Simulation | null = null;
@@ -136,7 +140,13 @@ export class SimulationRoom {
       });
     });
 
-    sim = await Simulation.init(canvas, simState, SimulationRoom);
+    try {
+      sim = await Simulation.init(canvas, simState, SimulationRoom, signal);
+      signal?.throwIfAborted();
+    } catch (error) {
+      ws.close();
+      throw error;
+    }
     buffer.forEach(action => {
       handleActtion(action);
     });
@@ -221,7 +231,6 @@ export class SimulationRoom {
   }
 
   destructor() {
-    Loader.Assets.clear();
     if (this.updateTimeout) clearInterval(this.updateTimeout);
     this.ws.close();
   }

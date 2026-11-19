@@ -31,8 +31,9 @@ export class Loader {
   }
 
   /** Reuses pending and successful fetches until the session cache is cleared. */
-  static cachedFileFetcher(fetcher: FileFetcher): FileFetcher {
+  static cachedFileFetcher(fetcher: FileFetcher, signal?: AbortSignal): FileFetcher {
     return (url: string) => {
+      if (signal?.aborted) return Promise.resolve(null);
       const cached = this.Assets.get(url);
       if (cached) return cached;
 
@@ -43,6 +44,7 @@ export class Loader {
         },
         error => {
           if (this.Assets.get(url) === pending) this.Assets.delete(url);
+          if (signal?.aborted) return null;
           throw error;
         },
       );

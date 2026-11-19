@@ -30,6 +30,31 @@ describe('Loader.cachedFileFetcher', () => {
     expect(fetcher).toHaveBeenCalledTimes(2);
   });
 
+  it('does not repopulate the cache after its session is aborted', async () => {
+    const controller = new AbortController();
+    const fetcher = vi.fn((url: string) => Promise.resolve(fetchedFile(url)));
+    const cached = Loader.cachedFileFetcher(fetcher, controller.signal);
+    await cached('a.obj');
+    controller.abort();
+    Loader.Assets.clear();
+
+    await expect(cached('a.obj')).resolves.toBeNull();
+    await expect(cached('b.obj')).resolves.toBeNull();
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(Loader.Assets.size).toBe(0);
+  });
+
+  it('resolves an in-flight canceled fetch as a missing asset', async () => {
+    const controller = new AbortController();
+    let reject!: (error: Error) => void;
+    const cached = Loader.cachedFileFetcher(() => new Promise((_resolve, fail) => (reject = fail)), controller.signal);
+    const pending = cached('a.obj');
+    controller.abort();
+    reject(new DOMException('Canceled', 'AbortError'));
+    await expect(pending).resolves.toBeNull();
+    expect(Loader.Assets.size).toBe(0);
+  });
+
   it('does not cache a null answer so the next call can retry', async () => {
     let fail = true;
     const fetcher = vi.fn(() => Promise.resolve(fail ? null : fetchedFile('a.obj')));
