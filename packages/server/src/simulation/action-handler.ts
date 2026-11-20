@@ -11,13 +11,13 @@ export class ActionHandler {
   actors: ServerBase[] = [];
   client: Client;
 
-  handleActions(actions: ClientActionMsg[], actors: ServerBase[], client: Client): void {
+  handleActions(actions: ClientActionMsg[], actors: ServerBase[], client: Client): Promise<void> {
     this.actors = actors;
     this.client = client;
-    actions.map(msg => this.handleAction(msg));
+    return Promise.all(actions.map(msg => Promise.resolve(this.handleAction(msg)))).then(() => undefined);
   }
 
-  handleAction(msg: ClientActionMsg): void {
+  handleAction(msg: ClientActionMsg): void | Promise<void> {
     switch (msg.type) {
       case ClientAction.PICK_ACTOR:
         this.handlePickActor(msg.payload);
@@ -29,8 +29,7 @@ export class ActionHandler {
         this.handleMoveActor(msg.payload.guid, msg.payload.position);
         break;
       case ClientAction.PICK_ITEM:
-        void this.handlePickItem(msg.payload);
-        break;
+        return this.handlePickItem(msg.payload);
       case ClientAction.ROLL:
         this.handleRoll(msg.payload);
         break;

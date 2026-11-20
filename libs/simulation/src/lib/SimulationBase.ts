@@ -1,4 +1,5 @@
 import type { AbstractEngine } from '@babylonjs/core/Engines/abstractEngine';
+import { EngineStore } from '@babylonjs/core/Engines/engineStore';
 
 // Side efects
 import '@babylonjs/core/Culling/ray';
@@ -74,8 +75,21 @@ export abstract class SimulationBase {
     });
   }
 
-  stop() {
+  /**
+   * Stops the render loop and releases the scene, physics world and engine.
+   * The instance must not be used afterwards.
+   */
+  dispose() {
     this.engine.stopRenderLoop();
+    // Scene.dispose() also disposes the physics engine (and its Havok world)
+    // via the physics scene component registered by enablePhysics.
+    this.scene.dispose();
+    this.engine.dispose();
+    // Babylon only searches the disposed scene's engine for a new default.
+    // Asset loading in other active simulations still needs a live default scene.
+    if (!EngineStore.LastCreatedScene) {
+      EngineStore._LastCreatedScene = EngineStore.Instances.flatMap(engine => engine.scenes).pop() ?? null;
+    }
   }
 
   /**

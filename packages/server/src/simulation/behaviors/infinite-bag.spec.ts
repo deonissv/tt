@@ -186,9 +186,7 @@ describe('infinite bags in a server simulation', () => {
     sim = getPhSim();
   });
   afterEach(() => {
-    sim.stop();
-    sim.scene.dispose();
-    sim.engine.dispose();
+    sim.dispose();
     vi.restoreAllMocks();
   });
 
