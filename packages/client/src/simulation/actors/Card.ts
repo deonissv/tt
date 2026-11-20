@@ -1,4 +1,6 @@
 import type { Texture } from '@babylonjs/core/Materials/Textures/texture';
+import type { MultiMaterial } from '@babylonjs/core/Materials/multiMaterial';
+import type { StandardMaterial } from '@babylonjs/core/Materials/standardMaterial';
 import type { Mesh } from '@babylonjs/core/Meshes/mesh';
 import { CardMixin, FlatModel } from '@tt/actors';
 import { Loader } from '@tt/loader';
@@ -41,7 +43,7 @@ export class Card extends CardMixin(ClientBase<CardState>) {
     return new Card(state, model, faceTexture, backTexture);
   }
 
-  static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid: CardGrid) {
+  private static setFaceGrid(faceTexture: Texture, grid: CardGrid) {
     const [col, row] = Card.getColRow(grid.sequence, grid.cols);
 
     const cardWidth = 1 / grid.cols;
@@ -52,6 +54,10 @@ export class Card extends CardMixin(ClientBase<CardState>) {
 
     faceTexture.uScale = cardWidth;
     faceTexture.vScale = cardHeight;
+  }
+
+  static getCardModel(model: Mesh, faceTexture: Texture, backTexture: Texture, grid: CardGrid) {
+    Card.setFaceGrid(faceTexture, grid);
 
     const cardModel = FlatModel(
       model,
@@ -71,25 +77,67 @@ export class Card extends CardMixin(ClientBase<CardState>) {
       },
     );
 
-    const material = cardModel.material;
+    cardModel.scaling.x = 1.6;
+    Card.updateWidth(cardModel, faceTexture, grid);
+    return cardModel;
+  }
+
+  private static updateWidth(model: Mesh, faceTexture: Texture, grid: CardGrid) {
+    const material = model.material as MultiMaterial;
     const updateWidth = () => {
-      // A deck may have rerendered with another face while this image loaded.
-      if (cardModel.isDisposed() || cardModel.material !== material) return;
+      // Ignore an image that finished after another reveal or deck rerender.
+      if (
+        model.isDisposed() ||
+        model.material !== material ||
+        (material.subMaterials[1] as StandardMaterial).diffuseTexture !== faceTexture
+      )
+        return;
+      if (grid.faceAspectRatio && Number.isFinite(grid.faceAspectRatio) && grid.faceAspectRatio > 0) {
+        model.scaling.x = 1.6 * grid.faceAspectRatio;
+        return;
+      }
       const { width, height } = faceTexture.getBaseSize();
       if (width > 0 && height > 0) {
-        cardModel.scaling.x = 1.6 * (width / grid.cols / (height / grid.rows));
+        model.scaling.x = 1.6 * (width / grid.cols / (height / grid.rows));
       }
     };
 
-    cardModel.scaling.x = 1.6;
     updateWidth();
     if (!faceTexture.isReady()) faceTexture.onLoadObservable.addOnce(updateWidth);
-    return cardModel;
   }
 
   static getColRow(sequence: number, cols: number): [number, number] {
     const col = sequence % cols;
     const row = Math.floor(sequence / cols);
     return [col, row];
+  }
+
+  /**
+   * Rebuilds the card textures after a reveal: a card spawned face-down
+   * carried a redacted face until the server says it is public now.
+   */
+  async rerenderCard(grid: CardGrid): Promise<void> {
+    if (
+      this.__state.faceURL === grid.faceURL &&
+      this.__state.backURL === grid.backURL &&
+      this.__state.cols === grid.cols &&
+      this.__state.rows === grid.rows &&
+      this.__state.sequence === grid.sequence
+    )
+      return;
+    const faceTexture = await Loader.loadTexture(grid.faceURL);
+    if (!faceTexture) return;
+    if (this.isDisposed()) {
+      faceTexture.dispose();
+      return;
+    }
+    const material = this.model.material as MultiMaterial;
+    const faceMaterial = material.subMaterials[1] as StandardMaterial;
+    const previousFace = faceMaterial.diffuseTexture;
+    Card.setFaceGrid(faceTexture, grid);
+    faceMaterial.diffuseTexture = faceTexture;
+    this.__state = { ...this.__state, ...grid };
+    Card.updateWidth(this.model, faceTexture, this.__state);
+    if (previousFace !== (material.subMaterials[2] as StandardMaterial).diffuseTexture) previousFace?.dispose();
   }
 }

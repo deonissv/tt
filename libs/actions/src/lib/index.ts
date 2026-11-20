@@ -9,6 +9,7 @@ export type {
   MoveServerActorPld,
   RerenderBagPld,
   RerenderDeckPld,
+  RerenderCardPld,
   RerenderTileStackPld,
   RotateClientActorPld,
   SpawnPickedActorPld,

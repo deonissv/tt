@@ -8,6 +8,8 @@ export interface CardGrid {
   rows: number;
   cols: number;
   sequence: number;
+  /** Public geometry, independent of the private face image and atlas coordinates. */
+  faceAspectRatio?: number;
 }
 
 export interface CardState extends ActorBaseState, CardGrid {

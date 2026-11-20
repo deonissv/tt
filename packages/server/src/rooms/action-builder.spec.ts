@@ -3,6 +3,7 @@ import { ServerAction } from '@tt/actions';
 import {
   ActorType,
   type ActorState,
+  type CardState,
   type BagState,
   type UnknownActorState,
   type DeckState,
@@ -59,6 +60,46 @@ it('broadcasts a tile stack size change to players already in the room', () => {
   expect(builder.getSimActions({ actorStates: [{ ...stack, size: 2 }] })).toContainEqual({
     type: 'RERENDER_TILE_STACK',
     payload: { guid: 'stack', size: 2 },
+  });
+});
+
+describe('card reveal', () => {
+  const card = (): CardState => ({
+    guid: 'card',
+    name: 'Card',
+    type: ActorType.CARD,
+    faceURL: 'face.png',
+    backURL: 'back.png',
+    cols: 2,
+    rows: 2,
+    sequence: 3,
+    transformation: { rotation: [Math.PI, 0, 0] },
+  });
+
+  it('broadcasts RERENDER_CARD when a card turns face up', () => {
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [card()] };
+
+    expect(
+      builder.getSimActions({ actorStates: [{ ...card(), transformation: { rotation: [0, 0, 0] } }] }),
+    ).toContainEqual({
+      type: 'RERENDER_CARD',
+      payload: {
+        guid: 'card',
+        grid: { faceURL: 'face.png', backURL: 'back.png', cols: 2, rows: 2, sequence: 3 },
+      },
+    });
+  });
+
+  it('does not broadcast a reveal when a card turns face down', () => {
+    const builder = new ActionBuilder();
+    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.prevSimState = { actorStates: [{ ...card(), transformation: { rotation: [0, 0, 0] } }] };
+
+    const actions = builder.getSimActions({ actorStates: [card()] });
+
+    expect(actions).not.toContainEqual(expect.objectContaining({ type: 'RERENDER_CARD' }));
   });
 });
 

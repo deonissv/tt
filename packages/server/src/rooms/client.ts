@@ -1,5 +1,7 @@
-import type { MsgMap, ServerAction, ServerActionMsg } from '@tt/actions';
+import type { MsgMap, ServerActionMsg } from '@tt/actions';
+import { ServerAction } from '@tt/actions';
 import type { ValidatedUser } from '../auth/validated-user';
+import { redactCardFace } from './card-visibility';
 
 export class Client {
   userId: number;
@@ -29,8 +31,28 @@ export class Client {
     if (cursorsAction && Object.keys(cursorsAction).length > 1) {
       actions.push(this.cleanUpCursors(cursorsAction));
     }
-    actions.push(...simActions);
+    actions.push(...simActions.map(action => this.hideCardFaces(action)));
     return actions;
+  }
+
+  /**
+   * Strips the face texture from face-down cards this client does not hold,
+   * so hidden card faces never reach clients that cannot see them.
+   */
+  private hideCardFaces(action: ServerActionMsg): ServerActionMsg {
+    if (action.type === ServerAction.SPAWN_PICKED_ACTOR) {
+      return {
+        ...action,
+        payload: {
+          ...action.payload,
+          state: redactCardFace(action.payload.state, this.code, action.payload.clientId),
+        },
+      };
+    }
+    if (action.type === ServerAction.SPAWN_ACTOR) {
+      return { ...action, payload: redactCardFace(action.payload, this.code, null) };
+    }
+    return action;
   }
 
   /**

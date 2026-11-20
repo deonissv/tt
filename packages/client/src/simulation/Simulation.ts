@@ -15,7 +15,7 @@ import { ActorType, type SimulationStateSave } from '@tt/states';
 
 import type { Tuple } from '@tt/utils';
 import { FLIP_KEYS, PICK_ITEM_KEYS, ROLL_KEYS, ROTATE_CCW_KEYS, ROTATE_CW_KEYS, SHUFFLE_KEYS } from '../config';
-import { Bag, ClientBase, Deck, TileStack } from './actors';
+import { Bag, Card, ClientBase, Deck, TileStack } from './actors';
 import { ClientActorBuilder } from './ClientActorBuilder';
 import { SimulationScene } from './SimulationScene';
 
@@ -37,7 +37,10 @@ export class Simulation extends SimulationBase {
   private _hll: HighlightLayer;
   private _hoveredActor: ClientBase | null = null;
   private _pickedActor: ClientBase | null = null;
-  private _pendingSpawns = new Map<string, { bagContents?: UnknownActorState[] }>();
+  private _pendingSpawns = new Map<
+    string,
+    { bagContents?: UnknownActorState[]; cardGrid?: CardGrid; rotation?: Tuple<number, 3> }
+  >();
   private _cursorPos: [number, number] = [0, 0];
   cbs: SimulationCallbacks;
 
@@ -295,7 +298,7 @@ export class Simulation extends SimulationBase {
   }
 
   private async _spawnActor(state: UnknownActorState, picked: boolean) {
-    const token: { bagContents?: UnknownActorState[] } = {};
+    const token: { bagContents?: UnknownActorState[]; cardGrid?: CardGrid; rotation?: Tuple<number, 3> } = {};
     this._pendingSpawns.set(state.guid, token);
     try {
       const actor = await ClientActorBuilder.build(state);
@@ -304,6 +307,9 @@ export class Simulation extends SimulationBase {
         return;
       }
       if (actor instanceof Bag && token.bagContents) actor.rerenderBag(token.bagContents);
+      if (actor && token.rotation) actor.rotation = Vector3.FromArray(token.rotation);
+      if (actor instanceof Card && token.cardGrid) await actor.rerenderCard(token.cardGrid);
+      if (this._pendingSpawns.get(state.guid) !== token) return;
       if (actor && picked) {
         this._cursorPos = this.getCursor();
         this._pickedActor = actor;
@@ -314,6 +320,8 @@ export class Simulation extends SimulationBase {
   }
 
   handleRotateActor(guid: string, position: Tuple<number, 3>) {
+    const pending = this._pendingSpawns.get(guid);
+    if (pending) pending.rotation = position;
     const actor = this.actors.find(a => a.guid === guid);
     if (actor) {
       actor.rotation = Vector3.FromArray(position);
@@ -328,6 +336,16 @@ export class Simulation extends SimulationBase {
   handleTileStackRerender(guid: string, size: number) {
     const actor = this.actors.find(a => a.guid === guid);
     if (actor instanceof TileStack) actor.rerenderStack(size);
+  }
+
+  handleCardRerender(guid: string, grid: CardGrid) {
+    const pending = this._pendingSpawns.get(guid);
+    if (pending) {
+      pending.cardGrid = grid;
+      return;
+    }
+    const actor = this.actors.find(a => a.guid === guid);
+    if (actor instanceof Card) void actor.rerenderCard(grid);
   }
 
   handleBagRerender(guid: string, containedObjects: UnknownActorState[]) {

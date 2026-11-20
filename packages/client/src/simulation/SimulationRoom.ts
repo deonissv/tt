@@ -116,6 +116,10 @@ export class SimulationRoom {
           sim.handleTileStackRerender(action.payload.guid, action.payload.size);
           break;
         }
+        case ServerAction.RERENDER_CARD: {
+          sim.handleCardRerender(action.payload.guid, action.payload.grid);
+          break;
+        }
         case ServerAction.RERENDER_BAG: {
           sim.handleBagRerender(action.payload.guid, action.payload.containedObjects);
           break;

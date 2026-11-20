@@ -333,6 +333,8 @@ export class SimulationRoom {
           };
         case ServerAction.RERENDER_DECK:
           return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
+        case ServerAction.RERENDER_CARD:
+          return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
         case ServerAction.RERENDER_BAG:
           return { ...action, payload: this.assetUrlService.patchStateURLs(action.payload, this.room.code) };
         default:

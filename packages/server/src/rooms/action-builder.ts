@@ -4,6 +4,7 @@ import { DEFAULT_POSITION, DEFAULT_ROTATION, DEFAULT_SCALE } from '@tt/actors';
 import {
   ActorType,
   type ActorBaseState,
+  type CardState,
   type BagState,
   type DeckState,
   type SimulationStateSave,
@@ -12,6 +13,7 @@ import {
   type UnknownActorState,
 } from '@tt/states';
 import { vecFloatCompare } from '@tt/utils';
+import { cardIsFaceDown } from './card-visibility';
 import type { Simulation } from '../simulation/simulation';
 
 export class ActionBuilder {
@@ -213,10 +215,40 @@ export class ActionBuilder {
             payload: { guid, size: actorState.size },
           });
         }
+
+        const cardReveal = this.getCardReveal(prevActorState, actorState);
+        if (cardReveal) actions.push(cardReveal);
       }
     });
 
     return actions;
+  }
+
+  /**
+   * A card turning face-up reveals its face to every client, so clients that
+   * received a redacted spawn need the real textures now.
+   */
+  private getCardReveal(
+    prevState: ActorBaseState,
+    currentState: ActorBaseState,
+  ): MsgMap[ServerAction.RERENDER_CARD] | null {
+    if (prevState.type !== ActorType.CARD || currentState.type !== ActorType.CARD) return null;
+    if (!cardIsFaceDown(prevState) || cardIsFaceDown(currentState)) return null;
+
+    const card = currentState as CardState;
+    return {
+      type: ServerAction.RERENDER_CARD,
+      payload: {
+        guid: card.guid,
+        grid: {
+          faceURL: card.faceURL,
+          backURL: card.backURL,
+          cols: card.cols,
+          rows: card.rows,
+          sequence: card.sequence,
+        },
+      },
+    };
   }
 
   getActorPositionUpdate(prevState: ActorBaseState, currentState: ActorBaseState): Transformation['position'] | null {
