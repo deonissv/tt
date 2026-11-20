@@ -1,15 +1,17 @@
-import type { BagState, UnknownActorState } from '@tt/states';
+import { ActorType, type BagState, type UnknownActorState } from '@tt/states';
 import { manifestActor } from '../fixtures/manifest';
-import { ClientAction } from '@tt/actions';
+import { ClientAction, ServerAction, type ServerActionMsg } from '@tt/actions';
 import coordinates from '../fixtures/targeting/coordinates.json';
 import { positionChanged, transformVector } from '../support/transforms';
 import { captureRoom } from '../support/api';
+import { captureCanvases } from '../support/screenshots';
 import { waitForClientReady, waitForRenderedFrames } from '../support/rendering';
 import { actorIdentityList, getActor, waitForActorStable, waitForRoomStable } from '../support/physics';
 import {
   expect,
   test,
   expectMatchingCanvases,
+  expectChangedCanvases,
   expectClientAction,
   expectSpawnedActor,
   expectRoomUnchanged,
@@ -528,6 +530,14 @@ test.describe(() => {
     async ({ player: { page, connection }, guestPlayer, room }, testInfo) => {
       const before = await captureRoom(room);
       const identities = actorIdentityList(getActor(before.state, deck.guid));
+      const ownerMessages: ServerActionMsg[] = [];
+      const observerMessages: ServerActionMsg[] = [];
+      connection.socket.on('framereceived', ({ payload }) => {
+        ownerMessages.push(...(JSON.parse(String(payload)) as ServerActionMsg[]));
+      });
+      guestPlayer!.connection.socket.on('framereceived', ({ payload }) => {
+        observerMessages.push(...(JSON.parse(String(payload)) as ServerActionMsg[]));
+      });
       const start = coordinates.profiles['face-down-deck'].fb31d5;
       const end = [start[0] + 48, start[1] + 24];
       await page.locator('canvas').focus();
@@ -561,7 +571,49 @@ test.describe(() => {
       const after = await waitForRoomStable(room);
       expect(actorIdentityList(getActor(after.state, deck.guid))).toEqual(identities.slice(1));
       expect(after.state.actorStates!.filter(item => item.guid === identities[0])).toHaveLength(1);
+      await expect
+        .poll(() =>
+          observerMessages.find(
+            action => action.type === ServerAction.SPAWN_PICKED_ACTOR && action.payload.state.guid === drawnGuid,
+          ),
+        )
+        .toBeTruthy();
+      const observerSpawn = observerMessages.find(
+        action => action.type === ServerAction.SPAWN_PICKED_ACTOR && action.payload.state.guid === drawnGuid,
+      );
+      const ownerSpawn = ownerMessages.find(
+        action => action.type === ServerAction.SPAWN_PICKED_ACTOR && action.payload.state.guid === drawnGuid,
+      );
+      expect(ownerSpawn).toMatchObject({ payload: { state: { faceURL: expect.any(String) } } });
+      if (
+        observerSpawn?.type !== ServerAction.SPAWN_PICKED_ACTOR ||
+        ownerSpawn?.type !== ServerAction.SPAWN_PICKED_ACTOR
+      ) {
+        throw new Error('Both players must receive the drawn card');
+      }
+      const hidden = observerSpawn.payload.state;
+      if (hidden.type !== ActorType.CARD || ownerSpawn.payload.state.type !== ActorType.CARD)
+        throw new Error('Expected a drawn card');
+      expect(hidden.faceURL).toBe(hidden.backURL);
+      expect(hidden.faceURL).not.toBe(ownerSpawn.payload.state.faceURL);
+      expect(hidden).toMatchObject({ cols: 1, rows: 1, sequence: 0 });
+      // The holder has the real face, so canvas agreement while face-down
+      // verifies that the observer renders the same back and physical shape.
       await expectMatchingCanvases(testInfo, 'face-down-deck-extraction', [page, guestPlayer!.page]);
+      const beforeReveal = await captureCanvases([page, guestPlayer!.page]);
+      await page.mouse.move(end[0], end[1]);
+      await waitForRenderedFrames(page);
+      await expectClientAction(connection, ClientAction.FLIP, () => page.keyboard.press('KeyF'), drawnGuid);
+      await expect
+        .poll(() =>
+          observerMessages.some(
+            action => action.type === ServerAction.RERENDER_CARD && action.payload.guid === drawnGuid,
+          ),
+        )
+        .toBe(true);
+      await waitForRoomStable(room);
+      await expectChangedCanvases(testInfo, 'revealed-card', [page, guestPlayer!.page], beforeReveal);
+      await expectMatchingCanvases(testInfo, 'revealed-card', [page, guestPlayer!.page]);
     },
   );
 });

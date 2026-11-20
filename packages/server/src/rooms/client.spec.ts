@@ -1,5 +1,6 @@
 import type { MsgMap, ServerActionMsg } from '@tt/actions';
 import { ServerAction } from '@tt/actions';
+import { ActorType } from '@tt/states';
 import type { ValidatedUser } from '../auth/validated-user';
 import { Client } from './client';
 
@@ -82,6 +83,57 @@ describe('Client', () => {
       client.prepareMessage(original, [removeAction]);
 
       expect(original.payload).toEqual({ [user.code]: [1, 2], other: [3, 4] });
+    });
+  });
+
+  describe('hidden card faces', () => {
+    const faceDownCard = (): MsgMap[ServerAction.SPAWN_ACTOR]['payload'] => ({
+      type: ActorType.CARD,
+      guid: 'card',
+      name: 'Card',
+      faceURL: 'face.png',
+      backURL: 'back.png',
+      cols: 1,
+      rows: 1,
+      sequence: 0,
+      transformation: { rotation: [Math.PI, 0, 0] },
+    });
+
+    it('redacts the face of a face-down card spawned unheld', () => {
+      const [action] = client.prepareMessage(null, [{ type: ServerAction.SPAWN_ACTOR, payload: faceDownCard() }]);
+
+      expect(action).toMatchObject({
+        type: ServerAction.SPAWN_ACTOR,
+        payload: { faceURL: 'back.png', backURL: 'back.png' },
+      });
+    });
+
+    it('redacts the face of a face-down card another client drew', () => {
+      const [action] = client.prepareMessage(null, [
+        { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: 'someone-else', state: faceDownCard() } },
+      ]);
+
+      expect(action).toMatchObject({
+        type: ServerAction.SPAWN_PICKED_ACTOR,
+        payload: { state: { faceURL: 'back.png' } },
+      });
+    });
+
+    it('keeps the full state for the client that holds the drawn card', () => {
+      const held = client.prepareMessage(null, [
+        { type: ServerAction.SPAWN_PICKED_ACTOR, payload: { clientId: user.code, state: faceDownCard() } },
+      ]);
+
+      expect(held[0]).toMatchObject({ payload: { state: { faceURL: 'face.png' } } });
+    });
+
+    it('leaves face-up cards untouched', () => {
+      const faceUp = faceDownCard();
+      faceUp.transformation = { rotation: [0, 0, 0] };
+
+      const [action] = client.prepareMessage(null, [{ type: ServerAction.SPAWN_ACTOR, payload: faceUp }]);
+
+      expect(action).toMatchObject({ payload: { faceURL: 'face.png' } });
     });
   });
 });

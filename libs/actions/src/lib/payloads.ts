@@ -47,6 +47,11 @@ export interface RerenderTileStackPld {
   size: number;
 }
 
+export interface RerenderCardPld {
+  guid: string;
+  grid: CardGrid;
+}
+
 export interface RerenderBagPld {
   guid: string;
   containedObjects: UnknownActorState[];

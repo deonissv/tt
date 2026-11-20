@@ -10,6 +10,7 @@ import type {
   MoveServerActorPld,
   RerenderBagPld,
   RerenderDeckPld,
+  RerenderCardPld,
   RerenderTileStackPld,
   RotateClientActorPld,
   SpawnPickedActorPld,
@@ -47,6 +48,7 @@ interface ActionPayloads {
   [ServerAction.REMOVE_ACTOR]: string;
   [ServerAction.RERENDER_DECK]: RerenderDeckPld;
   [ServerAction.RERENDER_TILE_STACK]: RerenderTileStackPld;
+  [ServerAction.RERENDER_CARD]: RerenderCardPld;
   [ServerAction.RERENDER_BAG]: RerenderBagPld;
 }
 
