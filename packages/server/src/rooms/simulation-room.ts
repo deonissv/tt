@@ -19,6 +19,7 @@ import { parseClientActions } from './action-validation';
 import { ActionBuilder } from './action-builder';
 import type { AssetUrlService } from './asset-url.service';
 
+const ACTION_DRAIN_TIMEOUT = 30 * 1000;
 const EMPTY_ROOM_PERSIST_DELAY = 5 * 60 * 1000; // 5 minutes
 
 export class SimulationRoom {
@@ -37,6 +38,13 @@ export class SimulationRoom {
   savingInterval: NodeJS.Timeout | undefined;
   tickInterval: NodeJS.Timeout | undefined;
   closeTimeout: NodeJS.Timeout | undefined;
+
+  private closing = false;
+  private readonly pendingActions = new Set<Promise<void>>();
+
+  get isClosing(): boolean {
+    return this.closing;
+  }
 
   private static readonly logger = new Logger('SimulationRoom');
 
@@ -144,6 +152,10 @@ export class SimulationRoom {
    */
   listen(): void {
     this.wss.on('connection', (ws: WebSocket) => {
+      if (this.closing) {
+        ws.close();
+        return;
+      }
       SimulationRoom.logger.log(`Client connecting to room ${this.room.roomId}`);
       if (!hasProperty(ws, 'user') || !isObject(ws.user)) {
         throw new Error('Unknown user connected');
@@ -174,6 +186,7 @@ export class SimulationRoom {
    * @param event - The WebSocket message event.
    */
   private onMessage(event: WebSocket.MessageEvent, canClose: boolean) {
+    if (this.closing) return;
     SimulationRoom.logger.debug(`Received message: ${JSON.stringify(event.data)}`);
     let actions: ClientActionMsg[];
     try {
@@ -199,7 +212,15 @@ export class SimulationRoom {
       }
     }
 
-    this.actionsHandler.handleActions(actions, this.simulation.actors, this.clients.get(event.target)!);
+    const pending = this.actionsHandler.handleActions(actions, this.simulation.actors, this.clients.get(event.target)!);
+    this.pendingActions.add(pending);
+    void pending.then(
+      () => this.pendingActions.delete(pending),
+      error => {
+        this.pendingActions.delete(pending);
+        SimulationRoom.logger.error(error);
+      },
+    );
   }
 
   /**
@@ -219,34 +240,63 @@ export class SimulationRoom {
     }
     this.clients.delete(event.target);
 
-    if (this.clients.size === 0) {
-      this.closeTimeout = setTimeout(() => {
-        if (this.clients.size === 0) {
-          this.closeRoom().catch(e => {
-            SimulationRoom.logger.error(e);
-          });
-        }
-      }, EMPTY_ROOM_PERSIST_DELAY);
-    }
+    this.scheduleClose();
     SimulationRoom.logger.log(`Client disconnected from room ${this.room.roomId}`);
   }
 
+  private scheduleClose() {
+    if (this.closing || this.clients.size > 0) return;
+    if (this.closeTimeout) clearTimeout(this.closeTimeout);
+    this.closeTimeout = setTimeout(() => {
+      if (this.clients.size === 0) {
+        this.closeRoom().catch(error => SimulationRoom.logger.error(error));
+      }
+    }, EMPTY_ROOM_PERSIST_DELAY);
+  }
+
+  private async drainActions() {
+    if (this.pendingActions.size === 0) return;
+    let timeout: NodeJS.Timeout | undefined;
+    try {
+      await Promise.race([
+        Promise.all(this.pendingActions),
+        new Promise<never>((_resolve, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error('Timed out waiting for pending room actions')),
+            ACTION_DRAIN_TIMEOUT,
+          );
+        }),
+      ]);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
   /**
-   * Closes the room by clearing intervals, saving room state, and closing the WebSocket server.
+   * Closes the room by clearing intervals, saving room state, stopping and disposing
+   * the simulation, and closing the WebSocket server.
    *
    * @returns {Promise<void>} A promise that resolves when the room is closed.
    */
   private async closeRoom() {
-    this.broadcast([
-      {
-        type: ServerAction.CLOSED,
-        payload: null,
-      },
-    ]);
+    if (this.closing) return;
+    this.closing = true;
+
+    try {
+      // Finish draws before saving so late asset loads cannot outlive this scene.
+      await this.drainActions();
+      await this.roomsService.saveRoomState(this.room.code);
+    } catch (error) {
+      this.closing = false;
+      this.scheduleClose();
+      throw error;
+    }
 
     if (this.tickInterval) clearInterval(this.tickInterval);
     if (this.savingInterval) clearInterval(this.savingInterval);
-    await this.roomsService.saveRoomState(this.room.code);
+    if (this.closeTimeout) clearTimeout(this.closeTimeout);
+    this.broadcast([{ type: ServerAction.CLOSED, payload: null }]);
+    this.simulation.dispose();
     this.wss.close();
   }
 
@@ -256,7 +306,7 @@ export class SimulationRoom {
    * Retrieves the cursors and actions from the simulation and broadcasts the actions to the clients.
    */
   private tick() {
-    if (this.clients.size === 0) {
+    if (this.closing || this.clients.size === 0) {
       return;
     }
 
@@ -291,6 +341,7 @@ export class SimulationRoom {
       });
     }
     return setInterval(async () => {
+      if (this.closing) return;
       const simSave = this.simulation.toState();
       const simUpdate = this.simulation.toStateUpdate(this.simSave);
       if (simUpdate.actorStates?.length && simUpdate.actorStates.length > 0) {

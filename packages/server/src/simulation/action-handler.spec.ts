@@ -190,7 +190,7 @@ describe('handleAction', () => {
       const other = new Client({ code: 'other', roleId: 1, userId: 2, username: 'other' });
 
       await wait(100);
-      actionHandler.handleActions([{ type: ClientAction.PICK_ACTOR, payload: 'box' }], sim.actors, holder);
+      await actionHandler.handleActions([{ type: ClientAction.PICK_ACTOR, payload: 'box' }], sim.actors, holder);
       // Simulate another player holding the second actor.
       sim.actors.find(actor => actor.guid === 'other')!.picked = other.code;
 

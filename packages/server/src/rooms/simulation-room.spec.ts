@@ -286,6 +286,7 @@ describe('SimulationRoom', () => {
     });
 
     it('closes the room when its author sends CLOSE', async () => {
+      room.simulation = getPhSim();
       const socket = connect(user); // user.userId === roomTable.authorId -> allowed to close
 
       socket.onmessage?.({
@@ -297,6 +298,7 @@ describe('SimulationRoom', () => {
     });
 
     it('removes the room from the registry when it closes', async () => {
+      room.simulation = getPhSim();
       expect(registry.get(roomTable.code)).toBe(room);
       const socket = connect(user);
 
@@ -318,6 +320,182 @@ describe('SimulationRoom', () => {
       });
 
       expect(saveRoomState).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('closeRoom', () => {
+    function sendClose(socket: FakeSocket) {
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.CLOSE, payload: null }]),
+      });
+    }
+
+    it('stops the render loop and disposes the simulation', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+
+      sendClose(socket);
+
+      await vi.waitFor(() => expect(sim.scene.isDisposed).toBe(true));
+      expect(saveRoomState).toHaveBeenCalledWith(roomTable.code);
+      expect(sim.engine.isDisposed).toBe(true);
+      expect(sim.engine.activeRenderLoops.length).toBe(0);
+    });
+
+    it('saves the room state before disposing the simulation', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      let disposedWhenSaved: boolean | undefined;
+      saveRoomState.mockImplementation(() => {
+        disposedWhenSaved = sim.scene.isDisposed;
+      });
+      const socket = connect(user);
+
+      sendClose(socket);
+
+      await vi.waitFor(() => expect(sim.scene.isDisposed).toBe(true));
+      expect(disposedWhenSaved).toBe(false);
+    });
+
+    it('saves only once and ignores new work throughout shutdown', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+      const handleSpy = vi.spyOn(actionsHandler, 'handleActions');
+      let finishSaving!: () => void;
+      saveRoomState.mockReturnValue(new Promise<void>(resolve => (finishSaving = resolve)));
+
+      sendClose(socket);
+      sendClose(socket);
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.ROLL, payload: 'die-1' }]),
+      });
+      const newcomer = fakeSocket(otherUser);
+      const closeSpy = vi.spyOn(newcomer, 'close');
+      room.wss.emit('connection', newcomer);
+
+      await vi.waitFor(() => expect(saveRoomState).toHaveBeenCalledTimes(1));
+      expect(sim.scene.isDisposed).toBe(false);
+      expect(handleSpy).not.toHaveBeenCalled();
+      expect(closeSpy).toHaveBeenCalledOnce();
+      expect(room.clients.size).toBe(1);
+
+      finishSaving();
+      await vi.waitFor(() => expect(sim.scene.isDisposed).toBe(true));
+      sendClose(socket);
+      socket.onclose?.({ target: socket });
+
+      expect(saveRoomState).toHaveBeenCalledTimes(1);
+      expect(room.closeTimeout).toBeUndefined();
+    });
+
+    it('waits for an in-flight draw before saving and disposing its scene', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+      let finishDraw!: () => void;
+      const pending = new Promise<void>(resolve => (finishDraw = resolve));
+      vi.spyOn(actionsHandler, 'handlePickItem').mockReturnValue(pending);
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.PICK_ITEM, payload: 'bag' }]),
+      });
+
+      sendClose(socket);
+      await Promise.resolve();
+      expect(saveRoomState).not.toHaveBeenCalled();
+      expect(sim.scene.isDisposed).toBe(false);
+
+      finishDraw();
+
+      await vi.waitFor(() => expect(sim.scene.isDisposed).toBe(true));
+      expect(saveRoomState).toHaveBeenCalledOnce();
+    });
+
+    it('allows retries after a pending draw exceeds the shutdown deadline', async () => {
+      vi.useFakeTimers();
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+      let finishDraw!: () => void;
+      vi.spyOn(actionsHandler, 'handlePickItem').mockReturnValue(new Promise<void>(resolve => (finishDraw = resolve)));
+      socket.onmessage?.({
+        target: socket,
+        data: JSON.stringify([{ type: ClientAction.PICK_ITEM, payload: 'bag' }]),
+      });
+
+      sendClose(socket);
+      await vi.advanceTimersByTimeAsync(30 * 1000);
+      expect(sim.scene.isDisposed).toBe(false);
+      expect(saveRoomState).not.toHaveBeenCalled();
+      connect(otherUser);
+      expect(room.clients.size).toBe(2);
+
+      finishDraw();
+      await vi.advanceTimersByTimeAsync(0);
+      sendClose(socket);
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(saveRoomState).toHaveBeenCalledOnce();
+      expect(sim.scene.isDisposed).toBe(true);
+    });
+
+    it('retries a failed save automatically if the last client left during shutdown', async () => {
+      vi.useFakeTimers();
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+      let failSaving!: (error: Error) => void;
+      saveRoomState.mockReturnValueOnce(new Promise<void>((_resolve, reject) => (failSaving = reject)));
+
+      sendClose(socket);
+      await Promise.resolve();
+      socket.onclose?.({ target: socket });
+      failSaving(new Error('database unavailable'));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(sim.scene.isDisposed).toBe(false);
+
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+
+      expect(saveRoomState).toHaveBeenCalledTimes(2);
+      expect(sim.scene.isDisposed).toBe(true);
+    });
+
+    it('keeps unsaved state available and allows shutdown to be retried after a save failure', async () => {
+      const sim = getPhSim();
+      room.simulation = sim;
+      saveRoomState.mockRejectedValueOnce(new Error('database unavailable'));
+      const socket = connect(user);
+
+      sendClose(socket);
+
+      await vi.waitFor(() => expect(saveRoomState).toHaveBeenCalledOnce());
+      expect(registry.get(roomTable.code)).toBe(room);
+      expect(sim.scene.isDisposed).toBe(false);
+
+      sendClose(socket);
+
+      await vi.waitFor(() => expect(registry.get(roomTable.code)).toBeUndefined());
+      expect(saveRoomState).toHaveBeenCalledTimes(2);
+      expect(sim.scene.isDisposed).toBe(true);
+      expect(sim.engine.isDisposed).toBe(true);
+    });
+
+    it('disposes the simulation when an empty room times out', async () => {
+      vi.useFakeTimers();
+      const sim = getPhSim();
+      room.simulation = sim;
+      const socket = connect(user);
+
+      socket.onclose?.({ target: socket });
+      await vi.runOnlyPendingTimersAsync();
+
+      expect(saveRoomState).toHaveBeenCalledWith(roomTable.code);
+      expect(sim.scene.isDisposed).toBe(true);
+      expect(sim.engine.isDisposed).toBe(true);
     });
   });
 
