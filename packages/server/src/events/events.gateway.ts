@@ -78,12 +78,18 @@ export class EventsGateway implements OnGatewayInit {
         }
 
         const roomId = this.getRoomUrl(request);
-        if (!roomId || !this.roomRegistry.has(roomId)) {
+        const room = roomId ? this.roomRegistry.get(roomId) : undefined;
+        if (!room) {
           abortHandshake(socket, 400, 'No room found');
           return;
         }
 
-        const wss = this.roomRegistry.get(roomId)!.wss;
+        if (room.isClosing) {
+          abortHandshake(socket, 503);
+          return;
+        }
+
+        const { wss } = room;
         wss.handleUpgrade(request, socket, head, ws => {
           Object.assign(ws, { user: validatedUser });
           wss.emit('connection', ws, request);

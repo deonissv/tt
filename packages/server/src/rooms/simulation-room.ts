@@ -42,6 +42,10 @@ export class SimulationRoom {
   private closing = false;
   private readonly pendingActions = new Set<Promise<void>>();
 
+  get isClosing(): boolean {
+    return this.closing;
+  }
+
   private static readonly logger = new Logger('SimulationRoom');
 
   constructor(
