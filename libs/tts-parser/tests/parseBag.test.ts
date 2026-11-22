@@ -1,7 +1,7 @@
 import { DEMO } from '@tt/demo-saves';
 import type { BagState } from '@tt/states';
 import { ActorType } from '@tt/states';
-import type { ObjectState } from '@tt/tts-save';
+import type { ObjectState } from '@tt/tts-schema';
 import type { DeepPartial } from '@tt/utils';
 
 import { TTSParser } from '../src';

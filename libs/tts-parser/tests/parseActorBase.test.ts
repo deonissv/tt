@@ -1,5 +1,5 @@
 import { CATAN, MUNCHKIN } from '@tt/demo-saves';
-import { ObjectState } from '@tt/tts-save';
+import { ObjectState } from '@tt/tts-schema';
 import { degToRad, Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 

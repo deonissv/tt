@@ -21,8 +21,8 @@ The project uses BabylonJS and Havok. The client selects WebGPU or WebGL in `lib
 
 | Package | Responsibility |
 | --- | --- |
-| `@tt/tts-save` | Tabletop Simulator save format types |
-| `@tt/tts-parser` | Converts saves into `@tt/states` |
+| `@tt/tts-schema` | Tabletop Simulator save schemas and types |
+| `@tt/tts-parser` | Reads and writes TTS saves, collects assets, and imports simulation state into `@tt/states` |
 | `@tt/actors` | Shared actor mixins |
 | `@tt/builtin-actors` | Built-in assets |
 | `@tt/simulation` | Shared engine, scene, and state support |

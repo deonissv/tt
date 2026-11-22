@@ -1,6 +1,6 @@
 import { MUNCHKIN } from '@tt/demo-saves';
 import type { ActorBaseState, CardState } from '@tt/states';
-import { ObjectState } from '@tt/tts-save';
+import { ObjectState } from '@tt/tts-schema';
 import { degToRad, omitKeys, Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 

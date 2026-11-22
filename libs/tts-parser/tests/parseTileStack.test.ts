@@ -1,6 +1,6 @@
 import { DEMO } from '@tt/demo-saves';
 import { ActorType, TileStackState } from '@tt/states';
-import { ObjectState } from '@tt/tts-save';
+import { ObjectState } from '@tt/tts-schema';
 import { degToRad, Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 
