@@ -1,5 +1,5 @@
 # Managed production test stack. Local visual development attaches to host processes.
-FROM node:22.9.0-bookworm-slim AS dependencies
+FROM node:26.13.0-bookworm-slim AS dependencies
 
 WORKDIR /app
 
@@ -41,7 +41,7 @@ ENV VITE_STATIC_HOST=${VITE_STATIC_HOST}
 FROM source AS build
 RUN npm run build
 
-FROM node:22.9.0-bookworm-slim
+FROM node:26.13.0-bookworm-slim
 
 RUN apt-get update \
   && apt-get install --yes --no-install-recommends nginx \
