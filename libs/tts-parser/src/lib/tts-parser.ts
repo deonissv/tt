@@ -43,7 +43,7 @@ export class TTSParser {
     return this.errors.length > 0;
   }
   static get guid(): string | undefined {
-    return this.guids.at(-1);
+    return this.guids[this.guids.length - 1];
   }
   static reset(): void {
     this.errors = [];
