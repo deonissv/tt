@@ -1,7 +1,8 @@
-import type { CustomImageState, CustomMeshState, ObjectState, TransformState } from '@tt/tts-save';
-
+import type { z } from 'zod';
+import { isUnknownObject } from '@tt/utils';
 import type {
   ActorBaseState,
+  ActorMap,
   CardState,
   CustomImage,
   DeckState,
@@ -24,42 +25,71 @@ import {
   type SimulationStateSave,
   type TableState,
   type TileState,
-  type TileType,
 } from '@tt/states';
-import type { DeepPartial, Defined, OptionalAllBut, Tuple } from '@tt/utils';
-import { degToRad, hasProperty, isNumber, isObject, isTuple } from '@tt/utils';
-import { ParserBase } from './parser-base';
+import { createImportSchemas } from './import-schemas';
+import { decodeSaveInput } from './input';
+import { getFormatWarnings } from './parse';
+import type { TtsParseWarning } from './types';
 
-type MinimalObjectState = OptionalAllBut<ObjectState, ['GUID', 'Name']>;
+type ActorBase = Omit<ActorBaseState, 'type'>;
 
-export class TTSParser extends ParserBase {
-  static parse(tts: string): SimulationStateSave | null {
+export class TTSParser {
+  static errors: string[] = [];
+  static guids: string[] = [];
+  static formatWarnings: TtsParseWarning[] = [];
+  private static readonly schemas = createImportSchemas(issues => this.report(issues));
+
+  static get isErrored(): boolean {
+    return this.errors.length > 0;
+  }
+  static get guid(): string | undefined {
+    return this.guids.at(-1);
+  }
+  static reset(): void {
+    this.errors = [];
+    this.guids = [];
+    this.formatWarnings = [];
+  }
+
+  private static report(issues: z.core.$ZodIssue[], guid = this.guid): void {
+    for (const issue of issues) {
+      const path = issue.path
+        .map((key, index) => (typeof key === 'number' ? `[${key}]` : `${index ? '.' : ''}${String(key)}`))
+        .join('');
+      this.errors.push(`${guid ? `${guid}: ` : ''}${path ? `${path}: ` : ''}${issue.message}`);
+    }
+  }
+
+  private static read<T extends z.ZodType>(schema: T, value: unknown, guid = this.guid): z.output<T> | null {
+    const result = schema.safeParse(value, { jitless: true });
+    if (result.success) return result.data;
+    this.report(result.error.issues, guid);
+    return null;
+  }
+
+  /** Import simulation state. Set formatWarnings to also check the full TTS document. */
+  static parse(tts: string, options: { formatWarnings?: boolean } = {}): SimulationStateSave | null {
     try {
-      const obj = JSON.parse(tts) as unknown;
-      const save: SimulationStateSave = {
-        leftHandedSystem: true,
-      };
-
-      if (!this.isObject(obj, 'ERROR 1')) return null;
-      if (!this.hasProperty(obj, 'ObjectStates', 'ERROR 2')) return null;
-      if (!this.isArray(obj.ObjectStates, 'ERROR 3')) return null;
-
-      if (hasProperty(obj, 'Gravity')) {
-        const candidate = this.parseNumber(obj.Gravity);
-        if (candidate) Object.assign(save, { gravity: candidate * 9.8 });
+      this.formatWarnings = [];
+      const decoded = decodeSaveInput(tts);
+      if (!decoded.ok) {
+        this.errors.push('TTS_PARSE', decoded.error);
+        return null;
       }
-
-      const candidate = this.parseTable(obj);
-      if (candidate) save.table = candidate;
-
-      save.actorStates = obj.ObjectStates.reduce<Defined<SimulationStateSave['actorStates']>>((acc, o) => {
-        const actorState = this.parseObject(o);
-        if (actorState) {
-          acc.push(actorState);
-        }
-        return acc;
-      }, []);
-
+      const root = decoded.save;
+      if (options.formatWarnings) this.formatWarnings = getFormatWarnings(root);
+      const actorStates: UnknownActorState[] = [];
+      const save: SimulationStateSave = { leftHandedSystem: true, actorStates };
+      const gravity = this.read(this.schemas.gravity, root.Gravity);
+      if (gravity != null) save.gravity = gravity * 9.8;
+      if (root.Table !== undefined) {
+        const table = this.parseTable(root);
+        if (table) save.table = table;
+      }
+      for (const object of root.ObjectStates) {
+        const actor = this.parseObject(object);
+        if (actor) actorStates.push(actor);
+      }
       return save;
     } catch {
       this.errors.push('TTS_PARSE');
@@ -67,229 +97,90 @@ export class TTSParser extends ParserBase {
     }
   }
 
-  static parseObject = (objectState: unknown): UnknownActorState | null => {
-    if (!this.isObject(objectState, 'ERROR 4')) return null;
-    if (!this.hasProperty(objectState, 'GUID', 'ERROR 5')) return null;
-    if (!this.isPropertyString(objectState, 'GUID', 'ERROR 6')) return null;
-    if (!this.hasProperty(objectState, 'Name', 'ERROR 7')) return null;
-    if (!this.isPropertyString(objectState, 'Name', 'ERROR 8')) return null;
-
-    this.guids.push(objectState.GUID);
-
-    const type = this.mapType(objectState.Name);
-    this.assert(type !== null, `Failed to parse object type ${objectState.Name} of ${this.guid}`);
-
-    const parsedObject = this.parseUnknownActorState(objectState);
-
-    this.guids.pop();
-    return parsedObject;
-  };
-
-  static parseUnknownActorState(objectState: MinimalObjectState): UnknownActorState | null {
-    const type = this.mapType(objectState.Name);
-    if (type === null) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    switch (type) {
-      case ActorType.BAG:
-        return this.parseBag(objectState);
-      case ActorType.CARD:
-        return this.parseCard(objectState);
-      case ActorType.TILE:
-        return this.parseTile(objectState);
-      case ActorType.TILE_STACK:
-        return this.parseTileStack(objectState);
-      case ActorType.DECK:
-        return this.parseDeck(objectState);
-      case ActorType.DIE6ROUND:
-      case ActorType.DIE4:
-      case ActorType.DIE6:
-      case ActorType.DIE8:
-      case ActorType.DIE10:
-      case ActorType.DIE12:
-      case ActorType.DIE20:
-        return this.parseDieN(objectState as ObjectState, type);
-      case ActorType.ACTOR:
-        return this.parseCustomObject(objectState);
-      case ActorType.PAWN_TOKEN:
-        return this.parseBuiltInActorState(objectState, type);
-    }
+  static parseObject(objectState: unknown): UnknownActorState | null {
+    return this.importActor(objectState);
   }
 
-  static parseBuiltInActorState(objectState: MinimalObjectState, type: ActorType.PAWN_TOKEN): PawnTokenState | null {
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
-
-    const pawnTokenState: PawnTokenState = {
-      type,
-      ...actorBase,
-    };
-
-    return pawnTokenState;
+  static parseUnknownActorState(objectState: unknown): UnknownActorState | null {
+    return this.parseObject(objectState);
   }
 
-  static parseActorBase(objectState: MinimalObjectState): Omit<ActorBaseState, 'type'> | null {
-    const actorState: Omit<ActorBaseState, 'type'> = {
-      guid: objectState.GUID,
-      name: objectState.Name,
-    };
-
-    if (this.hasProperty(objectState, 'Transform')) {
-      if (this.isObject(objectState.Transform, 'ERROR 9')) {
-        const transformation = this.parseTransform(objectState.Transform);
-        if (transformation !== null) {
-          actorState.transformation = transformation;
+  private static importActor(objectState: unknown): UnknownActorState | null;
+  private static importActor<T extends ActorType>(
+    objectState: unknown,
+    type: T,
+    parentDeck?: Record<string, unknown>,
+  ): ActorMap[T] | null;
+  private static importActor(
+    objectState: unknown,
+    type?: ActorType,
+    parentDeck?: Record<string, unknown>,
+  ): UnknownActorState | null {
+    const guid = isUnknownObject(objectState) ? objectState.GUID : undefined;
+    if (typeof guid === 'string') this.guids.push(guid);
+    try {
+      const base = this.parseActorBase(objectState);
+      if (!base) return null;
+      const actorType = type ?? this.mapType(base.name);
+      switch (actorType) {
+        case ActorType.BAG:
+          return this.convertBag(objectState, base);
+        case ActorType.CARD:
+          return this.convertCard(objectState, base, parentDeck);
+        case ActorType.DECK:
+          return this.convertDeck(objectState, base);
+        case ActorType.TILE:
+        case ActorType.TILE_STACK: {
+          const tile = this.read(this.schemas.tile, objectState);
+          if (!tile) return null;
+          if (actorType === ActorType.TILE) return { ...base, ...tile.CustomImage, type: actorType };
+          const stack = this.read(this.schemas.tileStack, objectState);
+          return stack ? { ...base, ...tile.CustomImage, type: actorType, size: stack.Number } : null;
         }
+        case ActorType.DIE6ROUND:
+        case ActorType.DIE4:
+        case ActorType.DIE6:
+        case ActorType.DIE8:
+        case ActorType.DIE10:
+        case ActorType.DIE12:
+        case ActorType.DIE20:
+          return this.convertDie(objectState, base, actorType);
+        case ActorType.ACTOR:
+          return this.convertCustomObject(objectState, base);
+        case ActorType.PAWN_TOKEN:
+          return { ...base, type: actorType };
+        default:
+          this.errors.push(`${base.guid}: Unsupported actor type ${base.name}`);
+          return null;
       }
+    } finally {
+      if (typeof guid === 'string') this.guids.pop();
     }
-
-    if (this.hasProperty(objectState, 'Rigidbody') && this.isObject(objectState.Rigidbody, 'ERROR 10')) {
-      if (this.hasProperty(objectState.Rigidbody, 'Mass')) {
-        const mass = this.parseNumber(objectState.Rigidbody.Mass);
-        if (mass !== null) {
-          actorState.mass = mass;
-        }
-      }
-    }
-
-    if (objectState?.ColorDiffuse) {
-      actorState.colorDiffuse = [objectState.ColorDiffuse.r, objectState.ColorDiffuse.g, objectState.ColorDiffuse.b];
-      if (objectState.ColorDiffuse.a && objectState.ColorDiffuse.a !== 1) {
-        actorState.colorDiffuse.push(objectState.ColorDiffuse.a);
-      }
-    }
-
-    if (this.hasProperty(objectState, 'Locked')) {
-      if (typeof objectState.Locked === 'boolean' && objectState.Locked) {
-        actorState.locked = objectState.Locked;
-      }
-    }
-
-    return actorState;
   }
 
-  static parseModel(modelState: DeepPartial<CustomMeshState>): Model | null {
-    if (!this.hasProperty(modelState, 'MeshURL', this.errorsText.MODEL.MESH.NO_URL)) return null;
-    if (!this.isPropertyString(modelState, 'MeshURL', this.errorsText.MODEL.MESH.URL_INVALID)) return null;
-    if (!this.isURL(modelState.MeshURL, this.errorsText.MODEL.MESH.URL_INVALID)) return null;
-
-    const model: Model = {
-      meshURL: modelState.MeshURL,
-    };
-
-    if (
-      this.hasProperty(modelState, 'ColliderURL') &&
-      this.isPropertyString(modelState, 'ColliderURL', this.errorsText.MODEL.COLLIDER.URL_NOT_STRING) &&
-      this.isURL(modelState.ColliderURL, this.errorsText.MODEL.COLLIDER.URL_INVALID)
-    ) {
-      model.colliderURL = modelState.ColliderURL;
-    }
-
-    if (
-      this.hasProperty(modelState, 'DiffuseURL') &&
-      this.isPropertyString(modelState, 'DiffuseURL', this.errorsText.MODEL.DIFFUSE.URL_NOT_STRING) &&
-      this.isURL(modelState.DiffuseURL, this.errorsText.MODEL.DIFFUSE.URL_INVALID)
-    ) {
-      model.diffuseURL = modelState.DiffuseURL;
-    }
-
-    if (
-      this.hasProperty(modelState, 'NormalURL') &&
-      this.isPropertyString(modelState, 'NormalURL', this.errorsText.MODEL.NORMAL.URL_NOT_STRING) &&
-      this.isURL(modelState.NormalURL, this.errorsText.MODEL.NORMAL.URL_INVALID)
-    ) {
-      model.normalURL = modelState.NormalURL;
-    }
-
-    return model;
+  static parseBuiltInActorState(objectState: unknown, type: ActorType.PAWN_TOKEN): PawnTokenState | null {
+    return this.importActor(objectState, type);
   }
 
-  static parseTransform(transform: DeepPartial<TransformState>): Transformation | null {
-    const transformState: Transformation = {};
-
-    if (!this.hasProperty(transform, 'posX', this.errorsText.TRANSFORM.NO_POS_X)) return null;
-    if (!this.hasProperty(transform, 'posY', this.errorsText.TRANSFORM.NO_POS_Y)) return null;
-    if (!this.hasProperty(transform, 'posZ', this.errorsText.TRANSFORM.NO_POS_Z)) return null;
-
-    const posX = this.parseNumber(transform.posX);
-    const posY = this.parseNumber(transform.posY);
-    const posZ = this.parseNumber(transform.posZ);
-    if (posX !== null && posY !== null && posZ !== null) {
-      transformState.position = [posX, posY, posZ];
-    }
-
-    if (!this.hasProperty(transform, 'rotX', this.errorsText.TRANSFORM.NO_ROT_X)) return null;
-    if (!this.hasProperty(transform, 'rotY', this.errorsText.TRANSFORM.NO_ROT_Y)) return null;
-    if (!this.hasProperty(transform, 'rotZ', this.errorsText.TRANSFORM.NO_ROT_Z)) return null;
-
-    const rotX = this.parseNumber(transform.rotX);
-    const rotY = this.parseNumber(transform.rotY);
-    const rotZ = this.parseNumber(transform.rotZ);
-    if (rotX !== null && rotY !== null && rotZ !== null) {
-      transformState.rotation = [rotX, rotY, rotZ].map(degToRad) as Tuple<number, 3>;
-    }
-
-    if (!this.hasProperty(transform, 'scaleX', this.errorsText.TRANSFORM.NO_SCALE_X)) return null;
-    if (!this.hasProperty(transform, 'scaleY', this.errorsText.TRANSFORM.NO_SCALE_Y)) return null;
-    if (!this.hasProperty(transform, 'scaleZ', this.errorsText.TRANSFORM.NO_SCALE_Z)) return null;
-
-    const scaleX = this.parseNumber(transform.scaleX);
-    const scaleY = this.parseNumber(transform.scaleY);
-    const scaleZ = this.parseNumber(transform.scaleZ);
-    if (scaleX !== null && scaleY !== null && scaleZ !== null) {
-      transformState.scale = [scaleX, scaleY, scaleZ];
-    }
-
-    return transformState;
+  static parseActorBase(objectState: unknown): ActorBase | null {
+    return this.read(this.schemas.base, objectState);
+  }
+  static parseModel(modelState: unknown): Model | null {
+    return this.read(this.schemas.model, modelState);
+  }
+  static parseTransform(transform: unknown): Transformation | null {
+    return this.read(this.schemas.transform, transform) ?? null;
+  }
+  static parseCustomImage(image: unknown): CustomImage | null {
+    return this.read(this.schemas.image, image);
   }
 
-  static parseCustomImage(customImage: DeepPartial<CustomImageState>): CustomImage | null {
-    if (!this.hasProperty(customImage, 'ImageURL', this.errorsText.CUSTOM_IMAGE.IMAGE_URL.NO_PROPERTY)) return null;
-    if (!this.isPropertyString(customImage, 'ImageURL', this.errorsText.CUSTOM_IMAGE.IMAGE_URL.NOT_STRING)) return null;
-    if (!this.isURL(customImage.ImageURL, this.errorsText.CUSTOM_IMAGE.IMAGE_URL.INVALID)) return null;
-
-    const flatActorState: CustomImage = {
-      faceURL: customImage.ImageURL,
-    };
-
-    if (
-      this.hasProperty(customImage, 'ImageSecondaryURL') &&
-      this.isPropertyString(customImage, 'ImageSecondaryURL', this.errorsText.CUSTOM_IMAGE.SECONDARY_URL.NOT_STRING) &&
-      this.isURL(customImage.ImageSecondaryURL, this.errorsText.CUSTOM_IMAGE.SECONDARY_URL.INVALID)
-    ) {
-      flatActorState.backURL = customImage.ImageSecondaryURL;
-    }
-
-    if (this.hasProperty(customImage, 'WidthScale')) {
-      const widthScale = this.parseNumber(customImage.WidthScale);
-      if (widthScale !== null) flatActorState.widthScale = widthScale;
-    }
-
-    return flatActorState;
+  static parseTable(table: unknown): TableState | null {
+    const data = this.read(this.schemas.table, table);
+    if (data?.Table === undefined) return null;
+    const type = this.mapTableType(data.Table);
+    return type === null ? null : { type, ...(data.TableURL !== undefined ? { url: data.TableURL } : {}) };
   }
-
-  static parseTable = (tableObj: object): TableState | null => {
-    if (!this.hasProperty(tableObj, 'Table', this.errorsText.TABLE.NO_TYPE_PROPERTY)) return null;
-    if (!this.isPropertyString(tableObj, 'Table', this.errorsText.TABLE.TYPE_PROPERTY_NOT_STRING)) return null;
-
-    const type = this.mapTableType(tableObj.Table);
-    if (type === null) return null;
-
-    const tableState: TableState = { type };
-
-    if (hasProperty(tableObj, 'TableURL')) {
-      if (
-        this.isPropertyString(tableObj, 'TableURL', this.errorsText.TABLE.TABLE_URL_NOT_STRING) &&
-        this.isURL(tableObj.TableURL, this.errorsText.TABLE.TABLE_URL_INVALID)
-      ) {
-        tableState.url = tableObj.TableURL;
-      }
-    }
-
-    return tableState;
-  };
 
   static mapTableType(type: string): TableType | null {
     // https://kb.tabletopsimulator.com/host-guides/tables/
@@ -350,298 +241,122 @@ export class TTSParser extends ParserBase {
     return null;
   }
 
-  static parseBag(objectState: MinimalObjectState): BagState | null {
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
+  static parseBag(objectState: unknown): BagState | null {
+    return this.importActor(objectState, ActorType.BAG);
+  }
 
-    if (!this.hasProperty(objectState, 'ContainedObjects', 'ERROR 11')) return null;
-    if (!this.isArray(objectState.ContainedObjects, 'ERROR 12')) return null;
-
-    const containedObjects = objectState.ContainedObjects.map(o => this.parseObject(o));
-
-    const model = this.parseModel(objectState);
-
-    const bagState: BagState = {
+  private static convertBag(objectState: unknown, base: ActorBase): BagState | null {
+    const data = this.read(this.schemas.bag, objectState);
+    if (!data) return null;
+    const containedObjects: UnknownActorState[] = [];
+    for (const child of data.ContainedObjects) {
+      const actor = this.parseObject(child);
+      if (actor) containedObjects.push(actor);
+    }
+    const name = base.name.toLowerCase();
+    return {
       type: ActorType.BAG,
-      ...actorBase,
-      containedObjects: containedObjects.filter((o): o is UnknownActorState => o !== null),
+      ...base,
+      containedObjects,
+      ...(name.startsWith('infinite_') || name === 'custom_model_infinite_bag' ? { infinite: true } : {}),
+      ...(data.CustomMesh ? { model: data.CustomMesh } : {}),
     };
-
-    // Both built-in and custom model infinite bags retain their template on draw.
-    const name = objectState.Name.toLowerCase();
-    if (name.startsWith('infinite_') || name === 'custom_model_infinite_bag') {
-      bagState.infinite = true;
-    }
-
-    if (model) bagState.model = model;
-
-    return bagState;
   }
 
-  static parseCard(objectState: MinimalObjectState, deck?: MinimalObjectState): CardState | null {
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
+  static parseCard(objectState: unknown, deck?: unknown): CardState | null {
+    const parent = isUnknownObject(deck) && isUnknownObject(deck.CustomDeck) ? deck.CustomDeck : undefined;
+    return this.importActor(objectState, ActorType.CARD, parent);
+  }
 
-    const cardID = objectState.CardID;
-    if (cardID === undefined || cardID === null) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    // if (!this.hasProperty(objectState, 'CustomDeck', 'ERROR 12')) return null;
-    // if (!this.isObject(objectState.CustomDeck, 'ERROR 13')) return null;
-
-    // CardID encodes deckId * 100 + sequence; numeric division also covers IDs
-    // below 100, where string slicing would yield NaN for the deck id.
-    const deckId = Math.floor(cardID / 100);
-    const sequence = cardID % 100;
-    if (!isNumber(deckId) || !isNumber(sequence)) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    const customDeckObj = objectState.CustomDeck?.[deckId] ?? deck?.CustomDeck?.[deckId];
-    if (!this.isObject(customDeckObj, 'ERROR 14')) return null;
-
-    if (!this.hasProperty(customDeckObj, 'FaceURL', 'ERROR 15')) return null;
-    if (!this.isString(customDeckObj.FaceURL, 'ERROR 16')) return null;
-    if (!this.isURL(customDeckObj.FaceURL, 'ERROR 17')) return null;
-
-    if (!this.hasProperty(customDeckObj, 'BackURL', 'ERROR 18')) return null;
-    if (!this.isString(customDeckObj.BackURL, 'ERROR 19')) return null;
-    if (!this.isURL(customDeckObj.BackURL, 'ERROR 20')) return null;
-
-    const cols = customDeckObj.NumWidth ? +customDeckObj.NumWidth : 1;
-    const rows = customDeckObj.NumHeight ? +customDeckObj.NumHeight : 1;
-
-    const cardState: CardState = {
+  private static convertCard(
+    objectState: unknown,
+    base: ActorBase,
+    parentDeck?: Record<string, unknown>,
+  ): CardState | null {
+    const data = this.read(this.schemas.card, objectState);
+    if (!data) return null;
+    const deckId = Math.floor(data.CardID / 100);
+    const ownGrid = data.CustomDeck?.[deckId];
+    const grid = this.read(this.schemas.deckGrid, ownGrid ?? parentDeck?.[deckId]);
+    if (!grid) return null;
+    return {
       type: ActorType.CARD,
-      ...actorBase,
-      faceURL: customDeckObj.FaceURL,
-      backURL: customDeckObj.BackURL,
-      cols,
-      rows,
-      sequence,
+      ...base,
+      faceURL: grid.FaceURL,
+      backURL: grid.BackURL,
+      cols: grid.NumWidth ?? 1,
+      rows: grid.NumHeight ?? 1,
+      sequence: data.CardID % 100,
     };
-
-    return cardState;
   }
 
-  static parseDeck(objectState: MinimalObjectState): DeckState | null {
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
+  static parseDeck(objectState: unknown): DeckState | null {
+    return this.importActor(objectState, ActorType.DECK);
+  }
 
-    if (!Array.isArray(objectState.ContainedObjects)) {
-      this.errors.push(objectState.GUID);
-      return null;
+  private static convertDeck(objectState: unknown, base: ActorBase): DeckState | null {
+    const data = this.read(this.schemas.deck, objectState);
+    if (!data) return null;
+    const cards: CardState[] = [];
+    for (const child of data.ContainedObjects) {
+      const card = this.importActor(child, ActorType.CARD, data.CustomDeck);
+      if (card) cards.push(card);
     }
+    return { type: ActorType.DECK, ...base, cards };
+  }
 
-    const cards = objectState.ContainedObjects.reduce<CardState[]>((acc, o) => {
-      const cardState = this.parseCard(o, objectState);
-      if (cardState) {
-        acc.push(cardState);
+  static parseTile(objectState: unknown): TileState | null {
+    return this.importActor(objectState, ActorType.TILE);
+  }
+
+  static parseTileStack(objectState: unknown): TileStackState | null {
+    return this.importActor(objectState, ActorType.TILE_STACK);
+  }
+
+  static parseCustomObject(objectState: unknown): ActorState | null {
+    return this.importActor(objectState, ActorType.ACTOR);
+  }
+
+  private static convertCustomObject(objectState: unknown, base: ActorBase): ActorState | null {
+    const data = this.read(this.schemas.actor, objectState);
+    if (!data) return null;
+    const actor: ActorState = { type: ActorType.ACTOR, ...base, model: data.CustomMesh };
+    if (data.ChildObjects !== undefined) {
+      actor.children = [];
+      for (const child of data.ChildObjects) {
+        const converted = this.parseObject(child);
+        if (converted) actor.children.push(converted as ActorState);
       }
-      return acc;
-    }, []);
-
-    if (cards.length === 0) {
-      this.errors.push(objectState.GUID);
-      return null;
     }
-
-    return {
-      type: ActorType.DECK,
-      ...actorBase,
-      cards,
-    };
+    return actor;
   }
 
-  static parseTile(objectState: MinimalObjectState): TileState | null {
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
-
-    if (!this.hasProperty(objectState, 'CustomImage', this.errorsText.TILE.CUSTOM_IMAGE.NO_PROPERTY)) return null;
-    if (!this.isObject(objectState.CustomImage, this.errorsText.TILE.CUSTOM_IMAGE.NOT_OBJECT)) return null;
-
-    const customImage = this.parseCustomImage(objectState.CustomImage);
-    if (!customImage) return null;
-
-    const tileState: TileState = {
-      type: ActorType.TILE,
-      ...actorBase,
-      ...customImage,
-      tileType: objectState.CustomImage?.CustomTile.Type as unknown as TileType,
-    };
-
-    return tileState;
+  static parseDieN(objectState: unknown, dieType: DieActorType): DieState | null {
+    return this.importActor(objectState, dieType);
   }
 
-  static parseTileStack(objectState: MinimalObjectState): TileStackState | null {
-    const tileState = this.parseTile(objectState);
-    if (!tileState) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    const size = this.parseNumber(objectState?.Number);
-    if (!size) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    return {
-      ...tileState,
-      type: ActorType.TILE_STACK,
-      size,
-    };
+  private static convertDie(objectState: unknown, base: ActorBase, dieType: DieActorType): DieState | null {
+    const schema = this.schemas.rotationValues.extend({
+      RotationValues: this.schemas.rotationValues.shape.RotationValues.length(DieFacesNumber[dieType]),
+    });
+    const data = this.read(schema, objectState);
+    if (!data) return null;
+    // Zod enforces the face count; TypeScript cannot infer a tuple from a dynamic .length().
+    return { ...base, type: dieType, rotationValues: data.RotationValues } as DieState;
   }
 
-  static parseCustomObject(objectState: MinimalObjectState): ActorState | null {
-    if (!this.hasProperty(objectState, 'CustomMesh', this.errorsText.ACTOR.CUSTOM_MESH.NO_PROPERTY)) return null;
-    if (!this.isObject(objectState.CustomMesh, this.errorsText.ACTOR.CUSTOM_MESH.NOT_OBJECT)) return null;
-
-    const model = this.parseModel(objectState.CustomMesh);
-    if (!model) {
-      return null;
-    }
-
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
-
-    const actorState: ActorState = {
-      type: ActorType.ACTOR,
-      ...actorBase,
-      model,
-    };
-
-    if (objectState?.ChildObjects) {
-      actorState.children = objectState.ChildObjects.reduce<ActorState[]>((acc, o) => {
-        const actorState = this.parseObject(o);
-        if (actorState) {
-          acc.push(actorState as ActorState);
-        }
-        return acc;
-      }, []);
-    }
-
-    return actorState;
-  }
-
-  static parseDieN(objectState: ObjectState, dieType: DieActorType): DieState | null {
-    const numFace = DieFacesNumber[dieType];
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
-
-    const rotationValues = this.parseRotationValues(objectState) as Tuple<RotationValue, typeof numFace>;
-    if (!rotationValues) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    if (!isTuple(rotationValues, numFace)) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    return {
-      ...actorBase,
-      type: dieType,
-      rotationValues,
-    } as DieState;
-  }
-
-  static parseDieBase(objectState: ObjectState): Omit<DieBaseState, 'type'> | null {
-    const actorBase = this.parseActorBase(objectState);
-    if (!actorBase) return null;
-
+  static parseDieBase(objectState: unknown): Omit<DieBaseState, 'type'> | null {
     const rotationValues = this.parseRotationValues(objectState);
-    if (!rotationValues) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    const dieState = {
-      ...actorBase,
-      rotationValues,
-    };
-
-    return dieState;
+    if (!rotationValues) return null;
+    const base = this.parseActorBase(objectState);
+    return base ? { ...base, rotationValues } : null;
   }
 
-  static parseRotationValues(objectState: ObjectState): RotationValue[] | null {
-    if (!Object.hasOwnProperty.call(objectState, 'RotationValues')) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    if (!Array.isArray(objectState.RotationValues)) {
-      this.errors.push(objectState.GUID);
-      return null;
-    }
-
-    const rotationValues = new Array<RotationValue>();
-    for (const rotationValue of objectState.RotationValues) {
-      const parsedRotationValue = this.parseRotationValue(rotationValue, objectState.GUID);
-      if (!parsedRotationValue) {
-        this.errors.push(objectState.GUID);
-        return null;
-      }
-      rotationValues.push(parsedRotationValue);
-    }
-
-    return rotationValues;
+  static parseRotationValues(objectState: unknown): RotationValue[] | null {
+    return this.read(this.schemas.rotationValues, objectState)?.RotationValues ?? null;
   }
 
   static parseRotationValue(rotationValue: unknown, guid: string): RotationValue | null {
-    if (!isObject(rotationValue)) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    if (!hasProperty(rotationValue, 'Rotation')) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    if (!hasProperty(rotationValue, 'Value')) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    const value = this.parseNumber(rotationValue.Value);
-    if (value === null) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    if (!isObject(rotationValue.Rotation)) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    if (
-      !hasProperty(rotationValue.Rotation, 'x') ||
-      !hasProperty(rotationValue.Rotation, 'y') ||
-      !hasProperty(rotationValue.Rotation, 'z')
-    ) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    const rotation: number[] = [];
-    for (const r of ['x', 'y', 'z'] as const) {
-      const candidate = this.parseNumber(rotationValue.Rotation[r]);
-      if (candidate === null) {
-        this.errors.push(guid);
-        return null;
-      }
-      rotation.push(degToRad(candidate));
-    }
-    if (!isTuple(rotation, 3)) {
-      this.errors.push(guid);
-      return null;
-    }
-
-    return { rotation, value };
+    return this.read(this.schemas.rotation, rotationValue, guid);
   }
 }

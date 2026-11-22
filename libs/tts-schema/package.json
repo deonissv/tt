@@ -1,0 +1,16 @@
+{
+  "name": "tts-schema",
+  "version": "0.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.ts",
+  "scripts": {
+    "format": "prettier 'src/**/*.ts' --write",
+    "lint": "eslint --ext .ts src",
+    "typecheck": "tsc --build --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.7"
+  }
+}

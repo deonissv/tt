@@ -25,7 +25,7 @@ COPY libs/rules/package.json ./libs/rules/package.json
 COPY libs/simulation/package.json ./libs/simulation/package.json
 COPY libs/states/package.json ./libs/states/package.json
 COPY libs/tts-parser/package.json ./libs/tts-parser/package.json
-COPY libs/tts-save/package.json ./libs/tts-save/package.json
+COPY libs/tts-schema/package.json ./libs/tts-schema/package.json
 COPY libs/utils/package.json ./libs/utils/package.json
 RUN npm ci
 

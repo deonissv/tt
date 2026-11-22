@@ -1,7 +1,7 @@
 import { DEMO } from '@tt/demo-saves';
 import type { Die4State, Die6State, Die8State } from '@tt/states';
 import { ActorType } from '@tt/states';
-import { ObjectState } from '@tt/tts-save';
+import { ObjectState } from '@tt/tts-schema';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseDie', () => {
