@@ -21,6 +21,7 @@ type FixtureVariant =
   | 'exhausted-tile-stack'
   | 'failed-bag-item'
   | 'face-down-deck'
+  | 'legacy-infinite-bag'
   | 'repeated-deck-card-guids'
   | 'locked-actor'
   | 'locked-bag'
@@ -75,6 +76,12 @@ const applyVariant = (state: SimulationStateSave, variant: FixtureVariant): void
     // Tabletop Simulator reference save: the Munchkin bag ships locked and
     // players still draw from it, so extraction must survive the lock.
     getActor<BagState>(state, '7a0b0b').locked = true;
+  }
+  if (variant === 'legacy-infinite-bag') {
+    // Games parsed by releases that predated the endless-container flag store
+    // the blue bag without `infinite`. Room start must re-derive the flag from
+    // the stored reference-save name or the bag empties after one draw.
+    delete getActor<BagState>(state, '314455').infinite;
   }
   if (variant === 'shuffle-bag') {
     const bag = getActor<BagState>(state, '7a0b0b');

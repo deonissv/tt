@@ -27,6 +27,7 @@ import {
   type TileState,
 } from '@tt/states';
 import { createImportSchemas } from './import-schemas';
+import { isInfiniteBagName } from './infinite-bag';
 import { decodeSaveInput } from './input';
 import { getFormatWarnings } from './parse';
 import type { TtsParseWarning } from './types';
@@ -253,12 +254,11 @@ export class TTSParser {
       const actor = this.parseObject(child);
       if (actor) containedObjects.push(actor);
     }
-    const name = base.name.toLowerCase();
     return {
       type: ActorType.BAG,
       ...base,
       containedObjects,
-      ...(name.startsWith('infinite_') || name === 'custom_model_infinite_bag' ? { infinite: true } : {}),
+      ...(isInfiniteBagName(base.name) ? { infinite: true } : {}),
       ...(data.CustomMesh ? { model: data.CustomMesh } : {}),
     };
   }
