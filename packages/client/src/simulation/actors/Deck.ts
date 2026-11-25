@@ -14,7 +14,7 @@ export class Deck extends ClientBase<DeckState> {
       return;
     }
     if (!faceTexture || !backTexture) throw new Error('Non-empty decks require card textures');
-    this.renderDeck(faceTexture, backTexture, state.cards[state.cards.length - 1], state.cards.length);
+    this.renderDeck(faceTexture, backTexture, state.cards.at(-1)!, state.cards.length);
   }
 
   static async fromState(state: DeckState): Promise<Deck | null> {
@@ -26,8 +26,8 @@ export class Deck extends ClientBase<DeckState> {
 
     if (state.cards.length === 0) return new Deck(state, model, null, null);
 
-    const faceTexture = await Loader.loadTexture(state.cards[state.cards.length - 1].faceURL);
-    const backTexture = await Loader.loadTexture(state.cards[0].backURL);
+    const faceTexture = await Loader.loadTexture(state.cards.at(-1)!.faceURL);
+    const backTexture = await Loader.loadTexture(state.cards.at(0)!.backURL);
 
     if (!faceTexture || !backTexture) {
       return null;
