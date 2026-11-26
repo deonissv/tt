@@ -1,7 +1,6 @@
 import { DEMO } from '@tt/demo-saves';
 import type { CardState } from '@tt/states';
 import { ActorType } from '@tt/states';
-import { ObjectState } from '@tt/tts-schema';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseCard', () => {
@@ -23,17 +22,16 @@ describe('TTSParser - parseCard', () => {
       sequence: 33,
     };
 
-    const result = TTSParser.parseCard(DEMO.CARD as unknown as ObjectState);
+    const result = TTSParser.parseCard(DEMO.CARD);
     expect(result).toMatchObject(expected);
   });
 
   it('should parse CardID 0 when a matching CustomDeck exists', () => {
-    const source = structuredClone(DEMO.CARD) as unknown as ObjectState & {
-      CustomDeck: NonNullable<ObjectState['CustomDeck']>;
+    const source = {
+      ...DEMO.CARD,
+      CardID: 0,
+      CustomDeck: { 0: DEMO.CARD.CustomDeck?.[2] },
     };
-    const deckId = Math.floor(source.CardID! / 100);
-    source.CardID = 0;
-    source.CustomDeck = { 0: source.CustomDeck[deckId] };
 
     const result = TTSParser.parseCard(source);
     expect(result).not.toBeNull();
@@ -41,8 +39,7 @@ describe('TTSParser - parseCard', () => {
   });
 
   it('should reject a card with no CardID', () => {
-    const source = structuredClone(DEMO.CARD) as unknown as ObjectState;
-    delete source.CardID;
+    const { CardID: _cardId, ...source } = DEMO.CARD;
 
     expect(TTSParser.parseCard(source)).toBeNull();
   });

@@ -3,6 +3,32 @@ import { parseTtsSave, serializeTtsSave } from '../src';
 import { baseSave } from './fixtures';
 
 describe('parseTtsSave — compatibility edges', () => {
+  const transformComponents = ['posX', 'posY', 'posZ', 'rotX', 'rotY', 'rotZ', 'scaleX', 'scaleY', 'scaleZ'] as const;
+  const nonFiniteFloats = [
+    [Infinity, 'Infinity'],
+    [-Infinity, '-Infinity'],
+    [NaN, 'NaN'],
+  ] as const;
+
+  it.each(
+    transformComponents.flatMap(component => nonFiniteFloats.map(([value, wire]) => ({ component, value, wire }))),
+  )('strictly round-trips Transform.$component containing $wire', ({ component, value, wire }) => {
+    const baseline = parseTtsSave(baseSave(), { mode: 'strict' });
+    expect(baseline.ok).toBe(true);
+    if (!baseline.ok) return;
+    baseline.save.ObjectStates[0].Transform[component] = value;
+
+    const text = serializeTtsSave(baseline.save);
+    expect(text).toContain(`"${component}":"${wire}"`);
+
+    const parsed = parseTtsSave(text, { mode: 'strict' });
+    expect(parsed.warnings).toEqual([]);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) return;
+    expect(parsed.save.ObjectStates[0].Transform[component]).toBe(wire);
+    expect(serializeTtsSave(parsed.save)).toBe(text);
+  });
+
   it.each([
     ['constructor', true],
     ['toString', true],
