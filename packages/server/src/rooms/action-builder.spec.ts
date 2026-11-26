@@ -41,7 +41,7 @@ const deck = (cards: DeckState['cards']): DeckState => ({
 
 const makeBuilder = (actors: { guid: string; picked?: string }[] = []): ActionBuilder => {
   const builder = new ActionBuilder();
-  builder.sim = { actors } as unknown as typeof builder.sim;
+  builder.sim = { actors: actors.map(actor => ({ ...actor, picked: actor.picked ?? null })) };
   return builder;
 };
 
@@ -78,7 +78,7 @@ describe('card reveal', () => {
 
   it('broadcasts RERENDER_CARD when a card turns face up', () => {
     const builder = new ActionBuilder();
-    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [] };
     builder.prevSimState = { actorStates: [card()] };
 
     expect(
@@ -94,7 +94,7 @@ describe('card reveal', () => {
 
   it('does not broadcast a reveal when a card turns face down', () => {
     const builder = new ActionBuilder();
-    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [] };
     builder.prevSimState = { actorStates: [{ ...card(), transformation: { rotation: [0, 0, 0] } }] };
 
     const actions = builder.getSimActions({ actorStates: [card()] });
@@ -149,7 +149,7 @@ describe('empty deck rerender', () => {
     const nextCards =
       operation === 'shuffle' ? [cards[0], cards[2], cards[1], cards[3]] : [cards[0], cards[2], cards[3]];
     const builder = new ActionBuilder();
-    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [] };
     builder.prevSimState = { actorStates: [{ ...before, cards }] };
 
     const actions = builder.getSimActions({ actorStates: [{ ...before, cards: nextCards }] });
@@ -173,9 +173,7 @@ describe('empty deck rerender', () => {
 
 describe('getDeckRerender', () => {
   it('does not rerender non-deck actors', () => {
-    expect(
-      new ActionBuilder().getDeckRerender(actorState() as unknown as DeckState, actorState() as unknown as DeckState),
-    ).toBeNull();
+    expect(new ActionBuilder().getDeckRerender(actorState(), actorState())).toBeNull();
   });
 
   it('rerenders when the top card changes', () => {
@@ -461,7 +459,7 @@ describe('sub-threshold drift', () => {
 
   it('broadcasts accumulated sub-threshold motion instead of swallowing it', () => {
     const builder = new ActionBuilder();
-    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [] };
     builder.prevSimState = { actorStates: [driftingActor(0)] };
 
     expect(builder.getSimActions({ actorStates: [driftingActor(0.0004)] })).toEqual([]);
@@ -490,7 +488,7 @@ describe('sub-threshold drift', () => {
       })),
     });
     const builder = new ActionBuilder();
-    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [] };
     builder.prevSimState = { actorStates: [deck(['first', 'second'])] };
 
     const actions = builder.getSimActions({ actorStates: [deck(['second', 'first'])] });
@@ -512,7 +510,7 @@ describe('sub-threshold drift', () => {
       containedObjects: items,
     });
     const builder = new ActionBuilder();
-    builder.sim = { actors: [] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [] };
     builder.prevSimState = { actorStates: [bag([item('first'), item('second')])] };
 
     expect(builder.getSimActions({ actorStates: [bag([item('first')])] }).map(a => a.type)).toContain(
@@ -523,7 +521,7 @@ describe('sub-threshold drift', () => {
 
   it('does not respawn an actor once delivered', () => {
     const builder = new ActionBuilder();
-    builder.sim = { actors: [{ guid: 'box', picked: null }] } as unknown as typeof builder.sim;
+    builder.sim = { actors: [{ guid: 'box', picked: null }] };
     builder.prevSimState = { actorStates: [] };
 
     expect(builder.getSimActions({ actorStates: [driftingActor(0)] }).map(a => a.type)).toContain(

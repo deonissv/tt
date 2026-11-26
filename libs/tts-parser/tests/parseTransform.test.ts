@@ -5,6 +5,25 @@ describe('TTSParser - parseTransform', () => {
     TTSParser.reset();
   });
 
+  it.each(['Infinity', '-Infinity', 'NaN'])(
+    'omits non-finite position components during simulation import: %s',
+    value => {
+      expect(
+        TTSParser.parseTransform({
+          posX: value,
+          posY: 0,
+          posZ: 0,
+          rotX: 0,
+          rotY: 0,
+          rotZ: 0,
+          scaleX: 1,
+          scaleY: 1,
+          scaleZ: 1,
+        }),
+      ).toEqual({ rotation: [0, 0, 0], scale: [1, 1, 1] });
+    },
+  );
+
   it('should correctly parse a standard transformation object', () => {
     const transform = {
       posX: 10,

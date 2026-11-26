@@ -1,12 +1,12 @@
-import { ActorType, type ActorState, type BagState, type UnknownActorState } from '@tt/states';
-import type { Client } from '../rooms/client';
+import { useActorFixtures } from '../../test/actor-fixtures';
+import { ActorType, type ActorState, type BagState } from '@tt/states';
+import { Client } from '../rooms/client';
 import { ActionHandler } from './action-handler';
 import { ServerBase } from './actors';
-const player = {
-  code: 'player',
-  pickHeight: 2,
-  rotationStep: Math.PI / 2,
-} as Client;
+const fixtures = useActorFixtures();
+const player = new Client({ userId: 1, username: 'player', code: 'player', roleId: 2 });
+player.pickHeight = 2;
+player.rotationStep = Math.PI / 2;
 
 const actorState = (locked = false): ActorState => ({
   type: ActorType.ACTOR,
@@ -26,25 +26,22 @@ const bagState = (size: number): BagState => ({
   })),
 });
 
-type ActorSpies = Record<'pick' | 'pickItem' | 'shuffle' | 'move' | 'release', ReturnType<typeof vi.fn>>;
-type MockActor = ServerBase & { spies: ActorSpies };
-
-const runtimeActor = (state: UnknownActorState): MockActor => {
+const runtimeActor = (state: ActorState | BagState) => {
+  const actor = state.type === ActorType.BAG ? fixtures.bag(state) : fixtures.actor(state);
   const spies = {
-    pick: vi.fn(),
-    pickItem: vi.fn().mockResolvedValue(null),
-    shuffle: vi.fn(),
-    move: vi.fn(),
-    release: vi.fn(),
+    pick: vi.spyOn(actor, 'pick').mockReturnValue(undefined),
+    pickItem:
+      state.type === ActorType.BAG && 'pickItem' in actor
+        ? vi.spyOn(actor, 'pickItem').mockResolvedValue(null)
+        : vi.fn(),
+    shuffle:
+      state.type === ActorType.BAG && 'shuffle' in actor
+        ? vi.spyOn(actor, 'shuffle').mockReturnValue(undefined)
+        : vi.fn(),
+    move: vi.spyOn(actor, 'move').mockReturnValue(undefined),
+    release: vi.spyOn(actor, 'release').mockReturnValue(undefined),
   };
-  const actor = {
-    guid: state.guid,
-    ...spies,
-    spies,
-    toState: () => structuredClone(state),
-  } as unknown as MockActor;
-  Object.setPrototypeOf(actor, ServerBase.prototype);
-  return actor;
+  return Object.assign(actor, { spies });
 };
 
 describe('ActionHandler portable rules', () => {

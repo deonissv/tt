@@ -2,11 +2,12 @@ import { subject } from '@casl/ability';
 import type { Game, Room } from '@prisma/client';
 import { permissions } from '../../prisma/permissions';
 import { authMockAdmin } from '../../test/authMock';
-import type { PermissionsService } from '../permissions.service';
+import { PermissionsService } from '../permissions.service';
 import type { UserWithPermissions } from './casl-ability.factory';
 import { CaslAbilityFactory } from './casl-ability.factory';
+import { PrismaService } from '../prisma/prisma.service';
 
-const permissionsServiceMock = {} as PermissionsService;
+const permissionsServiceMock = new PermissionsService(new PrismaService());
 
 const userFactory = (roleId: number): UserWithPermissions => {
   return {
@@ -24,12 +25,13 @@ describe('CaslAbilityFactory', () => {
 
   describe('createForRequestUser', () => {
     it('loads the request user permissions and builds the ability from them', async () => {
-      const permissionsService = { getUserWithPermissions: vi.fn().mockResolvedValue(guest) };
-      const factory = new CaslAbilityFactory(permissionsService as unknown as PermissionsService);
+      const permissionsService = new PermissionsService(new PrismaService());
+      const getUserWithPermissions = vi.spyOn(permissionsService, 'getUserWithPermissions').mockResolvedValue(guest);
+      const factory = new CaslAbilityFactory(permissionsService);
 
       const ability = await factory.createForRequestUser(guest);
 
-      expect(permissionsService.getUserWithPermissions).toHaveBeenCalledWith(guest);
+      expect(getUserWithPermissions).toHaveBeenCalledWith(guest);
       expect(ability.can('read', 'Game')).toBe(true);
       expect(ability.can('manage', 'Game')).toBe(false);
     });

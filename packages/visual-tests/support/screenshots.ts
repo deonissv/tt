@@ -1,6 +1,7 @@
 import { expect, type Page } from '@playwright/test';
 import { waitForRenderedFrames } from './rendering';
 import { screenshotStyle } from './screenshot-style';
+import { captureImages } from './capture-images';
 
 export async function canvasClip(page: Page) {
   const box = await page.locator('canvas').boundingBox();
@@ -27,9 +28,5 @@ export async function screenshotCanvas(page: Page, target?: string): Promise<Buf
 }
 
 export async function captureCanvases(pages: Page[]): Promise<Buffer[]> {
-  const captures = pages.map(page => screenshotCanvas(page));
-  return Promise.all(captures).catch(async error => {
-    await Promise.allSettled(captures);
-    throw error;
-  });
+  return captureImages(pages, page => screenshotCanvas(page));
 }

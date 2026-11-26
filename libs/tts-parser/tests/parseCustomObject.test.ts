@@ -1,7 +1,6 @@
 import { CHESS5 } from '@tt/demo-saves';
 import type { ActorState } from '@tt/states';
-import { ObjectState } from '@tt/tts-schema';
-import { degToRad, Tuple } from '@tt/utils';
+import { degToRad, type Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseCustomObject', () => {
@@ -27,6 +26,6 @@ describe('TTSParser - parseCustomObject', () => {
       },
       colorDiffuse: [1.0, 1.0, 1.0],
     };
-    expect(TTSParser.parseCustomObject(CHESS5.PAWN as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseCustomObject(CHESS5.PAWN)).toEqual(expected);
   });
 });

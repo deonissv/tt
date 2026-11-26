@@ -14,13 +14,13 @@ import {
 } from '@tt/states';
 import { vecFloatCompare } from '@tt/utils';
 import { cardIsFaceDown } from './card-visibility';
-import type { Simulation } from '../simulation/simulation';
+import type { ServerBase } from '../simulation/actors';
 
 export class ActionBuilder {
   prevCursors: string | null = null;
   prevSimState: SimulationStateSave | null = null;
   private prevObservedSimState: string | null = null;
-  sim: Simulation;
+  sim: { actors: readonly Pick<ServerBase, 'guid' | 'picked'>[] };
 
   getActions(cursors: CursorsPld, simState: SimulationStateSave): ServerActionMsg[] | null {
     const actions: ServerActionMsg[] = [];
@@ -189,7 +189,7 @@ export class ActionBuilder {
           });
         }
 
-        const deckRerender = this.getDeckRerender(prevActorState as DeckState, actorState as DeckState);
+        const deckRerender = this.getDeckRerender(prevActorState, actorState);
         if (deckRerender) {
           actions.push({
             type: ServerAction.RERENDER_DECK,
@@ -278,8 +278,8 @@ export class ActionBuilder {
     return currentState.transformation?.scale;
   }
 
-  getDeckRerender(prevState: DeckState, currentState: DeckState): RerenderDeckPld | null {
-    if (prevState.type != ActorType.DECK) return null;
+  getDeckRerender(prevState: UnknownActorState, currentState: UnknownActorState): RerenderDeckPld | null {
+    if (prevState.type !== ActorType.DECK || currentState.type !== ActorType.DECK) return null;
     if (JSON.stringify(prevState.cards) === JSON.stringify(currentState.cards)) return null;
 
     const rerenderPld = this.getRerenderDeckPld(currentState, prevState);

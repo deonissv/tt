@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import type { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -19,10 +19,7 @@ const user: User = {
   roleId: 2,
 };
 
-const logSpy = (service: AuthService) => {
-  const logger = (service as unknown as { logger: { log: Mock } }).logger;
-  return vi.spyOn(logger, 'log');
-};
+const logSpy = () => vi.spyOn(Logger.prototype, 'log');
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -60,7 +57,7 @@ describe('AuthService', () => {
   describe('signin', () => {
     it('validates the credentials and returns an access token', async () => {
       const compareMock = vi.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
-      const logger = logSpy(authService);
+      const logger = logSpy();
 
       const token = await authService.signin({ email: 'email', password: 'password' });
 
@@ -83,7 +80,7 @@ describe('AuthService', () => {
   describe('validateUser', () => {
     it('should return a user', async () => {
       const compareMock = vi.spyOn(bcrypt, 'compare').mockImplementation(() => Promise.resolve(true));
-      const logger = logSpy(authService);
+      const logger = logSpy();
 
       const result = await authService.validateUser('email', 'password');
 
@@ -96,7 +93,7 @@ describe('AuthService', () => {
 
     it('should throw an error if user not found', async () => {
       usersServiceMock.findOneByEmail.mockResolvedValueOnce(null);
-      const logger = logSpy(authService);
+      const logger = logSpy();
 
       await expect(authService.validateUser('email', 'password')).rejects.toThrow('Wrong email or password');
       expect(logger).toHaveBeenCalledWith(expect.stringContaining('Invalid email or password'));
@@ -111,7 +108,7 @@ describe('AuthService', () => {
   describe('signup', () => {
     it('should return an access token', async () => {
       const dto = { email: 'email', username: 'username', password: 'password', avatarUrl: 'avatarUrl' };
-      const logger = logSpy(authService);
+      const logger = logSpy();
 
       const token = await authService.signup(dto);
 

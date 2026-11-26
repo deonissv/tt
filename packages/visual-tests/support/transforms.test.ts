@@ -1,9 +1,7 @@
-import type { UnknownActorState } from '@tt/states';
 import { describe, expect, it } from 'vitest';
 import { positionChanged, rotationChanged } from './transforms';
 
-const state = (field: string, vector: unknown): UnknownActorState =>
-  ({ guid: 'actor', transformation: { [field]: vector } }) as unknown as UnknownActorState;
+const state = (field: string, vector: unknown) => ({ guid: 'actor', transformation: { [field]: vector } });
 
 describe.each([
   { field: 'position', changed: positionChanged },

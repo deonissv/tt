@@ -1,5 +1,17 @@
 import type { ClientAction, ClientActionMsg } from '@tt/actions';
-import type { RoomConnection } from '../support/room-connection';
+
+export interface ActionConnection {
+  readonly socket: {
+    waitForEvent(
+      event: 'framesent',
+      options: {
+        timeout: number;
+        signal: AbortSignal;
+        predicate: (frame: { payload: string | Buffer }) => boolean;
+      },
+    ): Promise<unknown>;
+  };
+}
 
 export function clientActionMatches(payload: string | Buffer, type: ClientAction, guid?: string): boolean {
   if (typeof payload !== 'string') return false;
@@ -16,7 +28,7 @@ export function clientActionMatches(payload: string | Buffer, type: ClientAction
 
 // Register the protocol listener before invoking the caller's native input.
 export async function expectClientAction(
-  connection: RoomConnection,
+  connection: ActionConnection,
   type: ClientAction,
   input: () => Promise<unknown>,
   guid?: string,

@@ -1,21 +1,19 @@
 import { EventEmitter } from 'node:events';
-import type { BrowserContext } from '@playwright/test';
 import { expect, it, vi } from 'vitest';
-import { configureContext } from './rendering';
+import { configureContext, type RenderingContext, type RenderingPage } from './rendering';
 
 function context() {
   const events = new EventEmitter();
-  const scripts: (() => void)[] = [];
-  return {
-    events,
-    scripts,
-    context: Object.assign(events, {
-      addInitScript: (script: () => void) => {
-        scripts.push(script);
-        return Promise.resolve();
-      },
-    }) as unknown as BrowserContext,
+  const scripts: (() => unknown)[] = [];
+  const context: RenderingContext = {
+    on: (event, listener) => events.on(event, listener),
+    addInitScript: script => {
+      scripts.push(script);
+      return Promise.resolve();
+    },
+    route: vi.fn<RenderingContext['route']>().mockResolvedValue(undefined),
   };
+  return { events, scripts, context };
 }
 
 it('selects the WebGL browser platform without replacing native animation scheduling', async () => {
@@ -41,7 +39,7 @@ it('records public browser errors and failed requests while ignoring ordinary co
   const fixture = context();
   const errors: string[] = [];
   await configureContext(fixture.context, errors);
-  const page = new EventEmitter();
+  const page = new EventEmitter() satisfies RenderingPage;
   fixture.events.emit('page', page);
   page.emit('pageerror', new Error('Unhandled scene error'));
   page.emit('console', { type: () => 'log', text: () => 'ordinary output' });

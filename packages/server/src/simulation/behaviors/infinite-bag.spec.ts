@@ -1,13 +1,7 @@
+import { useActorFixtures } from '../../../test/actor-fixtures';
 import { CreateBox, Logger } from '@babylonjs/core';
 import { ServerAction } from '@tt/actions';
-import {
-  ActorType,
-  applyActorStateUpdate,
-  type ActorState,
-  type ActorStateUpdate,
-  type BagState,
-  type SimulationStateSave,
-} from '@tt/states';
+import { ActorType, type ActorState, type BagState, type SimulationStateSave } from '@tt/states';
 import { Loader } from '@tt/loader';
 import { Logger as AppLogger } from '@tt/logger';
 import { Client } from '../../rooms/client';
@@ -29,20 +23,8 @@ const bagState = (infinite = true): BagState => ({
   containedObjects: [item('template')],
 });
 
-function fakeBag(initial: BagState): Bag {
-  let state = structuredClone(initial);
-  const actor = {
-    guid: state.guid,
-    scene: { getUniqueGUID: (guid: string) => guid, releaseGUID: vi.fn() },
-    toState: () => structuredClone(state),
-    updateState: (update: ActorStateUpdate) => {
-      state = applyActorStateUpdate(state, update) as BagState;
-    },
-    transformation: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-  } as unknown as Bag;
-  Object.setPrototypeOf(actor, Bag.prototype);
-  return actor;
-}
+const fixtures = useActorFixtures();
+const fakeBag = (initial: BagState): Bag => fixtures.bag(initial);
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -103,7 +85,7 @@ describe('bag draw reservations', () => {
     copies[0].containedObjects.length = 0;
     pending.resolve(null);
     await Promise.all(draws);
-    expect(actor.toState()).toEqual(state);
+    expect(actor.__state).toEqual(state);
   });
 
   it.each([true, false])('keeps empty bags inert, infinite=%s', async infinite => {
@@ -124,16 +106,16 @@ describe('bag draw reservations', () => {
       })
       .mockRejectedValueOnce(new Error('asset unavailable'));
     await expect(actor.pickItem('alice', 1)).resolves.toBeNull();
-    expect(actor.toState()).toEqual(state);
+    expect(actor.__state).toEqual(state);
     await expect(actor.pickItem('bob', 1)).rejects.toThrow('asset unavailable');
-    expect(actor.toState()).toEqual(state);
+    expect(actor.__state).toEqual(state);
     expect(build).toHaveBeenCalledTimes(2);
   });
 
   it.each(['null', 'reject'] as const)('restores only the failed finite reservation on %s', async failure => {
     const actor = fakeBag({ ...bagState(false), containedObjects: [item('first'), item('last')] });
     const pending = deferred<ServerBase | null>();
-    const spawned = { picked: 'bob', pick: vi.fn() } as unknown as ServerBase;
+    const spawned = fixtures.spawned('bob');
     const build = vi
       .spyOn(ServerActorBuilder, 'build')
       .mockReturnValueOnce(pending.promise)
@@ -154,8 +136,8 @@ describe('bag draw reservations', () => {
     const state = bagState();
     const actor = fakeBag(state);
     const pending = deferred<ServerBase | null>();
-    const pick = vi.fn();
-    const spawned = { pick } as unknown as ServerBase;
+    const spawned = fixtures.spawned();
+    const pick = vi.spyOn(spawned, 'pick');
     const released = vi.spyOn(actor.scene, 'releaseGUID');
     const build = vi
       .spyOn(ServerActorBuilder, 'build')
@@ -167,7 +149,7 @@ describe('bag draw reservations', () => {
     await failed;
     expect(build.mock.calls[0][0].guid).not.toBe(build.mock.calls[1][0].guid);
     expect(pick).toHaveBeenCalledWith('bob', 2);
-    expect(actor.toState()).toEqual(state);
+    expect(actor.__state).toEqual(state);
     expect(released).toHaveBeenCalledTimes(2);
   });
 });

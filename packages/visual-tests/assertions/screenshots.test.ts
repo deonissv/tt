@@ -1,54 +1,56 @@
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import type { Page, TestInfo } from '@playwright/test';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { PageAssertionsToHaveScreenshotOptions } from '@playwright/test';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   assertSnapshotComparisonMode,
-  expectChangedCanvases,
-  expectMatchingCanvases,
-  expectStoredScreenshot,
-} from './screenshots';
-import { captureCanvases } from '../support/screenshots';
+  createScreenshotAssertions,
+  type ScreenshotIO,
+  type SnapshotInfo,
+} from './screenshot-comparisons';
+import { captureImages } from '../support/capture-images';
 
-const compare = vi.hoisted(() => vi.fn());
-const compareChanged = vi.hoisted(() => vi.fn());
-const quiet = vi.hoisted(() => vi.fn());
-vi.mock('@playwright/test', () => ({
-  expect: () => ({
-    toHaveCount: quiet,
-    toHaveScreenshot: compare,
-    not: { toHaveScreenshot: compareChanged },
-  }),
-}));
+interface TestCanvas {
+  prepare(): Promise<void>;
+  screenshot(options?: { path?: string }): Promise<Buffer>;
+}
+const compare = vi.fn<(name: string, options?: PageAssertionsToHaveScreenshotOptions) => Promise<void>>();
+const compareChanged = vi.fn<(name: string, options?: PageAssertionsToHaveScreenshotOptions) => Promise<void>>();
+const io: ScreenshotIO<TestCanvas> = {
+  prepare: canvas => canvas.prepare(),
+  capture: async (canvas, target) => {
+    await canvas.prepare();
+    return canvas.screenshot(target ? { path: target } : undefined);
+  },
+  clip: () => Promise.resolve({ x: 1, y: 1, width: 1278, height: 718 }),
+  match: (_canvas, name, options) => compare(name, options),
+  changed: (_canvas, name, options) => compareChanged(name, options),
+};
+const { expectChangedCanvases, expectMatchingCanvases, expectStoredScreenshot } = createScreenshotAssertions(io);
+const captureCanvases = (canvases: TestCanvas[]) => captureImages(canvases, canvas => io.capture(canvas));
+
+beforeEach(() => {
+  compare.mockResolvedValue(undefined);
+  compareChanged.mockResolvedValue(undefined);
+});
 const temporary: string[] = [];
 afterEach(() => {
   vi.resetAllMocks();
   for (const root of temporary.splice(0)) fs.rmSync(root, { recursive: true, force: true });
 });
 
-function fixture(updateSnapshots = 'none') {
+function fixture(updateSnapshots: SnapshotInfo['config']['updateSnapshots'] = 'none') {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'visual-screenshots-'));
   temporary.push(root);
-  const info = {
-    testId: 'id',
-    config: { updateSnapshots },
-    snapshotPath: (name: string) => path.join(root, name),
-    attach: vi.fn().mockResolvedValue(undefined),
-  } as unknown as TestInfo;
-  const screenshot = vi.fn(({ path: target }: { path: string }) => {
+  const info: SnapshotInfo = { testId: 'id', config: { updateSnapshots }, snapshotPath: name => path.join(root, name) };
+  const screenshot = vi.fn(({ path: target }: { path?: string } = {}) => {
     if (target) fs.writeFileSync(target, 'reference PNG');
     return Promise.resolve(Buffer.from('reference PNG'));
   });
-  const move = vi.fn().mockResolvedValue(undefined);
-  const page = {
-    getByRole: vi.fn(),
-    locator: () => ({ screenshot, boundingBox: vi.fn().mockResolvedValue({ x: 0, y: 0, width: 1280, height: 720 }) }),
-    screenshot,
-    mouse: { move },
-    evaluate: vi.fn().mockResolvedValue(undefined),
-  } as unknown as Page;
-  return { root, info, page, screenshot, move };
+  const prepare = vi.fn<TestCanvas['prepare']>().mockResolvedValue(undefined);
+  const page: TestCanvas = { prepare, screenshot };
+  return { root, info, page, screenshot, prepare };
 }
 
 describe('cross-player screenshot assertions', () => {
@@ -61,21 +63,24 @@ describe('cross-player screenshot assertions', () => {
     await expect(expectMatchingCanvases(info, 'extract', [page, page])).resolves.toBeUndefined();
     expect(screenshot).toHaveBeenCalledTimes(2);
   });
-  it('clears pointer highlights and transient toasts before comparing images', async () => {
-    const { info, page, move } = fixture();
+  it('prepares each canvas before comparing images', async () => {
+    const { info, page, prepare } = fixture();
     compare.mockImplementation(() => {
-      expect(move).toHaveBeenCalledWith(10, 10);
-      expect(quiet).toHaveBeenCalledWith(0);
+      expect(prepare).toHaveBeenCalled();
+      return Promise.resolve();
     });
     await expectMatchingCanvases(info, 'rotate', [page, page]);
-    expect(quiet).toHaveBeenCalledTimes(3);
+    expect(prepare).toHaveBeenCalledTimes(3);
   });
-  it.each(['none', 'missing'])('compares every canvas in %s mode and removes its temporary reference', async mode => {
-    const { root, info, page } = fixture(mode);
-    await expectMatchingCanvases(info, 'roll', [page, page]);
-    expect(compare).toHaveBeenCalledTimes(2);
-    expect(fs.readdirSync(root)).toEqual([]);
-  });
+  it.each(['none', 'missing'] as const)(
+    'compares every canvas in %s mode and removes its temporary reference',
+    async mode => {
+      const { root, info, page } = fixture(mode);
+      await expectMatchingCanvases(info, 'roll', [page, page]);
+      expect(compare).toHaveBeenCalledTimes(2);
+      expect(fs.readdirSync(root)).toEqual([]);
+    },
+  );
 
   it('propagates an image mismatch and still removes its temporary reference', async () => {
     const { root, info, page } = fixture();
@@ -103,11 +108,14 @@ describe('cross-player screenshot assertions', () => {
     expect(fs.readdirSync(root)).toEqual([]);
   });
 
-  it.each(['all', 'changed'])('prevents update mode %s from accepting a different player image', async mode => {
-    const { info, page, screenshot } = fixture(mode);
-    await expect(expectMatchingCanvases(info, 'roll', [page, page])).rejects.toThrow('--update-snapshots=none');
-    expect(screenshot).not.toHaveBeenCalled();
-  });
+  it.each(['all', 'changed'] as const)(
+    'prevents update mode %s from accepting a different player image',
+    async mode => {
+      const { info, page, screenshot } = fixture(mode);
+      await expect(expectMatchingCanvases(info, 'roll', [page, page])).rejects.toThrow('--update-snapshots=none');
+      expect(screenshot).not.toHaveBeenCalled();
+    },
+  );
 
   it('still rejects different player images with the UI default Missing setting', async () => {
     const { root, info, page } = fixture('missing');
@@ -124,12 +132,12 @@ describe('cross-player screenshot assertions', () => {
 });
 
 describe('development snapshot settings', () => {
-  it.each(['none', 'missing'])('accepts %s without a manual UI preference change', mode => {
+  it.each(['none', 'missing'] as const)('accepts %s without a manual UI preference change', mode => {
     const { info } = fixture(mode);
     expect(() => assertSnapshotComparisonMode(info)).not.toThrow();
   });
 
-  it.each(['all', 'changed'])('rejects %s before development tests can update baselines', mode => {
+  it.each(['all', 'changed'] as const)('rejects %s before development tests can update baselines', mode => {
     const { info } = fixture(mode);
     expect(() => assertSnapshotComparisonMode(info)).toThrow('--update-snapshots=none');
   });
@@ -161,7 +169,7 @@ describe('stored screenshot assertions', () => {
     expect(fs.readFileSync(info.snapshotPath('stored.png'), 'utf8')).toBe('reviewed baseline');
   });
 
-  it.each(['all', 'changed'])('preserves intentional baseline updates in %s mode', async mode => {
+  it.each(['all', 'changed'] as const)('preserves intentional baseline updates in %s mode', async mode => {
     const { info, page } = fixture(mode);
     await expectStoredScreenshot(info, page, 'new.png');
     expect(compare).toHaveBeenCalledWith('new.png', undefined);
@@ -184,11 +192,11 @@ describe('visible action assertions', () => {
   });
 
   it('captures each player and compares it against its own before image', async () => {
-    const { root, info, page, screenshot } = fixture();
+    const { root, info, page } = fixture();
     const before = await captureCanvases([page, page]);
     await expectChangedCanvases(info, 'move', [page, page], before);
     expect(compareChanged).toHaveBeenCalledTimes(2);
-    expect(screenshot.mock.calls[0][0]).toEqual(
+    expect(compareChanged.mock.calls[0][1]).toEqual(
       expect.objectContaining({ clip: { x: 1, y: 1, width: 1278, height: 718 } }),
     );
     expect(fs.readdirSync(root)).toEqual([]);

@@ -1,4 +1,5 @@
 import type { ObjectState } from '@tt/tts-schema';
+import { ObjectStateSchema } from '@tt/tts-schema';
 import { DEMO } from '@tt/demo-saves';
 import { discriminateObjectKind } from '../src';
 
@@ -29,13 +30,34 @@ function obj(name: string, extra: Partial<ObjectState> = {}): ObjectState {
 }
 
 describe('discriminateObjectKind', () => {
+  it('recognizes a renamed standalone custom card without DeckIDs', () => {
+    const card = ObjectStateSchema.parse({ ...DEMO.CARD, Name: 'RenamedThing' });
+    expect(card.CardID).toBe(233);
+    expect(card.CustomDeck).toBeDefined();
+    expect(card).not.toHaveProperty('DeckIDs');
+
+    expect(discriminateObjectKind(card)).toEqual({ kind: 'cardCustom', stack: false, name: 'RenamedThing' });
+  });
+
+  it('recognizes a custom card with CardID zero', () => {
+    expect(discriminateObjectKind(obj('RenamedThing', { CardID: 0, CustomDeck: {} }))).toMatchObject({
+      kind: 'cardCustom',
+    });
+  });
+
+  it('keeps a renamed single-card deck classified as a deck', () => {
+    expect(discriminateObjectKind(obj('RenamedThing', { DeckIDs: [233], CustomDeck: {} }))).toMatchObject({
+      kind: 'deckCustom',
+    });
+  });
+
   it('classifies the legacy demo custom figurine by its saved name', () => {
     const figurine = DEMO.OBJ.ObjectStates.find(object => object.GUID === 'ca085b');
     expect(figurine).toBeDefined();
     expect(figurine?.Name).toBe('Figurine_Custom');
     expect(figurine).toHaveProperty('CustomImage', expect.any(Object));
     expect(figurine).not.toHaveProperty('CustomFigurine');
-    expect(discriminateObjectKind(figurine as unknown as ObjectState)).toMatchObject({ kind: 'customFigurine' });
+    expect(discriminateObjectKind(ObjectStateSchema.parse(figurine))).toMatchObject({ kind: 'customFigurine' });
   });
 
   it.each([undefined, 1])('recognizes TileStack as a stack with Number %s', number => {
@@ -51,7 +73,7 @@ describe('discriminateObjectKind', () => {
     const bag = DEMO.OBJ.ObjectStates.find(object => object.Name === 'Custom_Model_Bag');
     expect(bag).toBeDefined();
     expect(bag?.CustomMesh).toBeDefined();
-    expect(discriminateObjectKind(bag as unknown as ObjectState)).toMatchObject({ kind: 'bag' });
+    expect(discriminateObjectKind(ObjectStateSchema.parse(bag))).toMatchObject({ kind: 'bag' });
   });
 
   it.each<[string, string, object]>([

@@ -47,12 +47,12 @@ describe('handleRemoveActor', () => {
 
   it('clears the local pick reference when the held actor is removed', () => {
     const actor = addActor('box');
-    const fields = sim as unknown as { _pickedActor: ClientBase | null };
-    fields._pickedActor = actor;
+    const pickedActorKey = '_pickedActor';
+    sim[pickedActorKey] = actor;
 
     sim.handleRemoveActor('box');
 
-    expect(fields._pickedActor).toBeNull();
+    expect(sim[pickedActorKey]).toBeNull();
   });
 
   it('ignores unknown guids', () => {

@@ -164,8 +164,11 @@ export function discriminateObjectKind(object: ObjectState): TtsObjectKindResult
   }
 
   // Custom-content fields take precedence over names changed by mods.
+  if (object.CustomDeck && typeof object.CardID === 'number') {
+    return { kind: 'cardCustom', stack, name };
+  }
   if (object.CustomDeck && object.DeckIDs) {
-    return { kind: name === 'CardCustom' || looksLikeSingleCard(object) ? 'cardCustom' : 'deckCustom', stack, name };
+    return { kind: 'deckCustom', stack, name };
   }
   if (object.CustomPDF) return { kind: 'customPDF', stack, name };
   if (object.CustomAssetbundle) return { kind: 'customAssetbundle', stack, name };
@@ -190,10 +193,6 @@ export function discriminateObjectKind(object: ObjectState): TtsObjectKindResult
 
   if (name.length > 0) return { kind: 'builtin', stack, name };
   return { kind: 'unknown', stack, name };
-}
-
-function looksLikeSingleCard(object: ObjectState): boolean {
-  return object.ContainedObjects === undefined && object.DeckIDs?.length === 1;
 }
 
 function isStack(object: ObjectState, name: string): boolean {

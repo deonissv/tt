@@ -1,7 +1,6 @@
 import { CATAN } from '@tt/demo-saves';
 import type { TileState } from '@tt/states';
-import { ObjectState } from '@tt/tts-schema';
-import { degToRad, Tuple } from '@tt/utils';
+import { degToRad, type Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseTile', () => {
@@ -25,7 +24,7 @@ describe('TTSParser - parseTile', () => {
       colorDiffuse: [1, 1, 1],
     };
 
-    const parsed = TTSParser.parseTile(CATAN.LONGEST_ROAD as unknown as ObjectState);
+    const parsed = TTSParser.parseTile(CATAN.LONGEST_ROAD);
     expect(parsed !== null).toBeTruthy();
     expect(parsed).toStrictEqual(expected);
   });

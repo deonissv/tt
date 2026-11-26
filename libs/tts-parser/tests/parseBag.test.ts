@@ -1,7 +1,6 @@
 import { DEMO } from '@tt/demo-saves';
 import type { BagState } from '@tt/states';
 import { ActorType } from '@tt/states';
-import type { ObjectState } from '@tt/tts-schema';
 import type { DeepPartial } from '@tt/utils';
 
 import { TTSParser } from '../src';
@@ -30,7 +29,7 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = TTSParser.parseBag(DEMO.BAG as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.BAG);
     expect(result).toMatchObject(expected);
   });
 
@@ -53,12 +52,12 @@ describe('TTSParser - parseBag', () => {
       ],
     };
 
-    const result = TTSParser.parseBag(DEMO.CUSTOM_BAG as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.CUSTOM_BAG);
     expect(result).toMatchObject(expected);
   });
 
   it('marks Infinite_Bag saves as never-depleting containers', () => {
-    const result = TTSParser.parseBag(DEMO.INFINITE_BAG as unknown as ObjectState);
+    const result = TTSParser.parseBag(DEMO.INFINITE_BAG);
 
     expect(result?.type).toBe(ActorType.BAG);
     expect(result?.infinite).toBe(true);
@@ -66,7 +65,7 @@ describe('TTSParser - parseBag', () => {
   });
 
   it.each(['Bag', 'Custom_Model_Bag'])('leaves ordinary %s saves finite', Name => {
-    const result = TTSParser.parseBag({ ...DEMO.BAG, Name } as unknown as ObjectState);
+    const result = TTSParser.parseBag({ ...DEMO.BAG, Name });
 
     expect(result?.infinite).toBeUndefined();
   });
@@ -91,16 +90,14 @@ describe('TTSParser - parseBag', () => {
   );
 
   it('does not treat an incidental infinite substring as the save prefix', () => {
-    expect(
-      TTSParser.parseBag({ ...DEMO.BAG, Name: 'Custom_Infinite_Bag' } as unknown as ObjectState)?.infinite,
-    ).toBeUndefined();
+    expect(TTSParser.parseBag({ ...DEMO.BAG, Name: 'Custom_Infinite_Bag' })?.infinite).toBeUndefined();
   });
 
   it('preserves nested container variants as templates', () => {
     const result = TTSParser.parseBag({
       ...DEMO.INFINITE_BAG,
       ContainedObjects: [DEMO.BAG],
-    } as unknown as ObjectState);
+    });
 
     expect(result?.containedObjects[0]).toMatchObject({
       type: ActorType.BAG,

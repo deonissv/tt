@@ -1,4 +1,4 @@
-import type { ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { MimeResolver, MimeType } from '@tt/mime-resolver';
 import { vi } from 'vitest';
 import { FileLoaderService } from './file-loader.service';
@@ -7,9 +7,7 @@ describe('FileLoaderService', () => {
   let service: FileLoaderService;
 
   beforeEach(() => {
-    service = new FileLoaderService({
-      getOrThrow: () => 'http://example.com',
-    } as unknown as ConfigService);
+    service = new FileLoaderService(new ConfigService({ VITE_STATIC_HOST: 'http://example.com' }));
   });
 
   afterEach(() => {

@@ -1,6 +1,6 @@
 import { ClientAction } from '@tt/actions';
 import { expect, it, vi } from 'vitest';
-import type { RoomConnection } from '../support/room-connection';
+import type { ActionConnection } from './protocol';
 import { clientActionMatches, expectClientAction } from './protocol';
 
 const abortError = (signal: AbortSignal): Error => {
@@ -38,9 +38,9 @@ it('propagates malformed protocol messages', () => {
 it('allows native input to finish before timing out its resulting action', async () => {
   vi.useFakeTimers();
   try {
-    const connection = {
+    const connection: ActionConnection = {
       socket: {
-        waitForEvent: vi.fn(
+        waitForEvent: vi.fn<ActionConnection['socket']['waitForEvent']>().mockImplementation(
           (_: string, { timeout, signal }: { timeout: number; signal: AbortSignal }) =>
             new Promise<void>((resolve, reject) => {
               if (timeout) setTimeout(() => reject(new Error('observation timed out')), timeout);
@@ -49,7 +49,7 @@ it('allows native input to finish before timing out its resulting action', async
             }),
         ),
       },
-    } as unknown as RoomConnection;
+    };
     const result = expectClientAction(
       connection,
       ClientAction.MOVE_ACTOR,
@@ -70,16 +70,16 @@ it('allows native input to finish before timing out its resulting action', async
 it('still times out when completed input produces no matching action', async () => {
   vi.useFakeTimers();
   try {
-    const connection = {
+    const connection: ActionConnection = {
       socket: {
-        waitForEvent: vi.fn(
+        waitForEvent: vi.fn<ActionConnection['socket']['waitForEvent']>().mockImplementation(
           (_: string, { signal }: { signal: AbortSignal }) =>
             new Promise<void>((_, reject) => {
               signal.addEventListener('abort', () => reject(abortError(signal)), { once: true });
             }),
         ),
       },
-    } as unknown as RoomConnection;
+    };
     const result = expectClientAction(connection, ClientAction.MOVE_ACTOR, () => Promise.resolve(), 'actor', 10).catch(
       (error: unknown) => error,
     );
@@ -94,11 +94,13 @@ it('still times out when completed input produces no matching action', async () 
 it('settles in-flight native input before a socket failure can trigger a retry', async () => {
   vi.useFakeTimers();
   try {
-    const connection = {
+    const connection: ActionConnection = {
       socket: {
-        waitForEvent: vi.fn(() => Promise.reject(new Error('socket closed'))),
+        waitForEvent: vi
+          .fn<ActionConnection['socket']['waitForEvent']>()
+          .mockImplementation(() => Promise.reject(new Error('socket closed'))),
       },
-    } as unknown as RoomConnection;
+    };
     let settled = false;
     const result = expectClientAction(
       connection,
