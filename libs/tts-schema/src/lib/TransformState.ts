@@ -1,16 +1,17 @@
 import { z } from 'zod';
+import { JsonFloatSchema } from './JointState';
 
 export const TransformStateSchema = z
   .object({
-    posX: z.number(),
-    posY: z.number(),
-    posZ: z.number(),
-    rotX: z.number(),
-    rotY: z.number(),
-    rotZ: z.number(),
-    scaleX: z.number(),
-    scaleY: z.number(),
-    scaleZ: z.number(),
+    posX: JsonFloatSchema,
+    posY: JsonFloatSchema,
+    posZ: JsonFloatSchema,
+    rotX: JsonFloatSchema,
+    rotY: JsonFloatSchema,
+    rotZ: JsonFloatSchema,
+    scaleX: JsonFloatSchema,
+    scaleY: JsonFloatSchema,
+    scaleZ: JsonFloatSchema,
   })
   .meta({ id: 'TransformState', title: 'TransformState' });
 

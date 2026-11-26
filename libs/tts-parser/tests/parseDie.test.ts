@@ -1,7 +1,7 @@
 import { DEMO } from '@tt/demo-saves';
 import type { Die4State, Die6State, Die8State } from '@tt/states';
 import { ActorType } from '@tt/states';
-import { ObjectState } from '@tt/tts-schema';
+import { RotationValueStateSchema } from '@tt/tts-schema';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseDie', () => {
@@ -10,18 +10,26 @@ describe('TTSParser - parseDie', () => {
   });
 
   it('should parse a zero face value', () => {
-    const source = structuredClone(DEMO.DIE4) as unknown as ObjectState;
-    const rotationValues = source.RotationValues as unknown as { Value: unknown }[];
-    rotationValues[0].Value = 0;
+    const rotationValues = RotationValueStateSchema.array().parse(DEMO.DIE4.RotationValues);
+    const source = {
+      ...DEMO.DIE4,
+      RotationValues: rotationValues.map((rotation, index) => (index === 0 ? { ...rotation, Value: 0 } : rotation)),
+    };
 
     const result = TTSParser.parseDieN(source, ActorType.DIE4);
     expect(result?.rotationValues[0].value).toBe(0);
   });
 
   it('should reject a missing face value', () => {
-    const source = structuredClone(DEMO.DIE4) as unknown as ObjectState;
-    const rotationValues = source.RotationValues as unknown as { Value?: unknown }[];
-    delete rotationValues[0].Value;
+    const rotationValues = RotationValueStateSchema.array().parse(DEMO.DIE4.RotationValues);
+    const source = {
+      ...DEMO.DIE4,
+      RotationValues: rotationValues.map((rotation, index) => {
+        if (index !== 0) return rotation;
+        const { Value: _value, ...withoutValue } = rotation;
+        return withoutValue;
+      }),
+    };
 
     const result = TTSParser.parseDieN(source, ActorType.DIE4);
     expect(result).toBeNull();
@@ -52,7 +60,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = TTSParser.parseDieN(DEMO.DIE4 as unknown as ObjectState, ActorType.DIE4);
+    const result = TTSParser.parseDieN(DEMO.DIE4, ActorType.DIE4);
     expect(result).toMatchObject(expected);
   });
 
@@ -89,7 +97,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = TTSParser.parseDieN(DEMO.DIE6 as unknown as ObjectState, ActorType.DIE6);
+    const result = TTSParser.parseDieN(DEMO.DIE6, ActorType.DIE6);
     expect(result).toMatchObject(expected);
   });
 
@@ -134,7 +142,7 @@ describe('TTSParser - parseDie', () => {
       ],
     };
 
-    const result = TTSParser.parseDieN(DEMO.DIE8 as unknown as ObjectState, ActorType.DIE8);
+    const result = TTSParser.parseDieN(DEMO.DIE8, ActorType.DIE8);
     expect(result).toMatchObject(expected);
   });
 });

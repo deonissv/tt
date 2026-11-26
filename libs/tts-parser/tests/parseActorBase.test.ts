@@ -1,6 +1,5 @@
 import { CATAN, MUNCHKIN } from '@tt/demo-saves';
-import { ObjectState } from '@tt/tts-schema';
-import { degToRad, Tuple } from '@tt/utils';
+import { degToRad, type Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseActorBase', () => {
@@ -19,7 +18,7 @@ describe('TTSParser - parseActorBase', () => {
       },
       colorDiffuse: [0.713235259, 0.713235259, 0.713235259],
     };
-    expect(TTSParser.parseActorBase(MUNCHKIN.DECK as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseActorBase(MUNCHKIN.DECK)).toEqual(expected);
   });
 
   it('should parse catan deck', () => {
@@ -33,6 +32,6 @@ describe('TTSParser - parseActorBase', () => {
       },
       colorDiffuse: [0.713235259, 0.713235259, 0.713235259],
     };
-    expect(TTSParser.parseActorBase(CATAN.DECK as unknown as ObjectState)).toEqual(expected);
+    expect(TTSParser.parseActorBase(CATAN.DECK)).toEqual(expected);
   });
 });

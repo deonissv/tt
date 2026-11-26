@@ -1,7 +1,6 @@
 import { DEMO } from '@tt/demo-saves';
-import { ActorType, TileStackState } from '@tt/states';
-import { ObjectState } from '@tt/tts-schema';
-import { degToRad, Tuple } from '@tt/utils';
+import { ActorType, type TileStackState } from '@tt/states';
+import { degToRad, type Tuple } from '@tt/utils';
 import { TTSParser } from '../src';
 
 describe('TTSParser - parseTile', () => {
@@ -27,7 +26,7 @@ describe('TTSParser - parseTile', () => {
       colorDiffuse: [1, 1, 1],
     };
 
-    const parsed = TTSParser.parseTileStack(DEMO.TILE_STACK as unknown as ObjectState)!;
+    const parsed = TTSParser.parseTileStack(DEMO.TILE_STACK)!;
     expect(parsed).toStrictEqual(expected);
   });
 });
