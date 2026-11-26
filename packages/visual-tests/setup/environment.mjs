@@ -61,7 +61,26 @@ async function prepare(environment) {
     await compose(['down', '--volumes', '--remove-orphans'], { signal: startup.signal });
     // CI loads images from its cached Bake step; local runs build the stack here.
     const skipBuild = process.env.VISUAL_SKIP_BUILD === '1';
-    if (!skipBuild) await compose(['build'], { signal: startup.signal });
+    if (!skipBuild) {
+      try {
+        await compose(['build'], { signal: startup.signal });
+      } finally {
+        // Compose labels images with their project, including images from older
+        // runs. A partial build can also replace an image. Keep tagged/in-use
+        // images and never prune another project's images or the build cache.
+        try {
+          await docker([
+            'image',
+            'prune',
+            '--force',
+            '--filter',
+            `label=com.docker.compose.project=${environment.projectName}`,
+          ]);
+        } catch (error) {
+          console.warn(`[visual] Unable to remove obsolete images: ${error.message}`);
+        }
+      }
+    }
     await compose(['up', '--detach', '--wait', ...(skipBuild ? ['--no-build'] : [])], { signal: startup.signal });
     process.env.VISUAL_API_URL = await serviceURL('web', 8080);
     process.env.PW_TEST_CONNECT_WS_ENDPOINT = (await serviceURL('runner', 3000)).replace('http:', 'ws:');
