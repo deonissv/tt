@@ -6,8 +6,7 @@ import { getPhSim } from '../../test/testUtils';
 import { Client } from '../rooms/client';
 import { initHavok } from '../utils';
 import { ActionHandler } from './action-handler';
-import type { Card } from './actors';
-import { Actor, Deck, ServerBase, Tile, TileStack } from './actors';
+import { Bag, Card, Deck, ServerBase, Tile, TileStack } from './actors';
 import { ServerActorBuilder } from './serverActorBuilder';
 
 const PICK_HIGHT = 1;
@@ -324,17 +323,19 @@ describe('handleAction', () => {
     it('should sparn card object', async () => {
       vi.spyOn(ServerActorBuilder, 'buildCard').mockImplementation(() => {
         return Promise.resolve(
-          new Actor(
+          new Card(
             {
-              type: ActorType.ACTOR,
+              type: ActorType.CARD,
               guid: 'card',
               name: 'card',
-              model: {
-                meshURL: '',
-              },
+              faceURL: '',
+              backURL: '',
+              rows: 1,
+              cols: 1,
+              sequence: 0,
             },
             new Mesh('cardMesh'),
-          ) as unknown as Card,
+          ),
         );
       });
 
@@ -410,7 +411,6 @@ describe('handleAction', () => {
       });
       const sim = getPhSim();
 
-      const { Bag } = await import('./actors');
       new Bag(
         {
           type: ActorType.BAG,
@@ -451,9 +451,8 @@ describe('handleAction', () => {
       expect(built).toHaveLength(2);
       expect(built[0].guid).not.toBe(built[1].guid);
       expect(built.every(state => state.guid !== 'coin')).toBe(true);
-      const bag = sim.actors.find(actor => actor.guid === 'infbag') as unknown as {
-        toState: () => { containedObjects: { guid: string }[] };
-      };
+      const bag = sim.actors.find(actor => actor.guid === 'infbag');
+      if (!(bag instanceof Bag)) throw new Error('Expected the infinite bag actor');
       expect(bag.toState().containedObjects.map(item => item.guid)).toEqual(['coin']);
       expect(sim.actors.filter(actor => built.some(state => state.guid === actor.guid))).toHaveLength(2);
     });

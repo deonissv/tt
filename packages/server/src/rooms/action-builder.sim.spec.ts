@@ -4,8 +4,7 @@ import { ServerAction } from '@tt/actions';
 import { ActorType } from '@tt/states';
 import { wait } from '@tt/utils';
 import { getPhSim } from '../../test/testUtils';
-import type { Card } from '../simulation/actors';
-import { Actor, Deck, ServerBase } from '../simulation/actors';
+import { Card, Deck, ServerBase } from '../simulation/actors';
 import { ServerActorBuilder } from '../simulation/serverActorBuilder';
 import type { Simulation } from '../simulation/simulation';
 import { initHavok } from '../utils';
@@ -140,10 +139,10 @@ describe('getSimActions', () => {
   it('returns RERENDER_DECK', async () => {
     vi.spyOn(ServerActorBuilder, 'buildCard').mockImplementation(() => {
       return Promise.resolve(
-        new Actor(
-          { guid: 'card', name: 'card', type: ActorType.ACTOR, model: { meshURL: '' } },
+        new Card(
+          { guid: 'card', name: 'card', type: ActorType.CARD, faceURL: '', backURL: '', rows: 1, cols: 1, sequence: 0 },
           new Mesh('card'),
-        ) as unknown as Card,
+        ),
       );
     });
 

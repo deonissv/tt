@@ -8,8 +8,10 @@ async function drawCanvas(page: Page, x = 600, visible = true, size = 40): Promi
   await page.setContent('<style>body { margin: 0 }</style><canvas width="1280" height="720"></canvas>');
   await page.locator('canvas').evaluate(
     (element, { x, visible, size }) => {
-      const canvas = element as unknown as HTMLCanvasElement;
-      const context = canvas.getContext('2d')!;
+      if (!(element instanceof HTMLCanvasElement)) throw new Error('Expected a canvas element');
+      const canvas = element;
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Canvas has no 2D context');
       context.fillStyle = 'black';
       context.fillRect(0, 0, canvas.width, canvas.height);
       if (visible) {

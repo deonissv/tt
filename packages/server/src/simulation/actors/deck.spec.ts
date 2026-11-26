@@ -128,7 +128,12 @@ describe('Deck', () => {
       deck.rotationQuaternion = Quaternion.RotationAxis(Vector3.Right(), Math.PI);
       deck.computeWorldMatrix(true);
       deck.model.computeWorldMatrix(true);
-      const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue({ pick: vi.fn() } as unknown as Card);
+      const build = vi.spyOn(ServerActorBuilder, 'build').mockImplementation(state => {
+        if (state.type !== ActorType.CARD) throw new Error('Expected a drawn card');
+        const drawn = new Card(state, CreateBox('drawn-card', { size: 1 }));
+        vi.spyOn(drawn, 'pick').mockReturnValue(undefined);
+        return Promise.resolve(drawn);
+      });
 
       await deck.pickItem('client', 1);
 

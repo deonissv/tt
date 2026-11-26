@@ -1,4 +1,4 @@
-import type { ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 let counter = 0;
 
@@ -14,12 +14,5 @@ export default () => {
     NODE_ENV: 'test',
   };
 
-  return {
-    getOrThrow: vi.fn((key: string) => {
-      if (!env[key]) {
-        throw new Error(`${key} is not set`);
-      }
-      return env[key];
-    }),
-  } as unknown as ConfigService;
+  return new ConfigService(env);
 };

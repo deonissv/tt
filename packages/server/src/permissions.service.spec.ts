@@ -1,7 +1,7 @@
 import type { Mock } from 'vitest';
 import type { Permission } from '@prisma/client';
 
-import type { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from './prisma/prisma.service';
 import type { ValidatedUser } from './auth/validated-user';
 import { PermissionsService } from './permissions.service';
 
@@ -24,8 +24,11 @@ const user = (roleId: number): ValidatedUser => ({
   roleId,
 });
 
-const makeService = (findMany: Mock) =>
-  new PermissionsService({ permission: { findMany } } as unknown as PrismaService);
+const makeService = (findMany: Mock) => {
+  const prisma = new PrismaService();
+  vi.spyOn(prisma.permission, 'findMany').mockImplementation(findMany);
+  return new PermissionsService(prisma);
+};
 
 describe('PermissionsService', () => {
   let findMany: Mock;

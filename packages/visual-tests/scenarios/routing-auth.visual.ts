@@ -190,8 +190,8 @@ test.describe('client routing and authentication through the data router', () =>
           key: string,
         ) => string | null;
         Storage.prototype.getItem = function (this: Storage, key: string) {
-          const trackedWindow = window as unknown as { __routeFailureRecovered?: boolean };
-          if (key === 'access_token' && !trackedWindow.__routeFailureRecovered) {
+          const recovered = '__routeFailureRecovered' in window && window.__routeFailureRecovered === true;
+          if (key === 'access_token' && !recovered) {
             throw new Error('Controlled route failure');
           }
           return nativeGetItem.call(this, key);
@@ -205,7 +205,7 @@ test.describe('client routing and authentication through the data router', () =>
       );
 
       await page.evaluate(() => {
-        (window as unknown as { __routeFailureRecovered?: boolean }).__routeFailureRecovered = true;
+        Object.defineProperty(window, '__routeFailureRecovered', { value: true, configurable: true });
       });
       await page.getByRole('button', { name: 'Back to games' }).click();
       await expect(page).toHaveURL(/\/games\/?$/);

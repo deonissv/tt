@@ -1,18 +1,20 @@
+import { useActorFixtures } from '../../../test/actor-fixtures';
 import { Quaternion, Vector3 } from '@babylonjs/core';
 import type { ServerBase } from '../actors';
 import { flip, pick, rotate } from './transform';
 
 const quarter = Math.PI / 2;
+const fixtures = useActorFixtures();
 
 function heldActor(rotation: number[]): ServerBase {
-  return {
-    absoluteRotationQuaternion: Quaternion.FromEulerAngles(...(rotation as [number, number, number])),
-    flipped: false,
-  } as unknown as ServerBase;
+  const actor = fixtures.actor();
+  actor.rotationQuaternion = Quaternion.FromEulerAngles(rotation[0], rotation[1], rotation[2]);
+  actor.computeWorldMatrix(true);
+  return actor;
 }
 
 function expectOrientation(actor: ServerBase, rotation: number[]): void {
-  const expected = Quaternion.FromEulerAngles(...(rotation as [number, number, number]));
+  const expected = Quaternion.FromEulerAngles(rotation[0], rotation[1], rotation[2]);
   for (const axis of [Vector3.Right(), Vector3.Up(), Vector3.Forward()]) {
     const actualAxis = axis.applyRotationQuaternion(actor.__targetRotation!);
     const expectedAxis = axis.applyRotationQuaternion(expected);
@@ -23,20 +25,8 @@ function expectOrientation(actor: ServerBase, rotation: number[]): void {
 describe('held actor transforms', () => {
   it('uses the actor pickup policy during shared physics setup', () => {
     const rotation = Quaternion.FromEulerAngles(0.3, 0.6, 0.9);
-    const getPickRotation = vi.fn().mockReturnValue(rotation);
-    const actor = {
-      picked: null,
-      position: Vector3.Zero(),
-      body: {
-        setLinearVelocity: vi.fn(),
-        setAngularVelocity: vi.fn(),
-        setGravityFactor: vi.fn(),
-        setCollisionCallbackEnabled: vi.fn(),
-        shape: { isTrigger: false },
-      },
-      hk: { setActivationControl: vi.fn() },
-      getPickRotation,
-    } as unknown as ServerBase;
+    const actor = fixtures.actor();
+    const getPickRotation = vi.spyOn(actor, 'getPickRotation').mockReturnValue(rotation);
 
     pick(actor, 'player', 2, getPickRotation);
 

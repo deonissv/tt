@@ -1,6 +1,18 @@
-import { expect, type BrowserContext, type Page } from '@playwright/test';
+import { expect, type ConsoleMessage, type Page, type Request, type Route } from '@playwright/test';
 
-export async function configureContext(context: BrowserContext, errors: string[]): Promise<void> {
+export interface RenderingPage {
+  on(event: 'pageerror', listener: (error: Error) => void): unknown;
+  on(event: 'console', listener: (message: Pick<ConsoleMessage, 'type' | 'text'>) => void): unknown;
+  on(event: 'requestfailed', listener: (request: Pick<Request, 'method' | 'url' | 'failure'>) => void): unknown;
+}
+
+export interface RenderingContext {
+  addInitScript(script: () => unknown): Promise<unknown>;
+  on(event: 'page', listener: (page: RenderingPage) => void): unknown;
+  route(pattern: string, handler: (route: Pick<Route, 'fulfill'>) => Promise<unknown>): Promise<unknown>;
+}
+
+export async function configureContext(context: RenderingContext, errors: string[]): Promise<void> {
   await context.addInitScript(() => Object.defineProperty(navigator, 'gpu', { value: undefined }));
   context.on('page', page => {
     page.on('pageerror', error => errors.push(error.message));

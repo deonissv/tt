@@ -1,17 +1,8 @@
+import { useActorFixtures } from '../../../test/actor-fixtures';
 import { Matrix } from '@babylonjs/core';
 import { can, Capability } from '@tt/rules';
-import {
-  ActorType,
-  applyActorStateUpdate,
-  type ActorState,
-  type ActorStateUpdate,
-  type BagState,
-  type CardState,
-  type DeckState,
-  type TileStackState,
-  type UnknownActorState,
-} from '@tt/states';
-import { Bag, Deck, TileStack, type ServerBase } from '../actors';
+import { ActorType, type ActorState, type BagState, type CardState, type DeckState } from '@tt/states';
+import type { TileStack, ServerBase } from '../actors';
 import { ServerActorBuilder } from '../serverActorBuilder';
 
 const item = (guid: string): ActorState => ({
@@ -32,32 +23,15 @@ const card = (guid: string): CardState => ({
   sequence: 0,
 });
 
-function actorWithState(state: BagState | DeckState): {
-  actor: ServerBase & Pick<Bag, 'pickItem' | 'shuffle'>;
-  updateState: ReturnType<typeof vi.fn>;
-} {
-  let live: BagState | DeckState = state;
-  const updateState = vi.fn((update: ActorStateUpdate) => {
-    live = applyActorStateUpdate(live, update) as BagState | DeckState;
-  });
-  const actor = {
-    guid: state.guid,
-    toState: () => structuredClone(live),
-    updateState,
-    transformation: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-    model: { getWorldMatrix: () => Matrix.Identity(), scaling: { y: 0 } },
-    scene: {
-      getUniqueGUID: vi.fn((guid: string) => `${guid}-reserved`),
-      releaseGUID: vi.fn(),
-    },
-  } as unknown as ServerBase & Pick<Bag, 'pickItem' | 'shuffle'>;
-  Object.setPrototypeOf(actor, state.type === ActorType.BAG ? Bag.prototype : Deck.prototype);
-  return { actor, updateState };
+const fixtures = useActorFixtures();
+
+function actorWithState(state: BagState | DeckState) {
+  const actor = state.type === ActorType.BAG ? fixtures.bag(state) : fixtures.deck(state);
+  return { actor, updateState: vi.spyOn(actor, 'updateState') };
 }
 
-function stackActor(size: number, locked = false): ServerBase & Pick<Bag, 'pickItem'> {
-  let nextGuid = 0;
-  let state: TileStackState = {
+function stackActor(size: number, locked = false): TileStack {
+  return fixtures.stack({
     type: ActorType.TILE_STACK,
     guid: 'stack',
     name: 'Stack',
@@ -65,24 +39,7 @@ function stackActor(size: number, locked = false): ServerBase & Pick<Bag, 'pickI
     faceURL: 'face.png',
     size,
     locked,
-  };
-  const actor = {
-    guid: state.guid,
-    toState: () => structuredClone(state),
-    updateState: (update: ActorStateUpdate) => {
-      state = applyActorStateUpdate(state, update) as TileStackState;
-    },
-    transformation: { position: [0, 0, 0], rotation: [0, 0, 0], scale: [1, 1, 1] },
-    model: { scaling: { y: size } },
-    __collider: { scaling: { y: size } },
-    _forceUpdate: vi.fn(),
-    scene: {
-      getUniqueGUID: vi.fn((guid?: string) => guid ?? `tile-${nextGuid++}`),
-      releaseGUID: vi.fn(),
-    },
-  } as unknown as ServerBase & Pick<Bag, 'pickItem'>;
-  Object.setPrototypeOf(actor, TileStack.prototype);
-  return actor;
+  });
 }
 
 describe('actor container operations', () => {
@@ -114,9 +71,7 @@ describe('actor container operations', () => {
     const actor = stackActor(5);
     const allocateGUID = vi.spyOn(actor.scene, 'getUniqueGUID');
     const releaseGUID = vi.spyOn(actor.scene, 'releaseGUID');
-    const build = vi
-      .spyOn(ServerActorBuilder, 'build')
-      .mockResolvedValue({ picked: 'client', pick: vi.fn() } as unknown as ServerBase);
+    const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValue(fixtures.spawned());
 
     await actor.pickItem('client', 1);
 
@@ -141,53 +96,36 @@ describe('actor container operations', () => {
   });
 
   it.each(['bag', 'deck', 'stack'] as const)('draws an unlocked item from a locked %s', async kind => {
-    const actor = stackActor(3, true);
-    if (kind !== 'stack') {
-      const child = { ...item('child'), locked: true };
-      let state: BagState | DeckState =
-        kind === 'bag'
-          ? { type: ActorType.BAG, guid: 'bag', name: 'Bag', locked: true, containedObjects: [child] }
-          : {
-              type: ActorType.DECK,
-              guid: 'deck',
-              name: 'Deck',
-              locked: true,
-              cards: [
-                {
-                  ...child,
-                  type: ActorType.CARD,
-                  faceURL: 'face.png',
-                  backURL: 'back.png',
-                  rows: 1,
-                  cols: 1,
-                  sequence: 0,
+    const child = { ...item('child'), locked: true };
+    const actor =
+      kind === 'stack'
+        ? stackActor(3, true)
+        : actorWithState(
+            kind === 'bag'
+              ? { type: ActorType.BAG, guid: 'bag', name: 'Bag', locked: true, containedObjects: [child] }
+              : {
+                  type: ActorType.DECK,
+                  guid: 'deck',
+                  name: 'Deck',
+                  locked: true,
+                  cards: [{ ...card('child'), locked: true }],
                 },
-              ],
-            };
-      actor.toState = () => structuredClone(state);
-      actor.updateState = update => {
-        state = applyActorStateUpdate(state, update) as BagState | DeckState;
-      };
-      actor.model.getWorldMatrix = () => Matrix.Identity();
-      Object.setPrototypeOf(actor, kind === 'bag' ? Bag.prototype : Deck.prototype);
-    }
-    const before = actor.toState() as UnknownActorState;
+          ).actor;
+    const before = actor.__state;
     const transformation = structuredClone(actor.transformation);
-    const build = vi
-      .spyOn(ServerActorBuilder, 'build')
-      .mockResolvedValueOnce({ picked: 'client', pick: vi.fn() } as unknown as ServerBase);
+    const build = vi.spyOn(ServerActorBuilder, 'build').mockResolvedValueOnce(fixtures.spawned());
 
     await actor.pickItem('client', 1);
 
     const drawn = build.mock.calls[0][0];
     expect(drawn.locked).toBe(false);
     expect(can(drawn, Capability.Pickable)).toBe(true);
-    expect(actor.toState()).toMatchObject({ locked: true });
-    expect(can(actor.toState() as UnknownActorState, Capability.Pickable)).toBe(false);
+    expect(actor.__state).toMatchObject({ locked: true });
+    expect(can(actor.__state, Capability.Pickable)).toBe(false);
     expect(actor.transformation).toEqual(transformation);
     if (before.type === ActorType.BAG) expect(before.containedObjects[0].locked).toBe(true);
     if (before.type === ActorType.DECK) expect(before.cards[0].locked).toBe(true);
-    if (kind === 'stack') expect(actor.toState()).toMatchObject({ size: 2 });
+    if (kind === 'stack') expect(actor.__state).toMatchObject({ size: 2 });
   });
 
   it('restores a tile when creation resolves without an actor', async () => {
@@ -213,7 +151,7 @@ describe('actor container operations', () => {
 
     await expect(actor.pickItem('client', 1)).resolves.toBeNull();
 
-    expect(actor.toState()).toEqual({
+    expect(actor.__state).toEqual({
       type: ActorType.BAG,
       guid: 'bag',
       name: 'Bag',
@@ -233,7 +171,7 @@ describe('actor container operations', () => {
 
     await expect(actor.pickItem('client', 1)).rejects.toThrow('asset unavailable');
 
-    expect(actor.toState()).toEqual({
+    expect(actor.__state).toEqual({
       type: ActorType.BAG,
       guid: 'bag',
       name: 'Bag',
@@ -253,7 +191,7 @@ describe('actor container operations', () => {
 
     await expect(actor.pickItem('client', 1)).resolves.toBeNull();
 
-    expect(actor.toState()).toEqual({ ...state, cards: [card('bottom'), card('top')] });
+    expect(actor.__state).toEqual({ ...state, cards: [card('bottom'), card('top')] });
   });
 
   describe.each(['bag', 'face-up deck', 'face-down deck'] as const)('%s rollback ordering', kind => {
@@ -283,7 +221,7 @@ describe('actor container operations', () => {
         await expect(draws[index]).resolves.toBeNull();
       }
 
-      expect(actor.toState()).toEqual(state);
+      expect(actor.__state).toEqual(state);
       if (kind !== 'bag') expect(actor.model.scaling.y).toBe(children.length);
     });
 
@@ -309,7 +247,7 @@ describe('actor container operations', () => {
         await draws[index];
       }
 
-      expect(actor.toState()).toEqual(state);
+      expect(actor.__state).toEqual(state);
       expect(releaseGUID).toHaveBeenCalledTimes(children.length);
     });
 
@@ -327,7 +265,7 @@ describe('actor container operations', () => {
         () => new Promise<ServerBase | null>(resolve => completions.push(resolve)),
       );
       const draws = [actor.pickItem('client', 1), actor.pickItem('client', 1)];
-      const spawned = { picked: 'client', pick: vi.fn() } as unknown as ServerBase;
+      const spawned = fixtures.spawned();
       for (let index = 0; index < draws.length; index++) {
         const result = index === failedIndex ? null : spawned;
         completions[index](result);
@@ -337,7 +275,7 @@ describe('actor container operations', () => {
       const successfulIndex = 1 - failedIndex;
       const removedIndex = kind === 'face-down deck' ? successfulIndex : children.length - 1 - successfulIndex;
       const remaining = children.filter((_, index) => index !== removedIndex);
-      expect(actor.toState()).toEqual({
+      expect(actor.__state).toEqual({
         ...state,
         ...(kind === 'bag' ? { containedObjects: remaining } : { cards: remaining }),
       });
@@ -351,7 +289,7 @@ describe('actor container operations', () => {
     const pendingSpawn = new Promise<ServerBase | null>((_, reject) => {
       rejectSpawn = reject;
     });
-    const spawned = { picked: 'client', pick: vi.fn() } as unknown as ServerBase;
+    const spawned = fixtures.spawned();
     const build = vi
       .spyOn(ServerActorBuilder, 'build')
       .mockReturnValueOnce(pendingSpawn)
