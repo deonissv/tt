@@ -9,6 +9,7 @@ import type { ValidatedUser } from '../auth/validated-user';
 import { PolicyControlService } from '../casl/policy-control.service';
 import { Simulation } from '../simulation/simulation';
 import { RoomRegistry } from './room-registry';
+import { upgradeLegacySimulationState } from './legacy-simulation-state';
 import { SimulationRoomFactory } from './simulation-room.factory';
 
 @Injectable()
@@ -33,7 +34,9 @@ export class RoomsService {
   startSimulationRoom(roomTable: Room, simSave?: SimulationStateSave, gameId?: number, gameVersion?: number): string {
     const room = this.simulationRoomFactory.create(this, roomTable);
     try {
-      room.init(simSave, gameId, gameVersion).catch(e => {
+      // Fresh game loads and progress resumes both funnel here, so persisted
+      // states parsed by older releases are upgraded before room start.
+      room.init(upgradeLegacySimulationState(simSave), gameId, gameVersion).catch(e => {
         this.logger.error((e as Error).message);
       });
     } catch (e) {
